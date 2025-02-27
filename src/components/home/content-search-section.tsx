@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Upload } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export function ContentSearchSection() {
@@ -18,6 +19,7 @@ export function ContentSearchSection() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -51,15 +53,23 @@ export function ContentSearchSection() {
       }
       
       setFile(selectedFile);
+      console.log("File selected:", selectedFile.name);
     }
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+  const handleUploadClick = () => {
+    // Trigger the hidden file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -87,6 +97,7 @@ export function ContentSearchSection() {
       }
       
       setFile(droppedFile);
+      console.log("File dropped:", droppedFile.name);
     }
   };
 
@@ -270,52 +281,51 @@ export function ContentSearchSection() {
 
                   {searchType === "image" ? (
                     <div className="space-y-2">
-                      <Label htmlFor="image">Upload Image</Label>
-                      <div className="flex items-center justify-center w-full">
-                        <label
-                          htmlFor="image"
-                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-colors"
-                          onDragOver={handleDragOver}
-                          onDrop={handleDrop}
-                        >
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            {uploadProgress > 0 && uploadProgress < 100 ? (
-                              <div className="w-full max-w-xs">
-                                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-primary" 
-                                    style={{ width: `${uploadProgress}%` }}
-                                  ></div>
-                                </div>
-                                <p className="text-xs text-center mt-2">
-                                  Uploading... {uploadProgress}%
-                                </p>
+                      <Label>Upload Image</Label>
+                      <div 
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                        onClick={handleUploadClick}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                      >
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          {uploadProgress > 0 && uploadProgress < 100 ? (
+                            <div className="w-full max-w-xs">
+                              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-primary" 
+                                  style={{ width: `${uploadProgress}%` }}
+                                ></div>
                               </div>
-                            ) : (
-                              <>
-                                <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                                <p className="text-sm text-muted-foreground">
-                                  {file
-                                    ? file.name
-                                    : "Click to upload or drag and drop"}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  (JPG, PNG, GIF, WEBP up to 10MB)
-                                </p>
-                              </>
-                            )}
-                          </div>
-                        </label>
-                        <input
-                          id="image"
-                          name="image"
-                          type="file"
-                          accept="image/jpeg,image/png,image/gif,image/webp"
-                          className="hidden"
-                          onChange={handleFileChange}
-                          disabled={isLoading}
-                        />
+                              <p className="text-xs text-center mt-2">
+                                Uploading... {uploadProgress}%
+                              </p>
+                            </div>
+                          ) : (
+                            <>
+                              <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground">
+                                {file
+                                  ? file.name
+                                  : "Click to upload or drag and drop"}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                (JPG, PNG, GIF, WEBP up to 10MB)
+                              </p>
+                            </>
+                          )}
+                        </div>
                       </div>
+                      <input
+                        ref={fileInputRef}
+                        id="image-upload"
+                        name="image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        className="hidden"
+                        onChange={handleFileChange}
+                        disabled={isLoading}
+                      />
                     </div>
                   ) : (
                     <div className="space-y-2">
