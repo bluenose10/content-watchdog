@@ -11,7 +11,8 @@ export function PricingSection() {
   const { user } = useAuth();
 
   const handlePlanClick = (planId: string) => {
-    if (planId === "free") {
+    if (planId === "basic") {
+      // Free plan should navigate to signup
       navigate("/signup");
     } else {
       if (!user) {
