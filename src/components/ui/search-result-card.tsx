@@ -88,7 +88,8 @@ export function SearchResultCard({
         color: 'text-blue-600',
         bgColor: 'bg-blue-50 dark:bg-blue-900/30',
         name: 'Facebook',
-        image: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=774&auto=format&fit=crop'
+        brandColor: 'from-blue-600 to-blue-800',
+        image: null // Will use generated background
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -96,7 +97,8 @@ export function SearchResultCard({
         color: 'text-sky-500',
         bgColor: 'bg-sky-50 dark:bg-sky-900/30',
         name: 'Twitter/X',
-        image: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?q=80&w=1074&auto=format&fit=crop'
+        brandColor: 'from-sky-400 to-sky-600',
+        image: null
       };
     } else if (platform.includes('instagram')) {
       return {
@@ -104,7 +106,8 @@ export function SearchResultCard({
         color: 'text-pink-600',
         bgColor: 'bg-pink-50 dark:bg-pink-900/30',
         name: 'Instagram',
-        image: 'https://images.unsplash.com/photo-1611262588024-d12430b98920?q=80&w=1074&auto=format&fit=crop'
+        brandColor: 'from-pink-500 via-purple-500 to-orange-500',
+        image: null
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -112,7 +115,8 @@ export function SearchResultCard({
         color: 'text-blue-700',
         bgColor: 'bg-blue-50 dark:bg-blue-900/30',
         name: 'LinkedIn',
-        image: 'https://images.unsplash.com/photo-1611944212129-29977ae1398c?q=80&w=1074&auto=format&fit=crop'
+        brandColor: 'from-blue-700 to-blue-900',
+        image: null
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -120,7 +124,8 @@ export function SearchResultCard({
         color: 'text-red-600',
         bgColor: 'bg-red-50 dark:bg-red-900/30',
         name: 'YouTube',
-        image: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1074&auto=format&fit=crop'
+        brandColor: 'from-red-600 to-red-800',
+        image: null
       };
     } else if (platform.includes('tiktok')) {
       return {
@@ -128,7 +133,8 @@ export function SearchResultCard({
         color: 'text-black dark:text-white',
         bgColor: 'bg-pink-50 dark:bg-pink-900/30',
         name: 'TikTok',
-        image: 'https://images.unsplash.com/photo-1617784625140-458b19039e15?q=80&w=1074&auto=format&fit=crop'
+        brandColor: 'from-black via-cyan-500 to-pink-500',
+        image: null
       };
     } else {
       return {
@@ -136,7 +142,8 @@ export function SearchResultCard({
         color: 'text-gray-600 dark:text-gray-400',
         bgColor: 'bg-gray-50 dark:bg-gray-900/30',
         name: cleanSource,
-        image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=1170&auto=format&fit=crop'
+        brandColor: 'from-gray-500 to-gray-700',
+        image: null
       };
     }
   };
@@ -246,11 +253,6 @@ export function SearchResultCard({
       return false;
     }
   };
-  
-  // Get a fallback image based on the social media platform
-  const getFallbackImage = () => {
-    return socialMedia.image;
-  };
 
   // Get actual URL to use for "Visit Site" button
   const getVisitUrl = (): string => {
@@ -288,21 +290,23 @@ export function SearchResultCard({
             />
           ) : (
             <div className="relative w-full h-full">
-              {/* Social Media Platform Image Background */}
-              <img 
-                src={getFallbackImage()}
-                alt={socialMedia.name}
-                className="w-full h-full object-cover opacity-80 blur-[1px]"
-                onError={() => setImageError(true)}
-              />
+              {/* Platform Background */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${socialMedia.brandColor}`}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <socialMedia.Icon className={`text-white/10 dark:text-white/5`} size={150} strokeWidth={1} />
+                </div>
+              </div>
               
-              {/* Overlay with Platform Logo */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+              {/* Platform Name and Logo */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <div className={`bg-white/90 dark:bg-gray-800/90 p-5 rounded-full border shadow-md ${borderColor}`}>
                   <socialMedia.Icon size={42} className={socialMedia.color} strokeWidth={1.5} />
                 </div>
-                <div className="mt-4 text-sm font-medium bg-white/90 dark:bg-gray-800/90 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <span className={matchColor.text}>Content Match on {socialMedia.name}</span>
+                <div className="mt-3 text-2xl font-bold text-white drop-shadow-md">
+                  {socialMedia.name}
+                </div>
+                <div className="mt-2 text-sm font-medium bg-white/90 dark:bg-gray-800/90 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <span className={matchColor.text}>Content Match</span>
                 </div>
               </div>
             </div>
