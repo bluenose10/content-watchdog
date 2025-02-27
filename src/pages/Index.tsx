@@ -42,7 +42,22 @@ export default function Index() {
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
           
-          {/* First row with Key Features, Content Search, and Testimonials */}
+          {/* First section with About Us and Call to Action */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
+            <div className="col-span-1">
+              <AboutSection />
+            </div>
+            <div className="col-span-1">
+              <CallToAction />
+            </div>
+          </div>
+          
+          {/* Separator */}
+          <div className="max-w-4xl mx-auto mb-32">
+            <Separator className="border-dotted border-t-2" />
+          </div>
+          
+          {/* Second section with Features, Content Search, and Testimonials */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
             <div className="col-span-1">
               <FeaturesSection />
@@ -60,17 +75,9 @@ export default function Index() {
             <Separator className="border-dotted border-t-2" />
           </div>
           
-          {/* Second row with About, Pricing, and CTA */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="col-span-1">
-              <AboutSection />
-            </div>
-            <div className="col-span-1">
-              <PricingSection />
-            </div>
-            <div className="col-span-1">
-              <CallToAction />
-            </div>
+          {/* Pricing section */}
+          <div className="mb-32">
+            <PricingSection />
           </div>
         </div>
       </main>
