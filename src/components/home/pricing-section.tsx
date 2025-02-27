@@ -24,9 +24,6 @@ export function PricingSection() {
     }
   };
 
-  // Find popular plan or default to first plan
-  const displayPlan = PRICING_PLANS.find(plan => plan.popular) || PRICING_PLANS[0];
-
   return (
     <section id="pricing" className="h-full relative overflow-hidden">
       <div className="h-full">
@@ -37,20 +34,22 @@ export function PricingSection() {
           </p>
         </div>
 
-        <div className="flex justify-center">
-          <PricingCard
-            key={displayPlan.id}
-            name={displayPlan.name}
-            description={displayPlan.description}
-            price={displayPlan.price}
-            features={displayPlan.features.slice(0, 3)} // Show fewer features for compact view
-            limitations={[]} // Don't show limitations in compact view
-            cta={displayPlan.cta}
-            popular={displayPlan.popular}
-            onClick={() => handlePlanClick(displayPlan.id)}
-            planId={displayPlan.id}
-            className="animate-scale-in w-full"
-          />
+        <div className="flex flex-col space-y-4">
+          {PRICING_PLANS.map((plan) => (
+            <PricingCard
+              key={plan.id}
+              name={plan.name}
+              description={plan.description}
+              price={plan.price}
+              features={plan.features.slice(0, 3)} // Show fewer features for compact view
+              limitations={[]} // Don't show limitations in compact view
+              cta={plan.cta}
+              popular={plan.popular}
+              onClick={() => handlePlanClick(plan.id)}
+              planId={plan.id}
+              className="animate-scale-in w-full"
+            />
+          ))}
         </div>
 
         <div className="mt-4 text-center">

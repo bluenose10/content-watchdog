@@ -33,6 +33,9 @@ export function PricingCard({
 }: PricingCardProps) {
   const { user } = useAuth();
 
+  // Ensure price is properly formatted
+  const formattedPrice = price === 0 ? "Free" : `$${price.toFixed(2)}`;
+
   return (
     <div
       className={cn(
@@ -51,7 +54,7 @@ export function PricingCard({
       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       <div className="my-6">
         <span className="text-3xl font-bold">
-          {price === 0 ? "Free" : `$${price}`}
+          {formattedPrice}
         </span>
         {price > 0 && <span className="text-muted-foreground">/month</span>}
       </div>
