@@ -7,6 +7,7 @@ export const HeroSection = () => {
   const navigate = useNavigate();
 
   const handleSignUp = () => {
+    console.log("Sign Up button clicked, navigating to /signup");
     navigate('/signup');
   };
 
@@ -24,7 +25,8 @@ export const HeroSection = () => {
             id="signupButton"
             onClick={handleSignUp}
             variant="blue"
-            className="text-base px-6 py-3"
+            className="text-base px-6 py-3 cursor-pointer"
+            type="button"
           >
             Sign Up Now
           </Button>
