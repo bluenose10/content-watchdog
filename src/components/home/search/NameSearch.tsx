@@ -30,12 +30,12 @@ export function NameSearch({ onSearch, isLoading = false }: NameSearchProps) {
           required
         />
         <Button type="submit" className="whitespace-nowrap" disabled={isLoading}>
-          {isLoading ? "Searching..." : "Search For FREE"}
+          {isLoading ? "Searching..." : "Search Now"}
           {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
       </div>
       <p className="text-sm text-muted-foreground mt-2">
-        You can try a free preview without signing in or needing an account
+        You can try a free preview without signing up or needing an account
       </p>
     </form>
   );
