@@ -25,7 +25,7 @@ export const PRICING_PLANS = [
     id: "pro",
     name: "Pro",
     description: "For serious content creators",
-    price: 19.99,
+    price: 49.99,
     features: [
       "Unlimited search results",
       "Advanced content monitoring",
@@ -41,7 +41,7 @@ export const PRICING_PLANS = [
     id: "business",
     name: "Business",
     description: "For teams and businesses",
-    price: 49.99,
+    price: 149.00,
     features: [
       "Everything in Pro",
       "Unlimited automated monitoring",

@@ -37,7 +37,7 @@ export function UpgradeCard() {
             </ul>
           </div>
           <div className="text-center">
-            <p className="text-3xl font-bold mb-2">$19.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+            <p className="text-3xl font-bold mb-2">$49.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
             <Button asChild className="button-animation">
               <Link to="/#pricing">
                 Upgrade Now
