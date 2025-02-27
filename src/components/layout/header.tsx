@@ -4,7 +4,7 @@ import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { LogOut, Menu, Shield, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,6 +19,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
@@ -61,6 +62,9 @@ export function Header() {
         title: "Success",
         description: "You have been logged out successfully",
       });
+      
+      // Redirect to home page after logout
+      navigate('/');
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -84,6 +88,8 @@ export function Header() {
       }
     }
   };
+
+  console.log("Auth state in Header:", { isAuthenticated, userId: user?.id });
 
   return (
     <header
