@@ -93,12 +93,28 @@ export const createSearchResults = async (results: SearchResult[]) => {
     return [];
   }
   
-  console.log('Creating search results:', results);
+  console.log('Creating search results:', results.length);
   
   try {
+    // Ensure results have the required fields
+    const validResults = results.filter(result => {
+      if (!result.search_id || !result.title || !result.url || !result.source || !result.match_level || !result.found_at) {
+        console.error('Invalid result object missing required fields:', result);
+        return false;
+      }
+      return true;
+    });
+    
+    if (validResults.length === 0) {
+      console.error('No valid results to insert after filtering');
+      return [];
+    }
+    
+    console.log('Inserting valid results:', validResults.length);
+    
     const { data, error } = await supabase
       .from('search_results')
-      .insert(results)
+      .insert(validResults)
       .select();
     
     if (error) {
@@ -172,8 +188,8 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     const request = new Promise(async (resolve) => {
       try {
         // Try to use the real Google Search API if we have an API key
-        const apiKey = process.env.GOOGLE_API_KEY || '';
-        const searchEngineId = process.env.GOOGLE_CSE_ID || '';
+        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
+        const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
         
         if (!apiKey || !searchEngineId) {
           console.log('No API keys found, falling back to mock data');
@@ -394,7 +410,7 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
           items: sortedResults
         };
         
-        console.log('Generated mock image results:', mockResults.items.length);
+        console.log('Generated mock image results:', mockResults.items?.length || 0);
         
         // Cache the results
         cacheResults(cacheKey, mockResults);

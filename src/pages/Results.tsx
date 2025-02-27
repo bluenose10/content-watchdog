@@ -172,6 +172,7 @@ export default function Results() {
               if (parsedData.query_type === "name" || parsedData.query_type === "hashtag") {
                 const textResults = await performGoogleSearch(parsedData.query_text, 'anonymous', parsedData.search_params);
                 if (textResults && textResults.items) {
+                  console.log("Successfully received text results:", textResults.items.length);
                   const formattedResults = textResults.items.slice(0, 20).map((item: any, index: number) => {
                     // Determine match level based on position or relevance score
                     let matchLevel: 'High' | 'Medium' | 'Low';
@@ -192,149 +193,238 @@ export default function Results() {
                       relevance_score: item.relevanceScore || undefined
                     };
                   });
+                  console.log("Formatted results:", formattedResults.length);
                   setResults(formattedResults);
+                } else {
+                  console.error("No items in text search results");
+                  setError("No search results found. Please try a different search.");
+                }
+              } else if (parsedData.query_type === "image" && parsedData.image_url) {
+                const imageResults = await performImageSearch(parsedData.image_url, 'anonymous', parsedData.search_params);
+                if (imageResults && imageResults.items) {
+                  console.log("Successfully received image results:", imageResults.items.length);
+                  const formattedResults = imageResults.items.slice(0, 20).map((item: any, index: number) => {
+                    // Determine match level based on similarity score if available
+                    let matchLevel: 'High' | 'Medium' | 'Low';
+                    if (item.similarityScore) {
+                      matchLevel = item.similarityScore > 0.75 ? 'High' : item.similarityScore > 0.5 ? 'Medium' : 'Low';
+                    } else if (item.matchQuality) {
+                      matchLevel = item.matchQuality === 'high' ? 'High' : item.matchQuality === 'medium' ? 'Medium' : 'Low';
+                    } else {
+                      matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
+                    }
+                    
+                    return {
+                      search_id: searchId,
+                      title: item.title || "Untitled Content",
+                      url: item.link || item.image?.contextLink || "#",
+                      thumbnail: item.image?.thumbnailLink || "",
+                      source: item.displayLink || new URL(item.link || "#").hostname,
+                      match_level: matchLevel,
+                      found_at: new Date().toISOString(),
+                      similarity_score: item.similarityScore
+                    };
+                  });
+                  console.log("Formatted image results:", formattedResults.length);
+                  setResults(formattedResults);
+                } else {
+                  console.error("No items in image search results");
+                  setError("No search results found. Please try a different search.");
                 }
               }
             } catch (err) {
               console.error("Error generating anonymous results:", err);
-              setError("Failed to generate search results");
+              setError("Failed to generate search results. Please try again.");
             } finally {
               setIsGeneratingResults(false);
             }
+            setIsLoading(false);
+            return;
+          } else {
+            console.error("Temporary search data not found in session storage");
+            setError("Search data not found. Please try a new search.");
             setIsLoading(false);
             return;
           }
         }
 
         // First, get the search query data from DB for logged-in users
-        const searchQueryData = await getSearchQueryById(searchId);
-        console.log("Search query data:", searchQueryData);
-        setSearchData(searchQueryData);
+        try {
+          const searchQueryData = await getSearchQueryById(searchId);
+          console.log("Search query data:", searchQueryData);
+          setSearchData(searchQueryData);
 
-        // Check if we already have results for this search
-        let searchResults = await getSearchResults(searchId);
-        console.log("Initial search results:", searchResults);
-        
-        // If no results found, we need to perform the search
-        if (!searchResults || searchResults.length === 0) {
-          setIsGeneratingResults(true);
+          // Check if we already have results for this search
+          let searchResults = await getSearchResults(searchId);
+          console.log("Initial search results:", searchResults?.length || 0);
           
-          try {
-            if (searchQueryData.query_type === "image" && searchQueryData.image_url) {
-              // Perform image search
-              console.log("Performing image search with URL:", searchQueryData.image_url);
-              const imageResults = await performImageSearch(
-                searchQueryData.image_url, 
-                user?.id || 'anonymous',
-                searchQueryData.search_params
-              );
-              
-              // Process and save the image search results
-              if (imageResults && imageResults.items) {
-                console.log("Image search results:", imageResults.items.length);
-                const formattedResults: SearchResult[] = imageResults.items.slice(0, 20).map((item: any, index: number) => {
-                  // Determine match level based on similarity score if available
-                  let matchLevel: 'High' | 'Medium' | 'Low';
-                  if (item.similarityScore) {
-                    matchLevel = item.similarityScore > 0.75 ? 'High' : item.similarityScore > 0.5 ? 'Medium' : 'Low';
-                  } else if (item.matchQuality) {
-                    matchLevel = item.matchQuality === 'high' ? 'High' : item.matchQuality === 'medium' ? 'Medium' : 'Low';
-                  } else {
-                    matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
-                  }
-                  
-                  return {
-                    search_id: searchId,
-                    title: item.title || "Untitled Content",
-                    url: item.link || item.image?.contextLink || "#",
-                    thumbnail: item.image?.thumbnailLink || "",
-                    source: item.displayLink || new URL(item.link || "#").hostname,
-                    match_level: matchLevel,
-                    found_at: new Date().toISOString(),
-                    similarity_score: item.similarityScore
-                  };
-                });
+          // If no results found, we need to perform the search
+          if (!searchResults || searchResults.length === 0) {
+            setIsGeneratingResults(true);
+            
+            try {
+              if (searchQueryData.query_type === "image" && searchQueryData.image_url) {
+                // Perform image search
+                console.log("Performing image search with URL:", searchQueryData.image_url);
+                const imageResults = await performImageSearch(
+                  searchQueryData.image_url, 
+                  user?.id || 'anonymous',
+                  searchQueryData.search_params
+                );
                 
-                // Save search results to database if user is logged in
-                if (user) {
-                  await createSearchResults(formattedResults);
-                  console.log("Created image search results:", formattedResults.length);
+                // Process and save the image search results
+                if (imageResults && imageResults.items && imageResults.items.length > 0) {
+                  console.log("Image search results:", imageResults.items.length);
+                  const formattedResults: SearchResult[] = imageResults.items.slice(0, 20).map((item: any, index: number) => {
+                    // Determine match level based on similarity score if available
+                    let matchLevel: 'High' | 'Medium' | 'Low';
+                    if (item.similarityScore) {
+                      matchLevel = item.similarityScore > 0.75 ? 'High' : item.similarityScore > 0.5 ? 'Medium' : 'Low';
+                    } else if (item.matchQuality) {
+                      matchLevel = item.matchQuality === 'high' ? 'High' : item.matchQuality === 'medium' ? 'Medium' : 'Low';
+                    } else {
+                      matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
+                    }
+                    
+                    return {
+                      search_id: searchId,
+                      title: item.title || "Untitled Content",
+                      url: item.link || item.image?.contextLink || "#",
+                      thumbnail: item.image?.thumbnailLink || "",
+                      source: item.displayLink || new URL(item.link || "#").hostname,
+                      match_level: matchLevel,
+                      found_at: new Date().toISOString(),
+                      similarity_score: item.similarityScore
+                    };
+                  });
                   
-                  // Re-fetch results after saving
-                  searchResults = await getSearchResults(searchId);
+                  // Save search results to database if user is logged in
+                  if (user) {
+                    try {
+                      console.log("Saving image search results to database:", formattedResults.length);
+                      await createSearchResults(formattedResults);
+                      console.log("Created image search results successfully");
+                      
+                      // Re-fetch results after saving
+                      searchResults = await getSearchResults(searchId);
+                      console.log("Re-fetched search results:", searchResults?.length || 0);
+                    } catch (saveError) {
+                      console.error("Error saving image search results:", saveError);
+                      // Use the formatted results even if saving failed
+                      searchResults = formattedResults;
+                    }
+                  } else {
+                    // For anonymous users, just use the results without saving
+                    searchResults = formattedResults;
+                  }
                 } else {
-                  // For anonymous users, just use the results without saving
-                  searchResults = formattedResults;
+                  console.error("No items in image search results");
+                  setError("No search results found. Please try a different search.");
                 }
-              }
-            } else if ((searchQueryData.query_type === "name" || searchQueryData.query_type === "hashtag") && searchQueryData.query_text) {
-              // Perform text-based search
-              console.log("Performing text search with query:", searchQueryData.query_text);
-              const textResults = await performGoogleSearch(
-                searchQueryData.query_text, 
-                user?.id || 'anonymous',
-                searchQueryData.search_params
-              );
-              
-              // Process and save the text search results
-              if (textResults && textResults.items) {
-                console.log("Text search results:", textResults.items.length);
-                const formattedResults: SearchResult[] = textResults.items.slice(0, 20).map((item: any, index: number) => {
-                  // Determine match level based on relevance score if available
-                  let matchLevel: 'High' | 'Medium' | 'Low';
-                  if (item.relevanceScore) {
-                    matchLevel = item.relevanceScore > 0.75 ? 'High' : item.relevanceScore > 0.5 ? 'Medium' : 'Low';
-                  } else {
-                    matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
-                  }
-                  
-                  return {
-                    search_id: searchId,
-                    title: item.title || "Untitled Content",
-                    url: item.link || "#",
-                    thumbnail: item.pagemap?.cse_image?.[0]?.src || "",
-                    source: item.displayLink || new URL(item.link || "#").hostname,
-                    match_level: matchLevel,
-                    found_at: new Date().toISOString(),
-                    relevance_score: item.relevanceScore
-                  };
-                });
+              } else if ((searchQueryData.query_type === "name" || searchQueryData.query_type === "hashtag") && searchQueryData.query_text) {
+                // Perform text-based search
+                console.log("Performing text search with query:", searchQueryData.query_text);
+                const textResults = await performGoogleSearch(
+                  searchQueryData.query_text, 
+                  user?.id || 'anonymous',
+                  searchQueryData.search_params
+                );
                 
-                // Save search results to database if user is logged in
-                if (user) {
-                  console.log("Saving formatted results:", formattedResults);
-                  await createSearchResults(formattedResults);
-                  console.log("Created text search results");
+                // Process and save the text search results
+                if (textResults && textResults.items && textResults.items.length > 0) {
+                  console.log("Text search results:", textResults.items.length);
+                  const formattedResults: SearchResult[] = textResults.items.slice(0, 20).map((item: any, index: number) => {
+                    // Determine match level based on relevance score if available
+                    let matchLevel: 'High' | 'Medium' | 'Low';
+                    if (item.relevanceScore) {
+                      matchLevel = item.relevanceScore > 0.75 ? 'High' : item.relevanceScore > 0.5 ? 'Medium' : 'Low';
+                    } else {
+                      matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
+                    }
+                    
+                    let thumbnailUrl = "";
+                    try {
+                      thumbnailUrl = item.pagemap?.cse_image?.[0]?.src || "";
+                    } catch (err) {
+                      console.log("No thumbnail for item:", item.title);
+                    }
+                    
+                    let source = "";
+                    try {
+                      source = item.displayLink || new URL(item.link || "#").hostname;
+                    } catch (err) {
+                      console.log("Error parsing URL for source:", item.link);
+                      source = "Unknown source";
+                    }
+                    
+                    return {
+                      search_id: searchId,
+                      title: item.title || "Untitled Content",
+                      url: item.link || "#",
+                      thumbnail: thumbnailUrl,
+                      source: source,
+                      match_level: matchLevel,
+                      found_at: new Date().toISOString(),
+                      relevance_score: item.relevanceScore
+                    };
+                  });
                   
-                  // Re-fetch results after saving
-                  searchResults = await getSearchResults(searchId);
+                  // Save search results to database if user is logged in
+                  if (user) {
+                    try {
+                      console.log("Saving text search results to database:", formattedResults.length);
+                      await createSearchResults(formattedResults);
+                      console.log("Created text search results successfully");
+                      
+                      // Re-fetch results after saving
+                      searchResults = await getSearchResults(searchId);
+                      console.log("Re-fetched search results:", searchResults?.length || 0);
+                    } catch (saveError) {
+                      console.error("Error saving text search results:", saveError);
+                      // Use the formatted results even if saving failed
+                      searchResults = formattedResults;
+                    }
+                  } else {
+                    // For anonymous users, just use the results without saving
+                    searchResults = formattedResults;
+                  }
                 } else {
-                  // For anonymous users, just use the results without saving
-                  searchResults = formattedResults;
+                  console.error("No items in text search results");
+                  setError("No search results found. Please try a different search.");
                 }
               } else {
-                console.error("No items in text search results");
+                console.error("Invalid search data:", searchQueryData);
+                setError("Invalid search data. Please try a new search.");
               }
-            } else {
-              console.error("Invalid search data:", searchQueryData);
+            } catch (searchError) {
+              console.error("Error generating search results:", searchError);
+              setError("Failed to generate search results. Please try again.");
+              toast({
+                title: "Error generating results",
+                description: "There was a problem finding matches. Please try again.",
+                variant: "destructive",
+              });
+            } finally {
+              setIsGeneratingResults(false);
             }
-          } catch (searchError) {
-            console.error("Error generating search results:", searchError);
-            toast({
-              title: "Error generating results",
-              description: "There was a problem finding matches. Please try again.",
-              variant: "destructive",
-            });
-          } finally {
-            setIsGeneratingResults(false);
           }
+          
+          if (searchResults) {
+            console.log("Setting final results:", searchResults.length);
+            setResults(searchResults);
+          } else {
+            console.error("No search results after all attempts");
+            if (!error) {
+              setError("No results found. Please try a different search.");
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching search data:", err);
+          setError("Failed to load search data. Please try again.");
         }
-        
-        setResults(searchResults || []);
-        console.log("Final results set:", searchResults?.length);
       } catch (err) {
-        console.error("Error fetching search data:", err);
-        setError("Failed to load search results");
+        console.error("Error in main try block:", err);
+        setError("An unexpected error occurred. Please try again.");
       } finally {
         setIsLoading(false);
       }
