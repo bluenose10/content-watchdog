@@ -3,20 +3,24 @@ import { PricingCard } from "@/components/ui/pricing-card";
 import { PRICING_PLANS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export function PricingSection() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handlePlanClick = (planId: string) => {
     if (planId === "free") {
       navigate("/signup");
     } else {
-      toast({
-        title: "Upgrade to Premium",
-        description: "Please sign up first to upgrade to this plan.",
-      });
-      navigate("/signup");
+      if (!user) {
+        toast({
+          title: "Sign up required",
+          description: "Please sign up first to upgrade to this plan.",
+        });
+        navigate("/signup");
+      }
     }
   };
 
@@ -44,6 +48,7 @@ export function PricingSection() {
             cta={displayPlan.cta}
             popular={displayPlan.popular}
             onClick={() => handlePlanClick(displayPlan.id)}
+            planId={displayPlan.id}
             className="animate-scale-in w-full"
           />
         </div>

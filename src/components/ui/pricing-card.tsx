@@ -1,8 +1,10 @@
 
 import { Button } from "@/components/ui/button";
+import { CheckoutButton } from "@/components/stripe/CheckoutButton";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
 import React from "react";
+import { useAuth } from "@/context/AuthContext";
 
 interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
@@ -13,6 +15,7 @@ interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   cta: string;
   popular?: boolean;
   onClick?: () => void;
+  planId?: string;
 }
 
 export function PricingCard({
@@ -24,9 +27,12 @@ export function PricingCard({
   cta,
   popular = false,
   onClick,
+  planId,
   className,
   ...props
 }: PricingCardProps) {
+  const { user } = useAuth();
+
   return (
     <div
       className={cn(
@@ -63,15 +69,27 @@ export function PricingCard({
           </div>
         ))}
       </div>
-      <Button
-        className={cn(
-          "mt-6 w-full button-animation",
-          popular ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
-        )}
-        onClick={onClick}
-      >
-        {cta}
-      </Button>
+      
+      {/* Conditionally render either the CheckoutButton or regular Button */}
+      {user && planId && price > 0 ? (
+        <CheckoutButton
+          planId={planId}
+          variant={popular ? "blue" : "default"}
+          className="mt-6 w-full button-animation"
+        >
+          {cta}
+        </CheckoutButton>
+      ) : (
+        <Button
+          className={cn(
+            "mt-6 w-full button-animation",
+            popular ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+          )}
+          onClick={onClick}
+        >
+          {cta}
+        </Button>
+      )}
     </div>
   );
 }

@@ -10,3 +10,5 @@ schemas = ["public", "storage"]
 [functions.google-search]
 verify_jwt = false
 
+[functions.create-checkout]
+verify_jwt = false

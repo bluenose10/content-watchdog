@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import Results from "./pages/Results";
 import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCanceled from "./pages/PaymentCanceled";
 import { useAuth } from "./context/AuthContext";
 
 // Create a protected route component
@@ -67,6 +69,10 @@ const AppRoutes = () => {
           <Results />
         </ResultsRoute>
       } />
+      
+      {/* Payment result pages */}
+      <Route path="/success" element={<PaymentSuccess />} />
+      <Route path="/canceled" element={<PaymentCanceled />} />
       
       {/* Protected routes */}
       <Route path="/dashboard" element={
