@@ -20,14 +20,6 @@ const testimonials = [
     avatar: "https://i.pravatar.cc/150?u=2",
     content: "As a photographer, protecting my work is crucial. This platform has become an essential part of my business. Worth every penny!",
     rating: 5
-  },
-  {
-    id: 3,
-    name: "Olivia Rodriguez",
-    role: "Social Media Influencer",
-    avatar: "https://i.pravatar.cc/150?u=3",
-    content: "The real-time alerts are game-changing. I no longer have to manually search for my content - I get notified instantly when matches are found.",
-    rating: 4
   }
 ];
 
