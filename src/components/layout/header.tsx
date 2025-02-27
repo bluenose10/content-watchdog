@@ -91,7 +91,7 @@ export function Header() {
             className="flex items-center gap-2 font-bold text-xl"
           >
             <Shield className="h-6 w-6" />
-            <span className="text-gradient">{APP_NAME}</span>
+            <span className="text-gradient">InfluenceGuard</span>
           </a>
         </div>
 
