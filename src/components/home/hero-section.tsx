@@ -1,8 +1,14 @@
 
 import { ArrowRight, Search, Shield, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
+  
+  const handleCreateAccount = () => {
+    navigate('/signup');
+  };
+
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -20,13 +26,13 @@ export const HeroSection = () => {
             <Search className="mr-2 h-5 w-5" />
             Search Now
           </a>
-          <Link 
-            to="/signup"
+          <button 
+            onClick={handleCreateAccount}
             className="flex items-center justify-center h-12 px-6 bg-white hover:bg-gray-100 text-purple-600 border border-purple-200 rounded-md cursor-pointer transition-colors"
           >
             <Shield className="mr-2 h-5 w-5" />
             Create Account
-          </Link>
+          </button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
