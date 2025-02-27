@@ -109,7 +109,7 @@ export function SearchResultCard({
         color: 'text-blue-700',
         bgColor: 'bg-white',
         name: 'LinkedIn',
-        iconUrl: '/lovable-uploads/71eeb517-4964-4090-994c-5bad460e3be4.png',
+        iconUrl: '/lovable-uploads/140db42c-ae9c-4fff-a819-0da1ec55a215.png',
         backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('youtube')) {
