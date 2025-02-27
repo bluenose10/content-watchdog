@@ -7,26 +7,38 @@ import { HeroSection } from "@/components/home/hero-section";
 import { PricingSection } from "@/components/home/pricing-section";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { toast } = useToast();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      // Show welcome toast when the page loads
-      toast({
-        title: "Welcome to InfluenceGuard",
-        description: "Explore our platform designed to protect your content online.",
-        duration: 5000,
-      });
-    } catch (err) {
-      console.error("Toast error:", err);
-      setError("Failed to display welcome message");
+    // If user is authenticated, redirect to dashboard
+    if (!loading && user) {
+      navigate("/dashboard");
+      return;
     }
-  }, [toast]);
+
+    // Only show welcome toast for non-authenticated users
+    if (!loading && !user) {
+      try {
+        toast({
+          title: "Welcome to InfluenceGuard",
+          description: "Explore our platform designed to protect your content online.",
+          duration: 5000,
+        });
+      } catch (err) {
+        console.error("Toast error:", err);
+        setError("Failed to display welcome message");
+      }
+    }
+  }, [toast, user, loading, navigate]);
 
   // Fallback UI for errors
   if (error) {
@@ -40,6 +52,15 @@ const Index = () => {
         >
           Refresh Page
         </button>
+      </div>
+    );
+  }
+
+  // Don't render anything while loading or if user is authenticated (will redirect)
+  if (loading || user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
