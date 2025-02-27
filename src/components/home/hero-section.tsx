@@ -1,7 +1,6 @@
 
 import { ArrowRight, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
   return (
@@ -14,14 +13,13 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
-          <Button 
-            variant="purple"
-            size="lg"
-            className="text-base font-medium shadow-lg" 
+          <button
+            id="signupButton"
             onClick={() => window.location.href = "/signup"}
+            className="bg-[#007BFF] hover:bg-[#0056b3] text-white px-5 py-2.5 rounded-md font-medium transition-colors duration-200 cursor-pointer"
           >
-            Open Account
-          </Button>
+            Sign Up Now
+          </button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
