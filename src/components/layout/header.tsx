@@ -24,6 +24,7 @@ export function Header() {
   const { toast } = useToast();
 
   const isAuthenticated = !!user;
+  const isOnHomePage = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,7 +79,7 @@ export function Header() {
   // Function to handle section navigation
   const scrollToSection = (sectionId: string) => {
     // If we're already on the home page
-    if (location.pathname === '/') {
+    if (isOnHomePage) {
       const section = document.getElementById(sectionId);
       if (section) {
         window.scrollTo({
@@ -86,6 +87,9 @@ export function Header() {
           behavior: 'smooth'
         });
       }
+    } else {
+      // If we're not on the home page, navigate to home page with the section hash
+      navigate(`/#${sectionId}`);
     }
   };
 
@@ -111,21 +115,27 @@ export function Header() {
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-6">
           {navigationItems.map((item) => (
-            <Link
+            <button
               key={item.name}
-              to={item.href}
               className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
-              onClick={(e) => {
-                // Only for section links on the homepage
-                if (item.href.startsWith('/#')) {
-                  e.preventDefault();
+              onClick={() => {
+                // For home link, just navigate to home
+                if (item.href === '/') {
+                  navigate('/');
+                }
+                // For section links, either scroll or navigate
+                else if (item.href.startsWith('/#')) {
                   const sectionId = item.href.substring(2); // Remove '/#'
                   scrollToSection(sectionId);
+                }
+                // For other links, use regular navigation
+                else {
+                  navigate(item.href);
                 }
               }}
             >
               {item.name}
-            </Link>
+            </button>
           ))}
         </nav>
 
@@ -173,22 +183,28 @@ export function Header() {
           <div className="container py-6 flex flex-col gap-6">
             <nav className="flex flex-col gap-4">
               {navigationItems.map((item) => (
-                <Link
+                <button
                   key={item.name}
-                  to={item.href}
-                  className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer"
-                  onClick={(e) => {
-                    // Only for section links on the homepage
-                    if (item.href.startsWith('/#')) {
-                      e.preventDefault();
+                  className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
+                  onClick={() => {
+                    // For home link, just navigate to home
+                    if (item.href === '/') {
+                      navigate('/');
+                    }
+                    // For section links, either scroll or navigate
+                    else if (item.href.startsWith('/#')) {
                       const sectionId = item.href.substring(2); // Remove '/#'
                       scrollToSection(sectionId);
                       setIsMobileMenuOpen(false);
                     }
+                    // For other links, use regular navigation
+                    else {
+                      navigate(item.href);
+                    }
                   }}
                 >
                   {item.name}
-                </Link>
+                </button>
               ))}
             </nav>
 
