@@ -9,6 +9,7 @@ import { useState } from "react";
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { SearchQuery } from "@/lib/db-types";
 
 export function ContentSearchSection() {
   const navigate = useNavigate();
@@ -31,8 +32,8 @@ export function ContentSearchSection() {
 
     if (!user) {
       toast({
-        title: "Login required",
-        description: "Please sign in to search for content",
+        title: "Authentication Required",
+        description: "You must be signed in to use this feature.",
         variant: "destructive",
       });
       navigate("/login");
@@ -40,19 +41,19 @@ export function ContentSearchSection() {
     }
 
     try {
-      let searchData = {
+      let searchData: SearchQuery = {
         user_id: user.id,
         query_type: searchType as "name" | "hashtag" | "image",
       };
 
       if (searchType === "name" && nameQuery.trim()) {
-        searchData = { ...searchData, query_text: nameQuery.trim() };
+        searchData.query_text = nameQuery.trim();
       } else if (searchType === "hashtag" && hashtagQuery.trim()) {
-        searchData = { ...searchData, query_text: hashtagQuery.trim() };
+        searchData.query_text = hashtagQuery.trim();
       } else if (searchType === "image" && selectedFile) {
         setIsUploading(true);
         const imageUrl = await uploadSearchImage(selectedFile, user.id);
-        searchData = { ...searchData, image_url: imageUrl };
+        searchData.image_url = imageUrl;
       } else {
         toast({
           title: "Search input required",
@@ -126,6 +127,11 @@ export function ContentSearchSection() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
+                  {!user && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      You must be <Link to="/login" className="text-primary hover:underline">signed in</Link> to use this feature
+                    </p>
+                  )}
                 </TabsContent>
                 <TabsContent value="hashtag">
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -140,6 +146,11 @@ export function ContentSearchSection() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
+                  {!user && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      You must be <Link to="/login" className="text-primary hover:underline">signed in</Link> to use this feature
+                    </p>
+                  )}
                 </TabsContent>
                 <TabsContent value="image">
                   <div className="flex flex-col gap-2">
@@ -184,6 +195,11 @@ export function ContentSearchSection() {
                       {isUploading ? "Uploading..." : "Search"}
                       {!isUploading && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
+                    {!user && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        You must be <Link to="/login" className="text-primary hover:underline">signed in</Link> to use this feature
+                      </p>
+                    )}
                   </div>
                 </TabsContent>
               </form>
