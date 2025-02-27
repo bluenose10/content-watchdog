@@ -30,6 +30,7 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("Starting sign up process...");
 
     // Simple validation
     if (formData.password !== formData.confirmPassword) {
@@ -42,10 +43,24 @@ const SignUp = () => {
       return;
     }
 
+    // Additional validation - password length
+    if (formData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      console.log("Calling Supabase signUp...");
       const { data, error } = await signUp(formData.email, formData.password);
+      console.log("Sign up response:", { data, error });
       
       if (error) {
+        console.error("Supabase signup error:", error);
         toast({
           title: "Sign up failed",
           description: error.message || "There was an error creating your account",
@@ -63,7 +78,7 @@ const SignUp = () => {
         }, 2000);
       }
     } catch (error: any) {
-      console.error("Signup error:", error);
+      console.error("Exception during signup:", error);
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",
@@ -127,6 +142,9 @@ const SignUp = () => {
                   onChange={handleChange}
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  Password must be at least 6 characters long
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
