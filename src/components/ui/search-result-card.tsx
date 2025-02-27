@@ -73,7 +73,7 @@ export function SearchResultCard({
     }
   };
   
-  // Map social media platforms to their respective logos and content images
+  // Map social media platforms to their respective background images and icons
   const getSocialMediaInfo = () => {
     const platform = cleanSource.toLowerCase();
     
@@ -83,7 +83,9 @@ export function SearchResultCard({
         color: 'text-blue-600',
         bgColor: 'bg-white',
         name: 'Facebook',
-        logoUrl: '/lovable-uploads/635b4db7-5776-4365-8831-07be04a15714.png'
+        iconUrl: '/lovable-uploads/635b4db7-5776-4365-8831-07be04a15714.png',
+        // Mountain landscape image for Facebook
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -91,7 +93,9 @@ export function SearchResultCard({
         color: 'text-sky-500',
         bgColor: 'bg-white',
         name: 'Twitter/X',
-        logoUrl: '/lovable-uploads/8c8c70f8-5aba-4fb4-8261-cc6c9c7a4ded.png'
+        iconUrl: '/lovable-uploads/8c8c70f8-5aba-4fb4-8261-cc6c9c7a4ded.png',
+        // Use a background image for Twitter
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('instagram')) {
       return {
@@ -99,7 +103,9 @@ export function SearchResultCard({
         color: 'text-pink-600',
         bgColor: 'bg-white',
         name: 'Instagram',
-        logoUrl: '/lovable-uploads/554d6a51-776f-4eb2-90bb-728cb6d94365.png'
+        iconUrl: '/lovable-uploads/554d6a51-776f-4eb2-90bb-728cb6d94365.png',
+        // Mountain image for Instagram
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -107,7 +113,9 @@ export function SearchResultCard({
         color: 'text-blue-700',
         bgColor: 'bg-white',
         name: 'LinkedIn',
-        logoUrl: '/lovable-uploads/71eeb517-4964-4090-994c-5bad460e3be4.png'
+        iconUrl: '/lovable-uploads/71eeb517-4964-4090-994c-5bad460e3be4.png',
+        // Mountain landscape for LinkedIn
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -115,7 +123,9 @@ export function SearchResultCard({
         color: 'text-red-600',
         bgColor: 'bg-white',
         name: 'YouTube',
-        logoUrl: '/lovable-uploads/74f208e0-bb64-408c-826a-b51bba43af07.png'
+        iconUrl: '/lovable-uploads/74f208e0-bb64-408c-826a-b51bba43af07.png',
+        // Kindle e-reader image for YouTube
+        backgroundImage: 'https://images.unsplash.com/photo-1544716278-e513176f20b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
       };
     } else if (platform.includes('tiktok')) {
       return {
@@ -123,7 +133,8 @@ export function SearchResultCard({
         color: 'text-black dark:text-white',
         bgColor: 'bg-white',
         name: 'TikTok',
-        logoUrl: null
+        iconUrl: null,
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else {
       return {
@@ -131,7 +142,8 @@ export function SearchResultCard({
         color: 'text-gray-600 dark:text-gray-400',
         bgColor: 'bg-white',
         name: cleanSource,
-        logoUrl: null
+        iconUrl: null,
+        backgroundImage: null
       };
     }
   };
@@ -263,12 +275,32 @@ export function SearchResultCard({
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
             />
+          ) : socialMedia.backgroundImage ? (
+            // Display the social media background image with platform icon overlay
+            <div className="relative w-full h-full">
+              <img 
+                src={socialMedia.backgroundImage} 
+                alt={`${socialMedia.name} content`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-4 left-4 bg-white rounded-full p-2 shadow-md">
+                {socialMedia.iconUrl ? (
+                  <img 
+                    src={socialMedia.iconUrl} 
+                    alt={`${socialMedia.name} logo`}
+                    className="w-8 h-8 object-contain"
+                  />
+                ) : (
+                  <socialMedia.Icon size={24} className={socialMedia.color} />
+                )}
+              </div>
+            </div>
           ) : (
-            // Display the social media platform logo
+            // Fallback to logo-only display
             <div className="relative w-full h-full flex items-center justify-center bg-white">
-              {socialMedia.logoUrl ? (
+              {socialMedia.iconUrl ? (
                 <img 
-                  src={socialMedia.logoUrl} 
+                  src={socialMedia.iconUrl} 
                   alt={`${socialMedia.name} logo`}
                   className="max-w-[80%] max-h-[80%] object-contain"
                 />
@@ -305,9 +337,6 @@ export function SearchResultCard({
             Upgrade to View
           </Badge>
         )}
-        <div className="absolute left-2 bottom-2 bg-white/90 dark:bg-gray-800/90 rounded-full p-1.5 border border-gray-200 dark:border-gray-700">
-          <socialMedia.Icon size={18} className={socialMedia.color} />
-        </div>
       </div>
       <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50">
         <h3 className="text-lg font-semibold" title={cleanTitle}>{truncatedTitle}</h3>
