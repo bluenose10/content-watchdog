@@ -56,7 +56,12 @@ const SignUp = () => {
 
     try {
       console.log("Calling Supabase signUp...");
-      const { data, error } = await signUp(formData.email, formData.password);
+      // Pass name as user metadata
+      const { data, error } = await signUp(
+        formData.email, 
+        formData.password, 
+        { data: { name: formData.name } }
+      );
       console.log("Sign up response:", { data, error });
       
       if (error) {

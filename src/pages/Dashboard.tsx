@@ -11,7 +11,11 @@ const Dashboard = () => {
   const { user } = useAuth();
   useProtectedRoute();
   
-  const username = user?.email ? user.email.split('@')[0] : '';
+  const firstName = user?.user_metadata?.name 
+    ? user.user_metadata.name.split(' ')[0] 
+    : user?.email 
+      ? user.email.split('@')[0] 
+      : '';
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -22,7 +26,7 @@ const Dashboard = () => {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
               <p className="text-muted-foreground">
-                Welcome back, {username}! Monitor and protect your content.
+                Welcome back, {firstName}! Monitor and protect your content.
               </p>
             </div>
             <Button asChild>
