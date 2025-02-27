@@ -71,6 +71,20 @@ export function Header() {
     }
   };
 
+  // Function to handle section navigation
+  const scrollToSection = (sectionId: string) => {
+    // If we're already on the home page
+    if (location.pathname === '/') {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        window.scrollTo({
+          top: section.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
   return (
     <header
       className={cn(
@@ -94,7 +108,15 @@ export function Header() {
             <Link
               key={item.name}
               to={item.href}
-              className="text-sm font-medium transition-colors hover:text-primary smooth-transition"
+              className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
+              onClick={(e) => {
+                // Only for section links on the homepage
+                if (item.href.startsWith('/#')) {
+                  e.preventDefault();
+                  const sectionId = item.href.substring(2); // Remove '/#'
+                  scrollToSection(sectionId);
+                }
+              }}
             >
               {item.name}
             </Link>
@@ -148,8 +170,16 @@ export function Header() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className="text-lg font-medium px-2 py-2 border-b border-border"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer"
+                  onClick={(e) => {
+                    // Only for section links on the homepage
+                    if (item.href.startsWith('/#')) {
+                      e.preventDefault();
+                      const sectionId = item.href.substring(2); // Remove '/#'
+                      scrollToSection(sectionId);
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
                 >
                   {item.name}
                 </Link>
