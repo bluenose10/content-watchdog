@@ -12,7 +12,7 @@ interface AnimatedGradientBorderProps extends React.HTMLAttributes<HTMLDivElemen
 
 export function AnimatedGradientBorder({
   children,
-  gradientClasses = "from-indigo-500 via-purple-500 to-pink-500",
+  gradientClasses = "from-purple-500 via-blue-500 to-indigo-500",
   borderWidth = "2px",
   animationDuration = "4s",
   containerClassName,

@@ -5,83 +5,83 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 240 50% 99%;
+    --foreground: 224 71% 4%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 224 71% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 224 71% 4%;
 
-    --primary: 222 47% 30%;
+    --primary: 262 83% 58%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96%;
+    --secondary: 220 84% 66%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 216 34% 62%;
+    --accent: 262 83% 58%;
     --accent-foreground: 222 47% 11%;
 
-    --destructive: 0 80% 50%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 47% 11%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262 83% 58%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 213 32% 95%;
-    --sidebar-foreground: 222 47% 30%;
-    --sidebar-primary: 222 47% 30%;
+    --sidebar-background: 240 30% 96%;
+    --sidebar-foreground: 262 60% 52%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 216 34% 90%;
-    --sidebar-accent-foreground: 222 47% 20%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 262 59% 94%;
+    --sidebar-accent-foreground: 262 60% 52%;
+    --sidebar-border: 262 43% 90%;
+    --sidebar-ring: 262 83% 58%;
   }
 
   .dark {
-    --background: 222 47% 6%;
+    --background: 224 71% 4%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 8%;
+    --card: 224 71% 6%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 8%;
+    --popover: 224 71% 6%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 263 85% 65%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 217.2 32% 17.5%;
+    --secondary: 220 70% 55%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 28% 17%;
+    --muted-foreground: 217 19% 73%;
 
-    --accent: 217.2 32% 25%;
+    --accent: 263 70% 50%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 40.6%;
+    --destructive: 0 63% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32% 17.5%;
-    --input: 217.2 32% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 263 75% 65%;
 
-    --sidebar-background: 222 47% 10%;
-    --sidebar-foreground: 213 31% 91%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 217.2 32% 20%;
-    --sidebar-accent-foreground: 213 31% 91%;
-    --sidebar-border: 217.2 32% 17.5%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 224 71% 8%;
+    --sidebar-foreground: 263 75% 75%;
+    --sidebar-primary: 263 85% 65%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 265 50% 22%;
+    --sidebar-accent-foreground: 263 75% 75%;
+    --sidebar-border: 265 50% 22%;
+    --sidebar-ring: 263 85% 65%;
   }
 }
 
@@ -95,7 +95,8 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     background-image: radial-gradient(
       circle at 50% 50%,
-      rgba(var(--primary), 0.03) 0%,
+      rgba(147, 51, 234, 0.07) 0%,
+      rgba(79, 70, 229, 0.05) 35%,
       rgba(var(--background), 0) 70%
     );
   }
@@ -111,7 +112,7 @@
   }
   
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-blue-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-400;
   }
   
   .button-animation {
@@ -128,38 +129,74 @@
 
   /* New styling components */
   .card-gradient {
-    @apply bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border border-slate-200/50 dark:border-slate-700/50;
+    @apply bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-purple-950/40 border border-purple-100/50 dark:border-purple-800/30 shadow-md;
   }
 
   .feature-card {
     @apply relative overflow-hidden rounded-xl p-6 transition-all duration-300 
-           hover:shadow-md hover:translate-y-[-4px] bg-white dark:bg-slate-800 
-           border border-slate-200 dark:border-slate-700
+           hover:shadow-md hover:translate-y-[-4px] bg-white dark:bg-gray-900 
+           border border-purple-200/80 dark:border-purple-700/30
            before:content-[''] before:absolute before:inset-0 before:rounded-xl
-           before:bg-gradient-to-r before:from-transparent before:via-indigo-600/5 before:to-transparent
-           before:animate-shimmer hover:border-indigo-200 dark:hover:border-indigo-900;
+           before:bg-gradient-to-r before:from-transparent before:via-purple-600/5 before:to-transparent
+           before:animate-shimmer hover:border-purple-300 dark:hover:border-purple-600/60;
   }
 
   .hero-background {
     @apply relative before:absolute before:inset-0 before:bg-hero-pattern before:opacity-5
-           after:absolute after:inset-0 after:bg-gradient-radial after:from-indigo-500/5 after:to-transparent;
+           after:absolute after:inset-0 after:bg-gradient-radial after:from-purple-500/5 after:to-transparent;
   }
 
   .primary-button {
-    @apply bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700
+    @apply bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700
            text-white font-medium rounded-lg px-5 py-2.5 transition-all duration-300 
            shadow-md hover:shadow-lg active:scale-95;
   }
 
+  .secondary-button {
+    @apply bg-gradient-to-r from-indigo-500/10 to-blue-500/10 hover:from-indigo-500/20 hover:to-blue-500/20
+           text-indigo-700 dark:text-indigo-300 font-medium rounded-lg px-5 py-2.5 transition-all duration-300 
+           shadow-sm hover:shadow-md active:scale-95 border border-indigo-200 dark:border-indigo-800;
+  }
+
   .accent-glow {
-    @apply relative after:absolute after:inset-0 after:rounded-full after:bg-primary/20 
+    @apply relative after:absolute after:inset-0 after:rounded-full after:bg-purple-500/20 
            after:blur-xl after:scale-150 after:-z-10;
   }
 
   .shimmer-effect {
     @apply relative overflow-hidden before:absolute before:inset-0 
-           before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent
+           before:bg-gradient-to-r before:from-transparent before:via-purple-300/20 dark:before:via-purple-300/10 before:to-transparent
            before:animate-shimmer;
+  }
+  
+  .purple-blur-bg {
+    @apply relative before:absolute before:-inset-1 before:bg-gradient-to-r before:from-purple-600 before:to-blue-600 
+           before:blur-xl before:opacity-20 dark:before:opacity-30 before:-z-10 before:rounded-2xl;
+  }
+  
+  .dashboard-card {
+    @apply bg-white dark:bg-gray-900 border border-purple-100 dark:border-purple-900/40 
+           rounded-xl shadow-sm hover:shadow-md transition-all duration-300 
+           hover:border-purple-300 dark:hover:border-purple-700 p-6;
+  }
+  
+  .purple-glow {
+    @apply shadow-[0_0_15px_rgba(147,51,234,0.2)] dark:shadow-[0_0_15px_rgba(147,51,234,0.4)];
+  }
+  
+  .blue-glow {
+    @apply shadow-[0_0_15px_rgba(59,130,246,0.2)] dark:shadow-[0_0_15px_rgba(59,130,246,0.4)];
+  }
+  
+  .gradient-border {
+    @apply relative border-0 before:absolute before:inset-0 before:-z-10 before:p-[1px] before:rounded-xl
+           before:bg-gradient-to-r before:from-purple-500 before:to-blue-500 
+           before:content-[''] after:absolute after:inset-[1px] after:-z-10 after:rounded-[calc(0.75rem-1px)]
+           after:bg-white dark:after:bg-gray-900 after:content-[''];
+  }
+  
+  .purple-dot-pattern {
+    @apply bg-[radial-gradient(rgba(147,51,234,0.15)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(147,51,234,0.25)_1px,transparent_1px)] bg-[size:20px_20px];
   }
 }
 
