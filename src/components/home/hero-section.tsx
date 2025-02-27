@@ -20,13 +20,14 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
-          <button
+          <Button
             id="signupButton"
             onClick={handleSignUp}
-            className="bg-[#007BFF] hover:bg-[#0056b3] text-white px-5 py-2.5 rounded-md font-medium transition-colors duration-200 cursor-pointer"
+            variant="blue"
+            className="text-base px-6 py-3"
           >
             Sign Up Now
-          </button>
+          </Button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
