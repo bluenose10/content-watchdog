@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { APP_NAME } from "@/lib/constants";
-import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Shield } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
@@ -30,12 +30,28 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { success } = await signIn(formData.email, formData.password);
-      if (success) {
-        navigate("/dashboard");
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        toast({
+          title: "Login failed",
+          description: error.message || "Invalid email or password",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in",
+        });
+        navigate('/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +71,7 @@ const Login = () => {
           <CardHeader>
             <CardTitle className="text-2xl">Welcome back</CardTitle>
             <CardDescription>
-              Log in to access your account
+              Log in to your account to continue
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -73,15 +89,7 @@ const Login = () => {
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-primary hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   name="password"
@@ -91,6 +99,14 @@ const Login = () => {
                   onChange={handleChange}
                   required
                 />
+              </div>
+              <div className="text-right">
+                <Link
+                  to="/reset-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
               </div>
               <Button type="submit" className="w-full button-animation" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Log In"}
@@ -110,6 +126,18 @@ const Login = () => {
             </Link>
           </CardFooter>
         </Card>
+
+        <p className="text-xs text-center mt-8 text-muted-foreground">
+          By logging in, you agree to our{" "}
+          <Link to="#" className="underline hover:text-foreground">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link to="#" className="underline hover:text-foreground">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

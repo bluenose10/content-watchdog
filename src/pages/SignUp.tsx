@@ -43,14 +43,32 @@ const SignUp = () => {
     }
 
     try {
-      const { success } = await signUp(formData.email, formData.password, formData.name);
+      const { data, error } = await signUp(formData.email, formData.password);
       
-      if (success) {
-        // Don't navigate automatically since the user needs to confirm their email
-        // We'll let the success toast guide them
+      if (error) {
+        toast({
+          title: "Sign up failed",
+          description: error.message || "There was an error creating your account",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Your account has been created. Please check your email for verification.",
+        });
+        
+        // Optionally navigate to login page with a delay
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
