@@ -25,7 +25,7 @@ const Dashboard = () => {
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gradient">Dashboard</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
               <p className="text-gradient font-medium">
                 Welcome back, {firstName}! Monitor and protect your content.
               </p>

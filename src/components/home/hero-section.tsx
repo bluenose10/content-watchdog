@@ -1,67 +1,73 @@
 
 import { Button } from "@/components/ui/button";
-import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
-import { ArrowDown, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ArrowRight, Search, Shield, Zap } from "lucide-react";
 
-export function HeroSection() {
-  const scrollToFeatures = () => {
-    const featuresSection = document.getElementById("features");
-    if (featuresSection) {
-      window.scrollTo({
-        top: featuresSection.offsetTop - 100,
-        behavior: "smooth",
-      });
-    }
-  };
-
+export const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex flex-col justify-center items-center pt-16 overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
-      
-      {/* Animated background shapes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/5 animate-floating" style={{ animationDelay: "0s" }} />
-        <div className="absolute top-1/3 -left-20 h-60 w-60 rounded-full bg-primary/5 animate-floating" style={{ animationDelay: "0.5s" }} />
-        <div className="absolute bottom-20 right-1/4 h-40 w-40 rounded-full bg-primary/5 animate-floating" style={{ animationDelay: "1s" }} />
-      </div>
-      
-      <div className="container relative z-10 px-4 md:px-6 flex flex-col items-center text-center animate-fade-in">
-        <div className="inline-flex items-center rounded-full border border-border/40 bg-background/95 px-3 py-1 text-sm backdrop-blur-md mb-6">
-          <span className="text-muted-foreground">Protect your content online</span>
-        </div>
-        
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter mb-4 max-w-3xl leading-tight">
-          <span className="text-gradient">Protect Your Content</span> From Unauthorized Use
+    <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
+      <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-gradient max-w-3xl mx-auto">
+          Protect Your Digital Content from Unauthorized Use
         </h1>
-        
-        <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl">
-          {APP_NAME} helps influencers and content creators detect and monitor unauthorized use of their content across the internet.
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 mb-12">
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <Button asChild size="lg" className="button-animation">
-            <Link to="/signup">
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
+            <Link to="/search">
+              <Search className="mr-2 h-5 w-5" />
+              Search Now
             </Link>
           </Button>
-          <Button variant="outline" size="lg" onClick={scrollToFeatures}>
-            Learn More
-            <ArrowDown className="ml-2 h-4 w-4" />
+          <Button asChild size="lg" variant="secondary">
+            <Link to="/signup">
+              <Shield className="mr-2 h-5 w-5" />
+              Create Account
+            </Link>
           </Button>
         </div>
-        
-        {/* Hero image or mockup */}
-        <div className="glass-card rounded-xl overflow-hidden shadow-2xl max-w-3xl w-full transition-all duration-500 hover:shadow-primary/10">
-          <img
-            src="https://placehold.co/1200x675/png"
-            alt="InfluenceGuard Dashboard"
-            className="w-full h-auto rounded-lg animate-pulse-subtle"
-          />
+        <div className="w-full max-w-3xl pt-8 md:pt-12">
+          <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4">
+                <Search className="h-6 w-6 text-purple-700 dark:text-purple-400" />
+              </div>
+              <h3 className="text-xl font-medium mb-1">Find Content</h3>
+              <p className="text-sm text-muted-foreground">
+                Search across platforms to locate your images and text
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
+                <Zap className="h-6 w-6 text-blue-700 dark:text-blue-400" />
+              </div>
+              <h3 className="text-xl font-medium mb-1">Monitor Usage</h3>
+              <p className="text-sm text-muted-foreground">
+                Get alerts when new matches of your content are detected
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-4">
+                <Shield className="h-6 w-6 text-indigo-700 dark:text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-medium mb-1">Take Action</h3>
+              <p className="text-sm text-muted-foreground">
+                Send DMCA takedown notices with evidence provided
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-8 flex items-center">
+          <Link
+            to="#features"
+            className="flex items-center text-sm text-muted-foreground hover:text-foreground group"
+          >
+            Learn more about our features
+            <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
     </section>
   );
-}
+};
