@@ -69,5 +69,3 @@ url = ""
 
 [functions]
 # Function settings
-[functions.serve]
-port = 54321
