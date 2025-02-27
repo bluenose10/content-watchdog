@@ -113,7 +113,7 @@ export function SearchResultCard({
       </CardContent>
       <CardFooter className="bg-green-50/70">
         {isPremium || isFreePreview ? (
-          <Button asChild variant="outline" size="sm" className="w-full gap-1 border-green-300 hover:border-red-400 hover:bg-red-50 transition-all duration-300">
+          <Button asChild variant="outline" size="sm" className="w-full gap-1 border-green-300 hover:border-red-400 hover:bg-red-200 transition-all duration-300">
             <a href={url} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4" />
               Visit Site
@@ -124,7 +124,7 @@ export function SearchResultCard({
             onClick={onUpgrade} 
             variant="outline" 
             size="sm" 
-            className="w-full border-green-300 hover:border-red-400 hover:bg-red-50 transition-all duration-300"
+            className="w-full border-green-300 hover:border-red-400 hover:bg-red-200 transition-all duration-300"
           >
             Upgrade to View
           </Button>
