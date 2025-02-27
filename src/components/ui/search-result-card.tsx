@@ -89,7 +89,7 @@ export function SearchResultCard({
         bgColor: 'bg-blue-50 dark:bg-blue-900/30',
         name: 'Facebook',
         brandColor: 'from-blue-600 to-blue-800',
-        image: null // Will use generated background
+        logoUrl: 'public/lovable-uploads/f1cbed5d-2990-460f-8e09-7eaf6f2e5c0c.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -98,7 +98,7 @@ export function SearchResultCard({
         bgColor: 'bg-sky-50 dark:bg-sky-900/30',
         name: 'Twitter/X',
         brandColor: 'from-sky-400 to-sky-600',
-        image: null
+        logoUrl: null // Using icon since Twitter/X logo not provided
       };
     } else if (platform.includes('instagram')) {
       return {
@@ -107,7 +107,7 @@ export function SearchResultCard({
         bgColor: 'bg-pink-50 dark:bg-pink-900/30',
         name: 'Instagram',
         brandColor: 'from-pink-500 via-purple-500 to-orange-500',
-        image: null
+        logoUrl: 'public/lovable-uploads/6e36b8a0-a51b-48a4-a920-29680cd4bcae.png'
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -116,7 +116,7 @@ export function SearchResultCard({
         bgColor: 'bg-blue-50 dark:bg-blue-900/30',
         name: 'LinkedIn',
         brandColor: 'from-blue-700 to-blue-900',
-        image: null
+        logoUrl: 'public/lovable-uploads/cdde8926-a941-4e4c-8b16-18a1360ee5be.png'
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -125,7 +125,7 @@ export function SearchResultCard({
         bgColor: 'bg-red-50 dark:bg-red-900/30',
         name: 'YouTube',
         brandColor: 'from-red-600 to-red-800',
-        image: null
+        logoUrl: 'public/lovable-uploads/3ee2383a-6a4c-4531-b338-ae13d53c6f6e.png'
       };
     } else if (platform.includes('tiktok')) {
       return {
@@ -134,7 +134,7 @@ export function SearchResultCard({
         bgColor: 'bg-pink-50 dark:bg-pink-900/30',
         name: 'TikTok',
         brandColor: 'from-black via-cyan-500 to-pink-500',
-        image: null
+        logoUrl: null
       };
     } else {
       return {
@@ -143,7 +143,7 @@ export function SearchResultCard({
         bgColor: 'bg-gray-50 dark:bg-gray-900/30',
         name: cleanSource,
         brandColor: 'from-gray-500 to-gray-700',
-        image: null
+        logoUrl: null
       };
     }
   };
@@ -291,22 +291,26 @@ export function SearchResultCard({
           ) : (
             <div className="relative w-full h-full">
               {/* Platform Background */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${socialMedia.brandColor}`}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <socialMedia.Icon className={`text-white/10 dark:text-white/5`} size={150} strokeWidth={1} />
-                </div>
+              <div className={`absolute inset-0 bg-gradient-to-br ${socialMedia.brandColor} flex items-center justify-center p-8`}>
+                {socialMedia.logoUrl ? (
+                  <img 
+                    src={socialMedia.logoUrl} 
+                    alt={socialMedia.name}
+                    className="max-w-[80%] max-h-[80%] object-contain drop-shadow-lg"
+                    onError={(e) => {
+                      console.error("Error loading logo:", e);
+                      // If logo fails to load, we'll still see the platform name below
+                    }}
+                  />
+                ) : (
+                  <socialMedia.Icon className="text-white/80" size={120} strokeWidth={1} />
+                )}
               </div>
               
-              {/* Platform Name and Logo */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className={`bg-white/90 dark:bg-gray-800/90 p-5 rounded-full border shadow-md ${borderColor}`}>
-                  <socialMedia.Icon size={42} className={socialMedia.color} strokeWidth={1.5} />
-                </div>
-                <div className="mt-3 text-2xl font-bold text-white drop-shadow-md">
-                  {socialMedia.name}
-                </div>
-                <div className="mt-2 text-sm font-medium bg-white/90 dark:bg-gray-800/90 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <span className={matchColor.text}>Content Match</span>
+              {/* Platform Name */}
+              <div className="absolute bottom-0 inset-x-0 bg-black/50 p-2 flex items-center justify-center">
+                <div className="text-lg font-bold text-white">
+                  Content found on {socialMedia.name}
                 </div>
               </div>
             </div>
