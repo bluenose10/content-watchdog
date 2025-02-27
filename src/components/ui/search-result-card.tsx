@@ -30,8 +30,13 @@ export function SearchResultCard({
   const { title, url, thumbnail, source, matchLevel, date } = result;
   const [imageError, setImageError] = useState(false);
   
+  // Clean up the title, url, and source if they contain Supabase URLs
+  const cleanTitle = cleanSupabaseUrls(title);
+  const cleanUrl = cleanSupabaseUrls(url);
+  const cleanSource = cleanSupabaseUrls(source);
+  
   // Truncate long titles
-  const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
+  const truncatedTitle = cleanTitle.length > 60 ? cleanTitle.substring(0, 60) + '...' : cleanTitle;
   
   // Ensure matchLevel is a valid string before using it
   const safeMatchLevel = matchLevel || 'Medium';
@@ -105,6 +110,41 @@ export function SearchResultCard({
   
   const { Icon, bgColor, iconColor, borderColor } = getIconParams();
 
+  // Function to clean Supabase URLs
+  function cleanSupabaseUrls(str: string): string {
+    if (!str) return str;
+    
+    // If the string is a Supabase URL, replace it with a cleaner alternative
+    if (str.includes('phkdkwusblkngypuwgao.supabase.co')) {
+      // Replace URLs in the title with something more appropriate
+      if (str.includes('linkedin.com')) {
+        return 'Professional Profile on LinkedIn';
+      } else if (str.includes('facebook.com')) {
+        return 'Profile on Facebook';
+      } else if (str.includes('instagram.com')) {
+        return 'Post on Instagram';
+      } else if (str.includes('twitter.com')) {
+        return 'Tweet on Twitter/X';
+      } else if (str.includes('youtube.com')) {
+        return 'Video on YouTube';
+      } else if (str.includes('tiktok.com')) {
+        return 'Video on TikTok';
+      }
+      
+      // For URLs that are paths to Supabase storage
+      if (str.startsWith('https://phkdkwusblkngypuwgao.supabase.co/storage/')) {
+        return 'Content Match Found';
+      }
+      
+      // For source domains
+      if (str === 'phkdkwusblkngypuwgao.supabase.co') {
+        return 'Social Media';
+      }
+    }
+    
+    return str;
+  }
+
   // Check if thumbnail is a valid URL
   const isValidThumbnail = () => {
     if (!thumbnail || imageError) return false;
@@ -135,7 +175,7 @@ export function SearchResultCard({
           {isValidThumbnail() ? (
             <img 
               src={thumbnail} 
-              alt={title}
+              alt={cleanTitle}
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
             />
@@ -172,14 +212,14 @@ export function SearchResultCard({
         )}
       </div>
       <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50">
-        <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
+        <h3 className="text-lg font-semibold" title={cleanTitle}>{truncatedTitle}</h3>
         <p className="text-sm text-muted-foreground">
-          Found on <span className="font-medium">{source}</span> • {formattedDate}
+          Found on <span className="font-medium">{cleanSource}</span> • {formattedDate}
         </p>
       </CardHeader>
       <CardContent className="pb-2">
         {isPremium || isFreePreview ? (
-          <p className="text-sm truncate text-gray-600 dark:text-gray-300" title={url}>{url}</p>
+          <p className="text-sm truncate text-gray-600 dark:text-gray-300" title={cleanUrl}>{cleanUrl}</p>
         ) : (
           <div className="space-y-1">
             <p className="text-sm text-purple-600 dark:text-purple-400">Full details available with premium plan</p>
@@ -194,7 +234,7 @@ export function SearchResultCard({
             size="sm" 
             className={`w-full border ${matchColor.border} ${matchColor.hover} transition-all duration-300 group`}
           >
-            <a href={url} target="_blank" rel="noopener noreferrer">
+            <a href={cleanUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className={`h-4 w-4 mr-2 ${matchColor.text} group-hover:rotate-12 transition-transform duration-300`} />
               Visit Site
             </a>
