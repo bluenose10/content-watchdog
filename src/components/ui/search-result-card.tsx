@@ -85,6 +85,15 @@ export function SearchResultCard({
         iconUrl: '/lovable-uploads/1e633b91-cda1-46a7-a5ce-9eb89b5e0b17.png',
         backgroundImage: '/lovable-uploads/2e32e60a-c5d3-4633-8478-b1bf97f4be7d.png'
       };
+    } else if (platform.includes('instagram')) {
+      return {
+        Icon: Instagram,
+        color: 'text-pink-600',
+        bgColor: 'bg-white',
+        name: 'Instagram',
+        iconUrl: '/lovable-uploads/aa9c9191-adcd-4086-a761-9f7f6fa6cddc.png',
+        backgroundImage: '/lovable-uploads/aa9c9191-adcd-4086-a761-9f7f6fa6cddc.png'
+      };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
         Icon: Twitter,
@@ -93,15 +102,6 @@ export function SearchResultCard({
         name: 'Twitter/X',
         iconUrl: '/lovable-uploads/2193c223-55d1-4caf-912c-7f2e8cd5e2eb.png',
         backgroundImage: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=300'
-      };
-    } else if (platform.includes('instagram')) {
-      return {
-        Icon: Instagram,
-        color: 'text-pink-600',
-        bgColor: 'bg-white',
-        name: 'Instagram',
-        iconUrl: '/lovable-uploads/57f9e9ad-8d7f-419b-a30e-b8d923ab1b04.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&h=300'
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -254,8 +254,9 @@ export function SearchResultCard({
     }
   };
   
-  // For Facebook, we always want to show the custom background image
+  // Check if we should always show the custom background image for these platforms
   const shouldShowFacebookBackground = cleanSource.toLowerCase().includes('facebook');
+  const shouldShowInstagramBackground = cleanSource.toLowerCase().includes('instagram');
   
   return (
     <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80`}>
@@ -270,6 +271,14 @@ export function SearchResultCard({
                 src={socialMedia.backgroundImage} 
                 alt="Facebook content"
                 className="w-auto h-auto max-w-[70%] max-h-[70%] object-contain"
+              />
+            </div>
+          ) : shouldShowInstagramBackground ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img 
+                src={socialMedia.backgroundImage} 
+                alt="Instagram content"
+                className="w-auto h-auto max-w-[60%] max-h-[60%] object-contain"
               />
             </div>
           ) : isValidThumbnail() ? (
