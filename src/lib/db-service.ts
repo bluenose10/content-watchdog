@@ -1,4 +1,3 @@
-
 import { supabase } from './supabase';
 import { SearchQuery, SearchResult, UserSubscription } from './db-types';
 
@@ -144,452 +143,194 @@ export const createUserSubscription = async (subscription: UserSubscription) => 
   return data?.[0];
 };
 
-// Google Custom Search API function
-export const performGoogleSearch = async (query: string, userId: string) => {
+// Google Custom Search API function - real API integration
+export const performGoogleSearch = async (query: string, userId: string, searchParams: any = {}) => {
   try {
-    console.log('Performing Google search for query:', query, 'by user:', userId);
+    console.log('Performing Google search for query:', query, 'by user:', userId, 'with params:', searchParams);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Try to use the real Google Search API if we have an API key
+    // For production use, this would be done via a Supabase Edge Function to keep the API key secure
+    const apiKey = process.env.GOOGLE_API_KEY || '';
+    const searchEngineId = process.env.GOOGLE_CSE_ID || '';
     
-    // Mock search results based on query
-    const mockResults = {
-      items: [
-        {
-          title: `${query} Profile on LinkedIn`,
-          link: 'https://linkedin.com/in/profile',
-          displayLink: 'linkedin.com',
-          snippet: `Professional profile page for ${query} with recent activity.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=1' }]
-          }
-        },
-        {
-          title: `${query} on Twitter`,
-          link: 'https://twitter.com/profile',
-          displayLink: 'twitter.com',
-          snippet: `Latest tweets and posts from ${query}.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=2' }]
-          }
-        },
-        {
-          title: `${query} on Instagram`,
-          link: 'https://instagram.com/profile',
-          displayLink: 'instagram.com',
-          snippet: `Photos and videos shared by ${query} on Instagram.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=3' }]
-          }
-        },
-        {
-          title: `${query}'s YouTube Channel`,
-          link: 'https://youtube.com/channel',
-          displayLink: 'youtube.com',
-          snippet: `Watch videos uploaded by ${query} on YouTube.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=4' }]
-          }
-        },
-        {
-          title: `${query} on Facebook`,
-          link: 'https://facebook.com/profile',
-          displayLink: 'facebook.com',
-          snippet: `Public profile and posts from ${query} on Facebook.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=5' }]
-          }
-        },
-        {
-          title: `${query} on Pinterest`,
-          link: 'https://pinterest.com/profile',
-          displayLink: 'pinterest.com',
-          snippet: `${query}'s Pinterest boards and pins.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=6' }]
-          }
-        },
-        {
-          title: `${query} on TikTok`,
-          link: 'https://tiktok.com/@profile',
-          displayLink: 'tiktok.com',
-          snippet: `${query}'s TikTok videos and profile information.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=7' }]
-          }
-        },
-        {
-          title: `${query} on Reddit`,
-          link: 'https://reddit.com/user/profile',
-          displayLink: 'reddit.com',
-          snippet: `${query}'s Reddit posts and comments.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=8' }]
-          }
-        },
-        {
-          title: `${query} on Medium`,
-          link: 'https://medium.com/@profile',
-          displayLink: 'medium.com',
-          snippet: `Articles written by ${query} on Medium.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=9' }]
-          }
-        },
-        {
-          title: `${query} on Etsy`,
-          link: 'https://etsy.com/shop/profile',
-          displayLink: 'etsy.com',
-          snippet: `${query}'s products and shop on Etsy.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=10' }]
-          }
-        },
-        {
-          title: `${query} on Snapchat`,
-          link: 'https://snapchat.com/add/profile',
-          displayLink: 'snapchat.com',
-          snippet: `${query}'s Snapchat profile and stories.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=11' }]
-          }
-        },
-        {
-          title: `${query} on Twitch`,
-          link: 'https://twitch.tv/profile',
-          displayLink: 'twitch.tv',
-          snippet: `${query}'s live streams and channel on Twitch.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=12' }]
-          }
-        },
-        {
-          title: `${query} on DeviantArt`,
-          link: 'https://deviantart.com/profile',
-          displayLink: 'deviantart.com',
-          snippet: `${query}'s artwork and portfolio on DeviantArt.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=13' }]
-          }
-        },
-        {
-          title: `${query} on Behance`,
-          link: 'https://behance.net/profile',
-          displayLink: 'behance.net',
-          snippet: `${query}'s design portfolio on Behance.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=14' }]
-          }
-        },
-        {
-          title: `${query} on Dribbble`,
-          link: 'https://dribbble.com/profile',
-          displayLink: 'dribbble.com',
-          snippet: `${query}'s design work on Dribbble.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=15' }]
-          }
-        },
-        {
-          title: `${query} on Vimeo`,
-          link: 'https://vimeo.com/profile',
-          displayLink: 'vimeo.com',
-          snippet: `${query}'s videos on Vimeo.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=16' }]
-          }
-        },
-        {
-          title: `${query} on Spotify`,
-          link: 'https://open.spotify.com/artist/profile',
-          displayLink: 'open.spotify.com',
-          snippet: `${query}'s music on Spotify.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=17' }]
-          }
-        },
-        {
-          title: `${query} on SoundCloud`,
-          link: 'https://soundcloud.com/profile',
-          displayLink: 'soundcloud.com',
-          snippet: `${query}'s tracks on SoundCloud.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=18' }]
-          }
-        },
-        {
-          title: `${query} on Flickr`,
-          link: 'https://flickr.com/photos/profile',
-          displayLink: 'flickr.com',
-          snippet: `${query}'s photography on Flickr.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=19' }]
-          }
-        },
-        {
-          title: `${query} on GitHub`,
-          link: 'https://github.com/profile',
-          displayLink: 'github.com',
-          snippet: `${query}'s code repositories and contributions on GitHub.`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=20' }]
-          }
-        }
-      ]
-    };
+    if (!apiKey || !searchEngineId) {
+      console.log('No API keys found, falling back to mock data');
+      return generateMockSearchResults(query, searchParams);
+    }
     
-    console.log('Generated mock results:', mockResults.items.length);
-    return mockResults;
+    // Build search parameters
+    const params = new URLSearchParams({
+      key: apiKey,
+      cx: searchEngineId,
+      q: query,
+      num: '20' // Maximum results to return
+    });
+    
+    // Add advanced search parameters if provided
+    if (searchParams?.exactMatch) {
+      params.append('exactTerms', query);
+    }
+    
+    if (searchParams?.dateRestrict) {
+      params.append('dateRestrict', searchParams.dateRestrict);
+    }
+    
+    if (searchParams?.searchType) {
+      params.append('searchType', searchParams.searchType);
+    }
+    
+    if (searchParams?.contentFilter) {
+      params.append('safe', searchParams.contentFilter === 'high' ? 'active' : 'off');
+    }
+    
+    const response = await fetch(`https://www.googleapis.com/customsearch/v1?${params.toString()}`);
+    
+    if (!response.ok) {
+      throw new Error(`Google API error: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Google API response:', data);
+    
+    return data;
   } catch (error) {
     console.error('Google Search API error:', error);
     
-    // Return fallback results in case of error
-    return {
-      items: [
-        {
-          title: `${query} Profile`,
-          link: 'https://linkedin.com/in/profile',
-          displayLink: 'linkedin.com',
-          snippet: `Profile information for ${query}`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=1' }]
-          }
-        },
-        {
-          title: `${query} Social Media`,
-          link: 'https://twitter.com/profile',
-          displayLink: 'twitter.com',
-          snippet: `Social media activity for ${query}`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=2' }]
-          }
-        },
-        {
-          title: `${query} Online Presence`,
-          link: 'https://instagram.com/profile',
-          displayLink: 'instagram.com',
-          snippet: `Online presence related to ${query}`,
-          pagemap: {
-            cse_image: [{ src: 'https://picsum.photos/200/300?random=3' }]
-          }
-        }
-      ]
-    };
+    // If API call fails, fall back to mock data
+    return generateMockSearchResults(query, searchParams);
   }
 };
 
+// Fallback to generate mock results when API is not available
+function generateMockSearchResults(query: string, searchParams: any = {}) {
+  console.log('Generating mock search results for:', query, 'with params:', searchParams);
+  
+  // Use search parameters to alter the mock results
+  const exactMatch = searchParams?.exactMatch;
+  const dateRestrict = searchParams?.dateRestrict;
+  const contentFilter = searchParams?.contentFilter || 'medium';
+  
+  // Generate more relevant titles based on search params
+  const getTitlePrefix = () => {
+    if (exactMatch) return `Exact match: "${query}"`;
+    if (dateRestrict === 'last24h') return `Latest: ${query}`;
+    if (dateRestrict === 'lastWeek') return `Recent: ${query}`;
+    if (dateRestrict === 'lastMonth') return `This month: ${query}`;
+    return query;
+  };
+  
+  // Simulate different sources based on content filter
+  const getSources = () => {
+    const allSources = [
+      'linkedin.com', 'twitter.com', 'instagram.com', 'facebook.com', 
+      'youtube.com', 'tiktok.com', 'pinterest.com', 'reddit.com', 
+      'medium.com', 'etsy.com', 'snapchat.com', 'twitch.tv', 
+      'deviantart.com', 'behance.net', 'dribbble.com', 'vimeo.com', 
+      'spotify.com', 'soundcloud.com', 'flickr.com', 'github.com'
+    ];
+    
+    // With high content filter, exclude certain platforms
+    if (contentFilter === 'high') {
+      return allSources.filter(s => !['tiktok.com', 'reddit.com', 'twitch.tv'].includes(s));
+    }
+    
+    return allSources;
+  };
+  
+  // Generate mock results
+  const sources = getSources();
+  const titlePrefix = getTitlePrefix();
+  
+  const mockResults = {
+    items: sources.map((source, index) => {
+      // Determine relevance based on index and search params
+      const isHighlyRelevant = index < 5 || (exactMatch && index < 8);
+      const isSomewhatRelevant = index < 10 || (dateRestrict && index < 12);
+      
+      return {
+        title: `${titlePrefix} Profile on ${source.split('.')[0]}`,
+        link: `https://${source}/profile`,
+        displayLink: source,
+        snippet: `${isHighlyRelevant ? 'Highly relevant' : isSomewhatRelevant ? 'Relevant' : 'Possibly related'} profile page for ${query} with ${dateRestrict ? 'recent' : ''} activity.`,
+        pagemap: {
+          cse_image: [{ src: `https://picsum.photos/200/300?random=${index+1}` }]
+        },
+        relevanceScore: isHighlyRelevant ? 0.9 : isSomewhatRelevant ? 0.7 : 0.4
+      };
+    })
+  };
+  
+  console.log('Generated mock results:', mockResults.items.length);
+  return mockResults;
+}
+
 // Image Search function - separate from text search
-export const performImageSearch = async (imageUrl: string, userId: string) => {
+export const performImageSearch = async (imageUrl: string, userId: string, searchParams: any = {}) => {
   try {
-    console.log('Performing image search with URL:', imageUrl);
+    console.log('Performing image search with URL:', imageUrl, 'with params:', searchParams);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // In a real implementation, we would call a real reverse image search API here
+    // For now, we'll use mock data with some enhancements based on the search parameters
     
-    // Mock image search results
+    // Extract search parameters
+    const similarityThreshold = searchParams?.similarityThreshold || 0.6;
+    const maxResults = searchParams?.maxResults || 20;
+    const searchMode = searchParams?.searchMode || 'relaxed';
+    
+    // In a real implementation, these parameters would be passed to the API
+    console.log('Image search params:', { similarityThreshold, maxResults, searchMode });
+    
+    // Simulate different levels of match quality based on the parameters
+    const getMatchQuality = (index: number) => {
+      // Strict mode has fewer high-quality matches
+      if (searchMode === 'strict') {
+        if (index < 3) return { quality: 'high', score: 0.85 + (Math.random() * 0.15) };
+        if (index < 8) return { quality: 'medium', score: 0.65 + (Math.random() * 0.15) };
+        return { quality: 'low', score: 0.4 + (Math.random() * 0.2) };
+      } 
+      
+      // Relaxed mode has more matches in general
+      if (index < 6) return { quality: 'high', score: 0.8 + (Math.random() * 0.2) };
+      if (index < 12) return { quality: 'medium', score: 0.6 + (Math.random() * 0.2) };
+      return { quality: 'low', score: 0.3 + (Math.random() * 0.3) };
+    };
+    
+    // Generate mock results with enhanced relevance data
+    const sources = [
+      'linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 
+      'youtube.com', 'tiktok.com', 'pinterest.com', 'reddit.com', 
+      'tumblr.com', 'flickr.com', 'deviantart.com', 'behance.net', 
+      'dribbble.com', 'unsplash.com', 'pexels.com', 'shutterstock.com', 
+      'gettyimages.com', 'stock.adobe.com', 'istockphoto.com', 'medium.com'
+    ];
+    
+    const mockItems = sources.map((source, index) => {
+      const matchQuality = getMatchQuality(index);
+      
+      // Only include results that meet the similarity threshold
+      if (matchQuality.score < similarityThreshold) {
+        return null;
+      }
+      
+      return {
+        title: `${source.split('.')[0].charAt(0).toUpperCase() + source.split('.')[0].slice(1)} Match`,
+        link: `https://${source}/image-match-${index}`,
+        displayLink: source,
+        snippet: `${matchQuality.quality.charAt(0).toUpperCase() + matchQuality.quality.slice(1)} match (${Math.round(matchQuality.score * 100)}% similar) found on ${source}.`,
+        image: {
+          contextLink: `https://${source}`,
+          thumbnailLink: `https://picsum.photos/200/300?random=${index+1}`,
+        },
+        similarityScore: matchQuality.score,
+        matchQuality: matchQuality.quality
+      };
+    }).filter(Boolean); // Remove null entries (below threshold)
+    
+    // Sort by similarity score and limit to max results
+    const sortedResults = mockItems.sort((a, b) => b.similarityScore - a.similarityScore).slice(0, maxResults);
+    
     const mockResults = {
-      items: [
-        {
-          title: 'LinkedIn Profile Match',
-          link: 'https://linkedin.com/in/profile-match',
-          displayLink: 'linkedin.com',
-          snippet: 'Professional profile page with potential image match.',
-          image: {
-            contextLink: 'https://linkedin.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=1',
-          }
-        },
-        {
-          title: 'Facebook Profile Match',
-          link: 'https://facebook.com/profile-match',
-          displayLink: 'facebook.com',
-          snippet: 'Social media profile with potential image match.',
-          image: {
-            contextLink: 'https://facebook.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=2',
-          }
-        },
-        {
-          title: 'Instagram Post',
-          link: 'https://instagram.com/p/abcdef123456',
-          displayLink: 'instagram.com',
-          snippet: 'Image post with similar visual elements.',
-          image: {
-            contextLink: 'https://instagram.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=3',
-          }
-        },
-        {
-          title: 'Twitter Image Post',
-          link: 'https://twitter.com/user/status/123456789',
-          displayLink: 'twitter.com',
-          snippet: 'Tweet containing a similar image.',
-          image: {
-            contextLink: 'https://twitter.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=4',
-          }
-        },
-        {
-          title: 'YouTube Thumbnail Match',
-          link: 'https://youtube.com/watch?v=abc123def456',
-          displayLink: 'youtube.com',
-          snippet: 'Video with similar thumbnail image.',
-          image: {
-            contextLink: 'https://youtube.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=5',
-          }
-        },
-        {
-          title: 'TikTok Video Preview',
-          link: 'https://tiktok.com/@user/video/123456789',
-          displayLink: 'tiktok.com',
-          snippet: 'Short video with similar visual content.',
-          image: {
-            contextLink: 'https://tiktok.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=6',
-          }
-        },
-        {
-          title: 'Pinterest Pin',
-          link: 'https://pinterest.com/pin/123456789',
-          displayLink: 'pinterest.com',
-          snippet: 'Pinned image with similar content.',
-          image: {
-            contextLink: 'https://pinterest.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=7',
-          }
-        },
-        {
-          title: 'Medium Article Image',
-          link: 'https://medium.com/article-with-image',
-          displayLink: 'medium.com',
-          snippet: 'Article featuring a similar image.',
-          image: {
-            contextLink: 'https://medium.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=8',
-          }
-        },
-        {
-          title: 'Reddit Post',
-          link: 'https://reddit.com/r/subreddit/comments/123456',
-          displayLink: 'reddit.com',
-          snippet: 'Reddit post containing a similar image.',
-          image: {
-            contextLink: 'https://reddit.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=9',
-          }
-        },
-        {
-          title: 'Tumblr Blog Post',
-          link: 'https://tumblr.com/post/123456789',
-          displayLink: 'tumblr.com',
-          snippet: 'Blog post with a matching image.',
-          image: {
-            contextLink: 'https://tumblr.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=10',
-          }
-        },
-        {
-          title: 'Flickr Photo',
-          link: 'https://flickr.com/photos/user/123456789',
-          displayLink: 'flickr.com',
-          snippet: 'Photo with similar composition and elements.',
-          image: {
-            contextLink: 'https://flickr.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=11',
-          }
-        },
-        {
-          title: 'DeviantArt Artwork',
-          link: 'https://deviantart.com/user/art/123456789',
-          displayLink: 'deviantart.com',
-          snippet: 'Artwork with similar style and elements.',
-          image: {
-            contextLink: 'https://deviantart.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=12',
-          }
-        },
-        {
-          title: 'Behance Project',
-          link: 'https://behance.net/gallery/123456789/project-title',
-          displayLink: 'behance.net',
-          snippet: 'Design project featuring similar visuals.',
-          image: {
-            contextLink: 'https://behance.net',
-            thumbnailLink: 'https://picsum.photos/200/300?random=13',
-          }
-        },
-        {
-          title: 'Dribbble Shot',
-          link: 'https://dribbble.com/shots/123456789',
-          displayLink: 'dribbble.com',
-          snippet: 'Design shot with matching elements.',
-          image: {
-            contextLink: 'https://dribbble.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=14',
-          }
-        },
-        {
-          title: 'Unsplash Photo',
-          link: 'https://unsplash.com/photos/abcdef123456',
-          displayLink: 'unsplash.com',
-          snippet: 'Stock photo with similar composition.',
-          image: {
-            contextLink: 'https://unsplash.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=15',
-          }
-        },
-        {
-          title: 'Pexels Photo',
-          link: 'https://pexels.com/photos/123456789',
-          displayLink: 'pexels.com',
-          snippet: 'Free stock photo with similar content.',
-          image: {
-            contextLink: 'https://pexels.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=16',
-          }
-        },
-        {
-          title: 'Shutterstock Image',
-          link: 'https://shutterstock.com/image-photo/123456789',
-          displayLink: 'shutterstock.com',
-          snippet: 'Stock image with similar subject matter.',
-          image: {
-            contextLink: 'https://shutterstock.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=17',
-          }
-        },
-        {
-          title: 'Getty Images Photo',
-          link: 'https://gettyimages.com/detail/123456789',
-          displayLink: 'gettyimages.com',
-          snippet: 'Professional photo with matching elements.',
-          image: {
-            contextLink: 'https://gettyimages.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=18',
-          }
-        },
-        {
-          title: 'Adobe Stock Photo',
-          link: 'https://stock.adobe.com/123456789',
-          displayLink: 'stock.adobe.com',
-          snippet: 'Stock photo with similar composition and subject.',
-          image: {
-            contextLink: 'https://stock.adobe.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=19',
-          }
-        },
-        {
-          title: 'iStock Photo',
-          link: 'https://istockphoto.com/photo/123456789',
-          displayLink: 'istockphoto.com',
-          snippet: 'Stock image with similar visual elements.',
-          image: {
-            contextLink: 'https://istockphoto.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=20',
-          }
-        }
-      ]
+      items: sortedResults
     };
     
     console.log('Generated mock image results:', mockResults.items.length);
@@ -598,7 +339,7 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
     console.error('Image Search API error:', error);
     
     // Return fallback results if the API call fails
-    const fallbackResults = {
+    return {
       items: [
         {
           title: 'LinkedIn Profile Match',
@@ -608,7 +349,8 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
           image: {
             contextLink: 'https://linkedin.com',
             thumbnailLink: 'https://picsum.photos/200/300?random=1',
-          }
+          },
+          similarityScore: 0.85
         },
         {
           title: 'Facebook Profile Match',
@@ -618,7 +360,8 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
           image: {
             contextLink: 'https://facebook.com',
             thumbnailLink: 'https://picsum.photos/200/300?random=2',
-          }
+          },
+          similarityScore: 0.75
         },
         {
           title: 'Instagram Post',
@@ -628,12 +371,11 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
           image: {
             contextLink: 'https://instagram.com',
             thumbnailLink: 'https://picsum.photos/200/300?random=3',
-          }
+          },
+          similarityScore: 0.68
         }
       ]
     };
-    
-    return fallbackResults;
   }
 };
 

@@ -6,6 +6,7 @@ export type SearchQuery = {
   query_type: 'name' | 'hashtag' | 'image';
   image_url?: string;
   created_at?: string;
+  search_params?: any; // Advanced search parameters
 }
 
 export type SearchResult = {
@@ -18,6 +19,8 @@ export type SearchResult = {
   match_level: 'Low' | 'Medium' | 'High';
   found_at: string;
   created_at?: string;
+  similarity_score?: number; // For image searches
+  relevance_score?: number; // For text searches
 }
 
 export type UserSubscription = {

@@ -13,10 +13,11 @@ export function ContentSearchSection() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleNameSearch = async (query: string) => {
+  const handleNameSearch = async (query: string, params?: any) => {
     try {
       setIsLoading(true);
-      const searchId = await handleTextSearch(query, "name", user);
+      console.log("Name search with query:", query, "and params:", params);
+      const searchId = await handleTextSearch(query, "name", user, params);
       navigate(`/results?id=${searchId}`);
     } catch (error) {
       console.error("Name search error:", error);
@@ -30,10 +31,11 @@ export function ContentSearchSection() {
     }
   };
 
-  const handleHashtagSearch = async (query: string) => {
+  const handleHashtagSearch = async (query: string, params?: any) => {
     try {
       setIsLoading(true);
-      const searchId = await handleTextSearch(query, "hashtag", user);
+      console.log("Hashtag search with query:", query, "and params:", params);
+      const searchId = await handleTextSearch(query, "hashtag", user, params);
       navigate(`/results?id=${searchId}`);
     } catch (error) {
       console.error("Hashtag search error:", error);
@@ -47,7 +49,7 @@ export function ContentSearchSection() {
     }
   };
 
-  const handleImageSearchSubmit = async (file: File) => {
+  const handleImageSearchSubmit = async (file: File, params?: any) => {
     try {
       if (!user) {
         toast({
@@ -60,8 +62,8 @@ export function ContentSearchSection() {
       }
       
       setIsLoading(true);
-      // Fix: Only pass the file to handleImageSearch, user is handled inside the function
-      const searchId = await handleImageSearch(file, user);
+      console.log("Image search with file:", file.name, "and params:", params);
+      const searchId = await handleImageSearch(file, user, params);
       navigate(`/results?id=${searchId}`);
     } catch (error) {
       console.error("Image search error:", error);

@@ -108,8 +108,18 @@ export default function Results() {
     } else if (sortOption === "date-old") {
       filtered.sort((a, b) => new Date(a.found_at).getTime() - new Date(b.found_at).getTime());
     } else {
-      // Default "relevance" sort puts high matches first, then medium, then low
+      // Default "relevance" sort - prioritize results with relevance/similarity scores
       filtered.sort((a, b) => {
+        // First try to use the relevance/similarity scores
+        if (a.relevance_score !== undefined && b.relevance_score !== undefined) {
+          return b.relevance_score - a.relevance_score;
+        }
+        
+        if (a.similarity_score !== undefined && b.similarity_score !== undefined) {
+          return b.similarity_score - a.similarity_score;
+        }
+        
+        // Fallback to match level if no scores are available
         const levelScore = {
           'High': 3,
           'Medium': 2,
@@ -152,10 +162,17 @@ export default function Results() {
             setIsGeneratingResults(true);
             try {
               if (parsedData.query_type === "name" || parsedData.query_type === "hashtag") {
-                const textResults = await performGoogleSearch(parsedData.query_text, 'anonymous');
+                const textResults = await performGoogleSearch(parsedData.query_text, 'anonymous', parsedData.search_params);
                 if (textResults && textResults.items) {
                   const formattedResults = textResults.items.slice(0, 20).map((item: any, index: number) => {
-                    const matchLevel = index < 5 ? "High" as const : index < 10 ? "Medium" as const : "Low" as const;
+                    // Determine match level based on position or relevance score
+                    let matchLevel: 'High' | 'Medium' | 'Low';
+                    if (item.relevanceScore) {
+                      matchLevel = item.relevanceScore > 0.75 ? 'High' : item.relevanceScore > 0.5 ? 'Medium' : 'Low';
+                    } else {
+                      matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
+                    }
+                    
                     return {
                       search_id: searchId,
                       title: item.title || "Untitled Content",
@@ -163,7 +180,8 @@ export default function Results() {
                       thumbnail: item.pagemap?.cse_image?.[0]?.src || "",
                       source: item.displayLink || new URL(item.link || "#").hostname,
                       match_level: matchLevel,
-                      found_at: new Date().toISOString()
+                      found_at: new Date().toISOString(),
+                      relevance_score: item.relevanceScore || undefined
                     };
                   });
                   setResults(formattedResults);
@@ -197,14 +215,25 @@ export default function Results() {
             if (searchQueryData.query_type === "image" && searchQueryData.image_url) {
               // Perform image search
               console.log("Performing image search with URL:", searchQueryData.image_url);
-              const imageResults = await performImageSearch(searchQueryData.image_url, user?.id || 'anonymous');
+              const imageResults = await performImageSearch(
+                searchQueryData.image_url, 
+                user?.id || 'anonymous',
+                searchQueryData.search_params
+              );
               
               // Process and save the image search results
               if (imageResults && imageResults.items) {
                 console.log("Image search results:", imageResults.items.length);
                 const formattedResults: SearchResult[] = imageResults.items.slice(0, 20).map((item: any, index: number) => {
-                  // Determine match level based on position
-                  const matchLevel = index < 5 ? "High" as const : index < 10 ? "Medium" as const : "Low" as const;
+                  // Determine match level based on similarity score if available
+                  let matchLevel: 'High' | 'Medium' | 'Low';
+                  if (item.similarityScore) {
+                    matchLevel = item.similarityScore > 0.75 ? 'High' : item.similarityScore > 0.5 ? 'Medium' : 'Low';
+                  } else if (item.matchQuality) {
+                    matchLevel = item.matchQuality === 'high' ? 'High' : item.matchQuality === 'medium' ? 'Medium' : 'Low';
+                  } else {
+                    matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
+                  }
                   
                   return {
                     search_id: searchId,
@@ -213,7 +242,8 @@ export default function Results() {
                     thumbnail: item.image?.thumbnailLink || "",
                     source: item.displayLink || new URL(item.link || "#").hostname,
                     match_level: matchLevel,
-                    found_at: new Date().toISOString()
+                    found_at: new Date().toISOString(),
+                    similarity_score: item.similarityScore
                   };
                 });
                 
@@ -232,14 +262,23 @@ export default function Results() {
             } else if ((searchQueryData.query_type === "name" || searchQueryData.query_type === "hashtag") && searchQueryData.query_text) {
               // Perform text-based search
               console.log("Performing text search with query:", searchQueryData.query_text);
-              const textResults = await performGoogleSearch(searchQueryData.query_text, user?.id || 'anonymous');
+              const textResults = await performGoogleSearch(
+                searchQueryData.query_text, 
+                user?.id || 'anonymous',
+                searchQueryData.search_params
+              );
               
               // Process and save the text search results
               if (textResults && textResults.items) {
                 console.log("Text search results:", textResults.items.length);
                 const formattedResults: SearchResult[] = textResults.items.slice(0, 20).map((item: any, index: number) => {
-                  // Determine match level based on position
-                  const matchLevel = index < 5 ? "High" as const : index < 10 ? "Medium" as const : "Low" as const;
+                  // Determine match level based on relevance score if available
+                  let matchLevel: 'High' | 'Medium' | 'Low';
+                  if (item.relevanceScore) {
+                    matchLevel = item.relevanceScore > 0.75 ? 'High' : item.relevanceScore > 0.5 ? 'Medium' : 'Low';
+                  } else {
+                    matchLevel = index < 5 ? 'High' : index < 10 ? 'Medium' : 'Low';
+                  }
                   
                   return {
                     search_id: searchId,
@@ -248,7 +287,8 @@ export default function Results() {
                     thumbnail: item.pagemap?.cse_image?.[0]?.src || "",
                     source: item.displayLink || new URL(item.link || "#").hostname,
                     match_level: matchLevel,
-                    found_at: new Date().toISOString()
+                    found_at: new Date().toISOString(),
+                    relevance_score: item.relevanceScore
                   };
                 });
                 
@@ -456,6 +496,11 @@ export default function Results() {
                       {searchData?.created_at && (
                         <span className="ml-2 text-sm">
                           • Searched on {formatDate(searchData.created_at)}
+                        </span>
+                      )}
+                      {searchData?.search_params && Object.keys(searchData.search_params).length > 0 && (
+                        <span className="ml-2 text-sm">
+                          • Using advanced parameters
                         </span>
                       )}
                     </p>

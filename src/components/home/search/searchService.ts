@@ -7,12 +7,19 @@ import { User } from "@supabase/supabase-js";
 export async function handleTextSearch(
   query: string, 
   queryType: "name" | "hashtag", 
-  user: User | null
+  user: User | null,
+  searchParams?: {
+    exactMatch?: boolean;
+    dateRestrict?: string; // last24h, lastWeek, lastMonth, lastYear
+    searchType?: string; // web, image, news, etc.
+    contentFilter?: string; // high, medium, off
+  }
 ): Promise<string> {
   const searchData: SearchQuery = {
     user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Anonymous user ID
     query_type: queryType,
     query_text: query,
+    search_params: searchParams
   };
 
   return await processSearch(searchData, user);
@@ -21,7 +28,12 @@ export async function handleTextSearch(
 // Handles image-based searches
 export async function handleImageSearch(
   file: File, 
-  user: User | null
+  user: User | null,
+  searchParams?: {
+    similarityThreshold?: number; // 0.0 - 1.0
+    maxResults?: number;
+    searchMode?: "strict" | "relaxed";
+  }
 ): Promise<string> {
   if (!user) {
     throw new Error("User must be signed in for image search");
@@ -33,6 +45,7 @@ export async function handleImageSearch(
     user_id: user.id,
     query_type: "image",
     image_url: imageUrl,
+    search_params: searchParams
   };
 
   return await processSearch(searchData, user);
