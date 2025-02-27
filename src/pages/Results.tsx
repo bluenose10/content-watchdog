@@ -9,11 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { getSearchQueryById, getSearchResults, getUserSubscription, getFreePlan } from "@/lib/db-service";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { ArrowLeft, ArrowRight, Download, Filter, Image } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, Filter, Loader, Image } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Plan, SearchResult } from "@/lib/db-types";
+import { AnimatedGradientBorder } from "@/components/ui/animated-gradient-border";
 
 const Results = () => {
   const { toast } = useToast();
@@ -85,122 +86,152 @@ const Results = () => {
     [];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
       <Header />
       <main className="flex-grow pt-24 pb-16">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Link to="/dashboard">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ArrowLeft className="h-4 w-4" />
+          {/* Header Section with Glassmorphism */}
+          <Card className="mb-8 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md shadow-md">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Link to="/dashboard">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100/50 dark:text-blue-400 dark:hover:bg-blue-900/30">
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      Search Results
+                    </h1>
+                  </div>
+                  <p className="text-muted-foreground mt-1">
+                    Results for: <span className="font-medium text-blue-600 dark:text-blue-400">
+                      {searchQuery?.query_type === 'image' 
+                        ? 'Image Search' 
+                        : searchQuery?.query_text || '@johndoe'}
+                    </span>
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/50">
+                    <Filter className="mr-2 h-4 w-4 text-blue-500" />
+                    Filter
                   </Button>
-                </Link>
-                <h1 className="text-3xl font-bold tracking-tight">Search Results</h1>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={!isPremium}
+                    className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/50"
+                    onClick={() => {
+                      if (!isPremium) {
+                        handleUpgrade();
+                      } else {
+                        toast({
+                          title: "Downloading Results",
+                          description: "Your results are being prepared for download.",
+                        });
+                      }
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4 text-blue-500" />
+                    Export
+                  </Button>
+                </div>
               </div>
-              <p className="text-muted-foreground">
-                Results for: <span className="font-medium">
-                  {searchQuery?.query_type === 'image' 
-                    ? 'Image Search' 
-                    : searchQuery?.query_text || '@johndoe'}
-                </span>
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-              </Button>
-              <Button variant="outline" size="sm" disabled={!isPremium} onClick={() => {
-                if (!isPremium) {
-                  handleUpgrade();
-                } else {
-                  toast({
-                    title: "Downloading Results",
-                    description: "Your results are being prepared for download.",
-                  });
-                }
-              }}>
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Display uploaded image if this is an image search */}
           {searchQuery?.query_type === 'image' && searchQuery.image_url && (
-            <Card className="mb-8">
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row items-start gap-4">
-                  <div className="w-full md:w-48 h-48 relative rounded-lg overflow-hidden border border-border">
-                    <img 
-                      src={searchQuery.image_url}
-                      alt="Uploaded image"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/placeholder.svg';
-                      }}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium mb-2">Uploaded Image</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      We're searching the web for visually similar images and potential unauthorized uses.
-                    </p>
-                    {resultsLoading ? (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
-                        Searching...
-                      </div>
-                    ) : searchResults?.length ? (
-                      <p className="text-sm text-green-600">
-                        Found {searchResults.length} potential matches
+            <AnimatedGradientBorder 
+              gradientClasses="from-blue-500 via-purple-600 to-indigo-600" 
+              className="mb-8 p-0"
+            >
+              <Card className="border-0 shadow-none bg-transparent overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row items-start gap-6">
+                    <div className="w-full md:w-48 h-48 relative rounded-lg overflow-hidden border border-white/20 shadow-lg">
+                      <img 
+                        src={searchQuery.image_url}
+                        alt="Uploaded image"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold mb-2 text-blue-600 dark:text-blue-400">Uploaded Image</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                        We're searching the web for visually similar images and potential unauthorized uses.
                       </p>
-                    ) : (
-                      <p className="text-sm text-yellow-600">
-                        No matches found yet
-                      </p>
-                    )}
+                      {resultsLoading ? (
+                        <div className="flex items-center gap-2 text-blue-500 dark:text-blue-400">
+                          <Loader className="h-4 w-4 animate-spin" />
+                          <span>Searching across platforms...</span>
+                        </div>
+                      ) : searchResults?.length ? (
+                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                          Found {searchResults.length} potential matches
+                        </p>
+                      ) : (
+                        <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                          No matches found yet
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </AnimatedGradientBorder>
           )}
 
           {!isPremium && searchResults && searchResults.length > resultLimit && (
-            <Card className="mb-8 bg-secondary/30 border-primary/20">
-              <CardContent className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-medium mb-1">Free Plan</h3>
-                  <p className="text-sm text-muted-foreground">
-                    You're viewing {resultLimit} of {searchResults?.length || 0} total results. 
-                    The first {FREE_PREVIEW_COUNT} results are clickable as a preview. 
-                    Upgrade to see all matches and access premium features.
-                  </p>
-                </div>
-                <Button asChild className="button-animation">
-                  <Link to="/#pricing">Upgrade Now</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <AnimatedGradientBorder 
+              gradientClasses="from-purple-600 via-blue-600 to-indigo-700" 
+              className="mb-8 p-0"
+            >
+              <Card className="mb-0 border-0 shadow-none overflow-hidden bg-transparent backdrop-blur-sm">
+                <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold mb-1 text-gradient bg-gradient-to-r from-blue-600 to-purple-600">Free Plan</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      You're viewing {resultLimit} of {searchResults?.length || 0} total results. 
+                      The first {FREE_PREVIEW_COUNT} results are clickable as a preview. 
+                      Upgrade to see all matches and access premium features.
+                    </p>
+                  </div>
+                  <Button asChild className="button-animation bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-md">
+                    <Link to="/#pricing">Upgrade Now</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </AnimatedGradientBorder>
           )}
 
           {resultsLoading ? (
-            <div className="text-center py-12">
-              <p>Loading search results...</p>
+            <div className="flex flex-col items-center justify-center py-16 gap-4">
+              <div className="w-16 h-16 relative">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-200 dark:border-blue-900 opacity-25"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-t-blue-600 dark:border-t-blue-400 animate-spin"></div>
+              </div>
+              <p className="text-blue-600 dark:text-blue-400 font-medium">Searching across platforms...</p>
             </div>
           ) : searchResults?.length === 0 ? (
-            <div className="text-center py-12">
-              <h2 className="text-xl font-semibold mb-2">No results found</h2>
-              <p className="text-muted-foreground mb-6">
-                We couldn't find any matches for your search. Try a different query or search type.
-              </p>
-              <Button asChild>
-                <Link to="/search">Try Another Search</Link>
-              </Button>
-            </div>
+            <Card className="text-center py-12 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm shadow-md">
+              <div className="max-w-md mx-auto px-6">
+                <Image className="h-16 w-16 mx-auto mb-4 text-blue-500 opacity-50" />
+                <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">No results found</h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  We couldn't find any matches for your search. Try a different query or search type.
+                </p>
+                <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm">
+                  <Link to="/search">Try Another Search</Link>
+                </Button>
+              </div>
+            </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {visibleResults.map((result: SearchResult, index: number) => (
@@ -224,16 +255,21 @@ const Results = () => {
           )}
 
           {!isPremium && searchResults && searchResults.length > resultLimit && (
-            <div className="mt-8 text-center">
-              <p className="text-muted-foreground mb-4">
+            <div className="mt-12 text-center">
+              <p className="text-gray-500 mb-4 dark:text-gray-400">
                 {visibleResults.length} of {searchResults.length} results shown
               </p>
-              <Button asChild className="button-animation">
-                <Link to="/#pricing">
-                  Upgrade to See All Results
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+              <AnimatedGradientBorder 
+                gradientClasses="from-blue-500 via-purple-600 to-indigo-600"
+                containerClassName="inline-block"
+              >
+                <Button asChild className="bg-transparent hover:bg-white/10 border-0 shadow-none">
+                  <Link to="/#pricing" className="px-6 py-2">
+                    <span className="font-medium mr-2">Upgrade to See All Results</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </AnimatedGradientBorder>
             </div>
           )}
         </div>
