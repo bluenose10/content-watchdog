@@ -67,19 +67,8 @@ export function CheckoutButton({
       console.log('Return URL:', returnUrl);
       
       try {
-        // Get the user's session token
-        const accessToken = session.access_token;
-        if (!accessToken) {
-          throw new Error("No access token available");
-        }
-        
-        console.log('Calling create-checkout with planId:', planId);
-        
-        // Call the Supabase Edge Function with proper authentication
+        // Call the Supabase Edge Function
         const { data, error } = await supabase.functions.invoke('create-checkout', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          },
           body: { 
             planId, 
             priceId: selectedPlan.stripePriceId,
@@ -107,8 +96,17 @@ export function CheckoutButton({
         
         console.log('Redirecting to:', data.url);
         
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
+        // Redirect to Stripe Checkout (simulated in this version)
+        // In a real implementation, this would go to Stripe
+        setTimeout(() => {
+          // For demo purposes, let's just navigate to the success page
+          navigate('/success', { 
+            state: { 
+              demo: true,
+              sessionId: data.sessionId 
+            } 
+          });
+        }, 1500);
       } catch (functionError) {
         console.error('Function call error:', functionError);
         throw new Error(`Checkout error: ${functionError.message}`);
