@@ -115,6 +115,14 @@ export function SearchResultCard({
             Free Preview
           </Badge>
         )}
+        {!isPremium && !isFreePreview && (
+          <Badge 
+            className="absolute left-2 top-2 bg-purple-500 text-white"
+            onClick={onUpgrade}
+          >
+            Upgrade to View
+          </Badge>
+        )}
       </div>
       <CardHeader className="pb-2">
         <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
