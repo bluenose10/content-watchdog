@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 
 interface CheckoutButtonProps {
   planId: string;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "blue";
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "blue" | "purple";
   className?: string;
   children?: React.ReactNode;
 }
@@ -22,31 +22,27 @@ export function CheckoutButton({
   const [error, setError] = useState<string | null>(null);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
 
-  const handleCheckout = async () => {
+  // A simplified checkout handler that minimizes potential points of failure
+  const handleCheckout = () => {
     try {
       setIsLoading(true);
-      setError(null);
       
-      // Display a toast notification to inform the user
+      // Show toast first for immediate feedback
       toast({
-        title: "Redirecting to checkout",
-        description: "Please wait while we prepare your checkout experience.",
+        title: "Starting checkout process",
+        description: "Please wait while we prepare your checkout page.",
       });
       
-      // Manually build the URL to the Supabase function
-      // This is a fallback approach to avoid issues with the Supabase client
-      const url = "/api/checkout?planId=" + encodeURIComponent(planId);
-      
-      // Navigate to the checkout URL
-      window.location.href = url;
+      // Simple timeout to allow the toast to be displayed
+      setTimeout(() => {
+        // Direct navigation to checkout URL
+        window.location.href = `/api/checkout?planId=${encodeURIComponent(planId)}&timestamp=${Date.now()}`;
+      }, 100);
       
     } catch (error) {
-      console.error('Error during checkout process:', error);
+      console.error('Error initiating checkout:', error);
       
-      // Create a descriptive error message
-      const errorMessage = "Failed to start checkout process. Please try again later.";
-      
-      setError(errorMessage);
+      setError("Could not initiate checkout process. Please try again.");
       setShowErrorDialog(true);
       
       toast({
@@ -54,7 +50,7 @@ export function CheckoutButton({
         description: "There was a problem starting the checkout process.",
         variant: "destructive",
       });
-    } finally {
+      
       setIsLoading(false);
     }
   };
