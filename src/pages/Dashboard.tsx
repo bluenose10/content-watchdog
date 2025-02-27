@@ -1,12 +1,18 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { ArrowRight, BarChart, FileClock, Image, Search, Shield, Upload, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  useProtectedRoute();
+  
+  const username = user?.email ? user.email.split('@')[0] : '';
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -16,7 +22,7 @@ const Dashboard = () => {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
               <p className="text-muted-foreground">
-                Welcome back, John! Monitor and protect your content.
+                Welcome back, {username}! Monitor and protect your content.
               </p>
             </div>
             <Button asChild>
