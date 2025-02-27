@@ -61,7 +61,7 @@ export const PRICING_PLANS = [
     id: "pro",
     name: "Professional",
     description: "Advanced protection for creators",
-    price: 29,
+    price: 49,
     interval: "month",
     features: [
       "Unlimited searches",
@@ -78,7 +78,7 @@ export const PRICING_PLANS = [
     id: "enterprise",
     name: "Enterprise",
     description: "Complete protection for businesses",
-    price: 99,
+    price: 149,
     interval: "month",
     features: [
       "All Pro features",
