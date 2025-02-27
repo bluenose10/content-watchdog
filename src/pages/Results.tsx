@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getSearchQueryById, getSearchResults, getUserSubscription, getFreePlan } from "@/lib/db-service";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { ArrowLeft, ArrowRight, Download, Filter } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, Filter, Image } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -58,21 +58,16 @@ const Results = () => {
   // Determine user's plan limits and premium status
   useEffect(() => {
     if (subscription) {
-      // If subscription exists and is active, use the plan's result limit
       const isActive = subscription.status === 'active';
       setIsPremium(isActive);
       
-      // If plans data is available, set result limit
       if (subscription.plans) {
         const planLimit = subscription.plans.result_limit;
-        // -1 means unlimited
         setResultLimit(planLimit === -1 ? 9999 : planLimit);
       } else {
-        // Default to free plan limit if plan details not available
         setResultLimit(freePlan?.result_limit || 5);
       }
     } else if (freePlan) {
-      // If no subscription, use free plan limit
       setResultLimit(freePlan.result_limit);
       setIsPremium(false);
     }
@@ -85,11 +80,10 @@ const Results = () => {
     });
   };
   
-  // For non-premium users, show only up to the result limit, but make the first FREE_PREVIEW_COUNT clickable
   const visibleResults = searchResults ? 
     (isPremium ? searchResults : searchResults.slice(0, resultLimit)) : 
     [];
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -134,6 +128,47 @@ const Results = () => {
             </div>
           </div>
 
+          {/* Display uploaded image if this is an image search */}
+          {searchQuery?.query_type === 'image' && searchQuery.image_url && (
+            <Card className="mb-8">
+              <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row items-start gap-4">
+                  <div className="w-full md:w-48 h-48 relative rounded-lg overflow-hidden border border-border">
+                    <img 
+                      src={searchQuery.image_url}
+                      alt="Uploaded image"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium mb-2">Uploaded Image</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      We're searching the web for visually similar images and potential unauthorized uses.
+                    </p>
+                    {resultsLoading ? (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
+                        Searching...
+                      </div>
+                    ) : searchResults?.length ? (
+                      <p className="text-sm text-green-600">
+                        Found {searchResults.length} potential matches
+                      </p>
+                    ) : (
+                      <p className="text-sm text-yellow-600">
+                        No matches found yet
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {!isPremium && searchResults && searchResults.length > resultLimit && (
             <Card className="mb-8 bg-secondary/30 border-primary/20">
               <CardContent className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -163,11 +198,11 @@ const Results = () => {
                 We couldn't find any matches for your search. Try a different query or search type.
               </p>
               <Button asChild>
-                <Link to="/">Try Another Search</Link>
+                <Link to="/search">Try Another Search</Link>
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {visibleResults.map((result: SearchResult, index: number) => (
                 <SearchResultCard
                   key={result.id}
@@ -181,7 +216,6 @@ const Results = () => {
                     date: result.found_at
                   }}
                   isPremium={isPremium}
-                  // For non-premium users, the first FREE_PREVIEW_COUNT results are clickable previews
                   isFreePreview={!isPremium && index < FREE_PREVIEW_COUNT}
                   onUpgrade={handleUpgrade}
                 />
@@ -207,6 +241,6 @@ const Results = () => {
       <Footer />
     </div>
   );
-};
+}
 
 export default Results;
