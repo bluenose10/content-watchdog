@@ -54,9 +54,9 @@ export default function Results() {
   const getResultLimit = () => {
     switch (accessLevel) {
       case AccessLevel.PREMIUM:
-        return 20; // Pro users can see up to 20 results
+        return 100; // Pro users can see all results
       case AccessLevel.BASIC:
-        return 2;  // Registered users can see 2 results
+        return 5;  // Registered users can see 5 results
       case AccessLevel.ANONYMOUS:
       default:
         return 0;  // Anonymous users see 0 unlocked results (all blurred)
@@ -80,7 +80,7 @@ export default function Results() {
         setError(null);
 
         // Handle anonymous searches from session storage
-        if (!user && searchId.startsWith('temp_')) {
+        if (searchId.startsWith('temp_')) {
           const tempSearchData = sessionStorage.getItem(`temp_search_${searchId}`);
           if (tempSearchData) {
             const parsedData = JSON.parse(tempSearchData);
@@ -92,8 +92,8 @@ export default function Results() {
               if (parsedData.query_type === "name" || parsedData.query_type === "hashtag") {
                 const textResults = await performGoogleSearch(parsedData.query_text, 'anonymous');
                 if (textResults && textResults.items) {
-                  const formattedResults = textResults.items.map((item: any, index: number) => {
-                    const matchLevel = index < 2 ? "High" as const : index < 4 ? "Medium" as const : "Low" as const;
+                  const formattedResults = textResults.items.slice(0, 20).map((item: any, index: number) => {
+                    const matchLevel = index < 5 ? "High" as const : index < 10 ? "Medium" as const : "Low" as const;
                     return {
                       search_id: searchId,
                       title: item.title || "Untitled Content",
@@ -140,9 +140,9 @@ export default function Results() {
               // Process and save the image search results
               if (imageResults && imageResults.items) {
                 console.log("Image search results:", imageResults.items.length);
-                const formattedResults: SearchResult[] = imageResults.items.map((item: any, index: number) => {
+                const formattedResults: SearchResult[] = imageResults.items.slice(0, 20).map((item: any, index: number) => {
                   // Determine match level based on position
-                  const matchLevel = index < 2 ? "High" as const : index < 4 ? "Medium" as const : "Low" as const;
+                  const matchLevel = index < 5 ? "High" as const : index < 10 ? "Medium" as const : "Low" as const;
                   
                   return {
                     search_id: searchId,
@@ -175,9 +175,9 @@ export default function Results() {
               // Process and save the text search results
               if (textResults && textResults.items) {
                 console.log("Text search results:", textResults.items.length);
-                const formattedResults: SearchResult[] = textResults.items.map((item: any, index: number) => {
+                const formattedResults: SearchResult[] = textResults.items.slice(0, 20).map((item: any, index: number) => {
                   // Determine match level based on position
-                  const matchLevel = index < 2 ? "High" as const : index < 4 ? "Medium" as const : "Low" as const;
+                  const matchLevel = index < 5 ? "High" as const : index < 10 ? "Medium" as const : "Low" as const;
                   
                   return {
                     search_id: searchId,
@@ -411,7 +411,7 @@ export default function Results() {
                       <LockIcon className="h-4 w-4 text-purple-500" />
                       <AlertTitle className="text-purple-700 dark:text-purple-300">Limited Access</AlertTitle>
                       <AlertDescription className="text-purple-600 dark:text-purple-400">
-                        <p>Sign in to see 2 search results or upgrade to Pro for full access.</p>
+                        <p>Sign in to see 5 search results or upgrade to Pro for full access.</p>
                         <div className="flex gap-2 mt-2">
                           <Button 
                             size="sm" 

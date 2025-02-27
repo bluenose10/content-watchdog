@@ -199,6 +199,141 @@ export const performGoogleSearch = async (query: string, userId: string) => {
           pagemap: {
             cse_image: [{ src: 'https://picsum.photos/200/300?random=5' }]
           }
+        },
+        {
+          title: `${query} on Pinterest`,
+          link: 'https://pinterest.com/profile',
+          displayLink: 'pinterest.com',
+          snippet: `${query}'s Pinterest boards and pins.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=6' }]
+          }
+        },
+        {
+          title: `${query} on TikTok`,
+          link: 'https://tiktok.com/@profile',
+          displayLink: 'tiktok.com',
+          snippet: `${query}'s TikTok videos and profile information.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=7' }]
+          }
+        },
+        {
+          title: `${query} on Reddit`,
+          link: 'https://reddit.com/user/profile',
+          displayLink: 'reddit.com',
+          snippet: `${query}'s Reddit posts and comments.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=8' }]
+          }
+        },
+        {
+          title: `${query} on Medium`,
+          link: 'https://medium.com/@profile',
+          displayLink: 'medium.com',
+          snippet: `Articles written by ${query} on Medium.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=9' }]
+          }
+        },
+        {
+          title: `${query} on Etsy`,
+          link: 'https://etsy.com/shop/profile',
+          displayLink: 'etsy.com',
+          snippet: `${query}'s products and shop on Etsy.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=10' }]
+          }
+        },
+        {
+          title: `${query} on Snapchat`,
+          link: 'https://snapchat.com/add/profile',
+          displayLink: 'snapchat.com',
+          snippet: `${query}'s Snapchat profile and stories.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=11' }]
+          }
+        },
+        {
+          title: `${query} on Twitch`,
+          link: 'https://twitch.tv/profile',
+          displayLink: 'twitch.tv',
+          snippet: `${query}'s live streams and channel on Twitch.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=12' }]
+          }
+        },
+        {
+          title: `${query} on DeviantArt`,
+          link: 'https://deviantart.com/profile',
+          displayLink: 'deviantart.com',
+          snippet: `${query}'s artwork and portfolio on DeviantArt.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=13' }]
+          }
+        },
+        {
+          title: `${query} on Behance`,
+          link: 'https://behance.net/profile',
+          displayLink: 'behance.net',
+          snippet: `${query}'s design portfolio on Behance.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=14' }]
+          }
+        },
+        {
+          title: `${query} on Dribbble`,
+          link: 'https://dribbble.com/profile',
+          displayLink: 'dribbble.com',
+          snippet: `${query}'s design work on Dribbble.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=15' }]
+          }
+        },
+        {
+          title: `${query} on Vimeo`,
+          link: 'https://vimeo.com/profile',
+          displayLink: 'vimeo.com',
+          snippet: `${query}'s videos on Vimeo.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=16' }]
+          }
+        },
+        {
+          title: `${query} on Spotify`,
+          link: 'https://open.spotify.com/artist/profile',
+          displayLink: 'open.spotify.com',
+          snippet: `${query}'s music on Spotify.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=17' }]
+          }
+        },
+        {
+          title: `${query} on SoundCloud`,
+          link: 'https://soundcloud.com/profile',
+          displayLink: 'soundcloud.com',
+          snippet: `${query}'s tracks on SoundCloud.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=18' }]
+          }
+        },
+        {
+          title: `${query} on Flickr`,
+          link: 'https://flickr.com/photos/profile',
+          displayLink: 'flickr.com',
+          snippet: `${query}'s photography on Flickr.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=19' }]
+          }
+        },
+        {
+          title: `${query} on GitHub`,
+          link: 'https://github.com/profile',
+          displayLink: 'github.com',
+          snippet: `${query}'s code repositories and contributions on GitHub.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=20' }]
+          }
         }
       ]
     };
@@ -312,6 +447,146 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
           image: {
             contextLink: 'https://tiktok.com',
             thumbnailLink: 'https://picsum.photos/200/300?random=6',
+          }
+        },
+        {
+          title: 'Pinterest Pin',
+          link: 'https://pinterest.com/pin/123456789',
+          displayLink: 'pinterest.com',
+          snippet: 'Pinned image with similar content.',
+          image: {
+            contextLink: 'https://pinterest.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=7',
+          }
+        },
+        {
+          title: 'Medium Article Image',
+          link: 'https://medium.com/article-with-image',
+          displayLink: 'medium.com',
+          snippet: 'Article featuring a similar image.',
+          image: {
+            contextLink: 'https://medium.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=8',
+          }
+        },
+        {
+          title: 'Reddit Post',
+          link: 'https://reddit.com/r/subreddit/comments/123456',
+          displayLink: 'reddit.com',
+          snippet: 'Reddit post containing a similar image.',
+          image: {
+            contextLink: 'https://reddit.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=9',
+          }
+        },
+        {
+          title: 'Tumblr Blog Post',
+          link: 'https://tumblr.com/post/123456789',
+          displayLink: 'tumblr.com',
+          snippet: 'Blog post with a matching image.',
+          image: {
+            contextLink: 'https://tumblr.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=10',
+          }
+        },
+        {
+          title: 'Flickr Photo',
+          link: 'https://flickr.com/photos/user/123456789',
+          displayLink: 'flickr.com',
+          snippet: 'Photo with similar composition and elements.',
+          image: {
+            contextLink: 'https://flickr.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=11',
+          }
+        },
+        {
+          title: 'DeviantArt Artwork',
+          link: 'https://deviantart.com/user/art/123456789',
+          displayLink: 'deviantart.com',
+          snippet: 'Artwork with similar style and elements.',
+          image: {
+            contextLink: 'https://deviantart.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=12',
+          }
+        },
+        {
+          title: 'Behance Project',
+          link: 'https://behance.net/gallery/123456789/project-title',
+          displayLink: 'behance.net',
+          snippet: 'Design project featuring similar visuals.',
+          image: {
+            contextLink: 'https://behance.net',
+            thumbnailLink: 'https://picsum.photos/200/300?random=13',
+          }
+        },
+        {
+          title: 'Dribbble Shot',
+          link: 'https://dribbble.com/shots/123456789',
+          displayLink: 'dribbble.com',
+          snippet: 'Design shot with matching elements.',
+          image: {
+            contextLink: 'https://dribbble.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=14',
+          }
+        },
+        {
+          title: 'Unsplash Photo',
+          link: 'https://unsplash.com/photos/abcdef123456',
+          displayLink: 'unsplash.com',
+          snippet: 'Stock photo with similar composition.',
+          image: {
+            contextLink: 'https://unsplash.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=15',
+          }
+        },
+        {
+          title: 'Pexels Photo',
+          link: 'https://pexels.com/photos/123456789',
+          displayLink: 'pexels.com',
+          snippet: 'Free stock photo with similar content.',
+          image: {
+            contextLink: 'https://pexels.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=16',
+          }
+        },
+        {
+          title: 'Shutterstock Image',
+          link: 'https://shutterstock.com/image-photo/123456789',
+          displayLink: 'shutterstock.com',
+          snippet: 'Stock image with similar subject matter.',
+          image: {
+            contextLink: 'https://shutterstock.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=17',
+          }
+        },
+        {
+          title: 'Getty Images Photo',
+          link: 'https://gettyimages.com/detail/123456789',
+          displayLink: 'gettyimages.com',
+          snippet: 'Professional photo with matching elements.',
+          image: {
+            contextLink: 'https://gettyimages.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=18',
+          }
+        },
+        {
+          title: 'Adobe Stock Photo',
+          link: 'https://stock.adobe.com/123456789',
+          displayLink: 'stock.adobe.com',
+          snippet: 'Stock photo with similar composition and subject.',
+          image: {
+            contextLink: 'https://stock.adobe.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=19',
+          }
+        },
+        {
+          title: 'iStock Photo',
+          link: 'https://istockphoto.com/photo/123456789',
+          displayLink: 'istockphoto.com',
+          snippet: 'Stock image with similar visual elements.',
+          image: {
+            contextLink: 'https://istockphoto.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=20',
           }
         }
       ]
