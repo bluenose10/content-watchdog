@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
@@ -82,8 +81,8 @@ export function SearchResultCard({
         color: 'text-blue-600',
         bgColor: 'bg-white',
         name: 'Facebook',
-        iconUrl: '/lovable-uploads/d78c1f85-fa38-4209-bef7-ac0f1eebb85f.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+        iconUrl: '/lovable-uploads/1e633b91-cda1-46a7-a5ce-9eb89b5e0b17.png',
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -91,8 +90,8 @@ export function SearchResultCard({
         color: 'text-sky-500',
         bgColor: 'bg-white',
         name: 'Twitter/X',
-        iconUrl: '/lovable-uploads/8c8c70f8-5aba-4fb4-8261-cc6c9c7a4ded.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+        iconUrl: '/lovable-uploads/2193c223-55d1-4caf-912c-7f2e8cd5e2eb.png',
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('instagram')) {
       return {
@@ -100,8 +99,8 @@ export function SearchResultCard({
         color: 'text-pink-600',
         bgColor: 'bg-white',
         name: 'Instagram',
-        iconUrl: '/lovable-uploads/783c1b40-9df2-4feb-9e47-35223bc17dfc.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1611262588024-d12430b98920?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+        iconUrl: '/lovable-uploads/57f9e9ad-8d7f-419b-a30e-b8d923ab1b04.png',
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -110,7 +109,7 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'LinkedIn',
         iconUrl: '/lovable-uploads/140db42c-ae9c-4fff-a819-0da1ec55a215.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1611944212129-29977ae1398c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -119,7 +118,7 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'YouTube',
         iconUrl: '/lovable-uploads/51a74172-ad82-43e0-a592-9cc36ee403d2.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('tiktok')) {
       return {
@@ -127,8 +126,8 @@ export function SearchResultCard({
         color: 'text-black dark:text-white',
         bgColor: 'bg-white',
         name: 'TikTok',
-        iconUrl: null,
-        backgroundImage: 'https://images.unsplash.com/photo-1611605698323-b1e99cfd37ea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+        iconUrl: '/lovable-uploads/7ee0ef56-c0e2-42fd-a5e5-9b8b4eb9aee0.png',
+        backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else {
       return {
