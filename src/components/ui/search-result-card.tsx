@@ -83,7 +83,7 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'Facebook',
         iconUrl: '/lovable-uploads/1e633b91-cda1-46a7-a5ce-9eb89b5e0b17.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&h=300'
+        backgroundImage: '/lovable-uploads/2e32e60a-c5d3-4633-8478-b1bf97f4be7d.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -254,6 +254,9 @@ export function SearchResultCard({
     }
   };
   
+  // For Facebook, we always want to show the custom background image
+  const shouldShowFacebookBackground = cleanSource.toLowerCase().includes('facebook');
+  
   return (
     <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80`}>
       <div className="relative">
@@ -261,7 +264,15 @@ export function SearchResultCard({
           className="overflow-hidden flex items-center justify-center bg-white"
           style={{ height: "200px" }}
         >
-          {isValidThumbnail() ? (
+          {shouldShowFacebookBackground ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img 
+                src={socialMedia.backgroundImage} 
+                alt="Facebook content"
+                className="w-auto h-auto max-w-[70%] max-h-[70%] object-contain"
+              />
+            </div>
+          ) : isValidThumbnail() ? (
             <img 
               src={thumbnail} 
               alt={cleanTitle}
