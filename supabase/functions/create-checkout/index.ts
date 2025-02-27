@@ -2,6 +2,7 @@
 // Follow Deno and Oak best practices
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.31.0";
+import Stripe from "https://esm.sh/stripe@12.0.0";
 
 // Define CORS headers
 const corsHeaders = {
@@ -24,7 +25,7 @@ serve(async (req) => {
     console.log("Request parameters:", { planId, priceId, returnUrl });
     
     // Validate inputs
-    if (!planId || !returnUrl) {
+    if (!planId || !returnUrl || !priceId) {
       console.error("Missing required parameters");
       return new Response(
         JSON.stringify({ error: 'Missing required parameters' }),
@@ -35,22 +36,62 @@ serve(async (req) => {
       );
     }
     
-    // For this demo version, we'll just return a mock checkout session
-    // In a real implementation, you would integrate with Stripe here
-    const mockSessionId = `cs_test_${Math.random().toString(36).substring(2, 15)}`;
+    // Initialize Stripe
+    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!STRIPE_SECRET_KEY) {
+      console.error("STRIPE_SECRET_KEY is not set");
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
+    }
     
-    console.log("Created mock session:", mockSessionId);
+    // Create Stripe client
+    const stripe = new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: '2023-10-16', // Use the latest API version
+    });
     
-    return new Response(
-      JSON.stringify({ 
-        url: "https://checkout.stripe.com/mock-checkout-session",
-        sessionId: mockSessionId
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-        status: 200 
-      }
-    );
+    try {
+      // Create checkout session
+      console.log("Creating Stripe checkout session with price ID:", priceId);
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+        success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${new URL(returnUrl).origin}/canceled`,
+      });
+      
+      console.log("Checkout session created:", session.id);
+      return new Response(
+        JSON.stringify({
+          url: session.url,
+          sessionId: session.id
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 200 
+        }
+      );
+    } catch (stripeError) {
+      console.error("Stripe error:", stripeError);
+      return new Response(
+        JSON.stringify({ error: `Stripe error: ${stripeError.message}` }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 400 
+        }
+      );
+    }
+    
   } catch (error) {
     console.error("Unhandled error:", error);
     return new Response(

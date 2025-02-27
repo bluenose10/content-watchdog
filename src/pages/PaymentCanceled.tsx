@@ -23,10 +23,10 @@ export default function PaymentCanceled() {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => navigate("/")} 
+              onClick={() => navigate("/#pricing")} 
               className="w-full"
             >
-              Go to Home
+              View Plans
             </Button>
           </div>
         </div>

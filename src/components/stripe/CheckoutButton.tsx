@@ -72,7 +72,8 @@ export function CheckoutButton({
           body: { 
             planId, 
             priceId: selectedPlan.stripePriceId,
-            returnUrl 
+            returnUrl,
+            userId: user.id, // Add user ID as reference
           }
         });
         
@@ -96,12 +97,8 @@ export function CheckoutButton({
         
         console.log('Redirecting to:', data.url);
         
-        // For demo purposes, we'll redirect to the success page with the session ID as a URL parameter
-        // In a real implementation, this would go to Stripe's checkout page
-        setTimeout(() => {
-          // Navigate to success page with session ID in URL query parameter
-          window.location.href = `/success?session_id=${data.sessionId}`;
-        }, 1500);
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
       } catch (functionError) {
         console.error('Function call error:', functionError);
         throw new Error(`Checkout error: ${functionError.message}`);
