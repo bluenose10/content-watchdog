@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "./badge";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface SearchResultCardProps {
   result: {
@@ -28,68 +28,10 @@ export function SearchResultCard({
   onUpgrade,
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
-  const [imageSrc, setImageSrc] = useState(thumbnail || '/placeholder.svg');
-  const [imageError, setImageError] = useState(false);
   
-  // When the component mounts or the URL changes, try to find a better image
-  useEffect(() => {
-    // Skip if we already have a thumbnail or if there was a previous error
-    if (thumbnail || imageError) return;
-    
-    const tryFindBetterImage = async () => {
-      try {
-        // Extract domain from URL
-        const urlObj = new URL(url);
-        const domain = urlObj.hostname;
-        
-        // Create an array of potential image URLs to try
-        const potentialImages = [
-          `https://${domain}/image.jpg`,
-          `https://${domain}/images/logo.png`,
-          `https://${domain}/wp-content/uploads/logo.png`,
-          `https://${domain}/assets/images/banner.jpg`,
-          `https://${domain}/logo.png`,
-          // Meta images often are better quality than favicons
-          `https://${domain}/wp-content/uploads/og-image.jpg`,
-          `https://${domain}/assets/img/og-image.jpg`,
-          // Try the favicon last as it's usually small
-          `https://${domain}/favicon.ico`
-        ];
-        
-        // Try each image URL until one works
-        for (const imgUrl of potentialImages) {
-          try {
-            const img = new Image();
-            img.src = imgUrl;
-            
-            // Use a promise to wait for the image to load or fail
-            await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              // Set a timeout in case the image takes too long
-              setTimeout(reject, 1000);
-            });
-            
-            // If we get here, the image loaded successfully
-            setImageSrc(imgUrl);
-            return;
-          } catch (err) {
-            // Image failed to load, try the next one
-            continue;
-          }
-        }
-        
-        // If all attempts fail, use placeholder
-        throw new Error("No images found");
-      } catch (err) {
-        // If there's any error in the process, use placeholder
-        setImageError(true);
-        setImageSrc('/placeholder.svg');
-      }
-    };
-    
-    tryFindBetterImage();
-  }, [url, thumbnail, imageError]);
+  // Use a default content image for all results
+  // If thumbnail is explicitly provided, use that instead
+  const imageSrc = thumbnail || 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=400&q=80';
   
   // Truncate long titles
   const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
@@ -116,10 +58,9 @@ export function SearchResultCard({
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             style={{ aspectRatio: "600/400" }}
-            onError={() => {
-              // If the selected image fails to load, use placeholder
-              setImageError(true);
-              setImageSrc('/placeholder.svg');
+            onError={(e) => {
+              // If even the default image fails, fall back to placeholder
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
           />
         </div>
