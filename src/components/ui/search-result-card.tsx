@@ -28,8 +28,12 @@ export function SearchResultCard({
   onUpgrade,
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
-  const [imgSrc, setImgSrc] = useState(thumbnail || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=400&q=80");
-  const [imgError, setImgError] = useState(false);
+  
+  // Default tech-related image from Unsplash
+  const defaultImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=400&q=80";
+  
+  // Start with default image, override with thumbnail if exists
+  const [currentImage, setCurrentImage] = useState<string>(thumbnail || defaultImage);
   
   // Truncate long titles
   const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
@@ -47,34 +51,20 @@ export function SearchResultCard({
     }
   })();
 
-  // Handle image error with multiple fallbacks
+  // Simple error handler that goes directly to placeholder
   const handleImageError = () => {
-    if (!imgError) {
-      // Try these alternative images in sequence
-      const fallbackImages = [
-        "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=600&h=400&q=80",
-        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&h=400&q=80",
-        "https://images.unsplash.com/photo-1483058712412-4245e9b90334?auto=format&fit=crop&w=600&h=400&q=80",
-        "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=600&h=400&q=80",
-        "/placeholder.svg"
-      ];
-      
-      // Use the first fallback image
-      setImgSrc(fallbackImages[0]);
-      setImgError(true);
-    } else {
-      // If the fallback also fails, use placeholder
-      setImgSrc("/placeholder.svg");
-    }
+    console.log("Image failed to load:", currentImage);
+    setCurrentImage("/placeholder.svg");
   };
   
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
-        <div className="overflow-hidden" style={{ height: "225px" }}>
+        <div className="overflow-hidden" style={{ height: "225px", backgroundColor: "#f1f5f9" }}>
+          {/* Background color ensures visibility even during image loading */}
           <img
-            src={imgSrc}
-            alt={title}
+            src={currentImage}
+            alt={title || "Search result"}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             style={{ aspectRatio: "600/400" }}
             onError={handleImageError}
