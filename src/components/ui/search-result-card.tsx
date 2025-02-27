@@ -31,9 +31,9 @@ export function SearchResultCard({
   const [imageError, setImageError] = useState(false);
   
   // Clean up the title, url, and source if they contain Supabase URLs
-  const cleanTitle = cleanSupabaseUrls(title);
-  const cleanUrl = cleanSupabaseUrls(url);
-  const cleanSource = cleanSupabaseUrls(source);
+  const cleanTitle = cleanSupabaseUrls(title, "title", source);
+  const cleanUrl = cleanSupabaseUrls(url, "url", source);
+  const cleanSource = cleanSupabaseUrls(source, "source");
   
   // Truncate long titles
   const truncatedTitle = cleanTitle.length > 60 ? cleanTitle.substring(0, 60) + '...' : cleanTitle;
@@ -111,34 +111,49 @@ export function SearchResultCard({
   const { Icon, bgColor, iconColor, borderColor } = getIconParams();
 
   // Function to clean Supabase URLs
-  function cleanSupabaseUrls(str: string): string {
+  function cleanSupabaseUrls(str: string, type: "title" | "url" | "source", sourceDomain?: string): string {
     if (!str) return str;
     
-    // If the string is a Supabase URL, replace it with a cleaner alternative
+    // If the string contains a Supabase URL
     if (str.includes('phkdkwusblkngypuwgao.supabase.co')) {
-      // Replace URLs in the title with something more appropriate
-      if (str.includes('linkedin.com')) {
-        return 'Professional Profile on LinkedIn';
-      } else if (str.includes('facebook.com')) {
-        return 'Profile on Facebook';
-      } else if (str.includes('instagram.com')) {
-        return 'Post on Instagram';
-      } else if (str.includes('twitter.com')) {
-        return 'Tweet on Twitter/X';
-      } else if (str.includes('youtube.com')) {
-        return 'Video on YouTube';
-      } else if (str.includes('tiktok.com')) {
-        return 'Video on TikTok';
+      // For source domains, just return a cleaner version
+      if (type === "source") {
+        if (str === 'phkdkwusblkngypuwgao.supabase.co') {
+          return 'Social Media';
+        }
+        return str.replace(/^https?:\/\//, '').split('.')[0]; // Return just the domain name
       }
       
-      // For URLs that are paths to Supabase storage
+      // Handle titles and URLs based on the source domain
+      if (sourceDomain === 'linkedin.com' || str.includes('linkedin.com')) {
+        return type === "title" 
+          ? 'Professional Profile on LinkedIn'
+          : 'https://linkedin.com/in/profile';
+      } else if (sourceDomain === 'facebook.com' || str.includes('facebook.com')) {
+        return type === "title"
+          ? 'Profile on Facebook'
+          : 'https://facebook.com/profile';
+      } else if (sourceDomain === 'instagram.com' || str.includes('instagram.com')) {
+        return type === "title"
+          ? 'Post on Instagram'
+          : 'https://instagram.com/post';
+      } else if (sourceDomain === 'twitter.com' || str.includes('twitter.com')) {
+        return type === "title"
+          ? 'Tweet on Twitter/X'
+          : 'https://twitter.com/status';
+      } else if (sourceDomain === 'youtube.com' || str.includes('youtube.com')) {
+        return type === "title"
+          ? 'Video on YouTube'
+          : 'https://youtube.com/watch';
+      } else if (sourceDomain === 'tiktok.com' || str.includes('tiktok.com')) {
+        return type === "title"
+          ? 'Video on TikTok'
+          : 'https://tiktok.com/@user/video';
+      }
+      
+      // If it's a storage URL or unrecognized URL with Supabase in it
       if (str.startsWith('https://phkdkwusblkngypuwgao.supabase.co/storage/')) {
-        return 'Content Match Found';
-      }
-      
-      // For source domains
-      if (str === 'phkdkwusblkngypuwgao.supabase.co') {
-        return 'Social Media';
+        return type === "title" ? 'Content Match Found' : '#';
       }
     }
     
@@ -178,6 +193,26 @@ export function SearchResultCard({
         return 'https://picsum.photos/seed/medium/300/200';
       default:
         return 'https://picsum.photos/seed/low/300/200';
+    }
+  };
+
+  // Get actual URL to use for "Visit Site" button
+  const getVisitUrl = (): string => {
+    // Don't try to visit obviously invalid URLs
+    if (cleanUrl === '#' || cleanUrl.includes('Content Match Found')) {
+      return '#';
+    }
+    
+    // Make sure URL is proper format
+    try {
+      new URL(cleanUrl);
+      return cleanUrl;
+    } catch (e) {
+      // If it's not a valid URL, try to make it valid
+      if (cleanUrl.includes('.com') || cleanUrl.includes('.org') || cleanUrl.includes('.net')) {
+        return cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
+      }
+      return '#';
     }
   };
   
@@ -250,7 +285,7 @@ export function SearchResultCard({
             size="sm" 
             className={`w-full border ${matchColor.border} ${matchColor.hover} transition-all duration-300 group`}
           >
-            <a href={cleanUrl.includes('Content Match Found') ? '#' : cleanUrl} target="_blank" rel="noopener noreferrer">
+            <a href={getVisitUrl()} target="_blank" rel="noopener noreferrer">
               <ExternalLink className={`h-4 w-4 mr-2 ${matchColor.text} group-hover:rotate-12 transition-transform duration-300`} />
               Visit Site
             </a>
