@@ -2,10 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { Menu, Shield, X } from "lucide-react";
+import { LogOut, Menu, Shield, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const navigationItems = [
   { name: "Home", href: "/" },
@@ -18,7 +19,8 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
 
   const isAuthenticated = !!user;
 
@@ -52,6 +54,23 @@ export function Header() {
     };
   }, [isMobileMenuOpen]);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem signing out",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <header
       className={cn(
@@ -84,9 +103,15 @@ export function Header() {
 
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
-            <Button asChild>
-              <Link to="/dashboard">Dashboard</Link>
-            </Button>
+            <>
+              <Button asChild variant="default">
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                Log out
+              </Button>
+            </>
           ) : (
             <>
               <Button asChild variant="ghost">
@@ -133,9 +158,15 @@ export function Header() {
 
             <div className="flex flex-col gap-3 mt-4">
               {isAuthenticated ? (
-                <Button asChild size="lg">
-                  <Link to="/dashboard">Dashboard</Link>
-                </Button>
+                <>
+                  <Button asChild size="lg">
+                    <Link to="/dashboard">Dashboard</Link>
+                  </Button>
+                  <Button variant="outline" size="lg" onClick={handleSignOut} className="flex items-center justify-center gap-2">
+                    <LogOut className="h-4 w-4" />
+                    Log out
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button asChild variant="outline" size="lg">
