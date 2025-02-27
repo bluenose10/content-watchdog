@@ -60,17 +60,17 @@ export function SearchResultCard({
   const { size, color, Icon } = getIconParams();
   
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md border-green-100">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md border border-green-200">
       <div className="relative">
         <div 
-          className="overflow-hidden flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100" 
+          className="overflow-hidden flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200" 
           style={{ height: "225px" }}
         >
           <div className="relative p-6 flex flex-col items-center justify-center text-center">
-            <div style={{ color: color }}>
+            <div className="bg-white/70 p-6 rounded-full" style={{ color: color }}>
               <Icon size={size} strokeWidth={1.5} />
             </div>
-            <div className="mt-3 text-sm font-medium text-green-800 bg-white/90 px-3 py-1 rounded-full border border-green-200">
+            <div className="mt-4 text-sm font-medium text-green-800 bg-white/90 px-4 py-1.5 rounded-full border border-green-300 shadow-sm">
               Content Match Found
             </div>
           </div>
@@ -96,9 +96,9 @@ export function SearchResultCard({
           </Badge>
         )}
       </div>
-      <CardHeader className="pb-2">
-        <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
-        <p className="text-sm text-muted-foreground">
+      <CardHeader className="pb-2 bg-green-50/50">
+        <h3 className="text-lg font-semibold text-green-900" title={title}>{truncatedTitle}</h3>
+        <p className="text-sm text-green-700/80">
           Found on {source} • {formattedDate}
         </p>
       </CardHeader>
@@ -111,9 +111,9 @@ export function SearchResultCard({
           </div>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="bg-green-50/50">
         {isPremium || isFreePreview ? (
-          <Button asChild variant="outline" size="sm" className="w-full gap-1">
+          <Button asChild variant="outline" size="sm" className="w-full gap-1 border-green-200 hover:bg-green-100 hover:text-green-800">
             <a href={url} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4" />
               Visit Site
@@ -124,7 +124,7 @@ export function SearchResultCard({
             onClick={onUpgrade} 
             variant="outline" 
             size="sm" 
-            className="w-full"
+            className="w-full border-green-200 hover:bg-green-100 hover:text-green-800"
           >
             Upgrade to View
           </Button>
