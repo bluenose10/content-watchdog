@@ -7,6 +7,7 @@ import { HeroSection } from "@/components/home/hero-section";
 import { PricingSection } from "@/components/home/pricing-section";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 
@@ -34,6 +35,7 @@ const Index = () => {
         <CallToAction />
       </main>
       <Footer />
+      <Toaster />
     </div>
   );
 };
