@@ -28,6 +28,7 @@ export function SearchResultCard({
   onUpgrade,
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
+  const [imageError, setImageError] = useState(false);
   
   // Truncate long titles
   const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
@@ -103,6 +104,26 @@ export function SearchResultCard({
   }
   
   const { Icon, bgColor, iconColor, borderColor } = getIconParams();
+
+  // Check if thumbnail is a valid URL
+  const isValidThumbnail = () => {
+    if (!thumbnail || imageError) return false;
+    
+    // Check if the thumbnail is actually the full image URL or a data URL
+    // These are signs the API couldn't find a proper thumbnail
+    if (thumbnail === url || 
+        thumbnail.includes('data:image') || 
+        thumbnail.startsWith('https://phkdkwusblkngypuwgao.supabase.co/storage/')) {
+      return false;
+    }
+    
+    try {
+      new URL(thumbnail);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
   
   return (
     <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80`}>
@@ -111,14 +132,23 @@ export function SearchResultCard({
           className={`overflow-hidden flex items-center justify-center ${bgColor}`}
           style={{ height: "200px" }}
         >
-          <div className="relative p-6 flex flex-col items-center justify-center text-center">
-            <div className={`bg-white/80 dark:bg-gray-800/80 p-5 rounded-full border ${borderColor}`}>
-              <Icon size={42} className={iconColor} strokeWidth={1.5} />
+          {isValidThumbnail() ? (
+            <img 
+              src={thumbnail} 
+              alt={title}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="relative p-6 flex flex-col items-center justify-center text-center">
+              <div className={`bg-white/80 dark:bg-gray-800/80 p-5 rounded-full border ${borderColor}`}>
+                <Icon size={42} className={iconColor} strokeWidth={1.5} />
+              </div>
+              <div className="mt-4 text-sm font-medium bg-white/80 dark:bg-gray-800/80 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
+                <span className={matchColor.text}>Content Match Found</span>
+              </div>
             </div>
-            <div className="mt-4 text-sm font-medium bg-white/80 dark:bg-gray-800/80 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-              <span className={matchColor.text}>Content Match Found</span>
-            </div>
-          </div>
+          )}
         </div>
         <Badge 
           className={`absolute right-2 top-2 ${matchColor.badge}`}
