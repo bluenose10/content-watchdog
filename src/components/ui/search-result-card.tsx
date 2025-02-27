@@ -83,8 +83,8 @@ export function SearchResultCard({
         color: 'text-blue-600',
         bgColor: 'bg-white',
         name: 'Facebook',
-        logoUrl: '/lovable-uploads/af0938db-0832-49ee-9207-a0d7eb137c15.png',
-        contentImageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e'
+        logoUrl: '/lovable-uploads/635b4db7-5776-4365-8831-07be04a15714.png', // Facebook logo
+        contentImageUrl: null
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -92,8 +92,8 @@ export function SearchResultCard({
         color: 'text-sky-500',
         bgColor: 'bg-white',
         name: 'Twitter/X',
-        logoUrl: null,
-        contentImageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
+        logoUrl: null, // No uploaded Twitter logo
+        contentImageUrl: null
       };
     } else if (platform.includes('instagram')) {
       return {
@@ -101,8 +101,8 @@ export function SearchResultCard({
         color: 'text-pink-600',
         bgColor: 'bg-white',
         name: 'Instagram',
-        logoUrl: '/lovable-uploads/21d7103e-7ada-436c-a3d2-70cf9ac9f6f1.png',
-        contentImageUrl: 'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b'
+        logoUrl: '/lovable-uploads/554d6a51-776f-4eb2-90bb-728cb6d94365.png', // Instagram logo
+        contentImageUrl: null
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -110,8 +110,8 @@ export function SearchResultCard({
         color: 'text-blue-700',
         bgColor: 'bg-white',
         name: 'LinkedIn',
-        logoUrl: '/lovable-uploads/18311b5e-f517-4b56-9ff2-fa50c1f8a507.png',
-        contentImageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e'
+        logoUrl: '/lovable-uploads/71eeb517-4964-4090-994c-5bad460e3be4.png', // LinkedIn logo
+        contentImageUrl: null
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -119,8 +119,8 @@ export function SearchResultCard({
         color: 'text-red-600',
         bgColor: 'bg-white',
         name: 'YouTube',
-        logoUrl: '/lovable-uploads/fc63dd69-3373-476b-82ef-89b335e91207.png',
-        contentImageUrl: 'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b'
+        logoUrl: '/lovable-uploads/74f208e0-bb64-408c-826a-b51bba43af07.png', // YouTube logo
+        contentImageUrl: null
       };
     } else if (platform.includes('tiktok')) {
       return {
@@ -129,7 +129,7 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'TikTok',
         logoUrl: null,
-        contentImageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
+        contentImageUrl: null
       };
     } else {
       return {
@@ -270,37 +270,18 @@ export function SearchResultCard({
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
             />
-          ) : socialMedia.contentImageUrl ? (
-            // Show platform-specific content image as fallback
-            <div className="relative w-full h-full">
-              <img 
-                src={socialMedia.contentImageUrl}
-                alt={`${socialMedia.name} content`}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md">
-                {socialMedia.logoUrl ? (
-                  <img 
-                    src={socialMedia.logoUrl} 
-                    alt={`${socialMedia.name} logo`}
-                    className="w-8 h-8 object-contain"
-                  />
-                ) : (
-                  <socialMedia.Icon size={24} className={socialMedia.color} />
-                )}
-              </div>
-              <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white p-2 text-center">
-                Content found on {socialMedia.name}
-              </div>
-            </div>
           ) : (
-            // Fallback to logo-only display if no content image
+            // Display the social media platform logo
             <div className="relative w-full h-full flex items-center justify-center bg-white">
               {socialMedia.logoUrl ? (
                 <img 
                   src={socialMedia.logoUrl} 
                   alt={`${socialMedia.name} logo`}
-                  className="w-auto h-auto max-w-[70%] max-h-[70%] object-contain"
+                  className="max-w-[80%] max-h-[80%] object-contain"
+                  onError={(e) => {
+                    console.error(`Error loading ${socialMedia.name} logo:`, e);
+                    setImageError(true);
+                  }}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center">
