@@ -1,13 +1,15 @@
 
 import { ArrowRight, Shield, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
-  // Function to handle navigation - using the complete URL
+  const navigate = useNavigate();
+  
+  // Function to handle navigation
   const handleSignUp = () => {
-    // Get the current base URL and navigate to the signup page
-    const baseUrl = window.location.origin;
-    window.location.href = `${baseUrl}/signup`;
-    console.log("Navigating to:", `${baseUrl}/signup`);
+    navigate("/signup");
+    console.log("Navigating to signup page");
   };
 
   return (
@@ -20,13 +22,14 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
-          <button
+          <Button
             onClick={handleSignUp}
-            className="flex items-center justify-center h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-md cursor-pointer transition-colors"
+            variant="purple"
+            className="flex items-center justify-center h-12 px-6"
           >
             <Shield className="mr-2 h-5 w-5" />
             Sign Up
-          </button>
+          </Button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
