@@ -1,15 +1,9 @@
 
 import { ArrowRight, Shield, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
   const navigate = useNavigate();
-
-  const handleSignUp = () => {
-    console.log("Sign Up button clicked, navigating to /signup");
-    navigate('/signup');
-  };
 
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
@@ -20,17 +14,6 @@ export const HeroSection = () => {
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
-          <Button
-            id="signupButton"
-            onClick={handleSignUp}
-            variant="blue"
-            className="text-base px-6 py-3 cursor-pointer"
-            type="button"
-          >
-            Sign Up Now
-          </Button>
-        </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
             <div className="flex flex-col items-center text-center">
