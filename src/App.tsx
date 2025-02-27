@@ -27,9 +27,9 @@ const App = () => (
             <Route path="/results" element={<Results />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Toaster />
+          <Sonner />
         </BrowserRouter>
-        <Toaster />
-        <Sonner />
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

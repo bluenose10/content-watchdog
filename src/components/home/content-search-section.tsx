@@ -99,7 +99,6 @@ export function ContentSearchSection() {
           toast({
             title: "Upload complete",
             description: "Your image has been uploaded successfully",
-            variant: "default",
           });
         } catch (error) {
           clearInterval(progressInterval);
