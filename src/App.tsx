@@ -58,6 +58,9 @@ const AppRoutes = () => {
       <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignUp />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       
+      {/* Handle reset-password route - redirect to login page */}
+      <Route path="/reset-password" element={<Navigate to="/login" replace />} />
+      
       {/* Anonymous-accessible route for results */}
       <Route path="/results" element={
         <ResultsRoute>
