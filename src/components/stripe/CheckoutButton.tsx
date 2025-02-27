@@ -23,7 +23,7 @@ export function CheckoutButton({
   children = "Subscribe"
 }: CheckoutButtonProps) {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export function CheckoutButton({
   const handleCheckout = async () => {
     try {
       // Check if user is logged in
-      if (!user) {
+      if (!user || !session) {
         sonnerToast.error("Authentication required", {
           description: "Please log in to subscribe to a plan",
         });
@@ -66,9 +66,16 @@ export function CheckoutButton({
       const returnUrl = `${window.location.origin}/success`;
       console.log('Return URL:', returnUrl);
       
-      // Call the Supabase Edge Function to create a checkout session
+      // Get the user access token
+      const accessToken = session.access_token;
+      
       console.log('Calling create-checkout with planId:', planId);
+      
+      // Call the Supabase Edge Function to create a checkout session with auth token
       const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
         body: { 
           planId, 
           priceId: selectedPlan.stripePriceId,

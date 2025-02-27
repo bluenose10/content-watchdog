@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 // Define CORS headers
 const corsHeaders = {
@@ -8,29 +9,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Define the Stripe domain (needed for some CORS operations)
-export const stripeDomain = Deno.env.get('SUPABASE_URL') || '';
-
-// Initialize Stripe with the secret key
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-  apiVersion: '2022-11-15',
-  httpClient: Stripe.createFetchHttpClient(),
-});
-
 serve(async (req) => {
-  console.log('Create checkout function called');
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // Get request body
-    const requestData = await req.json();
-    const { planId, priceId, returnUrl } = requestData;
+    // Get the Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Initialize Stripe
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey) {
+      throw new Error('Missing Stripe secret key');
+    }
     
-    console.log('Request data:', JSON.stringify(requestData, null, 2));
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2022-11-15',
+      httpClient: Stripe.createFetchHttpClient(),
+    });
+
+    // Get request body
+    const { planId, priceId, returnUrl } = await req.json();
+    
+    console.log('Request data received:', { planId, priceId, returnUrl });
 
     if (!priceId) {
       return new Response(
@@ -46,51 +51,36 @@ serve(async (req) => {
       );
     }
 
-    // Extract user information from the JWT token in the Authorization header
+    // Get the user's JWT from the request headers
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'Missing auth header' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
-    }
-    
-    // Extract the JWT token
-    const token = authHeader.replace('Bearer ', '');
-    
-    // Extract user email from JWT claims
-    let userEmail = '';
-    try {
-      // Decode the JWT token (simple decode, no verification needed as we just need the claims)
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      
-      const payload = JSON.parse(jsonPayload);
-      userEmail = payload.email || '';
-      
-      console.log('User email from token:', userEmail);
-    } catch (error) {
-      console.error('Error decoding JWT token:', error);
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication token' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
-    }
-    
-    if (!userEmail) {
-      return new Response(
-        JSON.stringify({ error: 'User email not found in token' }),
+        JSON.stringify({ error: 'Missing Authorization header' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
 
-    // Create checkout session
-    console.log('Creating checkout session with:', { userEmail, priceId, returnUrl });
+    // Get the user's email from the JWT
+    const { data: { user }, error: userError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (userError || !user) {
+      console.error('Error getting user from token:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    console.log('User authenticated:', {
+      userId: user.id,
+      email: user.email
+    });
+
+    // Create a checkout session
     const session = await stripe.checkout.sessions.create({
-      customer_email: userEmail,
+      customer_email: user.email,
       line_items: [
         {
           price: priceId,
@@ -102,20 +92,21 @@ serve(async (req) => {
       cancel_url: `${new URL(returnUrl).origin}/payment-canceled`,
       metadata: {
         planId: planId,
+        userId: user.id,
       },
     });
 
-    console.log('Checkout session created successfully:', session.id);
-    
+    console.log('Checkout session created:', session.id);
+
     return new Response(
       JSON.stringify({ url: session.url }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
-    console.error('Checkout error:', error);
+    console.error('Error:', error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });
