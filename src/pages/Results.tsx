@@ -23,6 +23,7 @@ const Results = () => {
   const searchId = searchParams.get('id');
   const [isPremium, setIsPremium] = useState(false);
   const [resultLimit, setResultLimit] = useState(5); // Default limit for free users
+  const FREE_PREVIEW_COUNT = 2; // Number of results to show as free preview
   
   // Fetch user subscription
   const { data: subscription } = useQuery({
@@ -84,6 +85,7 @@ const Results = () => {
     });
   };
   
+  // For non-premium users, show only up to the result limit, but make the first FREE_PREVIEW_COUNT clickable
   const visibleResults = searchResults ? 
     (isPremium ? searchResults : searchResults.slice(0, resultLimit)) : 
     [];
@@ -136,9 +138,11 @@ const Results = () => {
             <Card className="mb-8 bg-secondary/30 border-primary/20">
               <CardContent className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-medium mb-1">Free Plan Limitation</h3>
+                  <h3 className="text-lg font-medium mb-1">Free Plan</h3>
                   <p className="text-sm text-muted-foreground">
-                    You're viewing {resultLimit} of {searchResults?.length || 0} total results. Upgrade to see all matches and access premium features.
+                    You're viewing {resultLimit} of {searchResults?.length || 0} total results. 
+                    The first {FREE_PREVIEW_COUNT} results are clickable as a preview. 
+                    Upgrade to see all matches and access premium features.
                   </p>
                 </div>
                 <Button asChild className="button-animation">
@@ -164,7 +168,7 @@ const Results = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {visibleResults.map((result: SearchResult) => (
+              {visibleResults.map((result: SearchResult, index: number) => (
                 <SearchResultCard
                   key={result.id}
                   result={{
@@ -177,6 +181,8 @@ const Results = () => {
                     date: result.found_at
                   }}
                   isPremium={isPremium}
+                  // For non-premium users, the first FREE_PREVIEW_COUNT results are clickable previews
+                  isFreePreview={!isPremium && index < FREE_PREVIEW_COUNT}
                   onUpgrade={handleUpgrade}
                 />
               ))}

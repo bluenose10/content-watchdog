@@ -16,12 +16,14 @@ interface SearchResultCardProps {
     date: string;
   };
   isPremium?: boolean;
+  isFreePreview?: boolean;
   onUpgrade?: () => void;
 }
 
 export function SearchResultCard({
   result,
   isPremium = false,
+  isFreePreview = false,
   onUpgrade,
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
@@ -64,6 +66,13 @@ export function SearchResultCard({
         >
           {safeMatchLevel} Match
         </Badge>
+        {isFreePreview && (
+          <Badge 
+            className="absolute left-2 top-2 bg-blue-500 text-white"
+          >
+            Free Preview
+          </Badge>
+        )}
       </div>
       <CardHeader className="pb-2">
         <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
@@ -72,7 +81,7 @@ export function SearchResultCard({
         </p>
       </CardHeader>
       <CardContent className="pb-2">
-        {isPremium ? (
+        {isPremium || isFreePreview ? (
           <p className="text-sm truncate" title={url}>{url}</p>
         ) : (
           <div className="space-y-1">
@@ -81,7 +90,7 @@ export function SearchResultCard({
         )}
       </CardContent>
       <CardFooter>
-        {isPremium ? (
+        {isPremium || isFreePreview ? (
           <Button asChild variant="outline" size="sm" className="w-full gap-1">
             <a href={url} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4" />
