@@ -64,7 +64,7 @@ export default function Results() {
   };
 
   const getDisplayCount = () => {
-    return Math.min(10, results.length); // Always show 10 results max (some might be blurred)
+    return Math.min(20, results.length); // Display up to 20 results max for all user types
   };
 
   useEffect(() => {
@@ -79,7 +79,46 @@ export default function Results() {
         setIsLoading(true);
         setError(null);
 
-        // First, get the search query data
+        // Handle anonymous searches from session storage
+        if (!user && searchId.startsWith('temp_')) {
+          const tempSearchData = sessionStorage.getItem(`temp_search_${searchId}`);
+          if (tempSearchData) {
+            const parsedData = JSON.parse(tempSearchData);
+            setSearchData(parsedData);
+            
+            // For anonymous users, we'll generate results on the fly
+            setIsGeneratingResults(true);
+            try {
+              if (parsedData.query_type === "name" || parsedData.query_type === "hashtag") {
+                const textResults = await performGoogleSearch(parsedData.query_text, 'anonymous');
+                if (textResults && textResults.items) {
+                  const formattedResults = textResults.items.map((item: any, index: number) => {
+                    const matchLevel = index < 2 ? "High" as const : index < 4 ? "Medium" as const : "Low" as const;
+                    return {
+                      search_id: searchId,
+                      title: item.title || "Untitled Content",
+                      url: item.link || "#",
+                      thumbnail: item.pagemap?.cse_image?.[0]?.src || "",
+                      source: item.displayLink || new URL(item.link || "#").hostname,
+                      match_level: matchLevel,
+                      found_at: new Date().toISOString()
+                    };
+                  });
+                  setResults(formattedResults);
+                }
+              }
+            } catch (err) {
+              console.error("Error generating anonymous results:", err);
+              setError("Failed to generate search results");
+            } finally {
+              setIsGeneratingResults(false);
+            }
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // First, get the search query data from DB for logged-in users
         const searchQueryData = await getSearchQueryById(searchId);
         console.log("Search query data:", searchQueryData);
         setSearchData(searchQueryData);
@@ -258,7 +297,7 @@ export default function Results() {
 
   const handleSignIn = () => {
     // Store the current path to redirect back after login
-    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
     navigate('/login');
   };
 

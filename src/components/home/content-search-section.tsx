@@ -47,7 +47,7 @@ export function ContentSearchSection() {
     }
   };
 
-  const handleImageSearch = async (file: File) => {
+  const handleImageSearchSubmit = async (file: File) => {
     try {
       if (!user) {
         toast({
@@ -60,6 +60,7 @@ export function ContentSearchSection() {
       }
       
       setIsLoading(true);
+      // Fix: Only pass the file to handleImageSearch, user is handled inside the function
       const searchId = await handleImageSearch(file, user);
       navigate(`/results?id=${searchId}`);
     } catch (error) {
@@ -89,7 +90,7 @@ export function ContentSearchSection() {
             <SearchTabs
               onNameSearch={handleNameSearch}
               onHashtagSearch={handleHashtagSearch}
-              onImageSearch={handleImageSearch}
+              onImageSearch={handleImageSearchSubmit}
               isLoading={isLoading}
             />
           </CardContent>
