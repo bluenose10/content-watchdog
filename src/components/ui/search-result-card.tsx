@@ -70,7 +70,7 @@ export function SearchResultCard({
             <div className="bg-white/70 p-6 rounded-full" style={{ color: color }}>
               <Icon size={size} strokeWidth={1.5} />
             </div>
-            <div className="mt-4 text-sm font-medium text-green-800 bg-white/90 px-4 py-1.5 rounded-full border border-green-300 shadow-sm">
+            <div className="mt-4 text-sm font-medium bg-white/90 px-4 py-1.5 rounded-full border border-green-300 shadow-sm">
               Content Match Found
             </div>
           </div>
@@ -97,8 +97,8 @@ export function SearchResultCard({
         )}
       </div>
       <CardHeader className="pb-2 bg-green-50/50">
-        <h3 className="text-lg font-semibold text-green-900" title={title}>{truncatedTitle}</h3>
-        <p className="text-sm text-green-700/80">
+        <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
+        <p className="text-sm text-muted-foreground">
           Found on {source} • {formattedDate}
         </p>
       </CardHeader>
@@ -113,7 +113,7 @@ export function SearchResultCard({
       </CardContent>
       <CardFooter className="bg-green-50/50">
         {isPremium || isFreePreview ? (
-          <Button asChild variant="outline" size="sm" className="w-full gap-1 border-green-200 hover:bg-green-100 hover:text-green-800">
+          <Button asChild variant="outline" size="sm" className="w-full gap-1 border-green-200 hover:bg-green-100">
             <a href={url} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4" />
               Visit Site
@@ -124,7 +124,7 @@ export function SearchResultCard({
             onClick={onUpgrade} 
             variant="outline" 
             size="sm" 
-            className="w-full border-green-200 hover:bg-green-100 hover:text-green-800"
+            className="w-full border-green-200 hover:bg-green-100"
           >
             Upgrade to View
           </Button>
