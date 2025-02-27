@@ -96,16 +96,11 @@ export function CheckoutButton({
         
         console.log('Redirecting to:', data.url);
         
-        // Redirect to Stripe Checkout (simulated in this version)
-        // In a real implementation, this would go to Stripe
+        // For demo purposes, we'll redirect to the success page with the session ID as a URL parameter
+        // In a real implementation, this would go to Stripe's checkout page
         setTimeout(() => {
-          // For demo purposes, let's just navigate to the success page
-          navigate('/success', { 
-            state: { 
-              demo: true,
-              sessionId: data.sessionId 
-            } 
-          });
+          // Navigate to success page with session ID in URL query parameter
+          window.location.href = `/success?session_id=${data.sessionId}`;
         }, 1500);
       } catch (functionError) {
         console.error('Function call error:', functionError);
