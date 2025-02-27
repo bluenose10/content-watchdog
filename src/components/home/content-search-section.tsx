@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SEARCH_TYPES } from "@/lib/constants";
 import { createSearchQuery, performGoogleSearch, uploadSearchImage, createSearchResults } from "@/lib/db-service";
+import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Upload } from "lucide-react";

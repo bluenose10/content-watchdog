@@ -1,1 +1,11 @@
+
 project_id = "phkdkwusblkngypuwgao"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[functions]
+[functions.google-search]
+verify_jwt = false
