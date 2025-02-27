@@ -78,8 +78,8 @@ export function SearchResultCard({
     }
   };
   
-  // Get social media platform icon
-  const getSocialMediaIcon = () => {
+  // Get social media platform info
+  const getSocialMediaInfo = () => {
     const platform = cleanSource.toLowerCase();
     
     if (platform.includes('facebook')) {
@@ -87,42 +87,48 @@ export function SearchResultCard({
         Icon: Facebook,
         color: 'text-blue-600',
         bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-        name: 'Facebook'
+        name: 'Facebook',
+        image: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=774&auto=format&fit=crop'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
         Icon: Twitter,
         color: 'text-sky-500',
         bgColor: 'bg-sky-50 dark:bg-sky-900/30',
-        name: 'Twitter/X'
+        name: 'Twitter/X',
+        image: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?q=80&w=1074&auto=format&fit=crop'
       };
     } else if (platform.includes('instagram')) {
       return {
         Icon: Instagram,
         color: 'text-pink-600',
         bgColor: 'bg-pink-50 dark:bg-pink-900/30',
-        name: 'Instagram'
+        name: 'Instagram',
+        image: 'https://images.unsplash.com/photo-1611262588024-d12430b98920?q=80&w=1074&auto=format&fit=crop'
       };
     } else if (platform.includes('linkedin')) {
       return {
         Icon: Linkedin,
         color: 'text-blue-700',
         bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-        name: 'LinkedIn'
+        name: 'LinkedIn',
+        image: 'https://images.unsplash.com/photo-1611944212129-29977ae1398c?q=80&w=1074&auto=format&fit=crop'
       };
     } else if (platform.includes('youtube')) {
       return {
         Icon: Youtube,
         color: 'text-red-600',
         bgColor: 'bg-red-50 dark:bg-red-900/30',
-        name: 'YouTube'
+        name: 'YouTube',
+        image: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1074&auto=format&fit=crop'
       };
     } else {
       return {
         Icon: Search,
         color: 'text-gray-600 dark:text-gray-400',
         bgColor: 'bg-gray-50 dark:bg-gray-900/30',
-        name: cleanSource
+        name: cleanSource,
+        image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=1170&auto=format&fit=crop'
       };
     }
   };
@@ -158,7 +164,7 @@ export function SearchResultCard({
   }
   
   const { Icon, bgColor, iconColor, borderColor } = getIconParams();
-  const socialMedia = getSocialMediaIcon();
+  const socialMedia = getSocialMediaInfo();
 
   // Function to clean Supabase URLs
   function cleanSupabaseUrls(str: string, type: "title" | "url" | "source", sourceDomain?: string): string {
@@ -233,17 +239,9 @@ export function SearchResultCard({
     }
   };
   
-  // Get a fallback image based on safeMatchLevel
+  // Get a fallback image based on the social media platform
   const getFallbackImage = () => {
-    // Use consistent placeholder images based on match level
-    switch(safeMatchLevel) {
-      case 'High':
-        return 'https://picsum.photos/seed/high/300/200';
-      case 'Medium':
-        return 'https://picsum.photos/seed/medium/300/200';
-      default:
-        return 'https://picsum.photos/seed/low/300/200';
-    }
+    return socialMedia.image;
   };
 
   // Get actual URL to use for "Visit Site" button
@@ -281,12 +279,23 @@ export function SearchResultCard({
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="relative p-6 flex flex-col items-center justify-center text-center">
-              <div className={`bg-white/80 dark:bg-gray-800/80 p-5 rounded-full border ${borderColor}`}>
-                <socialMedia.Icon size={42} className={socialMedia.color} strokeWidth={1.5} />
-              </div>
-              <div className="mt-4 text-sm font-medium bg-white/80 dark:bg-gray-800/80 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                <span className={matchColor.text}>Content Match on {socialMedia.name}</span>
+            <div className="relative w-full h-full">
+              {/* Social Media Platform Image Background */}
+              <img 
+                src={getFallbackImage()}
+                alt={socialMedia.name}
+                className="w-full h-full object-cover opacity-80 blur-[1px]"
+                onError={() => setImageError(true)}
+              />
+              
+              {/* Overlay with Platform Logo */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                <div className={`bg-white/90 dark:bg-gray-800/90 p-5 rounded-full border shadow-md ${borderColor}`}>
+                  <socialMedia.Icon size={42} className={socialMedia.color} strokeWidth={1.5} />
+                </div>
+                <div className="mt-4 text-sm font-medium bg-white/90 dark:bg-gray-800/90 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <span className={matchColor.text}>Content Match on {socialMedia.name}</span>
+                </div>
               </div>
             </div>
           )}
