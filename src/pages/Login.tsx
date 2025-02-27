@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Shield } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -27,15 +29,16 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Login successful",
-        description: "Welcome back! Redirecting to dashboard...",
-      });
+    try {
+      const { success } = await signIn(formData.email, formData.password);
+      if (success) {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+    } finally {
       setIsLoading(false);
-      navigate("/dashboard");
-    }, 1500);
+    }
   };
 
   return (

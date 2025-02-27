@@ -8,6 +8,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,15 +42,18 @@ const SignUp = () => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Account created",
-        description: "You have successfully signed up. Redirecting to login...",
-      });
+    try {
+      const { success } = await signUp(formData.email, formData.password, formData.name);
+      
+      if (success) {
+        // Don't navigate automatically since the user needs to confirm their email
+        // We'll let the success toast guide them
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+    } finally {
       setIsLoading(false);
-      navigate("/login");
-    }, 1500);
+    }
   };
 
   return (
