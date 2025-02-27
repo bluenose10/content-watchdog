@@ -1,18 +1,19 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { SearchResultCard } from "@/components/ui/search-result-card";
 import { MOCK_SEARCH_RESULTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
-import { getSearchQueryById, getSearchResults, getUserSubscription } from "@/lib/db-service";
+import { getSearchQueryById, getSearchResults, getUserSubscription, getFreePlan } from "@/lib/db-service";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { ArrowLeft, ArrowRight, Download, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Plan, SearchResult } from "@/lib/db-types";
 
 const Results = () => {
   const { toast } = useToast();
@@ -21,13 +22,20 @@ const Results = () => {
   const searchParams = new URLSearchParams(location.search);
   const searchId = searchParams.get('id');
   const [isPremium, setIsPremium] = useState(false);
-  const [showingCount, setShowingCount] = useState(5); // Free users see 5 results
+  const [resultLimit, setResultLimit] = useState(5); // Default limit for free users
   
   // Fetch user subscription
   const { data: subscription } = useQuery({
     queryKey: ['subscription', user?.id],
     queryFn: () => user ? getUserSubscription(user.id) : null,
     enabled: !!user,
+  });
+
+  // Fetch free plan as fallback
+  const { data: freePlan } = useQuery({
+    queryKey: ['freePlan'],
+    queryFn: () => getFreePlan(),
+    enabled: !subscription,
   });
 
   // Fetch search query
@@ -46,13 +54,28 @@ const Results = () => {
     placeholderData: MOCK_SEARCH_RESULTS,
   });
 
-  // Check if user has premium subscription
+  // Determine user's plan limits and premium status
   useEffect(() => {
     if (subscription) {
-      // If subscription exists and is active, user is premium
-      setIsPremium(subscription.status === 'active');
+      // If subscription exists and is active, use the plan's result limit
+      const isActive = subscription.status === 'active';
+      setIsPremium(isActive);
+      
+      // If plans data is available, set result limit
+      if (subscription.plans) {
+        const planLimit = subscription.plans.result_limit;
+        // -1 means unlimited
+        setResultLimit(planLimit === -1 ? 9999 : planLimit);
+      } else {
+        // Default to free plan limit if plan details not available
+        setResultLimit(freePlan?.result_limit || 5);
+      }
+    } else if (freePlan) {
+      // If no subscription, use free plan limit
+      setResultLimit(freePlan.result_limit);
+      setIsPremium(false);
     }
-  }, [subscription]);
+  }, [subscription, freePlan]);
   
   const handleUpgrade = () => {
     toast({
@@ -62,7 +85,7 @@ const Results = () => {
   };
   
   const visibleResults = searchResults ? 
-    (isPremium ? searchResults : searchResults.slice(0, showingCount)) : 
+    (isPremium ? searchResults : searchResults.slice(0, resultLimit)) : 
     [];
   
   return (
@@ -109,13 +132,13 @@ const Results = () => {
             </div>
           </div>
 
-          {!isPremium && (
+          {!isPremium && searchResults && searchResults.length > resultLimit && (
             <Card className="mb-8 bg-secondary/30 border-primary/20">
               <CardContent className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-medium mb-1">Free Plan Limitation</h3>
                   <p className="text-sm text-muted-foreground">
-                    You're viewing {showingCount} of {searchResults?.length || 0} total results. Upgrade to see all matches and access premium features.
+                    You're viewing {resultLimit} of {searchResults?.length || 0} total results. Upgrade to see all matches and access premium features.
                   </p>
                 </div>
                 <Button asChild className="button-animation">
@@ -141,10 +164,18 @@ const Results = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {visibleResults.map((result) => (
+              {visibleResults.map((result: SearchResult) => (
                 <SearchResultCard
                   key={result.id}
-                  result={result}
+                  result={{
+                    id: result.id || '',
+                    title: result.title,
+                    url: result.url,
+                    thumbnail: result.thumbnail,
+                    source: result.source,
+                    matchLevel: result.match_level,
+                    date: result.found_at
+                  }}
                   isPremium={isPremium}
                   onUpgrade={handleUpgrade}
                 />
@@ -152,7 +183,7 @@ const Results = () => {
             </div>
           )}
 
-          {!isPremium && searchResults && searchResults.length > showingCount && (
+          {!isPremium && searchResults && searchResults.length > resultLimit && (
             <div className="mt-8 text-center">
               <p className="text-muted-foreground mb-4">
                 {visibleResults.length} of {searchResults.length} results shown

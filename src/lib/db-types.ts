@@ -27,6 +27,7 @@ export type UserSubscription = {
   status: 'active' | 'canceled' | 'past_due';
   current_period_end: string;
   created_at?: string;
+  plans?: Plan;
 }
 
 export type Plan = {
@@ -36,4 +37,5 @@ export type Plan = {
   search_limit: number;
   result_limit: number;
   monitoring_limit: number;
+  created_at?: string;
 }

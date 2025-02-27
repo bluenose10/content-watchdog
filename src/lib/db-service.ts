@@ -61,9 +61,9 @@ export const getSearchResults = async (searchId: string) => {
 export const getUserSubscription = async (userId: string) => {
   const { data, error } = await supabase
     .from('user_subscriptions')
-    .select('*')
+    .select('*, plans(*)')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
   
   // If no subscription found, it's not an error - user is on free plan
   if (error && error.code !== 'PGRST116') throw error;
@@ -86,6 +86,15 @@ export const uploadSearchImage = async (file: File, userId: string) => {
   const fileName = `${userId}/${Date.now()}.${fileExt}`;
   const filePath = `search-images/${fileName}`;
 
+  // Create the uploads bucket if it doesn't exist
+  const { error: bucketError } = await supabase.storage
+    .createBucket('uploads', {
+      public: true,
+      fileSizeLimit: 10485760, // 10MB
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    })
+    .catch(() => ({ error: null })); // Ignore error if bucket already exists
+
   const { error: uploadError } = await supabase.storage
     .from('uploads')
     .upload(filePath, file);
@@ -97,4 +106,27 @@ export const uploadSearchImage = async (file: File, userId: string) => {
     .getPublicUrl(filePath);
   
   return data.publicUrl;
+};
+
+// Get free plan details
+export const getFreePlan = async () => {
+  const { data, error } = await supabase
+    .from('plans')
+    .select('*')
+    .eq('id', 'free')
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
+
+// Get all available plans
+export const getPlans = async () => {
+  const { data, error } = await supabase
+    .from('plans')
+    .select('*')
+    .order('price', { ascending: true });
+  
+  if (error) throw error;
+  return data;
 };
