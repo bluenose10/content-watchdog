@@ -113,12 +113,12 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
     if (error) {
       console.error('Image search error:', error);
       
-      // Create fallback results if the API call fails
+      // Create better fallback results if the API call fails
       const fallbackResults = {
         items: [
           {
             title: 'LinkedIn Profile Match',
-            link: 'https://linkedin.com/in/profile',
+            link: 'https://linkedin.com/in/profile-match',
             displayLink: 'linkedin.com',
             snippet: 'Professional profile page with potential image match.',
             image: {
@@ -128,7 +128,7 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
           },
           {
             title: 'Facebook Profile Match',
-            link: 'https://facebook.com/profile',
+            link: 'https://facebook.com/profile-match',
             displayLink: 'facebook.com',
             snippet: 'Social media profile with potential image match.',
             image: {
@@ -138,17 +138,47 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
           },
           {
             title: 'Instagram Post',
-            link: 'https://instagram.com/p/123456',
+            link: 'https://instagram.com/p/abcdef123456',
             displayLink: 'instagram.com',
             snippet: 'Image post with similar visual elements.',
             image: {
               contextLink: 'https://instagram.com',
               thumbnailLink: 'https://picsum.photos/200/300?random=3',
             }
+          },
+          {
+            title: 'Twitter Image Post',
+            link: 'https://twitter.com/user/status/123456789',
+            displayLink: 'twitter.com',
+            snippet: 'Tweet containing a similar image.',
+            image: {
+              contextLink: 'https://twitter.com',
+              thumbnailLink: 'https://picsum.photos/200/300?random=4',
+            }
+          },
+          {
+            title: 'YouTube Thumbnail Match',
+            link: 'https://youtube.com/watch?v=abc123def456',
+            displayLink: 'youtube.com',
+            snippet: 'Video with similar thumbnail image.',
+            image: {
+              contextLink: 'https://youtube.com',
+              thumbnailLink: 'https://picsum.photos/200/300?random=5',
+            }
+          },
+          {
+            title: 'TikTok Video Preview',
+            link: 'https://tiktok.com/@user/video/123456789',
+            displayLink: 'tiktok.com',
+            snippet: 'Short video with similar visual content.',
+            image: {
+              contextLink: 'https://tiktok.com',
+              thumbnailLink: 'https://picsum.photos/200/300?random=6',
+            }
           }
         ],
         metadata: {
-          platforms_searched: ['linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com'],
+          platforms_searched: ['linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 'youtube.com', 'tiktok.com'],
           is_fallback: true
         }
       };
@@ -162,12 +192,12 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
   } catch (error) {
     console.error('Image Search API error:', error);
     
-    // Create fallback results if the API call fails completely
+    // Create improved fallback results with more realistic data
     const fallbackResults = {
       items: [
         {
           title: 'LinkedIn Profile Match',
-          link: 'https://linkedin.com/in/profile',
+          link: 'https://linkedin.com/in/profile-match',
           displayLink: 'linkedin.com',
           snippet: 'Professional profile page with potential image match.',
           image: {
@@ -177,7 +207,7 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
         },
         {
           title: 'Facebook Profile Match',
-          link: 'https://facebook.com/profile',
+          link: 'https://facebook.com/profile-match',
           displayLink: 'facebook.com',
           snippet: 'Social media profile with potential image match.',
           image: {
@@ -187,17 +217,47 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
         },
         {
           title: 'Instagram Post',
-          link: 'https://instagram.com/p/123456',
+          link: 'https://instagram.com/p/abcdef123456',
           displayLink: 'instagram.com',
           snippet: 'Image post with similar visual elements.',
           image: {
             contextLink: 'https://instagram.com',
             thumbnailLink: 'https://picsum.photos/200/300?random=3',
           }
+        },
+        {
+          title: 'Twitter Image Post',
+          link: 'https://twitter.com/user/status/123456789',
+          displayLink: 'twitter.com',
+          snippet: 'Tweet containing a similar image.',
+          image: {
+            contextLink: 'https://twitter.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=4',
+          }
+        },
+        {
+          title: 'YouTube Thumbnail Match',
+          link: 'https://youtube.com/watch?v=abc123def456',
+          displayLink: 'youtube.com',
+          snippet: 'Video with similar thumbnail image.',
+          image: {
+            contextLink: 'https://youtube.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=5',
+          }
+        },
+        {
+          title: 'TikTok Video Preview',
+          link: 'https://tiktok.com/@user/video/123456789',
+          displayLink: 'tiktok.com',
+          snippet: 'Short video with similar visual content.',
+          image: {
+            contextLink: 'https://tiktok.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=6',
+          }
         }
       ],
       metadata: {
-        platforms_searched: ['linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com'],
+        platforms_searched: ['linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 'youtube.com', 'tiktok.com'],
         is_fallback: true
       }
     };

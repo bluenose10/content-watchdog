@@ -212,7 +212,7 @@ export function ContentSearchSection() {
               search_id: searchData.id,
               title: item.title || 'Matched Image',
               url: item.link,
-              thumbnail: item.image?.thumbnailLink || item.link || '/placeholder.svg',
+              thumbnail: item.image?.thumbnailLink || '/placeholder.svg',
               source: new URL(item.link).hostname,
               match_level: 'High', // For image searches we consider all matches as high
               found_at: new Date().toISOString(),
