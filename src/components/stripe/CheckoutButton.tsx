@@ -43,10 +43,8 @@ export function CheckoutButton({
       // Log the URL before redirecting
       console.log('Redirecting to Stripe checkout URL:', response.url);
       
-      // Small delay before redirect to ensure logging completes
-      setTimeout(() => {
-        window.location.href = response.url;
-      }, 100);
+      // Directly redirect to Stripe without timeout
+      window.location.href = response.url;
       
     } catch (error) {
       console.error('Error during checkout process:', error);
@@ -89,29 +87,31 @@ export function CheckoutButton({
         {isLoading ? "Processing..." : children}
       </Button>
       
-      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Payment Error</AlertDialogTitle>
-            <AlertDialogDescription>
-              {error || "Something went wrong with the payment process."}
-              <div className="mt-4 p-3 bg-muted rounded-md text-sm">
-                <p className="font-medium">Troubleshooting tips:</p>
-                <ul className="list-disc ml-5 mt-2 space-y-1">
-                  <li>Check your internet connection</li>
-                  <li>Verify your Stripe configuration in Supabase</li>
-                  <li>Ensure the plan exists in your database</li>
-                  <li>Check the Edge Function logs for errors</li>
-                  <li>Try again in a few minutes</li>
-                </ul>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {showErrorDialog && (
+        <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Payment Error</AlertDialogTitle>
+              <AlertDialogDescription>
+                {error || "Something went wrong with the payment process."}
+                <div className="mt-4 p-3 bg-muted rounded-md text-sm">
+                  <p className="font-medium">Troubleshooting tips:</p>
+                  <ul className="list-disc ml-5 mt-2 space-y-1">
+                    <li>Check your internet connection</li>
+                    <li>Verify your Stripe configuration in Supabase</li>
+                    <li>Ensure the plan exists in your database</li>
+                    <li>Check the Edge Function logs for errors</li>
+                    <li>Try again in a few minutes</li>
+                  </ul>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction>Close</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   );
 }
