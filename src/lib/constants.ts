@@ -72,7 +72,7 @@ export const PRICING_PLANS = [
     ],
     stripePriceId: "price_1O2uq8Dt5zFTAXjQ3rkszxTy", // Replace with your real test mode Stripe Price ID
     popular: true,
-    cta: "Sign Up Now"
+    cta: "Upgrade Now"
   },
   {
     id: "enterprise",
@@ -90,7 +90,7 @@ export const PRICING_PLANS = [
     ],
     stripePriceId: "price_1O2urADt5zFTAXjQSKD8S5n4", // Replace with your real test mode Stripe Price ID
     popular: false,
-    cta: "Contact Sales"
+    cta: "Upgrade Now"
   },
 ];
 
