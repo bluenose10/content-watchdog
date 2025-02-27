@@ -26,7 +26,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-muted-foreground">
+              <p className="text-gradient font-medium">
                 Welcome back, {firstName}! Monitor and protect your content.
               </p>
             </div>
@@ -233,7 +233,7 @@ const Dashboard = () => {
               <CardContent className="pb-6">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                   <div className="space-y-2">
-                    <p>With the Pro plan, you'll get:</p>
+                    <p className="text-gradient font-semibold text-lg mb-2">Protect Your Content From Unauthorized Use</p>
                     <ul className="space-y-1">
                       <li className="flex items-center text-sm">
                         <Shield className="mr-2 h-4 w-4 text-green-500" />
