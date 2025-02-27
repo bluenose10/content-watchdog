@@ -128,8 +128,8 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${returnUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${returnUrl}/canceled`,
+      success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${returnUrl.replace('/success', '/canceled')}`,
       client_reference_id: user.id,
       customer_email: user.email,
       metadata: {
