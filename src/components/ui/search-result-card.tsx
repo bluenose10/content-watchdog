@@ -32,6 +32,10 @@ export function SearchResultCard({
   // Truncate long titles
   const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
   
+  // Ensure matchLevel is a valid string before using it
+  const safeMatchLevel = matchLevel || 'Medium';
+  const matchLevelColor = getMatchLevelColor(safeMatchLevel);
+  
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
@@ -47,9 +51,9 @@ export function SearchResultCard({
           />
         </div>
         <Badge 
-          className={`absolute right-2 top-2 ${getMatchLevelColor(matchLevel)} text-white`}
+          className={`absolute right-2 top-2 ${matchLevelColor} text-white`}
         >
-          {matchLevel} Match
+          {safeMatchLevel} Match
         </Badge>
       </div>
       <CardHeader className="pb-2">
