@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast as sonnerToast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { PRICING_PLANS } from "@/lib/constants";
 
 interface CheckoutButtonProps {
   planId: string;
@@ -28,6 +29,18 @@ export function CheckoutButton({
     try {
       setIsLoading(true);
       
+      // Find the selected plan
+      const selectedPlan = PRICING_PLANS.find(plan => plan.id === planId);
+      
+      if (!selectedPlan) {
+        throw new Error(`Plan with ID ${planId} not found`);
+      }
+      
+      // Make sure the plan has a Stripe Price ID (free plan won't)
+      if (!selectedPlan.stripePriceId && selectedPlan.price > 0) {
+        throw new Error(`No Stripe Price ID configured for plan ${selectedPlan.name}`);
+      }
+      
       // Show loading toast
       sonnerToast.loading("Creating checkout session...", {
         id: "checkout-toast",
@@ -41,7 +54,11 @@ export function CheckoutButton({
       // Call the Supabase Edge Function to create a checkout session
       console.log('Calling create-checkout with planId:', planId);
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { planId, returnUrl }
+        body: { 
+          planId, 
+          priceId: selectedPlan.stripePriceId,
+          returnUrl 
+        }
       });
       
       if (error) {

@@ -8,6 +8,7 @@ export const PRICING_PLANS = [
     name: "Free",
     description: "For individuals just getting started",
     price: 0,
+    stripePriceId: "", // Free plan doesn't need a Stripe ID
     features: [
       "Up to 5 search results per query",
       "Basic content monitoring",
@@ -26,6 +27,7 @@ export const PRICING_PLANS = [
     name: "Pro",
     description: "For serious content creators",
     price: 49.99,
+    stripePriceId: "price_XXXXXXXXXX", // Replace with your actual Pro plan Price ID from Stripe
     features: [
       "Unlimited search results",
       "Advanced content monitoring",
@@ -42,6 +44,7 @@ export const PRICING_PLANS = [
     name: "Business",
     description: "For teams and businesses",
     price: 149.00,
+    stripePriceId: "price_XXXXXXXXXX", // Replace with your actual Business plan Price ID from Stripe
     features: [
       "Everything in Pro",
       "Unlimited automated monitoring",
