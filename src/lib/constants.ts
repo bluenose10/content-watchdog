@@ -72,7 +72,7 @@ export const PRICING_PLANS = [
     ],
     stripePriceId: "price_1O2uq8Dt5zFTAXjQ3rkszxTy", // Replace with your real test mode Stripe Price ID
     popular: true,
-    cta: "Subscribe Now"
+    cta: "Sign Up Now"
   },
   {
     id: "enterprise",
