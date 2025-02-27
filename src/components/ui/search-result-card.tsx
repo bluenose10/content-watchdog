@@ -83,7 +83,6 @@ export function SearchResultCard({
         color: 'text-blue-600',
         bgColor: 'bg-white',
         name: 'Facebook',
-        brandColor: 'from-white to-white',
         logoUrl: '/lovable-uploads/af0938db-0832-49ee-9207-a0d7eb137c15.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
@@ -92,7 +91,6 @@ export function SearchResultCard({
         color: 'text-sky-500',
         bgColor: 'bg-white',
         name: 'Twitter/X',
-        brandColor: 'from-white to-white',
         logoUrl: null
       };
     } else if (platform.includes('instagram')) {
@@ -101,7 +99,6 @@ export function SearchResultCard({
         color: 'text-pink-600',
         bgColor: 'bg-white',
         name: 'Instagram',
-        brandColor: 'from-white to-white',
         logoUrl: '/lovable-uploads/21d7103e-7ada-436c-a3d2-70cf9ac9f6f1.png'
       };
     } else if (platform.includes('linkedin')) {
@@ -110,7 +107,6 @@ export function SearchResultCard({
         color: 'text-blue-700',
         bgColor: 'bg-white',
         name: 'LinkedIn',
-        brandColor: 'from-white to-white',
         logoUrl: '/lovable-uploads/18311b5e-f517-4b56-9ff2-fa50c1f8a507.png'
       };
     } else if (platform.includes('youtube')) {
@@ -119,7 +115,6 @@ export function SearchResultCard({
         color: 'text-red-600',
         bgColor: 'bg-white',
         name: 'YouTube',
-        brandColor: 'from-white to-white',
         logoUrl: '/lovable-uploads/fc63dd69-3373-476b-82ef-89b335e91207.png'
       };
     } else if (platform.includes('tiktok')) {
@@ -128,7 +123,6 @@ export function SearchResultCard({
         color: 'text-black dark:text-white',
         bgColor: 'bg-white',
         name: 'TikTok',
-        brandColor: 'from-white to-white',
         logoUrl: null
       };
     } else {
@@ -137,7 +131,6 @@ export function SearchResultCard({
         color: 'text-gray-600 dark:text-gray-400',
         bgColor: 'bg-white',
         name: cleanSource,
-        brandColor: 'from-white to-white',
         logoUrl: null
       };
     }
@@ -255,18 +248,11 @@ export function SearchResultCard({
     }
   };
   
-  // Debug what's happening with the logos
-  useEffect(() => {
-    if (socialMedia.logoUrl) {
-      console.log(`Rendering logo for ${socialMedia.name}:`, socialMedia.logoUrl);
-    }
-  }, [socialMedia]);
-  
   return (
     <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80`}>
       <div className="relative">
         <div 
-          className={`overflow-hidden flex items-center justify-center bg-white`}
+          className="overflow-hidden flex items-center justify-center bg-white"
           style={{ height: "200px" }}
         >
           {isValidThumbnail() ? (
@@ -282,11 +268,7 @@ export function SearchResultCard({
                 <img 
                   src={socialMedia.logoUrl} 
                   alt={`${socialMedia.name} logo`}
-                  className="max-w-[80%] max-h-[80%] object-contain"
-                  onError={(e) => {
-                    console.error(`Error loading ${socialMedia.name} logo:`, e);
-                    setImageError(true);
-                  }}
+                  className="w-auto h-auto max-w-[70%] max-h-[70%] object-contain"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center">
