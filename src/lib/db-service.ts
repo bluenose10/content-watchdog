@@ -80,6 +80,22 @@ export const createUserSubscription = async (subscription: UserSubscription) => 
   return data?.[0];
 };
 
+// Google Custom Search API function
+export const performGoogleSearch = async (query: string, userId: string) => {
+  try {
+    // This function should call a Supabase Edge Function to avoid exposing API keys
+    const { data, error } = await supabase.functions.invoke('google-search', {
+      body: { query, userId }
+    });
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Google Search API error:', error);
+    throw error;
+  }
+};
+
 // File upload functions
 export const uploadSearchImage = async (file: File, userId: string) => {
   // Create a clean filename with user ID and timestamp to avoid collisions

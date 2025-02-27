@@ -26,14 +26,24 @@ export function SearchResultCard({
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
   
+  // Handle missing thumbnails
+  const imageSrc = thumbnail || '/placeholder.svg';
+  
+  // Truncate long titles
+  const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
+  
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
         <div className="overflow-hidden">
           <img
-            src={thumbnail}
+            src={imageSrc}
             alt={title}
             className="h-40 w-full object-cover transition-transform duration-500 hover:scale-105"
+            onError={(e) => {
+              // Fallback for broken images
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }}
           />
         </div>
         <Badge 
@@ -43,14 +53,14 @@ export function SearchResultCard({
         </Badge>
       </div>
       <CardHeader className="pb-2">
-        <h3 className="text-lg font-semibold">{title}</h3>
+        <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
         <p className="text-sm text-muted-foreground">
           Found on {source} • {formatDate(date)}
         </p>
       </CardHeader>
       <CardContent className="pb-2">
         {isPremium ? (
-          <p className="text-sm truncate">{url}</p>
+          <p className="text-sm truncate" title={url}>{url}</p>
         ) : (
           <div className="space-y-1">
             <p className="text-sm">Full details available with premium plan</p>

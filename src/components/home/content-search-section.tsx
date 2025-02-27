@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SEARCH_TYPES } from "@/lib/constants";
-import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
+import { createSearchQuery, performGoogleSearch, uploadSearchImage, createSearchResults } from "@/lib/db-service";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Upload } from "lucide-react";
@@ -70,6 +70,17 @@ export function ContentSearchSection() {
       }
 
       let imageUrl;
+      let searchData;
+      let searchResults = [];
+
+      // Create search query in database
+      searchData = await createSearchQuery({
+        user_id: user.id,
+        query_text: searchType !== "image" ? searchQuery : undefined,
+        query_type: searchType as any,
+        image_url: undefined, // Will update this for image search
+      });
+
       if (searchType === "image" && file) {
         // Show initial upload toast
         toast({
@@ -91,6 +102,12 @@ export function ContentSearchSection() {
         try {
           imageUrl = await uploadSearchImage(file, user.id);
           
+          // Update the search query with the image URL
+          await supabase
+            .from('search_queries')
+            .update({ image_url: imageUrl })
+            .eq('id', searchData.id);
+          
           // Clear interval and set progress to 100%
           clearInterval(progressInterval);
           setUploadProgress(100);
@@ -104,15 +121,46 @@ export function ContentSearchSection() {
           clearInterval(progressInterval);
           throw error;
         }
+      } else if (searchType !== "image") {
+        // For text-based searches, use Google Custom Search API
+        toast({
+          title: "Searching...",
+          description: "Looking for content matches across the web",
+        });
+        
+        try {
+          // Perform the Google search
+          const googleResults = await performGoogleSearch(searchQuery, user.id);
+          
+          if (googleResults && googleResults.items) {
+            // Transform Google search results to our format
+            searchResults = googleResults.items.map((item: any) => ({
+              search_id: searchData.id,
+              title: item.title,
+              url: item.link,
+              thumbnail: item.pagemap?.cse_image?.[0]?.src || '/placeholder.svg',
+              source: new URL(item.link).hostname,
+              match_level: item.title.toLowerCase().includes(searchQuery.toLowerCase()) ? 'High' : 'Medium',
+              found_at: new Date().toISOString(),
+            }));
+            
+            // Save search results to the database
+            await createSearchResults(searchResults);
+            
+            toast({
+              title: "Search complete",
+              description: `Found ${searchResults.length} potential matches`,
+            });
+          }
+        } catch (error) {
+          console.error("Google search error:", error);
+          toast({
+            title: "Search error",
+            description: "There was a problem with your search. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
-
-      // Create search query in database
-      const searchData = await createSearchQuery({
-        user_id: user.id,
-        query_text: searchType !== "image" ? searchQuery : undefined,
-        query_type: searchType as any,
-        image_url: imageUrl,
-      });
 
       // Navigate to results page with the search ID
       navigate(`/results?id=${searchData.id}`);
