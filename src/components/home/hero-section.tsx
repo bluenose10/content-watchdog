@@ -6,7 +6,8 @@ export const HeroSection = () => {
   const navigate = useNavigate();
 
   const handleSignupClick = () => {
-    navigate('/signup');
+    // Force navigation to the absolute path
+    window.location.href = '/signup';
   };
 
   return (
