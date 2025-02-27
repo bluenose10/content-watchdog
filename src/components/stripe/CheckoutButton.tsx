@@ -68,27 +68,28 @@ export function CheckoutButton({
       console.log('Return URL:', returnUrl);
       console.log('Selected plan:', selectedPlan);
       
+      // Prepare the request payload
+      const payload = { 
+        planId, 
+        priceId: selectedPlan.stripePriceId,
+        returnUrl,
+        userId: user.id,
+      };
+      
+      console.log('Invoking create-checkout function with:', payload);
+      
       try {
-        console.log('Invoking create-checkout function with:', {
-          planId,
-          priceId: selectedPlan.stripePriceId,
-          returnUrl,
-          userId: user.id
-        });
-        
         // Call the Supabase Edge Function
         const { data, error } = await supabase.functions.invoke('create-checkout', {
-          body: { 
-            planId, 
-            priceId: selectedPlan.stripePriceId,
-            returnUrl,
-            userId: user.id,
-          }
+          body: payload
         });
         
         if (error) {
           console.error('Supabase function error:', error);
-          setDebugInfo(error);
+          setDebugInfo({
+            error: error,
+            requestPayload: payload
+          });
           throw new Error(`Failed to create checkout session: ${error.message}`);
         }
         
@@ -96,7 +97,10 @@ export function CheckoutButton({
         
         if (!data || !data.url) {
           console.error('Invalid response from checkout function:', data);
-          setDebugInfo(data);
+          setDebugInfo({
+            response: data,
+            requestPayload: payload
+          });
           throw new Error('No checkout URL returned from server');
         }
         

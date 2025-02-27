@@ -19,15 +19,19 @@ serve(async (req) => {
     console.log("Edge function invoked: create-checkout");
     
     // Parse the request body
-    const { planId, priceId, returnUrl, userId } = await req.json();
+    const requestData = await req.json();
+    const { planId, priceId, returnUrl, userId } = requestData;
     
-    console.log("Request parameters:", { planId, priceId, returnUrl, userId });
+    console.log("Request parameters:", requestData);
     
     // Validate inputs
-    if (!planId || !returnUrl || !priceId) {
-      console.error("Missing required parameters");
+    if (!priceId || !returnUrl) {
+      console.error("Missing required parameters", { priceId, returnUrl });
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
+        JSON.stringify({ 
+          error: 'Missing required parameters',
+          details: { priceId, returnUrl }
+        }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
           status: 400 
@@ -40,7 +44,7 @@ serve(async (req) => {
     if (!STRIPE_SECRET_KEY) {
       console.error("STRIPE_SECRET_KEY is not set");
       return new Response(
-        JSON.stringify({ error: 'Server configuration error' }),
+        JSON.stringify({ error: 'Server configuration error: Missing Stripe key' }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500 
@@ -50,60 +54,48 @@ serve(async (req) => {
     
     // Create Stripe client
     const stripe = new Stripe(STRIPE_SECRET_KEY, {
-      apiVersion: '2023-10-16', // Use the latest API version
+      apiVersion: '2023-10-16', // Use a stable API version
     });
     
-    try {
-      // Create checkout session
-      console.log("Creating Stripe checkout session with price ID:", priceId);
-      
-      const checkoutOptions = {
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${new URL(returnUrl).origin}/canceled`,
-      };
-      
-      // Add client_reference_id if userId is provided
-      if (userId) {
-        // @ts-ignore - TypeScript doesn't know about this property
-        checkoutOptions.client_reference_id = userId;
+    // Create checkout session
+    console.log("Creating Stripe checkout session with price ID:", priceId);
+    
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      client_reference_id: userId || undefined,
+      success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${new URL(returnUrl).origin}/canceled`,
+    });
+    
+    console.log("Checkout session created successfully:", session.id);
+    
+    return new Response(
+      JSON.stringify({
+        sessionId: session.id,
+        url: session.url
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+        status: 200 
       }
-      
-      const session = await stripe.checkout.sessions.create(checkoutOptions);
-      
-      console.log("Checkout session created:", session.id);
-      return new Response(
-        JSON.stringify({
-          url: session.url,
-          sessionId: session.id
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-          status: 200 
-        }
-      );
-    } catch (stripeError) {
-      console.error("Stripe error:", stripeError);
-      return new Response(
-        JSON.stringify({ error: `Stripe error: ${stripeError.message}` }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-          status: 400 
-        }
-      );
-    }
+    );
     
   } catch (error) {
-    console.error("Unhandled error:", error);
+    console.error("Error in create-checkout function:", error);
+    
     return new Response(
-      JSON.stringify({ error: 'Server error: ' + error.message }),
+      JSON.stringify({ 
+        error: error.message || 'Unknown server error',
+        stack: error.stack,
+        name: error.name
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
         status: 500 
