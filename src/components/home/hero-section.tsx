@@ -8,6 +8,8 @@ export const HeroSection = () => {
     const searchSection = document.getElementById('search');
     if (searchSection) {
       searchSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      console.error("Search section element not found");
     }
   };
 
@@ -21,11 +23,19 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <Button size="lg" className="button-animation" onClick={handleScrollToSearch}>
+          <Button 
+            size="lg" 
+            className="button-animation" 
+            onClick={handleScrollToSearch}
+          >
             <Search className="mr-2 h-5 w-5" />
             Search Now
           </Button>
-          <Button asChild size="lg" variant="secondary">
+          <Button 
+            asChild 
+            size="lg" 
+            variant="secondary"
+          >
             <Link to="/signup">
               <Shield className="mr-2 h-5 w-5" />
               Create Account
