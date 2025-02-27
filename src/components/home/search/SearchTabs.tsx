@@ -220,15 +220,15 @@ export function SearchTabs({
       )}
       
       <TabsContent value="name">
-        <NameSearch onSearch={handleNameSearch} isSearching={isLoading} />
+        <NameSearch onSearch={handleNameSearch} isLoading={isLoading} />
       </TabsContent>
       
       <TabsContent value="hashtag">
-        <HashtagSearch onSearch={handleHashtagSearch} isSearching={isLoading} />
+        <HashtagSearch onSearch={handleHashtagSearch} isLoading={isLoading} />
       </TabsContent>
       
       <TabsContent value="image">
-        <ImageSearch onSearch={handleImageSearch} isUploading={isLoading} />
+        <ImageSearch onSearch={handleImageSearch} isLoading={isLoading} />
       </TabsContent>
     </Tabs>
   );
