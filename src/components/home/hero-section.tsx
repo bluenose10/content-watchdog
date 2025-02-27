@@ -1,7 +1,14 @@
 
 import { ArrowRight, Shield, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
+
+  const handleSignupClick = () => {
+    navigate('/signup');
+  };
+
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -12,13 +19,13 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
-          <a 
-            href="/signup"
+          <button 
+            onClick={handleSignupClick}
             className="flex items-center justify-center h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-md cursor-pointer transition-colors"
           >
             <Shield className="mr-2 h-5 w-5" />
             Create Account
-          </a>
+          </button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
