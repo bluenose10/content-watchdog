@@ -122,6 +122,14 @@ export function SearchResultCard({
         name: 'YouTube',
         image: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1074&auto=format&fit=crop'
       };
+    } else if (platform.includes('tiktok')) {
+      return {
+        Icon: Search, // No specific TikTok icon in lucide-react
+        color: 'text-black dark:text-white',
+        bgColor: 'bg-pink-50 dark:bg-pink-900/30',
+        name: 'TikTok',
+        image: 'https://images.unsplash.com/photo-1617784625140-458b19039e15?q=80&w=1074&auto=format&fit=crop'
+      };
     } else {
       return {
         Icon: Search,
