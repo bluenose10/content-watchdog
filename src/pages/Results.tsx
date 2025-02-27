@@ -1,6 +1,6 @@
 
 import { Sidebar } from "@/components/ui/sidebar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getSearchQueryById, getSearchResults, performGoogleSearch, performImageSearch, createSearchResults } from "@/lib/db-service";
 import { SearchResult } from "@/lib/db-types";
@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
-  Filter,
   Share,
   Download,
   MoreVertical,
@@ -36,6 +35,7 @@ import { formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
+import { SearchFilters, SortOption, MatchLevelFilter, SourceFilter } from "@/components/ui/search-filters";
 
 export default function Results() {
   const [searchParams] = useSearchParams();
@@ -49,6 +49,12 @@ export default function Results() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Filter state
+  const [sortOption, setSortOption] = useState<SortOption>("relevance");
+  const [matchLevelFilter, setMatchLevelFilter] = useState<MatchLevelFilter>("all");
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>([]);
+  const [keywordFilter, setKeywordFilter] = useState("");
 
   // Result limits based on access level - defines how many unblurred results to show
   const getResultLimit = () => {
@@ -65,8 +71,63 @@ export default function Results() {
 
   // Show up to 20 results for all user types, regardless of their access level
   const getDisplayCount = () => {
-    return Math.min(20, results.length);
+    return Math.min(20, filteredResults.length);
   };
+  
+  // Filter and sort results based on current filters
+  const filteredResults = useMemo(() => {
+    let filtered = [...results];
+    
+    // Filter by match level
+    if (matchLevelFilter !== "all") {
+      filtered = filtered.filter(result => 
+        result.match_level.toLowerCase() === matchLevelFilter.toLowerCase()
+      );
+    }
+    
+    // Filter by source
+    if (sourceFilter.length > 0) {
+      filtered = filtered.filter(result => 
+        sourceFilter.includes(result.source)
+      );
+    }
+    
+    // Filter by keyword
+    if (keywordFilter) {
+      const keyword = keywordFilter.toLowerCase();
+      filtered = filtered.filter(result => 
+        result.title.toLowerCase().includes(keyword) || 
+        result.source.toLowerCase().includes(keyword) ||
+        result.url.toLowerCase().includes(keyword)
+      );
+    }
+    
+    // Sort the results
+    if (sortOption === "date-new") {
+      filtered.sort((a, b) => new Date(b.found_at).getTime() - new Date(a.found_at).getTime());
+    } else if (sortOption === "date-old") {
+      filtered.sort((a, b) => new Date(a.found_at).getTime() - new Date(b.found_at).getTime());
+    } else {
+      // Default "relevance" sort puts high matches first, then medium, then low
+      filtered.sort((a, b) => {
+        const levelScore = {
+          'High': 3,
+          'Medium': 2,
+          'Low': 1
+        };
+        
+        return levelScore[b.match_level as keyof typeof levelScore] - levelScore[a.match_level as keyof typeof levelScore];
+      });
+    }
+    
+    return filtered;
+  }, [results, sortOption, matchLevelFilter, sourceFilter, keywordFilter]);
+  
+  // Get all unique sources for filtering
+  const availableSources = useMemo(() => 
+    [...new Set(results.map(result => result.source))],
+    [results]
+  );
 
   useEffect(() => {
     if (!searchId) {
@@ -233,6 +294,18 @@ export default function Results() {
 
     fetchData();
   }, [searchId, user, navigate, toast, accessLevel]);
+  
+  const handleFilterChange = (filters: {
+    sort: SortOption;
+    matchLevel: MatchLevelFilter;
+    sources: SourceFilter;
+    keyword: string;
+  }) => {
+    setSortOption(filters.sort);
+    setMatchLevelFilter(filters.matchLevel);
+    setSourceFilter(filters.sources);
+    setKeywordFilter(filters.keyword);
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -263,7 +336,8 @@ export default function Results() {
       "Found Date",
     ].join(",");
     
-    const rows = results.map((result) => {
+    // Use filtered results for the download
+    const rows = filteredResults.map((result) => {
       return [
         `"${result.title.replace(/"/g, '""')}"`,
         `"${result.url.replace(/"/g, '""')}"`,
@@ -451,26 +525,25 @@ export default function Results() {
                     </Alert>
                   )}
 
-                  <div className="flex justify-between items-center mb-4">
-                    <p className="text-sm text-muted-foreground">
-                      {results.length} matches found
-                    </p>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Filter className="h-4 w-4" />
-                      Filter
-                    </Button>
+                  {/* Search filters */}
+                  <div className="mb-6">
+                    <SearchFilters 
+                      onFilterChange={handleFilterChange}
+                      availableSources={availableSources}
+                      totalResults={results.length}
+                    />
                   </div>
 
-                  {results.length === 0 ? (
+                  {filteredResults.length === 0 ? (
                     <div className="py-12 text-center">
                       <p className="text-muted-foreground">
-                        No results found for this search.
+                        No results found matching your filters.
                       </p>
                     </div>
                   ) : (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                        {results.slice(0, getDisplayCount()).map((result, index) => (
+                        {filteredResults.slice(0, getDisplayCount()).map((result, index) => (
                           <SearchResultCard
                             key={result.id || index}
                             result={{
