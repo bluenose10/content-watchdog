@@ -83,7 +83,7 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'Facebook',
         iconUrl: '/lovable-uploads/1e633b91-cda1-46a7-a5ce-9eb89b5e0b17.png',
-        backgroundImage: '/lovable-uploads/2e32e60a-c5d3-4633-8478-b1bf97f4be7d.png'
+        backgroundImage: '/lovable-uploads/28641dee-8317-4ceb-a17f-a7dc8232b7d3.png'
       };
     } else if (platform.includes('instagram')) {
       return {
