@@ -18,7 +18,7 @@ export function FeatureCard({
   style,
 }: FeatureCardProps) {
   return (
-    <Card className={cn("feature-card", className)} style={style}>
+    <Card className={cn("feature-card glass-card overflow-hidden transition-all duration-300 hover:shadow-lg w-full", className)} style={style}>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           {icon && (
@@ -26,9 +26,11 @@ export function FeatureCard({
               {icon}
             </div>
           )}
-          <div className="space-y-1">
-            <h3 className="font-semibold">{title}</h3>
-            <p className="text-sm text-muted-foreground">{description}</p>
+          <div className="flex-1">
+            <div>
+              <h4 className="font-semibold">{title}</h4>
+              <p className="text-sm text-muted-foreground whitespace-pre-line">{description}</p>
+            </div>
           </div>
         </div>
       </CardContent>
