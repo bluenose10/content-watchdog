@@ -30,7 +30,7 @@ export function HashtagSearch({ onSearch, isLoading = false }: HashtagSearchProp
           required
         />
         <Button type="submit" className="whitespace-nowrap" disabled={isLoading}>
-          {isLoading ? "Searching..." : "Search Now"}
+          {isLoading ? "Searching..." : "Search"}
           {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
       </div>
