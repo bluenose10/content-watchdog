@@ -42,10 +42,13 @@ export default function Index() {
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
           
-          {/* First section with About Us and Call to Action */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
+          {/* First section with About Us, Content Search, and Call to Action */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
             <div className="col-span-1">
               <AboutSection />
+            </div>
+            <div className="col-span-1" id="content-search-section">
+              <ContentSearchSection />
             </div>
             <div className="col-span-1">
               <CallToAction />
@@ -57,13 +60,10 @@ export default function Index() {
             <Separator className="border-dotted border-t-2" />
           </div>
           
-          {/* Second section with Features, Content Search, and Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+          {/* Second section with Features and Testimonials */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
             <div className="col-span-1">
               <FeaturesSection />
-            </div>
-            <div className="col-span-1" id="content-search-section">
-              <ContentSearchSection />
             </div>
             <div className="col-span-1">
               <TestimonialsSection />
