@@ -35,6 +35,53 @@ export const getSearchQueryById = async (searchId: string) => {
   return data;
 };
 
+// Delete search query and its results
+export const deleteSearchQuery = async (searchId: string) => {
+  // First get the search query to check if there's an image to delete
+  const { data: searchQuery, error: fetchError } = await supabase
+    .from('search_queries')
+    .select('*')
+    .eq('id', searchId)
+    .single();
+  
+  if (fetchError) throw fetchError;
+  
+  // If there's an image URL, delete it from storage
+  if (searchQuery.image_url && searchQuery.query_type === 'image') {
+    try {
+      // Extract the file path from the URL
+      const storageUrl = new URL(searchQuery.image_url);
+      const pathParts = storageUrl.pathname.split('/');
+      const storagePath = pathParts.slice(pathParts.indexOf('storage') + 2).join('/');
+      
+      if (storagePath) {
+        console.log('Deleting file from storage:', storagePath);
+        const { error: storageError } = await supabase.storage
+          .from('uploads')
+          .remove([storagePath]);
+        
+        if (storageError) {
+          console.error('Error deleting file from storage:', storageError);
+          // Continue with deleting the record even if file delete fails
+        }
+      }
+    } catch (e) {
+      console.error('Error processing image URL for deletion:', e);
+      // Continue with deletion even if URL parsing fails
+    }
+  }
+  
+  // Now delete the search query (cascading delete will remove results too)
+  const { error } = await supabase
+    .from('search_queries')
+    .delete()
+    .eq('id', searchId);
+  
+  if (error) throw error;
+  
+  return { success: true };
+};
+
 // Search results functions
 export const createSearchResults = async (results: SearchResult[]) => {
   const { data, error } = await supabase

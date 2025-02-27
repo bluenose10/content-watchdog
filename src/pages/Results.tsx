@@ -1,336 +1,271 @@
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
+import { Sidebar } from "@/components/ui/sidebar";
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { getSearchQueryById, getSearchResults } from "@/lib/db-service";
+import { SearchResult } from "@/lib/db-types";
 import { SearchResultCard } from "@/components/ui/search-result-card";
-import { MOCK_SEARCH_RESULTS } from "@/lib/constants";
-import { useToast } from "@/hooks/use-toast";
-import { getSearchQueryById, getSearchResults, getUserSubscription, getFreePlan } from "@/lib/db-service";
 import { useAuth } from "@/context/AuthContext";
-import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { ArrowLeft, ArrowRight, Download, Filter, Loader, Image, Search as SearchIcon } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Plan, SearchResult } from "@/lib/db-types";
-import { AnimatedGradientBorder } from "@/components/ui/animated-gradient-border";
+import { DeleteSearchButton } from "@/components/ui/delete-search-button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  Filter,
+  Share,
+  Download,
+  MoreVertical,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import { formatDate } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
-const PLACEHOLDER_IMAGES = [
-  {
-    id: "placeholder-1",
-    title: "Your search results will appear here",
-    url: "https://example.com",
-    thumbnail: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    source: "Waiting for search",
-    match_level: "Medium",
-    found_at: new Date().toISOString()
-  },
-  {
-    id: "placeholder-2",
-    title: "Try searching for your content",
-    url: "https://example.com",
-    thumbnail: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
-    source: "Try a new search",
-    match_level: "Low",
-    found_at: new Date().toISOString()
-  },
-  {
-    id: "placeholder-3",
-    title: "Upload an image to find matches",
-    url: "https://example.com",
-    thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
-    source: "Image search",
-    match_level: "High",
-    found_at: new Date().toISOString()
-  }
-];
-
-const Results = () => {
+export default function Results() {
+  const [searchParams] = useSearchParams();
+  const searchId = searchParams.get("id");
+  const { user } = useAuth();
+  const [searchData, setSearchData] = useState<any>(null);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useProtectedRoute();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const searchId = searchParams.get('id');
-  const [isPremium, setIsPremium] = useState(false);
-  const [resultLimit, setResultLimit] = useState(5); // Default limit for free users
-  const FREE_PREVIEW_COUNT = 2; // Number of results to show as free preview
-  
-  // Fetch user subscription
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription', user?.id],
-    queryFn: () => user ? getUserSubscription(user.id) : null,
-    enabled: !!user,
-  });
 
-  // Fetch free plan as fallback
-  const { data: freePlan } = useQuery({
-    queryKey: ['freePlan'],
-    queryFn: () => getFreePlan(),
-    enabled: !subscription,
-  });
-
-  // Fetch search query
-  const { data: searchQuery, isLoading: queryLoading } = useQuery({
-    queryKey: ['search', searchId],
-    queryFn: () => searchId ? getSearchQueryById(searchId) : null,
-    enabled: !!searchId,
-  });
-
-  // Fetch search results
-  const { data: searchResults, isLoading: resultsLoading } = useQuery({
-    queryKey: ['results', searchId],
-    queryFn: () => searchId ? getSearchResults(searchId) : null,
-    enabled: !!searchId,
-    // If we don't have real results yet, use mock data for demo
-    placeholderData: MOCK_SEARCH_RESULTS,
-  });
-
-  // Determine user's plan limits and premium status
   useEffect(() => {
-    if (subscription) {
-      const isActive = subscription.status === 'active';
-      setIsPremium(isActive);
-      
-      if (subscription.plans) {
-        const planLimit = subscription.plans.result_limit;
-        setResultLimit(planLimit === -1 ? 9999 : planLimit);
-      } else {
-        setResultLimit(freePlan?.result_limit || 5);
-      }
-    } else if (freePlan) {
-      setResultLimit(freePlan.result_limit);
-      setIsPremium(false);
+    if (!searchId) {
+      setError("No search ID provided");
+      setIsLoading(false);
+      return;
     }
-  }, [subscription, freePlan]);
-  
-  const handleUpgrade = () => {
-    toast({
-      title: "Upgrade Required",
-      description: "Please upgrade to a premium plan to see all results.",
-    });
+
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const searchQueryData = await getSearchQueryById(searchId);
+        setSearchData(searchQueryData);
+
+        const searchResults = await getSearchResults(searchId);
+        setResults(searchResults || []);
+      } catch (err) {
+        console.error("Error fetching search data:", err);
+        setError("Failed to load search results");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [searchId]);
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: "Check out these search results",
+          text: `Search results for ${searchData?.query_text || "image"}`,
+          url: window.location.href,
+        })
+        .catch((err) => console.error("Error sharing:", err));
+    } else {
+      // Fallback for browsers that don't support navigator.share
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "URL copied to clipboard",
+        description: "Share this link with others to show your results",
+      });
+    }
   };
-  
-  // Show placeholder images when there are no search results yet
-  const displayedResults = searchId ? 
-    (searchResults ? 
-      (isPremium ? searchResults : searchResults.slice(0, resultLimit)) : 
-      []) :
-    PLACEHOLDER_IMAGES;
+
+  const handleDownload = () => {
+    // Create a CSV of the search results
+    const headers = [
+      "Title",
+      "URL",
+      "Source",
+      "Match Level",
+      "Found Date",
+    ].join(",");
+    
+    const rows = results.map((result) => {
+      return [
+        `"${result.title.replace(/"/g, '""')}"`,
+        `"${result.url.replace(/"/g, '""')}"`,
+        `"${result.source.replace(/"/g, '""')}"`,
+        `"${result.match_level}"`,
+        `"${new Date(result.found_at).toLocaleDateString()}"`,
+      ].join(",");
+    });
+    
+    const csv = [headers, ...rows].join("\n");
+    
+    // Create a download link
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `search-results-${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
-      <Header />
-      <main className="flex-grow pt-24 pb-16">
-        <div className="container px-4 md:px-6">
-          {/* Header Section with Glassmorphism */}
-          <Card className="mb-8 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md shadow-md">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Link to="/dashboard">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100/50 dark:text-blue-400 dark:hover:bg-blue-900/30">
-                        <ArrowLeft className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      Search Results
-                    </h1>
-                  </div>
-                  <p className="text-muted-foreground mt-1">
-                    Results for: <span className="font-medium text-blue-600 dark:text-blue-400">
-                      {searchQuery?.query_type === 'image' 
-                        ? 'Image Search' 
-                        : searchQuery?.query_text || (searchId ? '@johndoe' : 'Start a search to see results')}
-                    </span>
+    <div className="flex min-h-screen bg-background">
+      <Sidebar />
+      <div className="flex-1 min-h-screen">
+        <main className="flex-1 p-4 md:p-6">
+          <div className="container mx-auto max-w-6xl">
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              
+              <div className="flex items-center gap-2">
+                {/* Add the delete button here */}
+                {searchData && (
+                  <DeleteSearchButton 
+                    searchId={searchId || ''} 
+                    searchType={searchData.query_type}
+                  />
+                )}
+              
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleShare}>
+                      <Share className="mr-2 h-4 w-4" />
+                      Share Results
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownload}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download CSV
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground">Loading search results...</p>
+              </div>
+            ) : error ? (
+              <Alert variant="destructive" className="my-8">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <div className="space-y-2 mb-8">
+                  <h1 className="text-2xl md:text-3xl font-bold">
+                    Search Results
+                  </h1>
+                  <p className="text-muted-foreground">
+                    {searchData?.query_type === "image"
+                      ? "Results for your image search"
+                      : `Results for "${searchData?.query_text}"`}
+                    {searchData?.created_at && (
+                      <span className="ml-2 text-sm">
+                        • Searched on {formatDate(searchData.created_at)}
+                      </span>
+                    )}
                   </p>
+                  {searchData?.query_type === "image" && searchData?.image_url && (
+                    <div className="mt-4 p-4 rounded-lg border border-border bg-secondary/20">
+                      <div className="flex items-center gap-4">
+                        <div className="h-20 w-20 rounded-md overflow-hidden border border-border shadow-sm">
+                          <img
+                            src={searchData.image_url}
+                            alt="Search image"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">Search Image</h3>
+                          <p className="text-sm text-muted-foreground">
+                            We found {results.length} matches for this image
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/50">
-                    <Filter className="mr-2 h-4 w-4 text-blue-500" />
+
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    {results.length} matches found
+                  </p>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Filter className="h-4 w-4" />
                     Filter
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    disabled={!isPremium || !searchId}
-                    className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/50"
-                    onClick={() => {
-                      if (!isPremium) {
-                        handleUpgrade();
-                      } else {
-                        toast({
-                          title: "Downloading Results",
-                          description: "Your results are being prepared for download.",
-                        });
-                      }
-                    }}
-                  >
-                    <Download className="mr-2 h-4 w-4 text-blue-500" />
-                    Export
-                  </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Display uploaded image if this is an image search */}
-          {searchQuery?.query_type === 'image' && searchQuery.image_url && (
-            <AnimatedGradientBorder 
-              gradientClasses="from-blue-500 via-purple-600 to-indigo-600" 
-              className="mb-8 p-0"
-            >
-              <Card className="border-0 shadow-none bg-transparent overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-start gap-6">
-                    <div className="w-full md:w-48 h-48 relative rounded-lg overflow-hidden border border-white/20 shadow-lg">
-                      <img 
-                        src={searchQuery.image_url}
-                        alt="Uploaded image"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder.svg';
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold mb-2 text-blue-600 dark:text-blue-400">Uploaded Image</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                        We're searching the web for visually similar images and potential unauthorized uses.
-                      </p>
-                      {resultsLoading ? (
-                        <div className="flex items-center gap-2 text-blue-500 dark:text-blue-400">
-                          <Loader className="h-4 w-4 animate-spin" />
-                          <span>Searching across platforms...</span>
-                        </div>
-                      ) : searchResults?.length ? (
-                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                          Found {searchResults.length} potential matches
-                        </p>
-                      ) : (
-                        <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                          No matches found yet
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </AnimatedGradientBorder>
-          )}
-
-          {!isPremium && searchId && searchResults && searchResults.length > resultLimit && (
-            <AnimatedGradientBorder 
-              gradientClasses="from-purple-600 via-blue-600 to-indigo-700" 
-              className="mb-8 p-0"
-            >
-              <Card className="mb-0 border-0 shadow-none overflow-hidden bg-transparent backdrop-blur-sm">
-                <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-bold mb-1 text-gradient bg-gradient-to-r from-blue-600 to-purple-600">Free Plan</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      You're viewing {resultLimit} of {searchResults?.length || 0} total results. 
-                      The first {FREE_PREVIEW_COUNT} results are clickable as a preview. 
-                      Upgrade to see all matches and access premium features.
+                {results.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <p className="text-muted-foreground">
+                      No results found for this search.
                     </p>
                   </div>
-                  <Button asChild className="button-animation bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-md">
-                    <Link to="/#pricing">Upgrade Now</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </AnimatedGradientBorder>
-          )}
-
-          {searchId && resultsLoading ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-4">
-              <div className="w-16 h-16 relative">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-200 dark:border-blue-900 opacity-25"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-t-blue-600 dark:border-t-blue-400 animate-spin"></div>
-              </div>
-              <p className="text-blue-600 dark:text-blue-400 font-medium">Searching across platforms...</p>
-            </div>
-          ) : searchId && searchResults?.length === 0 ? (
-            <Card className="text-center py-12 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm shadow-md">
-              <div className="max-w-md mx-auto px-6">
-                <Image className="h-16 w-16 mx-auto mb-4 text-blue-500 opacity-50" />
-                <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">No results found</h2>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  We couldn't find any matches for your search. Try a different query or search type.
-                </p>
-                <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm">
-                  <Link to="/search">Try Another Search</Link>
-                </Button>
-              </div>
-            </Card>
-          ) : (
-            <>
-              {!searchId && (
-                <div className="mb-8">
-                  <Card className="text-center py-8 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm shadow-md">
-                    <div className="max-w-md mx-auto px-6">
-                      <SearchIcon className="h-16 w-16 mx-auto mb-4 text-blue-500 opacity-70" />
-                      <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">Start a New Search</h2>
-                      <p className="text-gray-600 dark:text-gray-300 mb-6">
-                        Search for your content across platforms to discover where it appears online. Find unauthorized uses and protect your work.
-                      </p>
-                      <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm">
-                        <Link to="/search">
-                          <SearchIcon className="mr-2 h-4 w-4" />
-                          Start a Search
-                        </Link>
-                      </Button>
-                    </div>
-                  </Card>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayedResults.map((result: SearchResult, index: number) => (
-                  <SearchResultCard
-                    key={result.id}
-                    result={{
-                      id: result.id || '',
-                      title: result.title,
-                      url: result.url,
-                      thumbnail: result.thumbnail,
-                      source: result.source,
-                      matchLevel: result.match_level,
-                      date: result.found_at
-                    }}
-                    isPremium={isPremium}
-                    isFreePreview={searchId && !isPremium && index < FREE_PREVIEW_COUNT}
-                    onUpgrade={handleUpgrade}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {searchId && !isPremium && searchResults && searchResults.length > resultLimit && (
-            <div className="mt-12 text-center">
-              <p className="text-gray-500 mb-4 dark:text-gray-400">
-                {displayedResults.length} of {searchResults.length} results shown
-              </p>
-              <AnimatedGradientBorder 
-                gradientClasses="from-blue-500 via-purple-600 to-indigo-600"
-                containerClassName="inline-block"
-              >
-                <Button asChild className="bg-transparent hover:bg-white/10 border-0 shadow-none">
-                  <Link to="/#pricing" className="px-6 py-2">
-                    <span className="font-medium mr-2">Upgrade to See All Results</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </AnimatedGradientBorder>
-            </div>
-          )}
-        </div>
-      </main>
-      <Footer />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    {results.map((result, index) => (
+                      <SearchResultCard
+                        key={result.id || index}
+                        result={{
+                          id: result.id || `result-${index}`,
+                          title: result.title,
+                          url: result.url,
+                          thumbnail: result.thumbnail,
+                          source: result.source,
+                          matchLevel: result.match_level,
+                          date: result.found_at,
+                        }}
+                        isPremium={true}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
-
-export default Results;
