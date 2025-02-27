@@ -2,35 +2,53 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Check, Info } from "lucide-react";
+import { Check, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from "@/lib/supabase";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Get session_id and payment_intent from URL
   const sessionId = searchParams.get("session_id");
-  const isDemo = searchParams.get("demo") === "true";
 
   useEffect(() => {
-    // In a real implementation, you would verify the session with the Stripe API
+    // Verify the checkout session
     const verifySession = async () => {
       try {
-        // Simulate verification
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        if (!sessionId) {
+          throw new Error("No session ID found in URL");
+        }
+        
+        // Call Supabase Edge Function to verify session
+        const { data, error } = await supabase.functions.invoke('verify-checkout', {
+          body: { sessionId }
+        });
+        
+        if (error) {
+          throw new Error(`Failed to verify session: ${error.message}`);
+        }
+        
+        if (!data || !data.success) {
+          throw new Error(data?.message || "Session verification failed");
+        }
+        
+        setIsSuccess(true);
         setIsLoading(false);
       } catch (error) {
         console.error("Error verifying payment session:", error);
+        setErrorMessage(error instanceof Error ? error.message : "Failed to verify payment");
+        setIsSuccess(false);
         setIsLoading(false);
       }
     };
 
-    if (sessionId || isDemo) {
-      verifySession();
-    } else {
-      setIsLoading(false);
-    }
-  }, [sessionId, isDemo]);
+    verifySession();
+  }, [sessionId]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -38,30 +56,53 @@ export default function PaymentSuccess() {
         {isLoading ? (
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-            <h1 className="text-2xl font-bold">Simulating checkout...</h1>
-            <p className="text-muted-foreground">This is a demo. No actual payment is being processed.</p>
+            <h1 className="text-2xl font-bold">Verifying payment...</h1>
+            <p className="text-muted-foreground">Please wait while we confirm your payment.</p>
           </div>
-        ) : (
+        ) : isSuccess ? (
           <div className="text-center space-y-4">
-            <Alert className="mb-6 bg-yellow-50 border-yellow-200">
-              <Info className="h-4 w-4 text-yellow-600" />
-              <AlertTitle className="text-yellow-700">Demo Mode</AlertTitle>
-              <AlertDescription className="text-yellow-600 text-sm">
-                This is a demonstration only. No payment has been processed and no subscription has actually been activated.
-              </AlertDescription>
-            </Alert>
-            
             <div className="bg-green-100 p-3 rounded-full inline-flex">
               <Check className="h-10 w-10 text-green-600" />
             </div>
-            <h1 className="text-2xl font-bold">Demo Checkout Complete</h1>
+            <h1 className="text-2xl font-bold">Payment Successful</h1>
             <p className="text-muted-foreground">
-              In a real application, this page would appear after a successful payment processing.
+              Thank you for your purchase. Your subscription has been activated.
             </p>
             
             <div className="pt-4">
               <Button onClick={() => navigate("/dashboard")} className="w-full">
                 Go to Dashboard
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="bg-red-100 p-3 rounded-full inline-flex">
+              <AlertTriangle className="h-10 w-10 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold">Payment Verification Failed</h1>
+            <p className="text-muted-foreground">
+              {errorMessage || "We couldn't verify your payment. Please contact support."}
+            </p>
+            
+            <Alert className="my-4 bg-amber-50 border-amber-200">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-700">Important</AlertTitle>
+              <AlertDescription className="text-amber-600 text-sm">
+                If you believe this is an error and your card was charged, please contact our support team.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="pt-4 space-y-2">
+              <Button onClick={() => navigate("/dashboard")} className="w-full">
+                Return to Dashboard
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = "mailto:support@example.com"} 
+                className="w-full"
+              >
+                Contact Support
               </Button>
             </div>
           </div>
