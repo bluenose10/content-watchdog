@@ -9,7 +9,142 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      plans: {
+        Row: {
+          created_at: string | null
+          id: string
+          monitoring_limit: number
+          name: string
+          price: number
+          result_limit: number
+          search_limit: number
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          monitoring_limit: number
+          name: string
+          price: number
+          result_limit: number
+          search_limit: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          monitoring_limit?: number
+          name?: string
+          price?: number
+          result_limit?: number
+          search_limit?: number
+        }
+        Relationships: []
+      }
+      search_queries: {
+        Row: {
+          created_at: string | null
+          id: string
+          image_url: string | null
+          query_text: string | null
+          query_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          query_text?: string | null
+          query_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          query_text?: string | null
+          query_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      search_results: {
+        Row: {
+          created_at: string | null
+          found_at: string
+          id: string
+          match_level: string
+          search_id: string
+          source: string
+          thumbnail: string
+          title: string
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          found_at: string
+          id?: string
+          match_level: string
+          search_id: string
+          source: string
+          thumbnail: string
+          title: string
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          found_at?: string
+          id?: string
+          match_level?: string
+          search_id?: string
+          source?: string
+          thumbnail?: string
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_results_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "search_queries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          current_period_end: string
+          id: string
+          plan_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_period_end: string
+          id?: string
+          plan_id: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_period_end?: string
+          id?: string
+          plan_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
