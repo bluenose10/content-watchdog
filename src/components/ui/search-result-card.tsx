@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Search, FileSearch, Image } from "lucide-react";
 import { Badge } from "./badge";
 import { useEffect, useState } from "react";
 
@@ -45,27 +45,34 @@ export function SearchResultCard({
     }
   })();
   
+  // Get icon size and color based on match level
+  const getIconParams = () => {
+    switch(safeMatchLevel) {
+      case 'High':
+        return { size: 80, color: '#10b981', Icon: FileSearch };
+      case 'Medium':
+        return { size: 70, color: '#3b82f6', Icon: Search };
+      default:
+        return { size: 60, color: '#6b7280', Icon: Image };
+    }
+  };
+  
+  const { size, color, Icon } = getIconParams();
+  
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
         <div 
-          className="overflow-hidden flex items-center justify-center bg-slate-200" 
+          className="overflow-hidden flex items-center justify-center bg-slate-100" 
           style={{ height: "225px" }}
         >
-          <div className="w-24 h-24 text-slate-400">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-              <circle cx="9" cy="9" r="2" />
-              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-            </svg>
+          <div className="relative p-6 flex flex-col items-center justify-center text-center">
+            <div style={{ color: color }}>
+              <Icon size={size} strokeWidth={1.5} />
+            </div>
+            <div className="mt-3 text-sm font-medium text-slate-700 bg-white/80 px-3 py-1 rounded-full">
+              Content Match Found
+            </div>
           </div>
         </div>
         <Badge 
