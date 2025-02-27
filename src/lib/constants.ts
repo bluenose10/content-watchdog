@@ -76,7 +76,7 @@ export const PRICING_PLANS = [
   },
   {
     id: "enterprise",
-    name: "Enterprise",
+    name: "Business Account",
     description: "Complete protection for businesses",
     price: 149,
     interval: "month",
