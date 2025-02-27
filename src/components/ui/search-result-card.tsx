@@ -94,6 +94,15 @@ export function SearchResultCard({
         iconUrl: '/lovable-uploads/aa9c9191-adcd-4086-a761-9f7f6fa6cddc.png',
         backgroundImage: '/lovable-uploads/aa9c9191-adcd-4086-a761-9f7f6fa6cddc.png'
       };
+    } else if (platform.includes('linkedin')) {
+      return {
+        Icon: Linkedin,
+        color: 'text-blue-700',
+        bgColor: 'bg-white',
+        name: 'LinkedIn',
+        iconUrl: '/lovable-uploads/38a034f7-9a2e-4680-95eb-962ac700feef.png',
+        backgroundImage: '/lovable-uploads/38a034f7-9a2e-4680-95eb-962ac700feef.png'
+      };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
         Icon: Twitter,
@@ -102,15 +111,6 @@ export function SearchResultCard({
         name: 'Twitter/X',
         iconUrl: '/lovable-uploads/2193c223-55d1-4caf-912c-7f2e8cd5e2eb.png',
         backgroundImage: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=300'
-      };
-    } else if (platform.includes('linkedin')) {
-      return {
-        Icon: Linkedin,
-        color: 'text-blue-700',
-        bgColor: 'bg-white',
-        name: 'LinkedIn',
-        iconUrl: '/lovable-uploads/140db42c-ae9c-4fff-a819-0da1ec55a215.png',
-        backgroundImage: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=600&h=300'
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -257,6 +257,7 @@ export function SearchResultCard({
   // Check if we should always show the custom background image for these platforms
   const shouldShowFacebookBackground = cleanSource.toLowerCase().includes('facebook');
   const shouldShowInstagramBackground = cleanSource.toLowerCase().includes('instagram');
+  const shouldShowLinkedInBackground = cleanSource.toLowerCase().includes('linkedin');
   
   return (
     <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80`}>
@@ -279,6 +280,14 @@ export function SearchResultCard({
                 src={socialMedia.backgroundImage} 
                 alt="Instagram content"
                 className="w-auto h-auto max-w-[60%] max-h-[60%] object-contain"
+              />
+            </div>
+          ) : shouldShowLinkedInBackground ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img 
+                src={socialMedia.backgroundImage} 
+                alt="LinkedIn content"
+                className="w-auto h-auto max-w-[70%] max-h-[70%] object-contain"
               />
             </div>
           ) : isValidThumbnail() ? (
