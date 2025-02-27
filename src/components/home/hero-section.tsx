@@ -1,5 +1,5 @@
 
-import { ArrowRight, Search, Shield, Zap } from "lucide-react";
+import { ArrowRight, Shield, Zap } from "lucide-react";
 
 export const HeroSection = () => {
   const handleCreateAccount = () => {
@@ -8,21 +8,6 @@ export const HeroSection = () => {
     
     // Adding console log for debugging
     console.log("Create Account button clicked, redirecting to /signup");
-  };
-
-  const handleSearchNow = (e: React.MouseEvent) => {
-    e.preventDefault();
-    
-    // Find the content search section element and scroll to it
-    const contentSearchSection = document.getElementById("content-search-section");
-    if (contentSearchSection) {
-      contentSearchSection.scrollIntoView({ behavior: "smooth" });
-      
-      // Adding console log for debugging
-      console.log("Search Now button clicked, scrolling to content-search-section");
-    } else {
-      console.error("content-search-section element not found");
-    }
   };
 
   return (
@@ -34,14 +19,7 @@ export const HeroSection = () => {
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <button 
-            onClick={handleSearchNow}
-            className="flex items-center justify-center h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-md cursor-pointer transition-colors"
-          >
-            <Search className="mr-2 h-5 w-5" />
-            Search Now
-          </button>
+        <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
           <button 
             onClick={handleCreateAccount}
             className="flex items-center justify-center h-12 px-6 bg-white hover:bg-gray-100 text-purple-600 border border-purple-200 rounded-md cursor-pointer transition-colors"
@@ -54,7 +32,7 @@ export const HeroSection = () => {
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4">
-                <Search className="h-6 w-6 text-purple-700 dark:text-purple-400" />
+                <Shield className="h-6 w-6 text-purple-700 dark:text-purple-400" />
               </div>
               <h3 className="text-xl font-medium mb-1">Find Content</h3>
               <p className="text-sm text-muted-foreground">
