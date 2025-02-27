@@ -9,7 +9,7 @@ import { createSearchQuery, performGoogleSearch, uploadSearchImage, createSearch
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Upload } from "lucide-react";
+import { Search, Upload, X } from "lucide-react";
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -19,6 +19,7 @@ export function ContentSearchSection() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -51,6 +52,10 @@ export function ContentSearchSection() {
         e.target.value = ''; // Reset the input
         return;
       }
+      
+      // Create preview URL for the image
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreviewUrl(objectUrl);
       
       setFile(selectedFile);
       console.log("File selected:", selectedFile.name);
@@ -96,8 +101,23 @@ export function ContentSearchSection() {
         return;
       }
       
+      // Create preview URL for the image
+      const objectUrl = URL.createObjectURL(droppedFile);
+      setPreviewUrl(objectUrl);
+      
       setFile(droppedFile);
       console.log("File dropped:", droppedFile.name);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -282,40 +302,63 @@ export function ContentSearchSection() {
                   {searchType === "image" ? (
                     <div className="space-y-2">
                       <Label>Upload Image</Label>
-                      <div 
-                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-colors"
-                        onClick={handleUploadClick}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                      >
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                          {uploadProgress > 0 && uploadProgress < 100 ? (
-                            <div className="w-full max-w-xs">
-                              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-primary" 
-                                  style={{ width: `${uploadProgress}%` }}
-                                ></div>
-                              </div>
-                              <p className="text-xs text-center mt-2">
-                                Uploading... {uploadProgress}%
-                              </p>
-                            </div>
-                          ) : (
-                            <>
-                              <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                              <p className="text-sm text-muted-foreground">
-                                {file
-                                  ? file.name
-                                  : "Click to upload or drag and drop"}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                (JPG, PNG, GIF, WEBP up to 10MB)
-                              </p>
-                            </>
-                          )}
+                      
+                      {previewUrl ? (
+                        <div className="relative">
+                          <div className="relative w-full h-48 border-2 border-border rounded-lg overflow-hidden">
+                            <img 
+                              src={previewUrl}
+                              alt="Upload preview" 
+                              className="w-full h-full object-contain bg-secondary/30"
+                            />
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="destructive"
+                              className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-90"
+                              onClick={handleRemoveImage}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-center mt-2 text-muted-foreground">
+                            {file?.name} ({Math.round(file?.size / 1024)} KB)
+                          </p>
                         </div>
-                      </div>
+                      ) : (
+                        <div 
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                          onClick={handleUploadClick}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
+                        >
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            {uploadProgress > 0 && uploadProgress < 100 ? (
+                              <div className="w-full max-w-xs">
+                                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-primary" 
+                                    style={{ width: `${uploadProgress}%` }}
+                                  ></div>
+                                </div>
+                                <p className="text-xs text-center mt-2">
+                                  Uploading... {uploadProgress}%
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground">
+                                  Click to upload or drag and drop
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  (JPG, PNG, GIF, WEBP up to 10MB)
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       <input
                         ref={fileInputRef}
                         id="image-upload"
