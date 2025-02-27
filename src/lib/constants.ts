@@ -12,6 +12,30 @@ export const ABOUT_URL = "/about";
 // Authentication constants
 export const MIN_PASSWORD_LENGTH = 8;
 
+// Feature constants
+export const FEATURES = [
+  {
+    title: "Advanced Search",
+    description: "Scan the web for your content using images, hashtags, and names."
+  },
+  {
+    title: "Real-time Alerts",
+    description: "Get notified instantly when your content appears online."
+  },
+  {
+    title: "Automated Protection",
+    description: "Automate takedown requests and protect your digital assets."
+  },
+  {
+    title: "DMCA Assistance",
+    description: "Simplified DMCA process with pre-filled templates and tracking."
+  },
+  {
+    title: "Match Level System",
+    description: "Advanced algorithms detect exact and modified versions of your content."
+  }
+];
+
 // Search constants
 export const MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 export const SUPPORTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/webp"];
@@ -31,6 +55,7 @@ export const PRICING_PLANS = [
     ],
     stripePriceId: "", // Free plan doesn't need a Stripe Price ID
     popular: false,
+    cta: "Sign Up Free"
   },
   {
     id: "pro",
@@ -47,6 +72,7 @@ export const PRICING_PLANS = [
     ],
     stripePriceId: "price_1O2uq8Dt5zFTAXjQ3rkszxTy", // Replace with your real test mode Stripe Price ID
     popular: true,
+    cta: "Subscribe Now"
   },
   {
     id: "enterprise",
@@ -64,6 +90,7 @@ export const PRICING_PLANS = [
     ],
     stripePriceId: "price_1O2urADt5zFTAXjQSKD8S5n4", // Replace with your real test mode Stripe Price ID
     popular: false,
+    cta: "Contact Sales"
   },
 ];
 
