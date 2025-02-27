@@ -130,18 +130,18 @@ export function CheckoutButton({
             <AlertDialogHeader>
               <AlertDialogTitle>Checkout Error</AlertDialogTitle>
               <AlertDialogDescription>
-                {error || "Something went wrong with the checkout process."}
-                <div className="mt-4 p-3 bg-muted rounded-md text-sm">
-                  <p className="font-medium">Troubleshooting tips:</p>
-                  <ul className="list-disc ml-5 mt-2 space-y-1">
-                    <li>Check your internet connection</li>
-                    <li>Refresh the page and try again</li>
-                    <li>Ensure you are logged in</li>
-                    <li>Contact support if the issue persists</li>
-                  </ul>
-                </div>
+                <span>{error || "Something went wrong with the checkout process."}</span>
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="mt-4 p-3 bg-muted rounded-md text-sm">
+              <p className="font-medium">Troubleshooting tips:</p>
+              <ul className="list-disc ml-5 mt-2 space-y-1">
+                <li>Check your internet connection</li>
+                <li>Refresh the page and try again</li>
+                <li>Ensure you are logged in</li>
+                <li>Contact support if the issue persists</li>
+              </ul>
+            </div>
             <AlertDialogFooter>
               <AlertDialogAction>Close</AlertDialogAction>
             </AlertDialogFooter>
