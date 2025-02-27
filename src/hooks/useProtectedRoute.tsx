@@ -16,6 +16,13 @@ export const useProtectedRoute = () => {
         description: "Please log in to access this page",
         variant: "destructive",
       });
+      
+      // Store the current path to redirect back after login
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && currentPath !== '/signup') {
+        sessionStorage.setItem('redirectAfterLogin', currentPath);
+      }
+      
       navigate('/login');
     }
   }, [user, loading, navigate, toast]);

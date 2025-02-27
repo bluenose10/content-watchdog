@@ -8,9 +8,11 @@ import { SearchQuery } from "@/lib/db-types";
 
 interface RecentSearchesProps {
   searchQueries: SearchQuery[];
+  onSelectSearch?: (searchId: string) => void;
+  selectedSearchId?: string | null;
 }
 
-export function RecentSearches({ searchQueries }: RecentSearchesProps) {
+export function RecentSearches({ searchQueries, onSelectSearch, selectedSearchId }: RecentSearchesProps) {
   return (
     <Card className="glass-card md:col-span-2 transition-all duration-300 hover:shadow-lg">
       <CardHeader>
@@ -27,7 +29,15 @@ export function RecentSearches({ searchQueries }: RecentSearchesProps) {
             </p>
           ) : (
             searchQueries.slice(0, 3).map((search) => (
-              <div key={search.id} className="flex items-start gap-4">
+              <div 
+                key={search.id} 
+                className={`flex items-start gap-4 p-2 rounded-md cursor-pointer transition-colors ${
+                  selectedSearchId === search.id 
+                    ? 'bg-primary/10 dark:bg-primary/20' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+                onClick={() => onSelectSearch && search.id && onSelectSearch(search.id)}
+              >
                 <div className="rounded-full bg-secondary p-2">
                   {search.query_type === 'image' ? (
                     <Upload className="h-4 w-4" />
@@ -35,7 +45,7 @@ export function RecentSearches({ searchQueries }: RecentSearchesProps) {
                     <Search className="h-4 w-4" />
                   )}
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="text-sm font-medium">
                     {search.query_type === 'image' 
                       ? 'Image Search' 
@@ -49,7 +59,7 @@ export function RecentSearches({ searchQueries }: RecentSearchesProps) {
                 </div>
                 <div className="ml-auto">
                   <Button size="sm" variant="ghost" asChild>
-                    <Link to={`/results?id=${search.id}`}>View Results</Link>
+                    <Link to={`/results?id=${search.id}`}>View All</Link>
                   </Button>
                 </div>
               </div>

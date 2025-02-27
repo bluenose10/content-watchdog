@@ -66,7 +66,12 @@ export function ContentSearchSection() {
       const newSearch = await createSearchQuery(searchData);
       
       if (newSearch && newSearch.id) {
-        navigate(`/results?id=${newSearch.id}`);
+        // Direct users to the dashboard instead of results page
+        toast({
+          title: "Search created successfully",
+          description: "Your search results are available in your dashboard",
+        });
+        navigate("/dashboard");
       } else {
         throw new Error("Failed to create search");
       }

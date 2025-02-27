@@ -8,12 +8,15 @@ import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useEffect, useState } from "react";
 import { getUserSearchQueries, getUserSubscription, getSearchResults } from "@/lib/db-service";
-import { SearchQuery, UserSubscription } from "@/lib/db-types";
+import { SearchQuery, UserSubscription, SearchResult } from "@/lib/db-types";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentSearches } from "@/components/dashboard/RecentSearches";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
 import { LoadingState } from "@/components/dashboard/LoadingState";
+import { SearchResultCard } from "@/components/ui/search-result-card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -25,6 +28,9 @@ const Dashboard = () => {
   const [searchCount, setSearchCount] = useState(0);
   const [matchCount, setMatchCount] = useState(0);
   const [protectedCount, setProtectedCount] = useState(0);
+  const [selectedSearchId, setSelectedSearchId] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
 
   const firstName = user?.user_metadata?.name 
     ? user.user_metadata.name.split(' ')[0] 
@@ -60,6 +66,16 @@ const Dashboard = () => {
         
         // For now, just set a placeholder for protected count
         setProtectedCount(Math.floor(totalMatches * 0.3));
+
+        // Select the most recent search if available
+        if (searches && searches.length > 0) {
+          setSelectedSearchId(searches[0].id);
+          
+          // Load results for this search
+          if (searches[0].id) {
+            fetchSearchResults(searches[0].id);
+          }
+        }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -69,6 +85,25 @@ const Dashboard = () => {
     
     fetchUserData();
   }, [user]);
+
+  const fetchSearchResults = async (searchId: string) => {
+    if (!searchId) return;
+    
+    try {
+      setIsLoadingResults(true);
+      const results = await getSearchResults(searchId);
+      setSearchResults(results || []);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+    } finally {
+      setIsLoadingResults(false);
+    }
+  };
+
+  const handleSearchSelect = (searchId: string) => {
+    setSelectedSearchId(searchId);
+    fetchSearchResults(searchId);
+  };
 
   // Calculate remaining searches
   const getPlanLimit = () => {
@@ -89,6 +124,16 @@ const Dashboard = () => {
     if (!subscription || !subscription.plans) return 'Free';
     return subscription.plans.name;
   };
+
+  // Determine how many results to show based on subscription
+  const getVisibleResultsCount = () => {
+    const isPremium = getPlanName() !== 'Free';
+    if (isPremium) return searchResults.length; // Show all for premium users
+    return Math.min(3, searchResults.length); // Show only 3 for free users
+  };
+
+  const visibleResultsCount = getVisibleResultsCount();
+  const isPremiumUser = getPlanName() !== 'Free';
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -163,12 +208,77 @@ const Dashboard = () => {
                 />
               </div>
 
+              {/* Search Results Section */}
+              {selectedSearchId && (
+                <Card className="mt-6 w-full">
+                  <CardHeader>
+                    <CardTitle>Search Results</CardTitle>
+                    <CardDescription>
+                      {searchResults.length > 0
+                        ? `Showing ${visibleResultsCount} of ${searchResults.length} results`
+                        : "No results found"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingResults ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {searchResults.slice(0, visibleResultsCount).map((result, index) => (
+                            <SearchResultCard
+                              key={result.id || index}
+                              result={{
+                                id: result.id || `result-${index}`,
+                                title: result.title,
+                                url: result.url,
+                                thumbnail: result.thumbnail,
+                                source: result.source,
+                                matchLevel: result.match_level,
+                                date: result.found_at,
+                              }}
+                              isPremium={isPremiumUser}
+                              isFreePreview={!isPremiumUser && index < 3}
+                              onUpgrade={() => {
+                                // Handle upgrade logic
+                                window.scrollTo(0, document.body.scrollHeight);
+                              }}
+                            />
+                          ))}
+                        </div>
+                        
+                        {!isPremiumUser && searchResults.length > 3 && (
+                          <div className="mt-6 text-center">
+                            <p className="text-sm text-muted-foreground mb-3">
+                              Upgrade to view all {searchResults.length} results
+                            </p>
+                            <Button variant="outline" className="mx-auto">
+                              <Link to="#upgrade">Upgrade Now</Link>
+                            </Button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground">No results found for this search</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               <div className="grid gap-6 mt-6 md:grid-cols-2 lg:grid-cols-3">
-                <RecentSearches searchQueries={searchQueries} />
+                <RecentSearches 
+                  searchQueries={searchQueries} 
+                  onSelectSearch={handleSearchSelect}
+                  selectedSearchId={selectedSearchId}
+                />
                 <QuickActions />
               </div>
 
-              <div className="mt-6">
+              <div id="upgrade" className="mt-6">
                 <UpgradeCard />
               </div>
             </>
