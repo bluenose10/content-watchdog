@@ -8,7 +8,7 @@ const testimonials = [
   {
     id: 1,
     name: "Sarah Johnson",
-    role: "Content Creator",
+    role: "Content\nCreator",
     avatar: "https://i.pravatar.cc/150?u=1",
     content: "InfluenceGuard helped me discover 24 instances of my content being used without permission. The DMCA assistance made the takedown process so much easier.",
     rating: 5
@@ -49,7 +49,7 @@ export function TestimonialsSection() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold">{testimonial.name}</h4>
-                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-line">{testimonial.role}</p>
                       </div>
                       <div className="flex">
                         {Array.from({ length: 5 }).map((_, i) => (
