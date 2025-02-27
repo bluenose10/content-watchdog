@@ -18,7 +18,7 @@ const testimonials = [
     name: "Michael Chen",
     role: "Photographer",
     avatar: "https://i.pravatar.cc/150?u=2",
-    content: "As a photographer, protecting my work is crucial. This platform has become an essential part of my business. Worth every penny!",
+    content: "As a photographer, protecting my work is crucial. This platform has become an essential part of my business.",
     rating: 5
   }
 ];
