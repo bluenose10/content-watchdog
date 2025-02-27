@@ -35,7 +35,7 @@ export function NameSearch({ onSearch, isLoading = false }: NameSearchProps) {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground mt-2">
-        You can try a free preview without signing up or needing an account - see what we find online
+        You can try a free preview without signing up or needing an account - see what we find online, you might be surprised.
       </p>
     </form>
   );
