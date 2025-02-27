@@ -28,16 +28,25 @@ export default function PaymentSuccess() {
         
         console.log("Verifying session ID:", sessionId);
         
-        // For demo purposes, we'll just simulate a successful verification
-        // In a real app, we would call the Supabase Edge Function to verify
-        if (sessionId.startsWith('cs_test_')) {
-          // Simulate successful verification
+        // For mock checkout sessions (starts with mock_sess_)
+        if (sessionId.startsWith('mock_sess_')) {
+          console.log("Mock session detected, simulating successful verification");
+          // Simulate successful verification for mock/demo purposes
           setIsSuccess(true);
           setIsLoading(false);
           return;
         }
         
-        // Call Supabase Edge Function to verify session
+        // For test mode Stripe sessions
+        if (sessionId.startsWith('cs_test_')) {
+          // Simulate successful verification for test mode
+          console.log("Test mode session detected, simulating successful verification");
+          setIsSuccess(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Call Supabase Edge Function to verify production sessions
         const { data, error } = await supabase.functions.invoke('verify-checkout', {
           body: { sessionId }
         });

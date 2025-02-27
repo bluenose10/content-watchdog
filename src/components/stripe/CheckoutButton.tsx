@@ -52,9 +52,13 @@ export function CheckoutButton({
         throw new Error(`Plan with ID ${planId} not found`);
       }
       
-      // Make sure the plan has a Stripe Price ID (free plan won't)
-      if (!selectedPlan.stripePriceId && selectedPlan.price > 0) {
-        throw new Error(`No Stripe Price ID configured for plan ${selectedPlan.name}`);
+      // Check for free plan - direct to success
+      if (selectedPlan.price === 0) {
+        sonnerToast.success("Free plan activated", { 
+          description: "Your free plan has been activated successfully" 
+        });
+        navigate('/success');
+        return;
       }
       
       // Show loading toast
@@ -95,7 +99,7 @@ export function CheckoutButton({
         
         console.log('Checkout session response:', data);
         
-        if (!data || !data.url) {
+        if (!data || (!data.url && !data.mockMode)) {
           console.error('Invalid response from checkout function:', data);
           setDebugInfo({
             response: data,
@@ -107,12 +111,12 @@ export function CheckoutButton({
         // Success toast
         sonnerToast.success("Redirecting to checkout", {
           id: "checkout-toast",
-          description: "You'll be redirected to Stripe to complete your payment"
+          description: "You'll be redirected to complete your payment"
         });
         
         console.log('Redirecting to:', data.url);
         
-        // Redirect to Stripe checkout
+        // Redirect to checkout URL
         window.location.href = data.url;
       } catch (functionError) {
         console.error('Function call error:', functionError);

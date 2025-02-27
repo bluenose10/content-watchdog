@@ -9,6 +9,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// For development/demo environment
+const MOCK_MODE = true; // Set to false when ready for production
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -25,12 +28,12 @@ serve(async (req) => {
     console.log("Request parameters:", requestData);
     
     // Validate inputs
-    if (!priceId || !returnUrl) {
-      console.error("Missing required parameters", { priceId, returnUrl });
+    if (!planId || !returnUrl) {
+      console.error("Missing required parameters", { planId, returnUrl });
       return new Response(
         JSON.stringify({ 
           error: 'Missing required parameters',
-          details: { priceId, returnUrl }
+          details: { planId, returnUrl }
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
@@ -39,6 +42,33 @@ serve(async (req) => {
       );
     }
     
+    // For demo/development, use mock checkout instead of real Stripe
+    if (MOCK_MODE) {
+      console.log("Using mock checkout mode");
+      
+      // Generate a fake session ID
+      const mockSessionId = `mock_sess_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      
+      // Create success URL with mock session ID
+      const successUrl = `${returnUrl}?session_id=${mockSessionId}`;
+      
+      console.log("Created mock checkout session:", mockSessionId);
+      console.log("Mock success URL:", successUrl);
+      
+      return new Response(
+        JSON.stringify({
+          sessionId: mockSessionId,
+          url: successUrl,
+          mockMode: true
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 200 
+        }
+      );
+    }
+    
+    // For production: use real Stripe checkout
     // Initialize Stripe
     const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
     if (!STRIPE_SECRET_KEY) {
