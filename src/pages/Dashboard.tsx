@@ -1,16 +1,19 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { ArrowRight, BarChart, FileClock, Home, Image, Loader2, Search, Shield, Upload, User } from "lucide-react";
+import { Home, Image, Search, Shield, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useEffect, useState } from "react";
 import { getUserSearchQueries, getUserSubscription, getSearchResults } from "@/lib/db-service";
-import { SearchQuery, UserSubscription, SearchResult } from "@/lib/db-types";
-import { formatDate } from "@/lib/utils";
+import { SearchQuery, UserSubscription } from "@/lib/db-types";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import { RecentSearches } from "@/components/dashboard/RecentSearches";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
+import { LoadingState } from "@/components/dashboard/LoadingState";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -116,236 +119,57 @@ const Dashboard = () => {
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2 text-muted-foreground">Loading dashboard data...</span>
-            </div>
+            <LoadingState />
           ) : (
             <>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="glass-card transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Total Searches
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold">{searchCount}</div>
-                      <Search className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {searchesRemaining === 'Unlimited' 
-                        ? 'Unlimited searches available' 
-                        : `${searchesRemaining} searches remaining this month`}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="glass-card transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Content Matches
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold">{matchCount}</div>
-                      <Image className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {matchCount > 0 ? '+12 from last month' : 'No matches yet'}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="glass-card transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Protected Content
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold">{protectedCount}</div>
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {protectedCount > 0 ? `${Math.floor(protectedCount * 0.6)} DMCA notices sent` : 'No content protected yet'}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="glass-card transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Subscription
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold">{getPlanName()}</div>
-                      <User className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {getPlanName() === 'Free' ? (
-                        <Link to="/#pricing" className="text-primary hover:underline">
-                          Upgrade to Pro
-                        </Link>
-                      ) : (
-                        <span>
-                          Expires on {
-                            subscription?.current_period_end ? 
-                              formatDate(subscription.current_period_end) : 
-                              'N/A'
-                          }
-                        </span>
-                      )}
-                    </p>
-                  </CardContent>
-                </Card>
+                <StatsCard 
+                  title="Total Searches"
+                  value={searchCount}
+                  icon={Search}
+                  description={
+                    searchesRemaining === 'Unlimited' 
+                      ? 'Unlimited searches available' 
+                      : `${searchesRemaining} searches remaining this month`
+                  }
+                />
+                <StatsCard 
+                  title="Content Matches"
+                  value={matchCount}
+                  icon={Image}
+                  description={
+                    matchCount > 0 ? '+12 from last month' : 'No matches yet'
+                  }
+                />
+                <StatsCard 
+                  title="Protected Content"
+                  value={protectedCount}
+                  icon={Shield}
+                  description={
+                    protectedCount > 0 
+                      ? `${Math.floor(protectedCount * 0.6)} DMCA notices sent` 
+                      : 'No content protected yet'
+                  }
+                />
+                <StatsCard 
+                  title="Subscription"
+                  value={getPlanName()}
+                  icon={User}
+                  description={
+                    getPlanName() === 'Free' 
+                      ? 'Upgrade to Pro' 
+                      : `Expires on ${subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : 'N/A'}`
+                  }
+                />
               </div>
 
               <div className="grid gap-6 mt-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="glass-card md:col-span-2 transition-all duration-300 hover:shadow-lg">
-                  <CardHeader>
-                    <CardTitle>Recent Searches</CardTitle>
-                    <CardDescription>
-                      Your most recent content searches and results
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {searchQueries.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-6">
-                          You haven't performed any searches yet. Start by searching for your content.
-                        </p>
-                      ) : (
-                        searchQueries.slice(0, 3).map((search) => (
-                          <div key={search.id} className="flex items-start gap-4">
-                            <div className="rounded-full bg-secondary p-2">
-                              {search.query_type === 'image' ? (
-                                <Upload className="h-4 w-4" />
-                              ) : (
-                                <Search className="h-4 w-4" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">
-                                {search.query_type === 'image' 
-                                  ? 'Image Search' 
-                                  : search.query_type === 'hashtag'
-                                    ? `Hashtag Search: #${search.query_text}`
-                                    : `Username Search: @${search.query_text}`}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {search.created_at ? formatDate(search.created_at) : 'Recent'} 
-                                {/* We'll add match count later when implemented */}
-                              </p>
-                            </div>
-                            <div className="ml-auto">
-                              <Button size="sm" variant="ghost" asChild>
-                                <Link to={`/results?id=${search.id}`}>View Results</Link>
-                              </Button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    <div className="mt-6 text-center">
-                      <Button variant="outline" asChild>
-                        <Link to="/history">
-                          View All Searches
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="glass-card transition-all duration-300 hover:shadow-lg">
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>
-                      Common tasks and actions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/search">
-                          <Search className="mr-2 h-4 w-4" />
-                          New Content Search
-                        </Link>
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/monitoring">
-                          <FileClock className="mr-2 h-4 w-4" />
-                          Set Up Monitoring
-                        </Link>
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/analytics">
-                          <BarChart className="mr-2 h-4 w-4" />
-                          View Analytics
-                        </Link>
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/">
-                          <Home className="mr-2 h-4 w-4" />
-                          Back to Home
-                        </Link>
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/account">
-                          <User className="mr-2 h-4 w-4" />
-                          Account Settings
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <RecentSearches searchQueries={searchQueries} />
+                <QuickActions />
               </div>
 
               <div className="mt-6">
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle>Upgrade to Pro</CardTitle>
-                    <CardDescription>
-                      Get unlimited searches and advanced features
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-6">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div className="space-y-2">
-                        <p className="text-gradient font-semibold text-lg mb-2">Protect Your Content From Unauthorized Use</p>
-                        <ul className="space-y-1">
-                          <li className="flex items-center text-sm">
-                            <Shield className="mr-2 h-4 w-4 text-green-500" />
-                            Unlimited search results
-                          </li>
-                          <li className="flex items-center text-sm">
-                            <Shield className="mr-2 h-4 w-4 text-green-500" />
-                            Advanced content monitoring
-                          </li>
-                          <li className="flex items-center text-sm">
-                            <Shield className="mr-2 h-4 w-4 text-green-500" />
-                            10 automated monitoring sessions
-                          </li>
-                          <li className="flex items-center text-sm">
-                            <Shield className="mr-2 h-4 w-4 text-green-500" />
-                            Export results in multiple formats
-                          </li>
-                        </ul>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-3xl font-bold mb-2">$19.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                        <Button asChild className="button-animation">
-                          <Link to="/#pricing">
-                            Upgrade Now
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <UpgradeCard />
               </div>
             </>
           )}
