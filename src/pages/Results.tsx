@@ -2,7 +2,7 @@
 import { Sidebar } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getSearchQueryById, getSearchResults } from "@/lib/db-service";
+import { getSearchQueryById, getSearchResults, performGoogleSearch, performImageSearch } from "@/lib/db-service";
 import { SearchResult } from "@/lib/db-types";
 import { SearchResultCard } from "@/components/ui/search-result-card";
 import { useAuth } from "@/context/AuthContext";
@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { SidebarProvider } from "@/components/ui/sidebar"; // Add this import
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function Results() {
   const [searchParams] = useSearchParams();
@@ -52,15 +52,82 @@ export default function Results() {
       return;
     }
 
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
     const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
+        // First, get the search query data
         const searchQueryData = await getSearchQueryById(searchId);
         setSearchData(searchQueryData);
 
-        const searchResults = await getSearchResults(searchId);
+        // Check if we already have results for this search
+        let searchResults = await getSearchResults(searchId);
+        
+        // If no results found, we need to perform the search
+        if (!searchResults || searchResults.length === 0) {
+          if (searchQueryData.query_type === "image" && searchQueryData.image_url) {
+            // Perform image search
+            const imageResults = await performImageSearch(searchQueryData.image_url, user.id);
+            
+            // Process and save the image search results
+            if (imageResults && imageResults.items) {
+              const formattedResults = imageResults.items.map((item: any, index: number) => {
+                // Determine match level based on position
+                const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+                
+                return {
+                  search_id: searchId,
+                  title: item.title || "Untitled Content",
+                  url: item.link || item.image?.contextLink || "#",
+                  thumbnail: item.image?.thumbnailLink || "",
+                  source: item.displayLink || new URL(item.link || "#").hostname,
+                  match_level: matchLevel,
+                  found_at: new Date().toISOString()
+                };
+              });
+              
+              // Save search results to database
+              await createSearchResults(formattedResults);
+              
+              // Re-fetch results after saving
+              searchResults = await getSearchResults(searchId);
+            }
+          } else if ((searchQueryData.query_type === "name" || searchQueryData.query_type === "hashtag") && searchQueryData.query_text) {
+            // Perform text-based search
+            const textResults = await performGoogleSearch(searchQueryData.query_text, user.id);
+            
+            // Process and save the text search results
+            if (textResults && textResults.items) {
+              const formattedResults = textResults.items.map((item: any, index: number) => {
+                // Determine match level based on position
+                const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+                
+                return {
+                  search_id: searchId,
+                  title: item.title || "Untitled Content",
+                  url: item.link || "#",
+                  thumbnail: item.pagemap?.cse_image?.[0]?.src || "",
+                  source: item.displayLink || new URL(item.link || "#").hostname,
+                  match_level: matchLevel,
+                  found_at: new Date().toISOString()
+                };
+              });
+              
+              // Save search results to database
+              await createSearchResults(formattedResults);
+              
+              // Re-fetch results after saving
+              searchResults = await getSearchResults(searchId);
+            }
+          }
+        }
+        
         setResults(searchResults || []);
       } catch (err) {
         console.error("Error fetching search data:", err);
@@ -71,7 +138,7 @@ export default function Results() {
     };
 
     fetchData();
-  }, [searchId]);
+  }, [searchId, user, navigate]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -131,8 +198,19 @@ export default function Results() {
     document.body.removeChild(link);
   };
 
+  // Import the missing function
+  const createSearchResults = async (results: any[]) => {
+    try {
+      const { createSearchResults } = await import('@/lib/db-service');
+      return await createSearchResults(results);
+    } catch (error) {
+      console.error("Error creating search results:", error);
+      throw error;
+    }
+  };
+
   return (
-    <SidebarProvider> {/* Add SidebarProvider wrapper */}
+    <SidebarProvider>
       <div className="flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex-1 min-h-screen">
@@ -268,6 +346,6 @@ export default function Results() {
           </main>
         </div>
       </div>
-    </SidebarProvider> /* Close SidebarProvider */
+    </SidebarProvider>
   );
 }

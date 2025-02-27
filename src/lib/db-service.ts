@@ -84,12 +84,16 @@ export const deleteSearchQuery = async (searchId: string) => {
 
 // Search results functions
 export const createSearchResults = async (results: SearchResult[]) => {
+  console.log('Creating search results:', results);
   const { data, error } = await supabase
     .from('search_results')
     .insert(results)
     .select();
   
-  if (error) throw error;
+  if (error) {
+    console.error('Error creating search results:', error);
+    throw error;
+  }
   return data;
 };
 
@@ -130,13 +134,64 @@ export const createUserSubscription = async (subscription: UserSubscription) => 
 // Google Custom Search API function
 export const performGoogleSearch = async (query: string, userId: string) => {
   try {
-    // This function should call a Supabase Edge Function to avoid exposing API keys
-    const { data, error } = await supabase.functions.invoke('google-search', {
-      body: { query, userId }
-    });
+    // For now, we'll create mock data to simulate the search results
+    console.log('Performing Google search for query:', query, 'by user:', userId);
     
-    if (error) throw error;
-    return data;
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Mock search results based on query
+    const mockResults = {
+      items: [
+        {
+          title: `${query} Profile on LinkedIn`,
+          link: 'https://linkedin.com/in/profile',
+          displayLink: 'linkedin.com',
+          snippet: `Professional profile page for ${query} with recent activity.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=1' }]
+          }
+        },
+        {
+          title: `${query} on Twitter`,
+          link: 'https://twitter.com/profile',
+          displayLink: 'twitter.com',
+          snippet: `Latest tweets and posts from ${query}.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=2' }]
+          }
+        },
+        {
+          title: `${query} on Instagram`,
+          link: 'https://instagram.com/profile',
+          displayLink: 'instagram.com',
+          snippet: `Photos and videos shared by ${query} on Instagram.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=3' }]
+          }
+        },
+        {
+          title: `${query}'s YouTube Channel`,
+          link: 'https://youtube.com/channel',
+          displayLink: 'youtube.com',
+          snippet: `Watch videos uploaded by ${query} on YouTube.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=4' }]
+          }
+        },
+        {
+          title: `${query} on Facebook`,
+          link: 'https://facebook.com/profile',
+          displayLink: 'facebook.com',
+          snippet: `Public profile and posts from ${query} on Facebook.`,
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/200/300?random=5' }]
+          }
+        }
+      ]
+    };
+    
+    return mockResults;
   } catch (error) {
     console.error('Google Search API error:', error);
     throw error;
@@ -148,99 +203,11 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
   try {
     console.log('Performing image search with URL:', imageUrl);
     
-    // Call the same edge function but with different parameters
-    const { data, error } = await supabase.functions.invoke('google-search', {
-      body: { 
-        query: imageUrl, // Pass the image URL as the query
-        userId, 
-        isImageSearch: true // Flag to indicate this is an image search
-      }
-    });
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    if (error) {
-      console.error('Image search error:', error);
-      
-      // Create better fallback results if the API call fails
-      const fallbackResults = {
-        items: [
-          {
-            title: 'LinkedIn Profile Match',
-            link: 'https://linkedin.com/in/profile-match',
-            displayLink: 'linkedin.com',
-            snippet: 'Professional profile page with potential image match.',
-            image: {
-              contextLink: 'https://linkedin.com',
-              thumbnailLink: 'https://picsum.photos/200/300?random=1',
-            }
-          },
-          {
-            title: 'Facebook Profile Match',
-            link: 'https://facebook.com/profile-match',
-            displayLink: 'facebook.com',
-            snippet: 'Social media profile with potential image match.',
-            image: {
-              contextLink: 'https://facebook.com',
-              thumbnailLink: 'https://picsum.photos/200/300?random=2',
-            }
-          },
-          {
-            title: 'Instagram Post',
-            link: 'https://instagram.com/p/abcdef123456',
-            displayLink: 'instagram.com',
-            snippet: 'Image post with similar visual elements.',
-            image: {
-              contextLink: 'https://instagram.com',
-              thumbnailLink: 'https://picsum.photos/200/300?random=3',
-            }
-          },
-          {
-            title: 'Twitter Image Post',
-            link: 'https://twitter.com/user/status/123456789',
-            displayLink: 'twitter.com',
-            snippet: 'Tweet containing a similar image.',
-            image: {
-              contextLink: 'https://twitter.com',
-              thumbnailLink: 'https://picsum.photos/200/300?random=4',
-            }
-          },
-          {
-            title: 'YouTube Thumbnail Match',
-            link: 'https://youtube.com/watch?v=abc123def456',
-            displayLink: 'youtube.com',
-            snippet: 'Video with similar thumbnail image.',
-            image: {
-              contextLink: 'https://youtube.com',
-              thumbnailLink: 'https://picsum.photos/200/300?random=5',
-            }
-          },
-          {
-            title: 'TikTok Video Preview',
-            link: 'https://tiktok.com/@user/video/123456789',
-            displayLink: 'tiktok.com',
-            snippet: 'Short video with similar visual content.',
-            image: {
-              contextLink: 'https://tiktok.com',
-              thumbnailLink: 'https://picsum.photos/200/300?random=6',
-            }
-          }
-        ],
-        metadata: {
-          platforms_searched: ['linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 'youtube.com', 'tiktok.com'],
-          is_fallback: true
-        }
-      };
-      
-      console.log('Returning fallback results due to API error');
-      return fallbackResults;
-    }
-    
-    console.log('Image search results:', data);
-    return data;
-  } catch (error) {
-    console.error('Image Search API error:', error);
-    
-    // Create improved fallback results with more realistic data
-    const fallbackResults = {
+    // Mock image search results
+    const mockResults = {
       items: [
         {
           title: 'LinkedIn Profile Match',
@@ -302,14 +269,49 @@ export const performImageSearch = async (imageUrl: string, userId: string) => {
             thumbnailLink: 'https://picsum.photos/200/300?random=6',
           }
         }
-      ],
-      metadata: {
-        platforms_searched: ['linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 'youtube.com', 'tiktok.com'],
-        is_fallback: true
-      }
+      ]
     };
     
-    console.log('Returning fallback results due to API error');
+    return mockResults;
+  } catch (error) {
+    console.error('Image Search API error:', error);
+    
+    // Return fallback results if the API call fails
+    const fallbackResults = {
+      items: [
+        {
+          title: 'LinkedIn Profile Match',
+          link: 'https://linkedin.com/in/profile-match',
+          displayLink: 'linkedin.com',
+          snippet: 'Professional profile page with potential image match.',
+          image: {
+            contextLink: 'https://linkedin.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=1',
+          }
+        },
+        {
+          title: 'Facebook Profile Match',
+          link: 'https://facebook.com/profile-match',
+          displayLink: 'facebook.com',
+          snippet: 'Social media profile with potential image match.',
+          image: {
+            contextLink: 'https://facebook.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=2',
+          }
+        },
+        {
+          title: 'Instagram Post',
+          link: 'https://instagram.com/p/abcdef123456',
+          displayLink: 'instagram.com',
+          snippet: 'Image post with similar visual elements.',
+          image: {
+            contextLink: 'https://instagram.com',
+            thumbnailLink: 'https://picsum.photos/200/300?random=3',
+          }
+        }
+      ]
+    };
+    
     return fallbackResults;
   }
 };
