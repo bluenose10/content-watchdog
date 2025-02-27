@@ -10,6 +10,7 @@ import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Shield } from "lucide-react";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -42,7 +43,7 @@ export default function Index() {
           </p>
           
           {/* First row with Key Features, Content Search, and Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
             <div className="col-span-1">
               <FeaturesSection />
             </div>
@@ -52,6 +53,11 @@ export default function Index() {
             <div className="col-span-1">
               <TestimonialsSection />
             </div>
+          </div>
+          
+          {/* Separator */}
+          <div className="max-w-4xl mx-auto mb-32">
+            <Separator className="border-dotted border-t-2" />
           </div>
           
           {/* Second row with About, Pricing, and CTA */}
