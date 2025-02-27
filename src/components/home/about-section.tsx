@@ -30,15 +30,6 @@ export function AboutSection() {
             <p className="text-sm text-muted-foreground">
               We started InfluenceGuard with a simple mission: to give content creators control over how their work is used online. After seeing countless creators struggle with content theft, we built a solution that leverages advanced technology.
             </p>
-            
-            <div className="pt-2">
-              <Button asChild variant="outline" size="sm" className="button-animation">
-                <Link to="/about">
-                  Learn More
-                  <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>
-              </Button>
-            </div>
           </div>
         </div>
       </div>
