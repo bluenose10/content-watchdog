@@ -1,8 +1,15 @@
 
 import { ArrowRight, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
+
+  const handleSignUp = () => {
+    navigate('/signup');
+  };
+
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -15,7 +22,7 @@ export const HeroSection = () => {
         <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
           <button
             id="signupButton"
-            onClick={() => window.location.href = "/signup"}
+            onClick={handleSignUp}
             className="bg-[#007BFF] hover:bg-[#0056b3] text-white px-5 py-2.5 rounded-md font-medium transition-colors duration-200 cursor-pointer"
           >
             Sign Up Now
