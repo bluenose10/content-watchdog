@@ -76,45 +76,14 @@ export function Header() {
     }
   };
 
-  const handleNavigation = (href: string) => {
-    // Handle navigation based on the href
-    if (href === "/") {
-      // Direct navigation to home page
-      navigate("/");
-    } else if (href.startsWith("/#")) {
-      const sectionId = href.substring(2); // Remove '/#'
-      if (isOnHomePage) {
-        // If already on home page, scroll to section
-        const section = document.getElementById(sectionId);
-        if (section) {
-          window.scrollTo({
-            top: section.offsetTop - 100,
-            behavior: 'smooth'
-          });
-        }
-      } else {
-        // If not on home page, navigate to home with the section hash
-        navigate("/");
-        // Need to set a timeout to allow the home page to load before scrolling
-        setTimeout(() => {
-          const section = document.getElementById(sectionId);
-          if (section) {
-            window.scrollTo({
-              top: section.offsetTop - 100,
-              behavior: 'smooth'
-            });
-          }
-        }, 100);
-      }
-    } else {
-      // For other routes, use regular navigation
-      navigate(href);
-    }
-    
-    // Close mobile menu if open
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
+  const goToHome = () => {
+    // Force navigation using window.location to ensure a full page reload
+    window.location.href = "/";
+  };
+
+  const goToSection = (sectionId: string) => {
+    // Force navigation using window.location with hash
+    window.location.href = `/#${sectionId}`;
   };
 
   return (
@@ -128,36 +97,48 @@ export function Header() {
     >
       <div className="container flex items-center justify-between">
         <div className="flex items-center">
-          <button 
-            onClick={() => handleNavigation("/")}
+          <a 
+            href="/"
             className="flex items-center gap-2 font-bold text-xl"
           >
             <Shield className="h-6 w-6" />
             <span className="text-gradient">{APP_NAME}</span>
-          </button>
+          </a>
         </div>
 
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          {navigationItems.map((item) => (
-            <button
-              key={item.name}
-              className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
-              onClick={() => handleNavigation(item.href)}
-            >
-              {item.name}
-            </button>
-          ))}
+          <a 
+            href="/" 
+            className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
+          >
+            Home
+          </a>
+          <a 
+            href="/#features" 
+            className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
+          >
+            Features
+          </a>
+          <a 
+            href="/#pricing" 
+            className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
+          >
+            Pricing
+          </a>
+          <a 
+            href="/#about" 
+            className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
+          >
+            About
+          </a>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <>
-              <Button 
-                variant="default"
-                onClick={() => handleNavigation("/dashboard")}
-              >
-                Dashboard
+              <Button asChild variant="default">
+                <Link to="/dashboard">Dashboard</Link>
               </Button>
               <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
                 <LogOut className="h-4 w-4" />
@@ -166,17 +147,11 @@ export function Header() {
             </>
           ) : (
             <>
-              <Button 
-                variant="ghost"
-                onClick={() => handleNavigation("/login")}
-              >
-                Log in
+              <Button asChild variant="ghost">
+                <Link to="/login">Log in</Link>
               </Button>
-              <Button 
-                className="button-animation"
-                onClick={() => handleNavigation("/signup")}
-              >
-                Sign up
+              <Button asChild className="button-animation">
+                <Link to="/signup">Sign up</Link>
               </Button>
             </>
           )}
@@ -202,25 +177,37 @@ export function Header() {
         <div className="fixed inset-0 top-[57px] z-50 bg-background/95 backdrop-blur-sm animate-fade-in md:hidden">
           <div className="container py-6 flex flex-col gap-6">
             <nav className="flex flex-col gap-4">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.name}
-                  className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
-                  onClick={() => handleNavigation(item.href)}
-                >
-                  {item.name}
-                </button>
-              ))}
+              <a
+                href="/"
+                className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
+              >
+                Home
+              </a>
+              <a
+                href="/#features"
+                className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
+              >
+                Features
+              </a>
+              <a
+                href="/#pricing"
+                className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
+              >
+                Pricing
+              </a>
+              <a
+                href="/#about"
+                className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
+              >
+                About
+              </a>
             </nav>
 
             <div className="flex flex-col gap-3 mt-4">
               {isAuthenticated ? (
                 <>
-                  <Button 
-                    size="lg"
-                    onClick={() => handleNavigation("/dashboard")}
-                  >
-                    Dashboard
+                  <Button asChild size="lg">
+                    <Link to="/dashboard">Dashboard</Link>
                   </Button>
                   <Button variant="outline" size="lg" onClick={handleSignOut} className="flex items-center justify-center gap-2">
                     <LogOut className="h-4 w-4" />
@@ -229,19 +216,11 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => handleNavigation("/login")}
-                  >
-                    Log in
+                  <Button asChild variant="outline" size="lg">
+                    <Link to="/login">Log in</Link>
                   </Button>
-                  <Button 
-                    size="lg" 
-                    className="button-animation"
-                    onClick={() => handleNavigation("/signup")}
-                  >
-                    Sign up
+                  <Button asChild size="lg" className="button-animation">
+                    <Link to="/signup">Sign up</Link>
                   </Button>
                 </>
               )}

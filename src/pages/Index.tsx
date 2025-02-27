@@ -19,12 +19,6 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // If user is authenticated, redirect to dashboard
-    if (!loading && user) {
-      navigate("/dashboard");
-      return;
-    }
-
     // Only show welcome toast for non-authenticated users
     if (!loading && !user) {
       try {
@@ -56,8 +50,8 @@ const Index = () => {
     );
   }
 
-  // Don't render anything while loading or if user is authenticated (will redirect)
-  if (loading || user) {
+  // Don't render anything while loading
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
