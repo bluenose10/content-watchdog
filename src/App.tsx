@@ -38,10 +38,12 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Modified to allow access to home page even when logged in */}
+      {/* Public routes */}
       <Route path="/" element={<Index />} />
       <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignUp />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      
+      {/* Protected routes */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
