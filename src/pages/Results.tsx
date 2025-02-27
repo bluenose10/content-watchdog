@@ -7,6 +7,7 @@ import { SearchResult } from "@/lib/db-types";
 import { SearchResultCard } from "@/components/ui/search-result-card";
 import { useAuth } from "@/context/AuthContext";
 import { DeleteSearchButton } from "@/components/ui/delete-search-button";
+import { useProtectedRoute, AccessLevel } from "@/hooks/useProtectedRoute";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,7 @@ import {
   MoreVertical,
   AlertTriangle,
   Loader2,
+  LockIcon,
 } from "lucide-react";
 import {
   Alert,
@@ -33,11 +35,13 @@ import {
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
 
 export default function Results() {
   const [searchParams] = useSearchParams();
   const searchId = searchParams.get("id");
   const { user } = useAuth();
+  const { accessLevel } = useProtectedRoute(false); // Allow anonymous access but track level
   const [searchData, setSearchData] = useState<any>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,15 +50,27 @@ export default function Results() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Result limits based on access level
+  const getResultLimit = () => {
+    switch (accessLevel) {
+      case AccessLevel.PREMIUM:
+        return 20; // Pro users can see up to 20 results
+      case AccessLevel.BASIC:
+        return 2;  // Registered users can see 2 results
+      case AccessLevel.ANONYMOUS:
+      default:
+        return 0;  // Anonymous users see 0 unlocked results (all blurred)
+    }
+  };
+
+  const getDisplayCount = () => {
+    return Math.min(10, results.length); // Always show 10 results max (some might be blurred)
+  };
+
   useEffect(() => {
     if (!searchId) {
       setError("No search ID provided");
       setIsLoading(false);
-      return;
-    }
-
-    if (!user) {
-      navigate("/login");
       return;
     }
 
@@ -80,7 +96,7 @@ export default function Results() {
             if (searchQueryData.query_type === "image" && searchQueryData.image_url) {
               // Perform image search
               console.log("Performing image search with URL:", searchQueryData.image_url);
-              const imageResults = await performImageSearch(searchQueryData.image_url, user.id);
+              const imageResults = await performImageSearch(searchQueryData.image_url, user?.id || 'anonymous');
               
               // Process and save the image search results
               if (imageResults && imageResults.items) {
@@ -100,17 +116,22 @@ export default function Results() {
                   };
                 });
                 
-                // Save search results to database
-                await createSearchResults(formattedResults);
-                console.log("Created image search results:", formattedResults.length);
-                
-                // Re-fetch results after saving
-                searchResults = await getSearchResults(searchId);
+                // Save search results to database if user is logged in
+                if (user) {
+                  await createSearchResults(formattedResults);
+                  console.log("Created image search results:", formattedResults.length);
+                  
+                  // Re-fetch results after saving
+                  searchResults = await getSearchResults(searchId);
+                } else {
+                  // For anonymous users, just use the results without saving
+                  searchResults = formattedResults;
+                }
               }
             } else if ((searchQueryData.query_type === "name" || searchQueryData.query_type === "hashtag") && searchQueryData.query_text) {
               // Perform text-based search
               console.log("Performing text search with query:", searchQueryData.query_text);
-              const textResults = await performGoogleSearch(searchQueryData.query_text, user.id);
+              const textResults = await performGoogleSearch(searchQueryData.query_text, user?.id || 'anonymous');
               
               // Process and save the text search results
               if (textResults && textResults.items) {
@@ -130,14 +151,18 @@ export default function Results() {
                   };
                 });
                 
-                // Save search results to database
-                console.log("Saving formatted results:", formattedResults);
-                await createSearchResults(formattedResults);
-                console.log("Created text search results");
-                
-                // Re-fetch results after saving
-                searchResults = await getSearchResults(searchId);
-                console.log("Fetched updated results:", searchResults?.length);
+                // Save search results to database if user is logged in
+                if (user) {
+                  console.log("Saving formatted results:", formattedResults);
+                  await createSearchResults(formattedResults);
+                  console.log("Created text search results");
+                  
+                  // Re-fetch results after saving
+                  searchResults = await getSearchResults(searchId);
+                } else {
+                  // For anonymous users, just use the results without saving
+                  searchResults = formattedResults;
+                }
               } else {
                 console.error("No items in text search results");
               }
@@ -167,7 +192,7 @@ export default function Results() {
     };
 
     fetchData();
-  }, [searchId, user, navigate, toast]);
+  }, [searchId, user, navigate, toast, accessLevel]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -227,6 +252,16 @@ export default function Results() {
     document.body.removeChild(link);
   };
 
+  const handleUpgrade = () => {
+    navigate('/#pricing');
+  };
+
+  const handleSignIn = () => {
+    // Store the current path to redirect back after login
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+    navigate('/login');
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-background">
@@ -246,7 +281,7 @@ export default function Results() {
                 </Button>
                 
                 <div className="flex items-center gap-2">
-                  {searchData && (
+                  {user && searchData && (
                     <DeleteSearchButton 
                       searchId={searchId || ''} 
                       searchType={searchData.query_type}
@@ -266,10 +301,12 @@ export default function Results() {
                         <Share className="mr-2 h-4 w-4" />
                         Share Results
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleDownload}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Download CSV
-                      </DropdownMenuItem>
+                      {accessLevel !== AccessLevel.ANONYMOUS && (
+                        <DropdownMenuItem onClick={handleDownload}>
+                          <Download className="mr-2 h-4 w-4" />
+                          Download CSV
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -329,9 +366,57 @@ export default function Results() {
                     )}
                   </div>
 
+                  {/* Access level notice */}
+                  {accessLevel === AccessLevel.ANONYMOUS && (
+                    <Alert className="mb-6 bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
+                      <LockIcon className="h-4 w-4 text-purple-500" />
+                      <AlertTitle className="text-purple-700 dark:text-purple-300">Limited Access</AlertTitle>
+                      <AlertDescription className="text-purple-600 dark:text-purple-400">
+                        <p>Sign in to see 2 search results or upgrade to Pro for full access.</p>
+                        <div className="flex gap-2 mt-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/40"
+                            onClick={handleSignIn}
+                          >
+                            Sign In
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                            onClick={handleUpgrade}
+                          >
+                            Upgrade to Pro
+                          </Button>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {accessLevel === AccessLevel.BASIC && results.length > getResultLimit() && (
+                    <Alert className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+                      <LockIcon className="h-4 w-4 text-blue-500" />
+                      <AlertTitle className="text-blue-700 dark:text-blue-300">Basic Access</AlertTitle>
+                      <AlertDescription className="text-blue-600 dark:text-blue-400">
+                        <p>You can view {getResultLimit()} out of {results.length} results. Upgrade to Pro for full access.</p>
+                        <Button 
+                          size="sm" 
+                          className="bg-blue-600 hover:bg-blue-700 text-white mt-2"
+                          onClick={handleUpgrade}
+                        >
+                          Upgrade to Pro
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   <div className="flex justify-between items-center mb-4">
                     <p className="text-sm text-muted-foreground">
                       {results.length} matches found
+                      {accessLevel !== AccessLevel.PREMIUM && getResultLimit() < results.length && (
+                        <span> (viewing {getDisplayCount()})</span>
+                      )}
                     </p>
                     <Button variant="outline" size="sm" className="gap-2">
                       <Filter className="h-4 w-4" />
@@ -346,23 +431,34 @@ export default function Results() {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                      {results.map((result, index) => (
-                        <SearchResultCard
-                          key={result.id || index}
-                          result={{
-                            id: result.id || `result-${index}`,
-                            title: result.title,
-                            url: result.url,
-                            thumbnail: result.thumbnail,
-                            source: result.source,
-                            matchLevel: result.match_level,
-                            date: result.found_at,
-                          }}
-                          isPremium={true}
-                        />
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                        {results.slice(0, getDisplayCount()).map((result, index) => (
+                          <SearchResultCard
+                            key={result.id || index}
+                            result={{
+                              id: result.id || `result-${index}`,
+                              title: result.title,
+                              url: result.url,
+                              thumbnail: result.thumbnail,
+                              source: result.source,
+                              matchLevel: result.match_level,
+                              date: result.found_at,
+                            }}
+                            isPremium={index < getResultLimit()}
+                            isFreePreview={accessLevel === AccessLevel.ANONYMOUS && index < 2}
+                            onUpgrade={handleUpgrade}
+                          />
+                        ))}
+                      </div>
+                      
+                      {/* Upgrade card at the bottom */}
+                      {accessLevel !== AccessLevel.PREMIUM && (
+                        <div className="mb-8">
+                          <UpgradeCard />
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}
