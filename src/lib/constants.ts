@@ -27,7 +27,7 @@ export const PRICING_PLANS = [
     name: "Pro",
     description: "For serious content creators",
     price: 49.99,
-    stripePriceId: "price_XXXXXXXXXX", // Replace this with your Pro plan Price ID from Stripe
+    stripePriceId: "price_1PJgBKBWkNZlVOCIw5eBrEcO", // Updated with real Pro plan Price ID
     features: [
       "Unlimited search results",
       "Advanced content monitoring",
@@ -44,7 +44,7 @@ export const PRICING_PLANS = [
     name: "Business",
     description: "For teams and businesses",
     price: 149.00,
-    stripePriceId: "price_XXXXXXXXXX", // Replace this with your Business plan Price ID from Stripe
+    stripePriceId: "price_1PJgCWBWkNZlVOCIVgnPFoW4", // Updated with real Business plan Price ID
     features: [
       "Everything in Pro",
       "Unlimited automated monitoring",
