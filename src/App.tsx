@@ -14,6 +14,7 @@ import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
+import MockCheckout from "./pages/MockCheckout";
 import { useAuth } from "./context/AuthContext";
 
 // Create a protected route component
@@ -70,9 +71,10 @@ const AppRoutes = () => {
         </ResultsRoute>
       } />
       
-      {/* Payment result pages */}
+      {/* Payment related routes */}
       <Route path="/success" element={<PaymentSuccess />} />
       <Route path="/canceled" element={<PaymentCanceled />} />
+      <Route path="/mock-checkout" element={<MockCheckout />} />
       
       {/* Protected routes */}
       <Route path="/dashboard" element={

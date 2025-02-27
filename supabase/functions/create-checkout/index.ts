@@ -49,16 +49,17 @@ serve(async (req) => {
       // Generate a fake session ID
       const mockSessionId = `mock_sess_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
       
-      // Create success URL with mock session ID
-      const successUrl = `${returnUrl}?session_id=${mockSessionId}`;
+      // Create mock checkout URL that goes to our own mock checkout page
+      const origin = new URL(returnUrl).origin;
+      const mockCheckoutUrl = `${origin}/mock-checkout?session_id=${mockSessionId}&plan_id=${planId}&return_url=${encodeURIComponent(returnUrl)}`;
       
       console.log("Created mock checkout session:", mockSessionId);
-      console.log("Mock success URL:", successUrl);
+      console.log("Mock checkout URL:", mockCheckoutUrl);
       
       return new Response(
         JSON.stringify({
           sessionId: mockSessionId,
-          url: successUrl,
+          url: mockCheckoutUrl,
           mockMode: true
         }),
         { 
