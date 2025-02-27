@@ -30,17 +30,26 @@ export function CheckoutButton({
       
       console.log('Starting checkout for plan:', planId);
       
-      const { url } = await createCheckoutSession(planId);
+      // Call the payment service to create a checkout session
+      const response = await createCheckoutSession(planId);
+      console.log('Checkout session created:', response);
       
-      // Redirect to Stripe Checkout
-      if (url) {
-        console.log('Redirecting to Stripe checkout:', url);
-        window.location.href = url;
-      } else {
+      // Verify we have a valid URL
+      if (!response || !response.url) {
+        console.error('Invalid response from createCheckoutSession:', response);
         throw new Error('No checkout URL returned');
       }
+      
+      // Log the URL before redirecting
+      console.log('Redirecting to Stripe checkout URL:', response.url);
+      
+      // Small delay before redirect to ensure logging completes
+      setTimeout(() => {
+        window.location.href = response.url;
+      }, 100);
+      
     } catch (error) {
-      console.error('Error during checkout:', error);
+      console.error('Error during checkout process:', error);
       
       // Create a more descriptive error message
       let errorMessage = error.message || "Failed to start checkout process";
@@ -92,6 +101,7 @@ export function CheckoutButton({
                   <li>Check your internet connection</li>
                   <li>Verify your Stripe configuration in Supabase</li>
                   <li>Ensure the plan exists in your database</li>
+                  <li>Check the Edge Function logs for errors</li>
                   <li>Try again in a few minutes</li>
                 </ul>
               </div>
