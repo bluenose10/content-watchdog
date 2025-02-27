@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
@@ -30,19 +29,15 @@ export function SearchResultCard({
   const { title, url, thumbnail, source, matchLevel, date } = result;
   const [imageError, setImageError] = useState(false);
   
-  // Clean up the title, url, and source if they contain Supabase URLs
   const cleanTitle = cleanSupabaseUrls(title, "title", source);
   const cleanUrl = cleanSupabaseUrls(url, "url", source);
   const cleanSource = cleanSupabaseUrls(source, "source");
   
-  // Truncate long titles
   const truncatedTitle = cleanTitle.length > 60 ? cleanTitle.substring(0, 60) + '...' : cleanTitle;
   
-  // Ensure matchLevel is a valid string before using it
   const safeMatchLevel = matchLevel || 'Medium';
   const matchColor = getMatchColorStyles(safeMatchLevel);
   
-  // Safely format the date or provide a fallback
   const formattedDate = (() => {
     try {
       return date ? formatDate(date) : 'Recently';
@@ -51,7 +46,6 @@ export function SearchResultCard({
     }
   })();
   
-  // Get icon and styling based on match level
   const getIconParams = () => {
     switch(safeMatchLevel) {
       case 'High':
@@ -78,7 +72,6 @@ export function SearchResultCard({
     }
   };
   
-  // Get social media platform info
   const getSocialMediaInfo = () => {
     const platform = cleanSource.toLowerCase();
     
@@ -86,10 +79,10 @@ export function SearchResultCard({
       return {
         Icon: Facebook,
         color: 'text-blue-600',
-        bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+        bgColor: 'bg-gradient-to-br from-blue-500 to-blue-600',
         name: 'Facebook',
         brandColor: 'from-blue-600 to-blue-800',
-        logoUrl: 'public/lovable-uploads/f1cbed5d-2990-460f-8e09-7eaf6f2e5c0c.png'
+        logoUrl: 'public/lovable-uploads/af0938db-0832-49ee-9207-a0d7eb137c15.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -98,16 +91,16 @@ export function SearchResultCard({
         bgColor: 'bg-sky-50 dark:bg-sky-900/30',
         name: 'Twitter/X',
         brandColor: 'from-sky-400 to-sky-600',
-        logoUrl: null // Using icon since Twitter/X logo not provided
+        logoUrl: null
       };
     } else if (platform.includes('instagram')) {
       return {
         Icon: Instagram,
         color: 'text-pink-600',
-        bgColor: 'bg-pink-50 dark:bg-pink-900/30',
+        bgColor: 'bg-gradient-to-br from-pink-500 via-purple-500 to-orange-500',
         name: 'Instagram',
         brandColor: 'from-pink-500 via-purple-500 to-orange-500',
-        logoUrl: 'public/lovable-uploads/6e36b8a0-a51b-48a4-a920-29680cd4bcae.png'
+        logoUrl: 'public/lovable-uploads/21d7103e-7ada-436c-a3d2-70cf9ac9f6f1.png'
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -116,7 +109,7 @@ export function SearchResultCard({
         bgColor: 'bg-blue-50 dark:bg-blue-900/30',
         name: 'LinkedIn',
         brandColor: 'from-blue-700 to-blue-900',
-        logoUrl: 'public/lovable-uploads/cdde8926-a941-4e4c-8b16-18a1360ee5be.png'
+        logoUrl: 'public/lovable-uploads/18311b5e-f517-4b56-9ff2-fa50c1f8a507.png'
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -125,11 +118,11 @@ export function SearchResultCard({
         bgColor: 'bg-red-50 dark:bg-red-900/30',
         name: 'YouTube',
         brandColor: 'from-red-600 to-red-800',
-        logoUrl: 'public/lovable-uploads/3ee2383a-6a4c-4531-b338-ae13d53c6f6e.png'
+        logoUrl: 'public/lovable-uploads/fc63dd69-3373-476b-82ef-89b335e91207.png'
       };
     } else if (platform.includes('tiktok')) {
       return {
-        Icon: Search, // No specific TikTok icon in lucide-react
+        Icon: Search,
         color: 'text-black dark:text-white',
         bgColor: 'bg-pink-50 dark:bg-pink-900/30',
         name: 'TikTok',
@@ -148,7 +141,6 @@ export function SearchResultCard({
     }
   };
   
-  // Get match level color styles
   function getMatchColorStyles(level: string) {
     switch(level) {
       case 'High':
@@ -181,21 +173,17 @@ export function SearchResultCard({
   const { Icon, bgColor, iconColor, borderColor } = getIconParams();
   const socialMedia = getSocialMediaInfo();
 
-  // Function to clean Supabase URLs
   function cleanSupabaseUrls(str: string, type: "title" | "url" | "source", sourceDomain?: string): string {
     if (!str) return str;
     
-    // If the string contains a Supabase URL
     if (str.includes('phkdkwusblkngypuwgao.supabase.co')) {
-      // For source domains, just return a cleaner version
       if (type === "source") {
         if (str === 'phkdkwusblkngypuwgao.supabase.co') {
           return 'Social Media';
         }
-        return str.replace(/^https?:\/\//, '').split('.')[0]; // Return just the domain name
+        return str.replace(/^https?:\/\//, '').split('.')[0];
       }
       
-      // Handle titles and URLs based on the source domain
       if (sourceDomain === 'linkedin.com' || str.includes('linkedin.com')) {
         return type === "title" 
           ? 'Professional Profile on LinkedIn'
@@ -222,7 +210,6 @@ export function SearchResultCard({
           : 'https://tiktok.com/@user/video';
       }
       
-      // If it's a storage URL or unrecognized URL with Supabase in it
       if (str.startsWith('https://phkdkwusblkngypuwgao.supabase.co/storage/')) {
         return type === "title" ? 'Content Match Found' : '#';
       }
@@ -231,17 +218,13 @@ export function SearchResultCard({
     return str;
   }
 
-  // Check if thumbnail is a valid URL and not a Supabase URL
   const isValidThumbnail = () => {
     if (!thumbnail || imageError) return false;
     
-    // Check if the thumbnail is from Supabase
     if (thumbnail.includes('phkdkwusblkngypuwgao.supabase.co')) {
       return false;
     }
     
-    // Check if the thumbnail is actually the full image URL or a data URL
-    // These are signs the API couldn't find a proper thumbnail
     if (thumbnail === url || thumbnail.includes('data:image')) {
       return false;
     }
@@ -254,19 +237,15 @@ export function SearchResultCard({
     }
   };
 
-  // Get actual URL to use for "Visit Site" button
   const getVisitUrl = (): string => {
-    // Don't try to visit obviously invalid URLs
     if (cleanUrl === '#' || cleanUrl.includes('Content Match Found')) {
       return '#';
     }
     
-    // Make sure URL is proper format
     try {
       new URL(cleanUrl);
       return cleanUrl;
     } catch (e) {
-      // If it's not a valid URL, try to make it valid
       if (cleanUrl.includes('.com') || cleanUrl.includes('.org') || cleanUrl.includes('.net')) {
         return cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
       }
@@ -290,7 +269,6 @@ export function SearchResultCard({
             />
           ) : (
             <div className="relative w-full h-full">
-              {/* Platform Background */}
               <div className={`absolute inset-0 bg-gradient-to-br ${socialMedia.brandColor} flex items-center justify-center p-8`}>
                 {socialMedia.logoUrl ? (
                   <img 
@@ -299,15 +277,12 @@ export function SearchResultCard({
                     className="max-w-[80%] max-h-[80%] object-contain drop-shadow-lg"
                     onError={(e) => {
                       console.error("Error loading logo:", e);
-                      // If logo fails to load, we'll still see the platform name below
                     }}
                   />
                 ) : (
                   <socialMedia.Icon className="text-white/80" size={120} strokeWidth={1} />
                 )}
               </div>
-              
-              {/* Platform Name */}
               <div className="absolute bottom-0 inset-x-0 bg-black/50 p-2 flex items-center justify-center">
                 <div className="text-lg font-bold text-white">
                   Content found on {socialMedia.name}
