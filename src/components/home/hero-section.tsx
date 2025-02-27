@@ -4,6 +4,13 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Search, Shield, Zap } from "lucide-react";
 
 export const HeroSection = () => {
+  const handleScrollToSearch = () => {
+    const searchSection = document.getElementById('search');
+    if (searchSection) {
+      searchSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -14,11 +21,9 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <Button asChild size="lg" className="button-animation">
-            <Link to="/search">
-              <Search className="mr-2 h-5 w-5" />
-              Search Now
-            </Link>
+          <Button size="lg" className="button-animation" onClick={handleScrollToSearch}>
+            <Search className="mr-2 h-5 w-5" />
+            Search Now
           </Button>
           <Button asChild size="lg" variant="secondary">
             <Link to="/signup">
