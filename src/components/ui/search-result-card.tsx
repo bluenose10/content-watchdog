@@ -83,8 +83,7 @@ export function SearchResultCard({
         color: 'text-blue-600',
         bgColor: 'bg-white',
         name: 'Facebook',
-        logoUrl: '/lovable-uploads/635b4db7-5776-4365-8831-07be04a15714.png', // Facebook logo
-        contentImageUrl: null
+        logoUrl: '/lovable-uploads/635b4db7-5776-4365-8831-07be04a15714.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
@@ -92,8 +91,7 @@ export function SearchResultCard({
         color: 'text-sky-500',
         bgColor: 'bg-white',
         name: 'Twitter/X',
-        logoUrl: null, // No uploaded Twitter logo
-        contentImageUrl: null
+        logoUrl: '/lovable-uploads/8c8c70f8-5aba-4fb4-8261-cc6c9c7a4ded.png'
       };
     } else if (platform.includes('instagram')) {
       return {
@@ -101,8 +99,7 @@ export function SearchResultCard({
         color: 'text-pink-600',
         bgColor: 'bg-white',
         name: 'Instagram',
-        logoUrl: '/lovable-uploads/554d6a51-776f-4eb2-90bb-728cb6d94365.png', // Instagram logo
-        contentImageUrl: null
+        logoUrl: '/lovable-uploads/554d6a51-776f-4eb2-90bb-728cb6d94365.png'
       };
     } else if (platform.includes('linkedin')) {
       return {
@@ -110,8 +107,7 @@ export function SearchResultCard({
         color: 'text-blue-700',
         bgColor: 'bg-white',
         name: 'LinkedIn',
-        logoUrl: '/lovable-uploads/71eeb517-4964-4090-994c-5bad460e3be4.png', // LinkedIn logo
-        contentImageUrl: null
+        logoUrl: '/lovable-uploads/71eeb517-4964-4090-994c-5bad460e3be4.png'
       };
     } else if (platform.includes('youtube')) {
       return {
@@ -119,8 +115,7 @@ export function SearchResultCard({
         color: 'text-red-600',
         bgColor: 'bg-white',
         name: 'YouTube',
-        logoUrl: '/lovable-uploads/74f208e0-bb64-408c-826a-b51bba43af07.png', // YouTube logo
-        contentImageUrl: null
+        logoUrl: '/lovable-uploads/74f208e0-bb64-408c-826a-b51bba43af07.png'
       };
     } else if (platform.includes('tiktok')) {
       return {
@@ -128,8 +123,7 @@ export function SearchResultCard({
         color: 'text-black dark:text-white',
         bgColor: 'bg-white',
         name: 'TikTok',
-        logoUrl: null,
-        contentImageUrl: null
+        logoUrl: null
       };
     } else {
       return {
@@ -137,8 +131,7 @@ export function SearchResultCard({
         color: 'text-gray-600 dark:text-gray-400',
         bgColor: 'bg-white',
         name: cleanSource,
-        logoUrl: null,
-        contentImageUrl: null
+        logoUrl: null
       };
     }
   };
@@ -278,10 +271,6 @@ export function SearchResultCard({
                   src={socialMedia.logoUrl} 
                   alt={`${socialMedia.name} logo`}
                   className="max-w-[80%] max-h-[80%] object-contain"
-                  onError={(e) => {
-                    console.error(`Error loading ${socialMedia.name} logo:`, e);
-                    setImageError(true);
-                  }}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center">
