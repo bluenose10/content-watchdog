@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "./badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface SearchResultCardProps {
   result: {
@@ -28,35 +28,68 @@ export function SearchResultCard({
   onUpgrade,
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
+  const [imageSrc, setImageSrc] = useState(thumbnail || '/placeholder.svg');
   const [imageError, setImageError] = useState(false);
   
-  // Use the thumbnail URL if provided, or attempt to use an image from the source website
-  // If thumbnail is unavailable, we'll try to construct a URL to an image from the source domain
-  const determineThumbnailUrl = () => {
-    // If we already know the image had an error, use placeholder
-    if (imageError) {
-      return '/placeholder.svg';
-    }
+  // When the component mounts or the URL changes, try to find a better image
+  useEffect(() => {
+    // Skip if we already have a thumbnail or if there was a previous error
+    if (thumbnail || imageError) return;
     
-    // If thumbnail is provided and not empty, use it
-    if (thumbnail) {
-      return thumbnail;
-    }
+    const tryFindBetterImage = async () => {
+      try {
+        // Extract domain from URL
+        const urlObj = new URL(url);
+        const domain = urlObj.hostname;
+        
+        // Create an array of potential image URLs to try
+        const potentialImages = [
+          `https://${domain}/image.jpg`,
+          `https://${domain}/images/logo.png`,
+          `https://${domain}/wp-content/uploads/logo.png`,
+          `https://${domain}/assets/images/banner.jpg`,
+          `https://${domain}/logo.png`,
+          // Meta images often are better quality than favicons
+          `https://${domain}/wp-content/uploads/og-image.jpg`,
+          `https://${domain}/assets/img/og-image.jpg`,
+          // Try the favicon last as it's usually small
+          `https://${domain}/favicon.ico`
+        ];
+        
+        // Try each image URL until one works
+        for (const imgUrl of potentialImages) {
+          try {
+            const img = new Image();
+            img.src = imgUrl;
+            
+            // Use a promise to wait for the image to load or fail
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              // Set a timeout in case the image takes too long
+              setTimeout(reject, 1000);
+            });
+            
+            // If we get here, the image loaded successfully
+            setImageSrc(imgUrl);
+            return;
+          } catch (err) {
+            // Image failed to load, try the next one
+            continue;
+          }
+        }
+        
+        // If all attempts fail, use placeholder
+        throw new Error("No images found");
+      } catch (err) {
+        // If there's any error in the process, use placeholder
+        setImageError(true);
+        setImageSrc('/placeholder.svg');
+      }
+    };
     
-    // Try to extract domain from the URL to create a potential image path
-    try {
-      const urlObj = new URL(url);
-      const domain = urlObj.hostname;
-      // Try to use a favicon or og:image that might exist on the domain
-      return `https://${domain}/favicon.ico`;
-    } catch (e) {
-      // If URL parsing fails, use placeholder
-      return '/placeholder.svg';
-    }
-  };
-  
-  // Get thumbnail URL 
-  const imageSrc = determineThumbnailUrl();
+    tryFindBetterImage();
+  }, [url, thumbnail, imageError]);
   
   // Truncate long titles
   const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
@@ -83,23 +116,10 @@ export function SearchResultCard({
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             style={{ aspectRatio: "600/400" }}
-            onError={(e) => {
-              // If the main image or favicon fails, try an alternative approach
+            onError={() => {
+              // If the selected image fails to load, use placeholder
               setImageError(true);
-              
-              // Try to use a generic image from the domain
-              const fallbackImg = new Image();
-              const urlObj = new URL(url);
-              fallbackImg.src = `https://${urlObj.hostname}/logo.png`;
-              
-              fallbackImg.onload = () => {
-                (e.target as HTMLImageElement).src = fallbackImg.src;
-              };
-              
-              fallbackImg.onerror = () => {
-                // If all attempts fail, use placeholder
-                (e.target as HTMLImageElement).src = '/placeholder.svg';
-              };
+              setImageSrc('/placeholder.svg');
             }}
           />
         </div>
@@ -117,7 +137,7 @@ export function SearchResultCard({
         )}
         {!isPremium && !isFreePreview && (
           <Badge 
-            className="absolute left-2 top-2 bg-purple-500 text-white"
+            className="absolute left-2 top-2 bg-purple-500 text-white cursor-pointer"
             onClick={onUpgrade}
           >
             Upgrade to View
