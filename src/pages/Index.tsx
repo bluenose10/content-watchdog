@@ -42,7 +42,7 @@ export default function Index() {
           </p>
           
           {/* First row with Key Features, Content Search, and Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
             <div className="col-span-1">
               <FeaturesSection />
             </div>
