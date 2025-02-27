@@ -1,7 +1,6 @@
 
 // Follow Deno and Oak best practices
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.31.0";
 import Stripe from "https://esm.sh/stripe@12.0.0";
 
 // Define CORS headers
@@ -20,9 +19,9 @@ serve(async (req) => {
     console.log("Edge function invoked: create-checkout");
     
     // Parse the request body
-    const { planId, priceId, returnUrl } = await req.json();
+    const { planId, priceId, returnUrl, userId } = await req.json();
     
-    console.log("Request parameters:", { planId, priceId, returnUrl });
+    console.log("Request parameters:", { planId, priceId, returnUrl, userId });
     
     // Validate inputs
     if (!planId || !returnUrl || !priceId) {
@@ -57,7 +56,8 @@ serve(async (req) => {
     try {
       // Create checkout session
       console.log("Creating Stripe checkout session with price ID:", priceId);
-      const session = await stripe.checkout.sessions.create({
+      
+      const checkoutOptions = {
         payment_method_types: ['card'],
         line_items: [
           {
@@ -68,7 +68,15 @@ serve(async (req) => {
         mode: 'subscription',
         success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${new URL(returnUrl).origin}/canceled`,
-      });
+      };
+      
+      // Add client_reference_id if userId is provided
+      if (userId) {
+        // @ts-ignore - TypeScript doesn't know about this property
+        checkoutOptions.client_reference_id = userId;
+      }
+      
+      const session = await stripe.checkout.sessions.create(checkoutOptions);
       
       console.log("Checkout session created:", session.id);
       return new Response(

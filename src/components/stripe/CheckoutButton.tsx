@@ -28,6 +28,7 @@ export function CheckoutButton({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   const handleCheckout = async () => {
     try {
@@ -65,20 +66,29 @@ export function CheckoutButton({
       // Get the return URL for after checkout
       const returnUrl = `${window.location.origin}/success`;
       console.log('Return URL:', returnUrl);
+      console.log('Selected plan:', selectedPlan);
       
       try {
+        console.log('Invoking create-checkout function with:', {
+          planId,
+          priceId: selectedPlan.stripePriceId,
+          returnUrl,
+          userId: user.id
+        });
+        
         // Call the Supabase Edge Function
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: { 
             planId, 
             priceId: selectedPlan.stripePriceId,
             returnUrl,
-            userId: user.id, // Add user ID as reference
+            userId: user.id,
           }
         });
         
         if (error) {
           console.error('Supabase function error:', error);
+          setDebugInfo(error);
           throw new Error(`Failed to create checkout session: ${error.message}`);
         }
         
@@ -86,6 +96,7 @@ export function CheckoutButton({
         
         if (!data || !data.url) {
           console.error('Invalid response from checkout function:', data);
+          setDebugInfo(data);
           throw new Error('No checkout URL returned from server');
         }
         
@@ -147,6 +158,14 @@ export function CheckoutButton({
                 <li>Contact support if the issue persists</li>
               </ul>
             </div>
+            {debugInfo && (
+              <div className="mt-4 p-3 bg-red-50 rounded-md text-sm overflow-auto max-h-32">
+                <p className="font-medium text-red-700">Debug Information:</p>
+                <pre className="whitespace-pre-wrap text-xs text-red-600">
+                  {JSON.stringify(debugInfo, null, 2)}
+                </pre>
+              </div>
+            )}
             <AlertDialogFooter>
               <AlertDialogAction>Close</AlertDialogAction>
             </AlertDialogFooter>
