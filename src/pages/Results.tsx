@@ -2,7 +2,7 @@
 import { Sidebar } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getSearchQueryById, getSearchResults, performGoogleSearch, performImageSearch } from "@/lib/db-service";
+import { getSearchQueryById, getSearchResults, performGoogleSearch, performImageSearch, createSearchResults } from "@/lib/db-service";
 import { SearchResult } from "@/lib/db-types";
 import { SearchResultCard } from "@/components/ui/search-result-card";
 import { useAuth } from "@/context/AuthContext";
@@ -41,6 +41,7 @@ export default function Results() {
   const [searchData, setSearchData] = useState<any>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingResults, setIsGeneratingResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -64,71 +65,99 @@ export default function Results() {
 
         // First, get the search query data
         const searchQueryData = await getSearchQueryById(searchId);
+        console.log("Search query data:", searchQueryData);
         setSearchData(searchQueryData);
 
         // Check if we already have results for this search
         let searchResults = await getSearchResults(searchId);
+        console.log("Initial search results:", searchResults);
         
         // If no results found, we need to perform the search
         if (!searchResults || searchResults.length === 0) {
-          if (searchQueryData.query_type === "image" && searchQueryData.image_url) {
-            // Perform image search
-            const imageResults = await performImageSearch(searchQueryData.image_url, user.id);
-            
-            // Process and save the image search results
-            if (imageResults && imageResults.items) {
-              const formattedResults = imageResults.items.map((item: any, index: number) => {
-                // Determine match level based on position
-                const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+          setIsGeneratingResults(true);
+          
+          try {
+            if (searchQueryData.query_type === "image" && searchQueryData.image_url) {
+              // Perform image search
+              console.log("Performing image search with URL:", searchQueryData.image_url);
+              const imageResults = await performImageSearch(searchQueryData.image_url, user.id);
+              
+              // Process and save the image search results
+              if (imageResults && imageResults.items) {
+                console.log("Image search results:", imageResults.items.length);
+                const formattedResults = imageResults.items.map((item: any, index: number) => {
+                  // Determine match level based on position
+                  const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+                  
+                  return {
+                    search_id: searchId,
+                    title: item.title || "Untitled Content",
+                    url: item.link || item.image?.contextLink || "#",
+                    thumbnail: item.image?.thumbnailLink || "",
+                    source: item.displayLink || new URL(item.link || "#").hostname,
+                    match_level: matchLevel,
+                    found_at: new Date().toISOString()
+                  };
+                });
                 
-                return {
-                  search_id: searchId,
-                  title: item.title || "Untitled Content",
-                  url: item.link || item.image?.contextLink || "#",
-                  thumbnail: item.image?.thumbnailLink || "",
-                  source: item.displayLink || new URL(item.link || "#").hostname,
-                  match_level: matchLevel,
-                  found_at: new Date().toISOString()
-                };
-              });
-              
-              // Save search results to database
-              await createSearchResults(formattedResults);
-              
-              // Re-fetch results after saving
-              searchResults = await getSearchResults(searchId);
-            }
-          } else if ((searchQueryData.query_type === "name" || searchQueryData.query_type === "hashtag") && searchQueryData.query_text) {
-            // Perform text-based search
-            const textResults = await performGoogleSearch(searchQueryData.query_text, user.id);
-            
-            // Process and save the text search results
-            if (textResults && textResults.items) {
-              const formattedResults = textResults.items.map((item: any, index: number) => {
-                // Determine match level based on position
-                const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+                // Save search results to database
+                await createSearchResults(formattedResults);
+                console.log("Created image search results:", formattedResults.length);
                 
-                return {
-                  search_id: searchId,
-                  title: item.title || "Untitled Content",
-                  url: item.link || "#",
-                  thumbnail: item.pagemap?.cse_image?.[0]?.src || "",
-                  source: item.displayLink || new URL(item.link || "#").hostname,
-                  match_level: matchLevel,
-                  found_at: new Date().toISOString()
-                };
-              });
+                // Re-fetch results after saving
+                searchResults = await getSearchResults(searchId);
+              }
+            } else if ((searchQueryData.query_type === "name" || searchQueryData.query_type === "hashtag") && searchQueryData.query_text) {
+              // Perform text-based search
+              console.log("Performing text search with query:", searchQueryData.query_text);
+              const textResults = await performGoogleSearch(searchQueryData.query_text, user.id);
               
-              // Save search results to database
-              await createSearchResults(formattedResults);
-              
-              // Re-fetch results after saving
-              searchResults = await getSearchResults(searchId);
+              // Process and save the text search results
+              if (textResults && textResults.items) {
+                console.log("Text search results:", textResults.items.length);
+                const formattedResults = textResults.items.map((item: any, index: number) => {
+                  // Determine match level based on position
+                  const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+                  
+                  return {
+                    search_id: searchId,
+                    title: item.title || "Untitled Content",
+                    url: item.link || "#",
+                    thumbnail: item.pagemap?.cse_image?.[0]?.src || "",
+                    source: item.displayLink || new URL(item.link || "#").hostname,
+                    match_level: matchLevel,
+                    found_at: new Date().toISOString()
+                  };
+                });
+                
+                // Save search results to database
+                console.log("Saving formatted results:", formattedResults);
+                await createSearchResults(formattedResults);
+                console.log("Created text search results");
+                
+                // Re-fetch results after saving
+                searchResults = await getSearchResults(searchId);
+                console.log("Fetched updated results:", searchResults?.length);
+              } else {
+                console.error("No items in text search results");
+              }
+            } else {
+              console.error("Invalid search data:", searchQueryData);
             }
+          } catch (searchError) {
+            console.error("Error generating search results:", searchError);
+            toast({
+              title: "Error generating results",
+              description: "There was a problem finding matches. Please try again.",
+              variant: "destructive",
+            });
+          } finally {
+            setIsGeneratingResults(false);
           }
         }
         
         setResults(searchResults || []);
+        console.log("Final results set:", searchResults?.length);
       } catch (err) {
         console.error("Error fetching search data:", err);
         setError("Failed to load search results");
@@ -138,7 +167,7 @@ export default function Results() {
     };
 
     fetchData();
-  }, [searchId, user, navigate]);
+  }, [searchId, user, navigate, toast]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -198,17 +227,6 @@ export default function Results() {
     document.body.removeChild(link);
   };
 
-  // Import the missing function
-  const createSearchResults = async (results: any[]) => {
-    try {
-      const { createSearchResults } = await import('@/lib/db-service');
-      return await createSearchResults(results);
-    } catch (error) {
-      console.error("Error creating search results:", error);
-      throw error;
-    }
-  };
-
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-background">
@@ -261,6 +279,12 @@ export default function Results() {
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
                   <p className="text-muted-foreground">Loading search results...</p>
+                </div>
+              ) : isGeneratingResults ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                  <p className="text-muted-foreground">Generating search results...</p>
+                  <p className="text-xs text-muted-foreground mt-2">This may take a moment</p>
                 </div>
               ) : error ? (
                 <Alert variant="destructive" className="my-8">
