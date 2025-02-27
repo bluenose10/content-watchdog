@@ -85,9 +85,9 @@ export default function Results() {
               // Process and save the image search results
               if (imageResults && imageResults.items) {
                 console.log("Image search results:", imageResults.items.length);
-                const formattedResults = imageResults.items.map((item: any, index: number) => {
+                const formattedResults: SearchResult[] = imageResults.items.map((item: any, index: number) => {
                   // Determine match level based on position
-                  const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+                  const matchLevel = index < 2 ? "High" as const : index < 4 ? "Medium" as const : "Low" as const;
                   
                   return {
                     search_id: searchId,
@@ -115,9 +115,9 @@ export default function Results() {
               // Process and save the text search results
               if (textResults && textResults.items) {
                 console.log("Text search results:", textResults.items.length);
-                const formattedResults = textResults.items.map((item: any, index: number) => {
+                const formattedResults: SearchResult[] = textResults.items.map((item: any, index: number) => {
                   // Determine match level based on position
-                  const matchLevel = index < 2 ? "High" : index < 4 ? "Medium" : "Low";
+                  const matchLevel = index < 2 ? "High" as const : index < 4 ? "Medium" as const : "Low" as const;
                   
                   return {
                     search_id: searchId,
