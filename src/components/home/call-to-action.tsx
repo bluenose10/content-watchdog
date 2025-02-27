@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 
 export function CallToAction() {
   return (
-    <section className="section-padding bg-primary text-primary-foreground">
-      <div className="container text-center max-w-3xl">
-        <h2 className="text-3xl font-bold mb-6">Ready to Protect Your Content?</h2>
-        <p className="text-lg text-primary-foreground/80 mb-8">
-          Join thousands of content creators who trust InfluenceGuard to protect their work across the internet. Start your free trial today.
+    <section className="h-full">
+      <div className="h-full flex flex-col justify-center items-center bg-primary text-primary-foreground rounded-xl p-6">
+        <h2 className="text-2xl font-bold mb-4 text-center">Ready to Start?</h2>
+        <p className="text-sm text-primary-foreground/80 mb-6 text-center">
+          Join thousands of content creators who trust InfluenceGuard to protect their work across the internet.
         </p>
         <Button asChild size="lg" variant="secondary" className="button-animation">
           <Link to="/signup">

@@ -22,18 +22,21 @@ export function FeaturesSection() {
     }
   };
 
+  // Select just two features for the compact display
+  const displayFeatures = FEATURES.slice(0, 2);
+
   return (
-    <section id="features" className="section-padding">
-      <div className="container">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold mb-4">Powerful Protection Features</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Our comprehensive tools help you find and protect your content across the web
+    <section id="features" className="h-full">
+      <div className="h-full">
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold mb-2">Key Features</h2>
+          <p className="text-sm text-muted-foreground">
+            Powerful tools for content protection
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {FEATURES.map((feature, index) => (
+        <div className="space-y-4">
+          {displayFeatures.map((feature, index) => (
             <FeatureCard
               key={index}
               title={feature.title}

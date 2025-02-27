@@ -1,7 +1,6 @@
 
 import { PricingCard } from "@/components/ui/pricing-card";
 import { PRICING_PLANS } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -21,43 +20,37 @@ export function PricingSection() {
     }
   };
 
+  // Only show one pricing plan in this compact view
+  const displayPlan = PRICING_PLANS.find(plan => plan.popular) || PRICING_PLANS[0];
+
   return (
-    <section id="pricing" className="section-padding relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/5 animate-floating" style={{ animationDelay: "0.2s" }} />
-        <div className="absolute bottom-20 -left-20 h-60 w-60 rounded-full bg-primary/5 animate-floating" style={{ animationDelay: "0.7s" }} />
-      </div>
-      
-      <div className="container relative">
-        <div className="mb-12 text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-muted-foreground">
-            Choose the plan that works best for you. All plans include core features.
+    <section id="pricing" className="h-full relative overflow-hidden">
+      <div className="h-full">
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold mb-2">Pricing</h2>
+          <p className="text-sm text-muted-foreground">
+            Transparent, affordable plans
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PRICING_PLANS.map((plan, index) => (
-            <PricingCard
-              key={plan.id}
-              name={plan.name}
-              description={plan.description}
-              price={plan.price}
-              features={plan.features}
-              limitations={plan.limitations}
-              cta={plan.cta}
-              popular={plan.popular}
-              onClick={() => handlePlanClick(plan.id)}
-              className="animate-scale-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            />
-          ))}
+        <div className="flex justify-center">
+          <PricingCard
+            key={displayPlan.id}
+            name={displayPlan.name}
+            description={displayPlan.description}
+            price={displayPlan.price}
+            features={displayPlan.features.slice(0, 3)} // Show fewer features for compact view
+            limitations={[]} // Don't show limitations in compact view
+            cta={displayPlan.cta}
+            popular={displayPlan.popular}
+            onClick={() => handlePlanClick(displayPlan.id)}
+            className="animate-scale-in w-full"
+          />
         </div>
 
-        <div className="mt-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            All plans include a 14-day money-back guarantee. No contracts or commitments.
+        <div className="mt-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            14-day money-back guarantee. No contracts.
           </p>
         </div>
       </div>
