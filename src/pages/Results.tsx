@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { SidebarProvider } from "@/components/ui/sidebar"; // Add this import
 
 export default function Results() {
   const [searchParams] = useSearchParams();
@@ -131,141 +132,142 @@ export default function Results() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 min-h-screen">
-        <main className="flex-1 p-4 md:p-6">
-          <div className="container mx-auto max-w-6xl">
-            <div className="flex items-center justify-between mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-              
-              <div className="flex items-center gap-2">
-                {/* Add the delete button here */}
-                {searchData && (
-                  <DeleteSearchButton 
-                    searchId={searchId || ''} 
-                    searchType={searchData.query_type}
-                  />
-                )}
-              
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleShare}>
-                      <Share className="mr-2 h-4 w-4" />
-                      Share Results
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDownload}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download CSV
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+    <SidebarProvider> {/* Add SidebarProvider wrapper */}
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 min-h-screen">
+          <main className="flex-1 p-4 md:p-6">
+            <div className="container mx-auto max-w-6xl">
+              <div className="flex items-center justify-between mb-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
+                </Button>
+                
+                <div className="flex items-center gap-2">
+                  {searchData && (
+                    <DeleteSearchButton 
+                      searchId={searchId || ''} 
+                      searchType={searchData.query_type}
+                    />
+                  )}
+                
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <MoreVertical className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleShare}>
+                        <Share className="mr-2 h-4 w-4" />
+                        Share Results
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleDownload}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-            </div>
 
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-                <p className="text-muted-foreground">Loading search results...</p>
-              </div>
-            ) : error ? (
-              <Alert variant="destructive" className="my-8">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            ) : (
-              <>
-                <div className="space-y-2 mb-8">
-                  <h1 className="text-2xl md:text-3xl font-bold">
-                    Search Results
-                  </h1>
-                  <p className="text-muted-foreground">
-                    {searchData?.query_type === "image"
-                      ? "Results for your image search"
-                      : `Results for "${searchData?.query_text}"`}
-                    {searchData?.created_at && (
-                      <span className="ml-2 text-sm">
-                        • Searched on {formatDate(searchData.created_at)}
-                      </span>
-                    )}
-                  </p>
-                  {searchData?.query_type === "image" && searchData?.image_url && (
-                    <div className="mt-4 p-4 rounded-lg border border-border bg-secondary/20">
-                      <div className="flex items-center gap-4">
-                        <div className="h-20 w-20 rounded-md overflow-hidden border border-border shadow-sm">
-                          <img
-                            src={searchData.image_url}
-                            alt="Search image"
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">Search Image</h3>
-                          <p className="text-sm text-muted-foreground">
-                            We found {results.length} matches for this image
-                          </p>
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                  <p className="text-muted-foreground">Loading search results...</p>
+                </div>
+              ) : error ? (
+                <Alert variant="destructive" className="my-8">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <div className="space-y-2 mb-8">
+                    <h1 className="text-2xl md:text-3xl font-bold">
+                      Search Results
+                    </h1>
+                    <p className="text-muted-foreground">
+                      {searchData?.query_type === "image"
+                        ? "Results for your image search"
+                        : `Results for "${searchData?.query_text}"`}
+                      {searchData?.created_at && (
+                        <span className="ml-2 text-sm">
+                          • Searched on {formatDate(searchData.created_at)}
+                        </span>
+                      )}
+                    </p>
+                    {searchData?.query_type === "image" && searchData?.image_url && (
+                      <div className="mt-4 p-4 rounded-lg border border-border bg-secondary/20">
+                        <div className="flex items-center gap-4">
+                          <div className="h-20 w-20 rounded-md overflow-hidden border border-border shadow-sm">
+                            <img
+                              src={searchData.image_url}
+                              alt="Search image"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">Search Image</h3>
+                            <p className="text-sm text-muted-foreground">
+                              We found {results.length} matches for this image
+                            </p>
+                          </div>
                         </div>
                       </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center mb-4">
+                    <p className="text-sm text-muted-foreground">
+                      {results.length} matches found
+                    </p>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Filter className="h-4 w-4" />
+                      Filter
+                    </Button>
+                  </div>
+
+                  {results.length === 0 ? (
+                    <div className="py-12 text-center">
+                      <p className="text-muted-foreground">
+                        No results found for this search.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                      {results.map((result, index) => (
+                        <SearchResultCard
+                          key={result.id || index}
+                          result={{
+                            id: result.id || `result-${index}`,
+                            title: result.title,
+                            url: result.url,
+                            thumbnail: result.thumbnail,
+                            source: result.source,
+                            matchLevel: result.match_level,
+                            date: result.found_at,
+                          }}
+                          isPremium={true}
+                        />
+                      ))}
                     </div>
                   )}
-                </div>
-
-                <div className="flex justify-between items-center mb-4">
-                  <p className="text-sm text-muted-foreground">
-                    {results.length} matches found
-                  </p>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Filter className="h-4 w-4" />
-                    Filter
-                  </Button>
-                </div>
-
-                {results.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <p className="text-muted-foreground">
-                      No results found for this search.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                    {results.map((result, index) => (
-                      <SearchResultCard
-                        key={result.id || index}
-                        result={{
-                          id: result.id || `result-${index}`,
-                          title: result.title,
-                          url: result.url,
-                          thumbnail: result.thumbnail,
-                          source: result.source,
-                          matchLevel: result.match_level,
-                          date: result.found_at,
-                        }}
-                        isPremium={true}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </main>
+                </>
+              )}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider> /* Close SidebarProvider */
   );
 }
