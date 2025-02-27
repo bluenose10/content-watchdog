@@ -82,28 +82,33 @@ export const createUserSubscription = async (subscription: UserSubscription) => 
 
 // File upload functions
 export const uploadSearchImage = async (file: File, userId: string) => {
+  // Create a clean filename with user ID and timestamp to avoid collisions
   const fileExt = file.name.split('.').pop();
-  const fileName = `${userId}/${Date.now()}.${fileExt}`;
-  const filePath = `search-images/${fileName}`;
+  const sanitizedFileName = `${userId}_${Date.now()}.${fileExt}`;
+  const filePath = `search-images/${sanitizedFileName}`;
 
-  // Create the uploads bucket if it doesn't exist
-  const { error: bucketError } = await supabase.storage
-    .createBucket('uploads', {
-      public: true,
-      fileSizeLimit: 10485760, // 10MB
-      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-    })
-    .catch(() => ({ error: null })); // Ignore error if bucket already exists
-
+  // Upload the file to the storage bucket
   const { error: uploadError } = await supabase.storage
     .from('uploads')
-    .upload(filePath, file);
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type
+    });
   
-  if (uploadError) throw uploadError;
+  if (uploadError) {
+    console.error('Upload error:', uploadError);
+    throw new Error(`Error uploading file: ${uploadError.message}`);
+  }
   
+  // Get the public URL of the uploaded file
   const { data } = supabase.storage
     .from('uploads')
     .getPublicUrl(filePath);
+  
+  if (!data.publicUrl) {
+    throw new Error('Failed to get public URL for uploaded file');
+  }
   
   return data.publicUrl;
 };

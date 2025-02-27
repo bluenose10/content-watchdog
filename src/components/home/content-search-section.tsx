@@ -17,19 +17,45 @@ export function ContentSearchSection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(selectedFile.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a valid image file (JPEG, PNG, GIF, or WEBP)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (selectedFile.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: "Please upload an image smaller than 10MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setFile(selectedFile);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setUploadProgress(0);
 
     try {
       // Check if user is logged in
@@ -45,7 +71,41 @@ export function ContentSearchSection() {
 
       let imageUrl;
       if (searchType === "image" && file) {
-        imageUrl = await uploadSearchImage(file, user.id);
+        // Show upload progress notification
+        const uploadToast = toast({
+          title: "Uploading image...",
+          description: "Please wait while we upload your image",
+        });
+        
+        // Simulate progress updates (in a real app this would come from the upload API)
+        const progressInterval = setInterval(() => {
+          setUploadProgress((prev) => {
+            const newProgress = prev + 10;
+            if (newProgress >= 90) {
+              clearInterval(progressInterval);
+            }
+            return newProgress < 90 ? newProgress : 90;
+          });
+        }, 300);
+        
+        try {
+          imageUrl = await uploadSearchImage(file, user.id);
+          
+          // Clear interval and set progress to 100%
+          clearInterval(progressInterval);
+          setUploadProgress(100);
+          
+          // Update toast to show success
+          toast({
+            id: uploadToast,
+            title: "Upload complete",
+            description: "Your image has been uploaded successfully",
+            variant: "default",
+          });
+        } catch (error) {
+          clearInterval(progressInterval);
+          throw error;
+        }
       }
 
       // Create search query in database
@@ -67,6 +127,7 @@ export function ContentSearchSection() {
       });
     } finally {
       setIsLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -134,19 +195,39 @@ export function ContentSearchSection() {
                           className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-colors"
                         >
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">
-                              {file
-                                ? file.name
-                                : "Click to upload or drag and drop"}
-                            </p>
+                            {uploadProgress > 0 && uploadProgress < 100 ? (
+                              <div className="w-full max-w-xs">
+                                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-primary" 
+                                    style={{ width: `${uploadProgress}%` }}
+                                  ></div>
+                                </div>
+                                <p className="text-xs text-center mt-2">
+                                  Uploading... {uploadProgress}%
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground">
+                                  {file
+                                    ? file.name
+                                    : "Click to upload or drag and drop"}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  (JPG, PNG, GIF, WEBP up to 10MB)
+                                </p>
+                              </>
+                            )}
                           </div>
                           <input
                             id="image"
                             type="file"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
                             className="hidden"
                             onChange={handleFileChange}
+                            disabled={isLoading}
                           />
                         </label>
                       </div>
@@ -167,6 +248,7 @@ export function ContentSearchSection() {
                         }
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        disabled={isLoading}
                       />
                     </div>
                   )}
