@@ -25,35 +25,42 @@ export function CheckoutButton({
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
 
-  // A more robust checkout handler that better handles errors
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     try {
       setIsLoading(true);
       
-      // For demo purposes, instead of trying to go to a non-existent API endpoint,
-      // let's redirect to the pricing section on the home page for now
-      sonnerToast.success("Redirecting to pricing page", {
-        description: "This is a demo. In a real app, you would be redirected to a payment page."
+      // Show loading toast
+      sonnerToast.loading("Preparing checkout...", {
+        id: "checkout-toast",
+        description: "Please wait while we prepare your checkout"
       });
       
-      // Redirect to pricing section after a short delay
+      // Simulate API call to create checkout session
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Success toast
+      sonnerToast.success("Checkout ready", {
+        id: "checkout-toast",
+        description: "You're being redirected to the payment page"
+      });
+      
+      // In a real implementation, you would redirect to the Stripe checkout page
+      // For demo purposes, we'll navigate to a success page after a short delay
       setTimeout(() => {
-        navigate("/#pricing");
+        navigate("/success");
         setIsLoading(false);
-      }, 1500);
+      }, 1000);
       
     } catch (error) {
       console.error('Error initiating checkout:', error);
       
-      setError("Could not initiate checkout process. Please try again.");
-      setShowErrorDialog(true);
-      
-      toast({
-        title: "Checkout Error",
-        description: "There was a problem starting the checkout process.",
-        variant: "destructive",
+      sonnerToast.error("Checkout failed", {
+        id: "checkout-toast",
+        description: "There was a problem with the checkout process"
       });
       
+      setError("Could not initiate checkout process. Please try again.");
+      setShowErrorDialog(true);
       setIsLoading(false);
     }
   };
