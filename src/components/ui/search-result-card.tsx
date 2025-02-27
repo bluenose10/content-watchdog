@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "./badge";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface SearchResultCardProps {
   result: {
@@ -29,12 +29,9 @@ export function SearchResultCard({
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
   
-  // Default tech-related image from Unsplash
-  const defaultImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=400&q=80";
-  
-  // Start with default image, override with thumbnail if exists
-  const [currentImage, setCurrentImage] = useState<string>(thumbnail || defaultImage);
-  
+  // Use a static placeholder image for all cards
+  const placeholderImage = "/placeholder.svg";
+
   // Truncate long titles
   const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
   
@@ -50,24 +47,17 @@ export function SearchResultCard({
       return 'Recently';
     }
   })();
-
-  // Simple error handler that goes directly to placeholder
-  const handleImageError = () => {
-    console.log("Image failed to load:", currentImage);
-    setCurrentImage("/placeholder.svg");
-  };
   
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
-        <div className="overflow-hidden" style={{ height: "225px", backgroundColor: "#f1f5f9" }}>
-          {/* Background color ensures visibility even during image loading */}
+        <div className="overflow-hidden" style={{ height: "225px", backgroundColor: "#f5f5f5" }}>
+          {/* Use the static placeholder for all cards */}
           <img
-            src={currentImage}
+            src={placeholderImage}
             alt={title || "Search result"}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            className="w-full h-full object-contain p-4"
             style={{ aspectRatio: "600/400" }}
-            onError={handleImageError}
           />
         </div>
         <Badge 
