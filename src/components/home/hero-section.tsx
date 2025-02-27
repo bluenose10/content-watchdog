@@ -16,8 +16,7 @@ export const HeroSection = () => {
             href="/signup"
             className="flex items-center justify-center h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-md cursor-pointer transition-colors"
           >
-            <Shield className="mr-2 h-5 w-5" />
-            Sign Up
+            Open Account
           </a>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
