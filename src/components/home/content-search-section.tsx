@@ -70,18 +70,11 @@ export function ContentSearchSection() {
         return;
       }
 
-      let imageUrl;
+      let imageUrl = undefined;
       let searchData;
       let searchResults = [];
 
-      // Create search query in database
-      searchData = await createSearchQuery({
-        user_id: user.id,
-        query_text: searchType !== "image" ? searchQuery : undefined,
-        query_type: searchType as any,
-        image_url: undefined, // Will update this for image search
-      });
-
+      // Handle image upload first if this is an image search
       if (searchType === "image" && file) {
         // Show initial upload toast
         toast({
@@ -103,12 +96,6 @@ export function ContentSearchSection() {
         try {
           imageUrl = await uploadSearchImage(file, user.id);
           
-          // Update the search query with the image URL
-          await supabase
-            .from('search_queries')
-            .update({ image_url: imageUrl })
-            .eq('id', searchData.id);
-          
           // Clear interval and set progress to 100%
           clearInterval(progressInterval);
           setUploadProgress(100);
@@ -120,9 +107,20 @@ export function ContentSearchSection() {
           });
         } catch (error) {
           clearInterval(progressInterval);
+          console.error("Upload error:", error);
           throw error;
         }
-      } else if (searchType !== "image") {
+      }
+
+      // Create search query in database
+      searchData = await createSearchQuery({
+        user_id: user.id,
+        query_text: searchType !== "image" ? searchQuery : undefined,
+        query_type: searchType as any,
+        image_url: imageUrl, // Now we pass the imageUrl if it exists
+      });
+
+      if (searchType !== "image") {
         // For text-based searches, use Google Custom Search API
         toast({
           title: "Searching...",
