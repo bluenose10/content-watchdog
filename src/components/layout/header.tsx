@@ -8,13 +8,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-const navigationItems = [
-  { name: "Home", href: "/" },
-  { name: "Features", href: "/#features" },
-  { name: "Pricing", href: "/#pricing" },
-  { name: "About", href: "/#about" },
-];
-
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -76,13 +69,9 @@ export function Header() {
     }
   };
 
-  const goToHome = () => {
-    // Force navigation using window.location to ensure a full page reload
-    window.location.href = "/";
-  };
-
-  const goToSection = (sectionId: string) => {
-    // Force navigation using window.location with hash
+  // Function to handle navigation to home page sections
+  const navigateToSection = (sectionId: string) => {
+    // Use window.location to force a complete navigation
     window.location.href = `/#${sectionId}`;
   };
 
@@ -114,24 +103,24 @@ export function Header() {
           >
             Home
           </a>
-          <a 
-            href="/#features" 
+          <button 
+            onClick={() => navigateToSection('features')} 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
           >
             Features
-          </a>
-          <a 
-            href="/#pricing" 
+          </button>
+          <button 
+            onClick={() => navigateToSection('pricing')} 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
           >
             Pricing
-          </a>
-          <a 
-            href="/#about" 
+          </button>
+          <button 
+            onClick={() => navigateToSection('about')} 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
           >
             About
-          </a>
+          </button>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -183,24 +172,24 @@ export function Header() {
               >
                 Home
               </a>
-              <a
-                href="/#features"
+              <button
+                onClick={() => navigateToSection('features')}
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
               >
                 Features
-              </a>
-              <a
-                href="/#pricing"
+              </button>
+              <button
+                onClick={() => navigateToSection('pricing')}
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
               >
                 Pricing
-              </a>
-              <a
-                href="/#about"
+              </button>
+              <button
+                onClick={() => navigateToSection('about')}
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
               >
                 About
-              </a>
+              </button>
             </nav>
 
             <div className="flex flex-col gap-3 mt-4">
