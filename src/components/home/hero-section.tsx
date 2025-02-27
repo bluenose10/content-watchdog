@@ -8,26 +8,27 @@ export const HeroSection = () => {
 
   // Direct navigation to the Content Search section ID
   const handleSearchNow = () => {
-    // First attempt: find the content-search-section by ID
-    const contentSearch = document.getElementById('content-search-section');
-    if (contentSearch) {
-      contentSearch.scrollIntoView({ behavior: 'smooth' });
-      return;
+    // Use document.querySelector which is more reliable than getElementById
+    const contentSearchSection = document.querySelector('#content-search-section');
+    if (contentSearchSection) {
+      contentSearchSection.scrollIntoView({ behavior: 'smooth' });
+      console.log("Scrolling to content search section");
+    } else {
+      console.error("Content search section not found, trying alternative");
+      // Try to find any element with the search section ID
+      const anySearchSection = document.querySelector('[id*="search"]');
+      if (anySearchSection) {
+        anySearchSection.scrollIntoView({ behavior: 'smooth' });
+        console.log("Scrolling to found search section");
+      } else {
+        console.error("No search section found at all");
+      }
     }
-    
-    // Second attempt: check if we can use the index page component's search section
-    const searchSection = document.getElementById('search');
-    if (searchSection) {
-      searchSection.scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
-    
-    // Fallback: if we're on another page, navigate to the home page with the search section hash
-    navigate('/#content-search-section');
   };
 
   // Direct navigation to signup page
   const handleCreateAccount = () => {
+    console.log("Navigating to signup page");
     navigate('/signup');
   };
 
@@ -41,23 +42,20 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <Button 
-            size="lg" 
-            className="button-animation cursor-pointer" 
-            onClick={handleSearchNow}
+          <a 
+            href="#content-search-section"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 bg-gradient-to-r from-purple-600 to-blue-600 text-primary-foreground hover:from-purple-700 hover:to-blue-700 shadow-sm hover:shadow-md cursor-pointer button-animation"
           >
             <Search className="mr-2 h-5 w-5" />
             Search Now
-          </Button>
-          <Button 
-            size="lg" 
-            variant="secondary"
-            className="cursor-pointer"
-            onClick={handleCreateAccount}
+          </a>
+          <a 
+            href="/signup"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:from-indigo-500/20 hover:to-blue-500/20 cursor-pointer"
           >
             <Shield className="mr-2 h-5 w-5" />
             Create Account
-          </Button>
+          </a>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">

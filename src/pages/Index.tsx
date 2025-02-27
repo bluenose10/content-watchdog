@@ -47,7 +47,7 @@ export default function Index() {
             <div className="col-span-1">
               <FeaturesSection />
             </div>
-            <div className="col-span-1">
+            <div className="col-span-1" id="content-search-section">
               <ContentSearchSection />
             </div>
             <div className="col-span-1">
