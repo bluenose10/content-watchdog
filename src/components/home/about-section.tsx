@@ -11,9 +11,9 @@ export function AboutSection() {
           <p className="text-sm text-muted-foreground">Our mission and story</p>
         </div>
         
-        <Card className="glass-card">
-          <CardContent className="p-4 sm:p-6">
-            <div className="space-y-4">
+        <Card className="glass-card h-[calc(100%-4rem)]">
+          <CardContent className="p-4 sm:p-6 h-full flex flex-col">
+            <div className="space-y-4 flex-grow">
               <AnimatedGradientBorder 
                 gradientClasses="from-primary/20 via-primary/40 to-primary/20"
                 animationDuration="8s" 
@@ -21,14 +21,14 @@ export function AboutSection() {
               >
                 <img 
                   src="https://placehold.co/600x300/png" 
-                  alt="About InfluenceGuard" 
+                  alt="About Influence Guard" 
                   className="w-full h-auto rounded-lg"
                 />
               </AnimatedGradientBorder>
               
               <div className="space-y-3">            
                 <p className="text-sm text-muted-foreground">
-                  We started InfluenceGuard with a simple mission: to give content creators control over how their work is used online.
+                  We started Influence Guard with a simple mission: to give content creators control over how their work is used online.
                 </p>
               </div>
             </div>
