@@ -85,6 +85,8 @@ const AppRoutes = () => {
           <Search />
         </ProtectedRoute>
       } />
+      
+      {/* Catch all route for 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
