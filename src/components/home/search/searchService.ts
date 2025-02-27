@@ -54,7 +54,7 @@ async function processSearch(
     searchId = newSearch.id;
   } else {
     // For anonymous users, create a temporary search ID
-    searchId = crypto.randomUUID();
+    searchId = `temp_${crypto.randomUUID()}`;
     // Store search data in session storage for anonymous users
     sessionStorage.setItem(`temp_search_${searchId}`, JSON.stringify(searchData));
   }

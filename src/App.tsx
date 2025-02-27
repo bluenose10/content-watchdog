@@ -33,6 +33,21 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
+// Add a semi-protected route for Results that doesn't redirect anonymous users
+const ResultsRoute = ({ children }: { children: JSX.Element }) => {
+  const { loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  return children;
+};
+
 const AppRoutes = () => {
   const { user } = useAuth();
 
@@ -43,15 +58,17 @@ const AppRoutes = () => {
       <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignUp />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       
+      {/* Anonymous-accessible route for results */}
+      <Route path="/results" element={
+        <ResultsRoute>
+          <Results />
+        </ResultsRoute>
+      } />
+      
       {/* Protected routes */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
-        </ProtectedRoute>
-      } />
-      <Route path="/results" element={
-        <ProtectedRoute>
-          <Results />
         </ProtectedRoute>
       } />
       <Route path="/search" element={
