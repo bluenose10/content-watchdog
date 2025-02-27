@@ -18,7 +18,7 @@ const testimonials = [
     name: "Michael Chen",
     role: "Photographer",
     avatar: "https://i.pravatar.cc/150?u=2",
-    content: "As a photographer, protecting my work is crucial. This platform has become an essential part of my business. The real-time alerts notify me instantly when my photos appear online, and the automated protection saves me hours of manual searching.",
+    content: "As a photographer, protecting my work is crucial. This platform has become an essential part of my business. The real-time alerts notify me instantly when my photos appear online saves me hours of manual searching.",
     rating: 5
   }
 ];
