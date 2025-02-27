@@ -1,6 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { createCheckoutSession } from "@/lib/payment-service";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -28,47 +27,31 @@ export function CheckoutButton({
       setIsLoading(true);
       setError(null);
       
-      console.log('Starting checkout for plan:', planId);
+      // Display a toast notification to inform the user
+      toast({
+        title: "Redirecting to checkout",
+        description: "Please wait while we prepare your checkout experience.",
+      });
       
-      // Call the payment service to create a checkout session
-      const response = await createCheckoutSession(planId);
-      console.log('Checkout session created:', response);
+      // Manually build the URL to the Supabase function
+      // This is a fallback approach to avoid issues with the Supabase client
+      const url = "/api/checkout?planId=" + encodeURIComponent(planId);
       
-      // Verify we have a valid URL
-      if (!response || !response.url) {
-        console.error('Invalid response from createCheckoutSession:', response);
-        throw new Error('No checkout URL returned');
-      }
-      
-      // Log the URL before redirecting
-      console.log('Redirecting to Stripe checkout URL:', response.url);
-      
-      // Directly redirect to Stripe without timeout
-      window.location.href = response.url;
+      // Navigate to the checkout URL
+      window.location.href = url;
       
     } catch (error) {
       console.error('Error during checkout process:', error);
       
-      // Create a more descriptive error message
-      let errorMessage = error.message || "Failed to start checkout process";
-      
-      // Add more context for common errors
-      if (errorMessage.includes('status code 500')) {
-        errorMessage = 'Server error: The payment service is currently unavailable. Please try again later.';
-      } else if (errorMessage.includes('status code 404')) {
-        errorMessage = 'Error: The requested plan was not found.';
-      } else if (errorMessage.includes('status code 401')) {
-        errorMessage = 'Authentication error: Please log in again to continue.';
-      } else if (errorMessage.includes('network')) {
-        errorMessage = 'Network error: Please check your internet connection and try again.';
-      }
+      // Create a descriptive error message
+      const errorMessage = "Failed to start checkout process. Please try again later.";
       
       setError(errorMessage);
       setShowErrorDialog(true);
       
       toast({
         title: "Checkout Error",
-        description: "There was a problem starting the checkout process. See details for more information.",
+        description: "There was a problem starting the checkout process.",
         variant: "destructive",
       });
     } finally {
@@ -98,9 +81,7 @@ export function CheckoutButton({
                   <p className="font-medium">Troubleshooting tips:</p>
                   <ul className="list-disc ml-5 mt-2 space-y-1">
                     <li>Check your internet connection</li>
-                    <li>Verify your Stripe configuration in Supabase</li>
-                    <li>Ensure the plan exists in your database</li>
-                    <li>Check the Edge Function logs for errors</li>
+                    <li>Refresh the page and try again</li>
                     <li>Try again in a few minutes</li>
                   </ul>
                 </div>
