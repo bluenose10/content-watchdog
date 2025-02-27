@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
@@ -73,7 +72,6 @@ export function SearchResultCard({
     }
   };
   
-  // Map social media platforms to their respective background images and icons
   const getSocialMediaInfo = () => {
     const platform = cleanSource.toLowerCase();
     
@@ -83,8 +81,7 @@ export function SearchResultCard({
         color: 'text-blue-600',
         bgColor: 'bg-white',
         name: 'Facebook',
-        iconUrl: '/lovable-uploads/635b4db7-5776-4365-8831-07be04a15714.png',
-        // Mountain landscape image for Facebook
+        iconUrl: '/lovable-uploads/d78c1f85-fa38-4209-bef7-ac0f1eebb85f.png',
         backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
@@ -94,7 +91,6 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'Twitter/X',
         iconUrl: '/lovable-uploads/8c8c70f8-5aba-4fb4-8261-cc6c9c7a4ded.png',
-        // Use a background image for Twitter
         backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('instagram')) {
@@ -104,7 +100,6 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'Instagram',
         iconUrl: '/lovable-uploads/554d6a51-776f-4eb2-90bb-728cb6d94365.png',
-        // Mountain image for Instagram
         backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('linkedin')) {
@@ -114,7 +109,6 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'LinkedIn',
         iconUrl: '/lovable-uploads/71eeb517-4964-4090-994c-5bad460e3be4.png',
-        // Mountain landscape for LinkedIn
         backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('youtube')) {
@@ -124,7 +118,6 @@ export function SearchResultCard({
         bgColor: 'bg-white',
         name: 'YouTube',
         iconUrl: '/lovable-uploads/74f208e0-bb64-408c-826a-b51bba43af07.png',
-        // Kindle e-reader image for YouTube
         backgroundImage: 'https://images.unsplash.com/photo-1544716278-e513176f20b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
       };
     } else if (platform.includes('tiktok')) {
@@ -268,7 +261,6 @@ export function SearchResultCard({
           style={{ height: "200px" }}
         >
           {isValidThumbnail() ? (
-            // Use actual thumbnail if available
             <img 
               src={thumbnail} 
               alt={cleanTitle}
@@ -276,7 +268,6 @@ export function SearchResultCard({
               onError={() => setImageError(true)}
             />
           ) : socialMedia.backgroundImage ? (
-            // Display the social media background image with platform icon overlay
             <div className="relative w-full h-full">
               <img 
                 src={socialMedia.backgroundImage} 
@@ -296,7 +287,6 @@ export function SearchResultCard({
               </div>
             </div>
           ) : (
-            // Fallback to logo-only display
             <div className="relative w-full h-full flex items-center justify-center bg-white">
               {socialMedia.iconUrl ? (
                 <img 
