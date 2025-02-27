@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,6 +34,7 @@ export function ContentSearchSection() {
           description: "Please upload a valid image file (JPEG, PNG, GIF, or WEBP)",
           variant: "destructive",
         });
+        e.target.value = ''; // Reset the input
         return;
       }
       
@@ -46,10 +46,47 @@ export function ContentSearchSection() {
           description: "Please upload an image smaller than 10MB",
           variant: "destructive",
         });
+        e.target.value = ''; // Reset the input
         return;
       }
       
       setFile(selectedFile);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0];
+      
+      // Use the same validation as handleFileChange
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(droppedFile.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a valid image file (JPEG, PNG, GIF, or WEBP)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (droppedFile.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload an image smaller than 10MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setFile(droppedFile);
     }
   };
 
@@ -238,6 +275,8 @@ export function ContentSearchSection() {
                         <label
                           htmlFor="image"
                           className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
                         >
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
                             {uploadProgress > 0 && uploadProgress < 100 ? (
@@ -266,15 +305,16 @@ export function ContentSearchSection() {
                               </>
                             )}
                           </div>
-                          <input
-                            id="image"
-                            type="file"
-                            accept="image/jpeg,image/png,image/gif,image/webp"
-                            className="hidden"
-                            onChange={handleFileChange}
-                            disabled={isLoading}
-                          />
                         </label>
+                        <input
+                          id="image"
+                          name="image"
+                          type="file"
+                          accept="image/jpeg,image/png,image/gif,image/webp"
+                          className="hidden"
+                          onChange={handleFileChange}
+                          disabled={isLoading}
+                        />
                       </div>
                     </div>
                   ) : (
