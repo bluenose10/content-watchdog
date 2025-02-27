@@ -1,12 +1,12 @@
 
 import { ArrowRight, Shield, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
+
   const handleCreateAccount = () => {
-    // Force navigation to the signup page
-    window.location.href = "/signup";
-    
-    // Adding console log for debugging
+    navigate("/signup");
     console.log("Create Account button clicked, redirecting to /signup");
   };
 
@@ -22,7 +22,7 @@ export const HeroSection = () => {
         <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
           <button 
             onClick={handleCreateAccount}
-            className="flex items-center justify-center h-12 px-6 bg-white hover:bg-gray-100 text-purple-600 border border-purple-200 rounded-md cursor-pointer transition-colors"
+            className="flex items-center justify-center h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-md cursor-pointer transition-colors"
           >
             <Shield className="mr-2 h-5 w-5" />
             Create Account
