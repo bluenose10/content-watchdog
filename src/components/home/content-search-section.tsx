@@ -71,8 +71,8 @@ export function ContentSearchSection() {
 
       let imageUrl;
       if (searchType === "image" && file) {
-        // Show upload progress notification
-        const uploadToast = toast({
+        // Show initial upload toast
+        toast({
           title: "Uploading image...",
           description: "Please wait while we upload your image",
         });
@@ -95,9 +95,8 @@ export function ContentSearchSection() {
           clearInterval(progressInterval);
           setUploadProgress(100);
           
-          // Update toast to show success
+          // Show completion toast
           toast({
-            id: uploadToast,
             title: "Upload complete",
             description: "Your image has been uploaded successfully",
             variant: "default",
