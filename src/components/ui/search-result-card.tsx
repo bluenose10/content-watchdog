@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
@@ -99,7 +100,7 @@ export function SearchResultCard({
         color: 'text-pink-600',
         bgColor: 'bg-white',
         name: 'Instagram',
-        iconUrl: '/lovable-uploads/554d6a51-776f-4eb2-90bb-728cb6d94365.png',
+        iconUrl: '/lovable-uploads/783c1b40-9df2-4feb-9e47-35223bc17dfc.png',
         backgroundImage: '/lovable-uploads/921d062a-aa31-4af6-b436-33f404ae7fc9.png'
       };
     } else if (platform.includes('linkedin')) {
