@@ -78,7 +78,7 @@ export function ContentSearchSection() {
   };
 
   return (
-    <section id="search" className="h-full">
+    <section id="content-search-section" className="h-full">
       <div className="h-full">
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-bold mb-2">Content Search</h2>

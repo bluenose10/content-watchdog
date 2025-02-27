@@ -8,18 +8,22 @@ export const HeroSection = () => {
 
   // Direct navigation to the Content Search section ID
   const handleSearchNow = () => {
-    const contentSearch = document.querySelector('#content-search-section');
+    // First attempt: find the content-search-section by ID
+    const contentSearch = document.getElementById('content-search-section');
     if (contentSearch) {
       contentSearch.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // If element not found, try to find any search-related section
-      const searchTabs = document.querySelector('.search-tabs-container');
-      if (searchTabs) {
-        searchTabs.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        console.error("Content search section not found");
-      }
+      return;
     }
+    
+    // Second attempt: check if we can use the index page component's search section
+    const searchSection = document.getElementById('search');
+    if (searchSection) {
+      searchSection.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    
+    // Fallback: if we're on another page, navigate to the home page with the search section hash
+    navigate('/#content-search-section');
   };
 
   // Direct navigation to signup page
@@ -39,7 +43,7 @@ export const HeroSection = () => {
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <Button 
             size="lg" 
-            className="button-animation" 
+            className="button-animation cursor-pointer" 
             onClick={handleSearchNow}
           >
             <Search className="mr-2 h-5 w-5" />
@@ -48,6 +52,7 @@ export const HeroSection = () => {
           <Button 
             size="lg" 
             variant="secondary"
+            className="cursor-pointer"
             onClick={handleCreateAccount}
           >
             <Shield className="mr-2 h-5 w-5" />
