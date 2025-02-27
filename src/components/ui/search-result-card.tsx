@@ -60,17 +60,17 @@ export function SearchResultCard({
   const { size, color, Icon } = getIconParams();
   
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md border border-green-200">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md border border-green-300 bg-green-50/30 hover:border-red-400 group">
       <div className="relative">
         <div 
-          className="overflow-hidden flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200" 
+          className="overflow-hidden flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200 group-hover:from-green-50 group-hover:to-red-50 transition-all duration-300" 
           style={{ height: "225px" }}
         >
           <div className="relative p-6 flex flex-col items-center justify-center text-center">
-            <div className="bg-white/70 p-6 rounded-full" style={{ color: color }}>
+            <div className="bg-white/70 p-6 rounded-full group-hover:border group-hover:border-red-200 transition-all duration-300" style={{ color: color }}>
               <Icon size={size} strokeWidth={1.5} />
             </div>
-            <div className="mt-4 text-sm font-medium bg-white/90 px-4 py-1.5 rounded-full border border-green-300 shadow-sm">
+            <div className="mt-4 text-sm font-medium bg-white/90 px-4 py-1.5 rounded-full border border-green-300 shadow-sm group-hover:border-red-300 transition-all duration-300">
               Content Match Found
             </div>
           </div>
@@ -96,7 +96,7 @@ export function SearchResultCard({
           </Badge>
         )}
       </div>
-      <CardHeader className="pb-2 bg-green-50/50">
+      <CardHeader className="pb-2 bg-green-50/70 group-hover:bg-red-50/30 transition-all duration-300">
         <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
         <p className="text-sm text-muted-foreground">
           Found on {source} • {formattedDate}
@@ -111,9 +111,9 @@ export function SearchResultCard({
           </div>
         )}
       </CardContent>
-      <CardFooter className="bg-green-50/50">
+      <CardFooter className="bg-green-50/70 group-hover:bg-red-50/30 transition-all duration-300">
         {isPremium || isFreePreview ? (
-          <Button asChild variant="outline" size="sm" className="w-full gap-1 border-green-200 hover:bg-green-100">
+          <Button asChild variant="outline" size="sm" className="w-full gap-1 border-green-300 hover:bg-green-100 group-hover:border-red-300 group-hover:hover:bg-red-100 transition-all duration-300">
             <a href={url} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4" />
               Visit Site
@@ -124,7 +124,7 @@ export function SearchResultCard({
             onClick={onUpgrade} 
             variant="outline" 
             size="sm" 
-            className="w-full border-green-200 hover:bg-green-100"
+            className="w-full border-green-300 hover:bg-green-100 group-hover:border-red-300 group-hover:hover:bg-red-100 transition-all duration-300"
           >
             Upgrade to View
           </Button>
