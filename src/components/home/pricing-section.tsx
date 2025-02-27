@@ -24,16 +24,16 @@ export function PricingSection() {
     }
   };
 
-  // Only show one pricing plan in this compact view
+  // Find popular plan or default to first plan
   const displayPlan = PRICING_PLANS.find(plan => plan.popular) || PRICING_PLANS[0];
 
   return (
     <section id="pricing" className="h-full relative overflow-hidden">
       <div className="h-full">
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold mb-2">Pricing</h2>
+          <h2 className="text-2xl font-bold mb-2">Pricing Plans</h2>
           <p className="text-sm text-muted-foreground">
-            Transparent, affordable plans
+            Choose the plan that fits your needs
           </p>
         </div>
 
