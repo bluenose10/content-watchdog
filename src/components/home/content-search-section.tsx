@@ -5,14 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SEARCH_TYPES } from "@/lib/constants";
+import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { Search, Upload } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function ContentSearchSection() {
   const [searchType, setSearchType] = useState(SEARCH_TYPES[0].id);
   const [searchQuery, setSearchQuery] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -20,10 +27,47 @@ export function ContentSearchSection() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For demo purposes only, redirect to results
-    window.location.href = "/results";
+    setIsLoading(true);
+
+    try {
+      // Check if user is logged in
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to perform searches",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
+      let imageUrl;
+      if (searchType === "image" && file) {
+        imageUrl = await uploadSearchImage(file, user.id);
+      }
+
+      // Create search query in database
+      const searchData = await createSearchQuery({
+        user_id: user.id,
+        query_text: searchType !== "image" ? searchQuery : undefined,
+        query_type: searchType as any,
+        image_url: imageUrl,
+      });
+
+      // Navigate to results page with the search ID
+      navigate(`/results?id=${searchData.id}`);
+    } catch (error) {
+      console.error("Search error:", error);
+      toast({
+        title: "Error",
+        description: "There was an error processing your search. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -127,9 +171,13 @@ export function ContentSearchSection() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full button-animation">
+                  <Button 
+                    type="submit" 
+                    className="w-full button-animation" 
+                    disabled={isLoading || (searchType === "image" && !file) || (searchType !== "image" && !searchQuery)}
+                  >
                     <Search className="mr-2 h-4 w-4" />
-                    Search Now
+                    {isLoading ? "Searching..." : "Search Now"}
                   </Button>
 
                   <p className="text-xs text-center text-muted-foreground">

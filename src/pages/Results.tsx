@@ -6,14 +6,53 @@ import { Header } from "@/components/layout/header";
 import { SearchResultCard } from "@/components/ui/search-result-card";
 import { MOCK_SEARCH_RESULTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { getSearchQueryById, getSearchResults, getUserSubscription } from "@/lib/db-service";
+import { useAuth } from "@/context/AuthContext";
+import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { ArrowLeft, ArrowRight, Download, Filter } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 const Results = () => {
   const { toast } = useToast();
-  const [isPremium, setIsPremium] = useState(false); // In a real app, this would come from auth state
+  const { user } = useProtectedRoute();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const searchId = searchParams.get('id');
+  const [isPremium, setIsPremium] = useState(false);
   const [showingCount, setShowingCount] = useState(5); // Free users see 5 results
+  
+  // Fetch user subscription
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription', user?.id],
+    queryFn: () => user ? getUserSubscription(user.id) : null,
+    enabled: !!user,
+  });
+
+  // Fetch search query
+  const { data: searchQuery, isLoading: queryLoading } = useQuery({
+    queryKey: ['search', searchId],
+    queryFn: () => searchId ? getSearchQueryById(searchId) : null,
+    enabled: !!searchId,
+  });
+
+  // Fetch search results
+  const { data: searchResults, isLoading: resultsLoading } = useQuery({
+    queryKey: ['results', searchId],
+    queryFn: () => searchId ? getSearchResults(searchId) : null,
+    enabled: !!searchId,
+    // If we don't have real results yet, use mock data for demo
+    placeholderData: MOCK_SEARCH_RESULTS,
+  });
+
+  // Check if user has premium subscription
+  useEffect(() => {
+    if (subscription) {
+      // If subscription exists and is active, user is premium
+      setIsPremium(subscription.status === 'active');
+    }
+  }, [subscription]);
   
   const handleUpgrade = () => {
     toast({
@@ -22,7 +61,9 @@ const Results = () => {
     });
   };
   
-  const visibleResults = MOCK_SEARCH_RESULTS.slice(0, isPremium ? MOCK_SEARCH_RESULTS.length : showingCount);
+  const visibleResults = searchResults ? 
+    (isPremium ? searchResults : searchResults.slice(0, showingCount)) : 
+    [];
   
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -40,7 +81,11 @@ const Results = () => {
                 <h1 className="text-3xl font-bold tracking-tight">Search Results</h1>
               </div>
               <p className="text-muted-foreground">
-                Results for: <span className="font-medium">@johndoe</span>
+                Results for: <span className="font-medium">
+                  {searchQuery?.query_type === 'image' 
+                    ? 'Image Search' 
+                    : searchQuery?.query_text || '@johndoe'}
+                </span>
               </p>
             </div>
             <div className="flex gap-2">
@@ -70,7 +115,7 @@ const Results = () => {
                 <div>
                   <h3 className="text-lg font-medium mb-1">Free Plan Limitation</h3>
                   <p className="text-sm text-muted-foreground">
-                    You're viewing 5 of {MOCK_SEARCH_RESULTS.length} total results. Upgrade to see all matches and access premium features.
+                    You're viewing {showingCount} of {searchResults?.length || 0} total results. Upgrade to see all matches and access premium features.
                   </p>
                 </div>
                 <Button asChild className="button-animation">
@@ -80,21 +125,37 @@ const Results = () => {
             </Card>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {visibleResults.map((result) => (
-              <SearchResultCard
-                key={result.id}
-                result={result}
-                isPremium={isPremium}
-                onUpgrade={handleUpgrade}
-              />
-            ))}
-          </div>
+          {resultsLoading ? (
+            <div className="text-center py-12">
+              <p>Loading search results...</p>
+            </div>
+          ) : searchResults?.length === 0 ? (
+            <div className="text-center py-12">
+              <h2 className="text-xl font-semibold mb-2">No results found</h2>
+              <p className="text-muted-foreground mb-6">
+                We couldn't find any matches for your search. Try a different query or search type.
+              </p>
+              <Button asChild>
+                <Link to="/">Try Another Search</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {visibleResults.map((result) => (
+                <SearchResultCard
+                  key={result.id}
+                  result={result}
+                  isPremium={isPremium}
+                  onUpgrade={handleUpgrade}
+                />
+              ))}
+            </div>
+          )}
 
-          {!isPremium && (
+          {!isPremium && searchResults && searchResults.length > showingCount && (
             <div className="mt-8 text-center">
               <p className="text-muted-foreground mb-4">
-                {visibleResults.length} of {MOCK_SEARCH_RESULTS.length} results shown
+                {visibleResults.length} of {searchResults.length} results shown
               </p>
               <Button asChild className="button-animation">
                 <Link to="/#pricing">
