@@ -50,21 +50,22 @@ export default function Results() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Result limits based on access level
+  // Result limits based on access level - defines how many unblurred results to show
   const getResultLimit = () => {
     switch (accessLevel) {
       case AccessLevel.PREMIUM:
-        return 100; // Pro users can see all results
+        return 20; // Pro users can see all 20 results unblurred
       case AccessLevel.BASIC:
-        return 5;  // Registered users can see 5 results
+        return 5;  // Registered users can see 5 unblurred results
       case AccessLevel.ANONYMOUS:
       default:
         return 0;  // Anonymous users see 0 unlocked results (all blurred)
     }
   };
 
+  // Show up to 20 results for all user types, regardless of their access level
   const getDisplayCount = () => {
-    return Math.min(20, results.length); // Display up to 20 results max for all user types
+    return Math.min(20, results.length);
   };
 
   useEffect(() => {
@@ -438,7 +439,7 @@ export default function Results() {
                       <LockIcon className="h-4 w-4 text-blue-500" />
                       <AlertTitle className="text-blue-700 dark:text-blue-300">Basic Access</AlertTitle>
                       <AlertDescription className="text-blue-600 dark:text-blue-400">
-                        <p>You can view {getResultLimit()} out of {results.length} results. Upgrade to Pro for full access.</p>
+                        <p>You can view {getResultLimit()} out of {results.length} results without blur. Upgrade to Pro for full access.</p>
                         <Button 
                           size="sm" 
                           className="bg-blue-600 hover:bg-blue-700 text-white mt-2"
@@ -453,9 +454,6 @@ export default function Results() {
                   <div className="flex justify-between items-center mb-4">
                     <p className="text-sm text-muted-foreground">
                       {results.length} matches found
-                      {accessLevel !== AccessLevel.PREMIUM && getResultLimit() < results.length && (
-                        <span> (viewing {getDisplayCount()})</span>
-                      )}
                     </p>
                     <Button variant="outline" size="sm" className="gap-2">
                       <Filter className="h-4 w-4" />
