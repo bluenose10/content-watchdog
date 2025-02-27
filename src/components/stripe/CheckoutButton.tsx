@@ -6,6 +6,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { toast as sonnerToast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { PRICING_PLANS } from "@/lib/constants";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface CheckoutButtonProps {
   planId: string;
@@ -21,12 +23,25 @@ export function CheckoutButton({
   children = "Subscribe"
 }: CheckoutButtonProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
 
   const handleCheckout = async () => {
     try {
+      // Check if user is logged in
+      if (!user) {
+        sonnerToast.error("Authentication required", {
+          description: "Please log in to subscribe to a plan",
+        });
+        // Store the current path to redirect back after login
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+        navigate('/login');
+        return;
+      }
+
       setIsLoading(true);
       
       // Find the selected plan
