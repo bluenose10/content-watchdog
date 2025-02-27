@@ -1,16 +1,30 @@
 
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Search, Shield, Zap } from "lucide-react";
 
 export const HeroSection = () => {
-  const handleScrollToSearch = () => {
-    const searchSection = document.getElementById('search');
-    if (searchSection) {
-      searchSection.scrollIntoView({ behavior: 'smooth' });
+  const navigate = useNavigate();
+
+  // Direct navigation to the Content Search section ID
+  const handleSearchNow = () => {
+    const contentSearch = document.querySelector('#content-search-section');
+    if (contentSearch) {
+      contentSearch.scrollIntoView({ behavior: 'smooth' });
     } else {
-      console.error("Search section element not found");
+      // If element not found, try to find any search-related section
+      const searchTabs = document.querySelector('.search-tabs-container');
+      if (searchTabs) {
+        searchTabs.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        console.error("Content search section not found");
+      }
     }
+  };
+
+  // Direct navigation to signup page
+  const handleCreateAccount = () => {
+    navigate('/signup');
   };
 
   return (
@@ -26,20 +40,18 @@ export const HeroSection = () => {
           <Button 
             size="lg" 
             className="button-animation" 
-            onClick={handleScrollToSearch}
+            onClick={handleSearchNow}
           >
             <Search className="mr-2 h-5 w-5" />
             Search Now
           </Button>
           <Button 
-            asChild 
             size="lg" 
             variant="secondary"
+            onClick={handleCreateAccount}
           >
-            <Link to="/signup">
-              <Shield className="mr-2 h-5 w-5" />
-              Create Account
-            </Link>
+            <Shield className="mr-2 h-5 w-5" />
+            Create Account
           </Button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
