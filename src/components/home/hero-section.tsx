@@ -1,37 +1,9 @@
 
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowRight, Search, Shield, Zap } from "lucide-react";
 
 export const HeroSection = () => {
-  const navigate = useNavigate();
-
-  // Direct navigation to the Content Search section ID
-  const handleSearchNow = () => {
-    // Use document.querySelector which is more reliable than getElementById
-    const contentSearchSection = document.querySelector('#content-search-section');
-    if (contentSearchSection) {
-      contentSearchSection.scrollIntoView({ behavior: 'smooth' });
-      console.log("Scrolling to content search section");
-    } else {
-      console.error("Content search section not found, trying alternative");
-      // Try to find any element with the search section ID
-      const anySearchSection = document.querySelector('[id*="search"]');
-      if (anySearchSection) {
-        anySearchSection.scrollIntoView({ behavior: 'smooth' });
-        console.log("Scrolling to found search section");
-      } else {
-        console.error("No search section found at all");
-      }
-    }
-  };
-
-  // Direct navigation to signup page
-  const handleCreateAccount = () => {
-    console.log("Navigating to signup page");
-    navigate('/signup');
-  };
-
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
