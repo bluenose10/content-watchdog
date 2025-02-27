@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
-import { ExternalLink, Search, FileSearch, Image, AlertTriangle } from "lucide-react";
+import { ExternalLink, Search, FileSearch, Image, AlertTriangle, Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
 import { Badge } from "./badge";
 import { useEffect, useState } from "react";
 
@@ -78,6 +78,55 @@ export function SearchResultCard({
     }
   };
   
+  // Get social media platform icon
+  const getSocialMediaIcon = () => {
+    const platform = cleanSource.toLowerCase();
+    
+    if (platform.includes('facebook')) {
+      return {
+        Icon: Facebook,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+        name: 'Facebook'
+      };
+    } else if (platform.includes('twitter') || platform.includes('x.com')) {
+      return {
+        Icon: Twitter,
+        color: 'text-sky-500',
+        bgColor: 'bg-sky-50 dark:bg-sky-900/30',
+        name: 'Twitter/X'
+      };
+    } else if (platform.includes('instagram')) {
+      return {
+        Icon: Instagram,
+        color: 'text-pink-600',
+        bgColor: 'bg-pink-50 dark:bg-pink-900/30',
+        name: 'Instagram'
+      };
+    } else if (platform.includes('linkedin')) {
+      return {
+        Icon: Linkedin,
+        color: 'text-blue-700',
+        bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+        name: 'LinkedIn'
+      };
+    } else if (platform.includes('youtube')) {
+      return {
+        Icon: Youtube,
+        color: 'text-red-600',
+        bgColor: 'bg-red-50 dark:bg-red-900/30',
+        name: 'YouTube'
+      };
+    } else {
+      return {
+        Icon: Search,
+        color: 'text-gray-600 dark:text-gray-400',
+        bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+        name: cleanSource
+      };
+    }
+  };
+  
   // Get match level color styles
   function getMatchColorStyles(level: string) {
     switch(level) {
@@ -109,6 +158,7 @@ export function SearchResultCard({
   }
   
   const { Icon, bgColor, iconColor, borderColor } = getIconParams();
+  const socialMedia = getSocialMediaIcon();
 
   // Function to clean Supabase URLs
   function cleanSupabaseUrls(str: string, type: "title" | "url" | "source", sourceDomain?: string): string {
@@ -233,10 +283,10 @@ export function SearchResultCard({
           ) : (
             <div className="relative p-6 flex flex-col items-center justify-center text-center">
               <div className={`bg-white/80 dark:bg-gray-800/80 p-5 rounded-full border ${borderColor}`}>
-                <Icon size={42} className={iconColor} strokeWidth={1.5} />
+                <socialMedia.Icon size={42} className={socialMedia.color} strokeWidth={1.5} />
               </div>
               <div className="mt-4 text-sm font-medium bg-white/80 dark:bg-gray-800/80 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                <span className={matchColor.text}>Content Match Found</span>
+                <span className={matchColor.text}>Content Match on {socialMedia.name}</span>
               </div>
             </div>
           )}
@@ -261,6 +311,9 @@ export function SearchResultCard({
             Upgrade to View
           </Badge>
         )}
+        <div className="absolute left-2 bottom-2 bg-white/90 dark:bg-gray-800/90 rounded-full p-1.5 border border-gray-200 dark:border-gray-700">
+          <socialMedia.Icon size={18} className={socialMedia.color} />
+        </div>
       </div>
       <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50">
         <h3 className="text-lg font-semibold" title={cleanTitle}>{truncatedTitle}</h3>
