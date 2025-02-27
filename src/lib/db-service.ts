@@ -1,5 +1,10 @@
+
 import { supabase } from './supabase';
 import { SearchQuery, SearchResult, UserSubscription } from './db-types';
+import { getCacheKey, getCachedResults, cacheResults } from './search-cache';
+
+// Track pending requests to avoid duplicate calls
+const pendingRequests: Record<string, Promise<any>> = {};
 
 // Search queries functions
 export const createSearchQuery = async (searchQuery: SearchQuery) => {
@@ -143,56 +148,97 @@ export const createUserSubscription = async (subscription: UserSubscription) => 
   return data?.[0];
 };
 
-// Google Custom Search API function - real API integration
+// Google Custom Search API function - real API integration with caching
 export const performGoogleSearch = async (query: string, userId: string, searchParams: any = {}) => {
   try {
+    // Generate cache key from query and search parameters
+    const cacheKey = getCacheKey('text', query, searchParams);
+    
+    // Check if there's already a pending request for this search
+    if (pendingRequests[cacheKey]) {
+      console.log('Returning existing pending request for:', query);
+      return pendingRequests[cacheKey];
+    }
+    
+    // Check cache first
+    const cachedResults = getCachedResults(cacheKey);
+    if (cachedResults) {
+      return cachedResults;
+    }
+    
     console.log('Performing Google search for query:', query, 'by user:', userId, 'with params:', searchParams);
     
-    // Try to use the real Google Search API if we have an API key
-    // For production use, this would be done via a Supabase Edge Function to keep the API key secure
-    const apiKey = process.env.GOOGLE_API_KEY || '';
-    const searchEngineId = process.env.GOOGLE_CSE_ID || '';
-    
-    if (!apiKey || !searchEngineId) {
-      console.log('No API keys found, falling back to mock data');
-      return generateMockSearchResults(query, searchParams);
-    }
-    
-    // Build search parameters
-    const params = new URLSearchParams({
-      key: apiKey,
-      cx: searchEngineId,
-      q: query,
-      num: '20' // Maximum results to return
+    // Create a new promise for this request and store it
+    const request = new Promise(async (resolve) => {
+      try {
+        // Try to use the real Google Search API if we have an API key
+        const apiKey = process.env.GOOGLE_API_KEY || '';
+        const searchEngineId = process.env.GOOGLE_CSE_ID || '';
+        
+        if (!apiKey || !searchEngineId) {
+          console.log('No API keys found, falling back to mock data');
+          const mockResults = generateMockSearchResults(query, searchParams);
+          cacheResults(cacheKey, mockResults);
+          resolve(mockResults);
+          return;
+        }
+        
+        // Build search parameters
+        const params = new URLSearchParams({
+          key: apiKey,
+          cx: searchEngineId,
+          q: query,
+          num: '20' // Maximum results to return
+        });
+        
+        // Add advanced search parameters if provided
+        if (searchParams?.exactMatch) {
+          params.append('exactTerms', query);
+        }
+        
+        if (searchParams?.dateRestrict) {
+          params.append('dateRestrict', searchParams.dateRestrict);
+        }
+        
+        if (searchParams?.searchType) {
+          params.append('searchType', searchParams.searchType);
+        }
+        
+        if (searchParams?.contentFilter) {
+          params.append('safe', searchParams.contentFilter === 'high' ? 'active' : 'off');
+        }
+        
+        const response = await fetch(`https://www.googleapis.com/customsearch/v1?${params.toString()}`);
+        
+        if (!response.ok) {
+          throw new Error(`Google API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Google API response:', data);
+        
+        // Cache the results
+        cacheResults(cacheKey, data);
+        resolve(data);
+      } catch (error) {
+        console.error('Google Search API error:', error);
+        
+        // If API call fails, fall back to mock data
+        const mockResults = generateMockSearchResults(query, searchParams);
+        cacheResults(cacheKey, mockResults);
+        resolve(mockResults);
+      } finally {
+        // Clean up the pending request
+        setTimeout(() => {
+          delete pendingRequests[cacheKey];
+        }, 100);
+      }
     });
     
-    // Add advanced search parameters if provided
-    if (searchParams?.exactMatch) {
-      params.append('exactTerms', query);
-    }
+    // Store the promise
+    pendingRequests[cacheKey] = request;
     
-    if (searchParams?.dateRestrict) {
-      params.append('dateRestrict', searchParams.dateRestrict);
-    }
-    
-    if (searchParams?.searchType) {
-      params.append('searchType', searchParams.searchType);
-    }
-    
-    if (searchParams?.contentFilter) {
-      params.append('safe', searchParams.contentFilter === 'high' ? 'active' : 'off');
-    }
-    
-    const response = await fetch(`https://www.googleapis.com/customsearch/v1?${params.toString()}`);
-    
-    if (!response.ok) {
-      throw new Error(`Google API error: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log('Google API response:', data);
-    
-    return data;
+    return request;
   } catch (error) {
     console.error('Google Search API error:', error);
     
@@ -267,74 +313,149 @@ function generateMockSearchResults(query: string, searchParams: any = {}) {
 // Image Search function - separate from text search
 export const performImageSearch = async (imageUrl: string, userId: string, searchParams: any = {}) => {
   try {
+    // Generate cache key from image URL and search parameters
+    const cacheKey = getCacheKey('image', imageUrl, searchParams);
+    
+    // Check if there's already a pending request for this search
+    if (pendingRequests[cacheKey]) {
+      console.log('Returning existing pending request for image search');
+      return pendingRequests[cacheKey];
+    }
+    
+    // Check cache first
+    const cachedResults = getCachedResults(cacheKey);
+    if (cachedResults) {
+      return cachedResults;
+    }
+    
     console.log('Performing image search with URL:', imageUrl, 'with params:', searchParams);
     
-    // In a real implementation, we would call a real reverse image search API here
-    // For now, we'll use mock data with some enhancements based on the search parameters
-    
-    // Extract search parameters
-    const similarityThreshold = searchParams?.similarityThreshold || 0.6;
-    const maxResults = searchParams?.maxResults || 20;
-    const searchMode = searchParams?.searchMode || 'relaxed';
-    
-    // In a real implementation, these parameters would be passed to the API
-    console.log('Image search params:', { similarityThreshold, maxResults, searchMode });
-    
-    // Simulate different levels of match quality based on the parameters
-    const getMatchQuality = (index: number) => {
-      // Strict mode has fewer high-quality matches
-      if (searchMode === 'strict') {
-        if (index < 3) return { quality: 'high', score: 0.85 + (Math.random() * 0.15) };
-        if (index < 8) return { quality: 'medium', score: 0.65 + (Math.random() * 0.15) };
-        return { quality: 'low', score: 0.4 + (Math.random() * 0.2) };
-      } 
-      
-      // Relaxed mode has more matches in general
-      if (index < 6) return { quality: 'high', score: 0.8 + (Math.random() * 0.2) };
-      if (index < 12) return { quality: 'medium', score: 0.6 + (Math.random() * 0.2) };
-      return { quality: 'low', score: 0.3 + (Math.random() * 0.3) };
-    };
-    
-    // Generate mock results with enhanced relevance data
-    const sources = [
-      'linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 
-      'youtube.com', 'tiktok.com', 'pinterest.com', 'reddit.com', 
-      'tumblr.com', 'flickr.com', 'deviantart.com', 'behance.net', 
-      'dribbble.com', 'unsplash.com', 'pexels.com', 'shutterstock.com', 
-      'gettyimages.com', 'stock.adobe.com', 'istockphoto.com', 'medium.com'
-    ];
-    
-    const mockItems = sources.map((source, index) => {
-      const matchQuality = getMatchQuality(index);
-      
-      // Only include results that meet the similarity threshold
-      if (matchQuality.score < similarityThreshold) {
-        return null;
+    // Create a new promise for this request and store it
+    const request = new Promise(async (resolve) => {
+      try {
+        // Extract search parameters
+        const similarityThreshold = searchParams?.similarityThreshold || 0.6;
+        const maxResults = searchParams?.maxResults || 20;
+        const searchMode = searchParams?.searchMode || 'relaxed';
+        
+        // In a real implementation, these parameters would be passed to the API
+        console.log('Image search params:', { similarityThreshold, maxResults, searchMode });
+        
+        // Simulate different levels of match quality based on the parameters
+        const getMatchQuality = (index: number) => {
+          // Strict mode has fewer high-quality matches
+          if (searchMode === 'strict') {
+            if (index < 3) return { quality: 'high', score: 0.85 + (Math.random() * 0.15) };
+            if (index < 8) return { quality: 'medium', score: 0.65 + (Math.random() * 0.15) };
+            return { quality: 'low', score: 0.4 + (Math.random() * 0.2) };
+          } 
+          
+          // Relaxed mode has more matches in general
+          if (index < 6) return { quality: 'high', score: 0.8 + (Math.random() * 0.2) };
+          if (index < 12) return { quality: 'medium', score: 0.6 + (Math.random() * 0.2) };
+          return { quality: 'low', score: 0.3 + (Math.random() * 0.3) };
+        };
+        
+        // Generate mock results with enhanced relevance data
+        const sources = [
+          'linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 
+          'youtube.com', 'tiktok.com', 'pinterest.com', 'reddit.com', 
+          'tumblr.com', 'flickr.com', 'deviantart.com', 'behance.net', 
+          'dribbble.com', 'unsplash.com', 'pexels.com', 'shutterstock.com', 
+          'gettyimages.com', 'stock.adobe.com', 'istockphoto.com', 'medium.com'
+        ];
+        
+        const mockItems = sources.map((source, index) => {
+          const matchQuality = getMatchQuality(index);
+          
+          // Only include results that meet the similarity threshold
+          if (matchQuality.score < similarityThreshold) {
+            return null;
+          }
+          
+          return {
+            title: `${source.split('.')[0].charAt(0).toUpperCase() + source.split('.')[0].slice(1)} Match`,
+            link: `https://${source}/image-match-${index}`,
+            displayLink: source,
+            snippet: `${matchQuality.quality.charAt(0).toUpperCase() + matchQuality.quality.slice(1)} match (${Math.round(matchQuality.score * 100)}% similar) found on ${source}.`,
+            image: {
+              contextLink: `https://${source}`,
+              thumbnailLink: `https://picsum.photos/200/300?random=${index+1}`,
+            },
+            similarityScore: matchQuality.score,
+            matchQuality: matchQuality.quality
+          };
+        }).filter(Boolean); // Remove null entries (below threshold)
+        
+        // Sort by similarity score and limit to max results
+        const sortedResults = mockItems.sort((a, b) => b.similarityScore - a.similarityScore).slice(0, maxResults);
+        
+        const mockResults = {
+          items: sortedResults
+        };
+        
+        console.log('Generated mock image results:', mockResults.items.length);
+        
+        // Cache the results
+        cacheResults(cacheKey, mockResults);
+        resolve(mockResults);
+      } catch (error) {
+        console.error('Image Search API error:', error);
+        
+        // Return fallback results if the API call fails
+        const fallbackResults = {
+          items: [
+            {
+              title: 'LinkedIn Profile Match',
+              link: 'https://linkedin.com/in/profile-match',
+              displayLink: 'linkedin.com',
+              snippet: 'Professional profile page with potential image match.',
+              image: {
+                contextLink: 'https://linkedin.com',
+                thumbnailLink: 'https://picsum.photos/200/300?random=1',
+              },
+              similarityScore: 0.85
+            },
+            {
+              title: 'Facebook Profile Match',
+              link: 'https://facebook.com/profile-match',
+              displayLink: 'facebook.com',
+              snippet: 'Social media profile with potential image match.',
+              image: {
+                contextLink: 'https://facebook.com',
+                thumbnailLink: 'https://picsum.photos/200/300?random=2',
+              },
+              similarityScore: 0.75
+            },
+            {
+              title: 'Instagram Post',
+              link: 'https://instagram.com/p/abcdef123456',
+              displayLink: 'instagram.com',
+              snippet: 'Image post with similar visual elements.',
+              image: {
+                contextLink: 'https://instagram.com',
+                thumbnailLink: 'https://picsum.photos/200/300?random=3',
+              },
+              similarityScore: 0.68
+            }
+          ]
+        };
+        
+        // Cache even the fallback results
+        cacheResults(cacheKey, fallbackResults);
+        resolve(fallbackResults);
+      } finally {
+        // Clean up the pending request
+        setTimeout(() => {
+          delete pendingRequests[cacheKey];
+        }, 100);
       }
-      
-      return {
-        title: `${source.split('.')[0].charAt(0).toUpperCase() + source.split('.')[0].slice(1)} Match`,
-        link: `https://${source}/image-match-${index}`,
-        displayLink: source,
-        snippet: `${matchQuality.quality.charAt(0).toUpperCase() + matchQuality.quality.slice(1)} match (${Math.round(matchQuality.score * 100)}% similar) found on ${source}.`,
-        image: {
-          contextLink: `https://${source}`,
-          thumbnailLink: `https://picsum.photos/200/300?random=${index+1}`,
-        },
-        similarityScore: matchQuality.score,
-        matchQuality: matchQuality.quality
-      };
-    }).filter(Boolean); // Remove null entries (below threshold)
+    });
     
-    // Sort by similarity score and limit to max results
-    const sortedResults = mockItems.sort((a, b) => b.similarityScore - a.similarityScore).slice(0, maxResults);
+    // Store the promise
+    pendingRequests[cacheKey] = request;
     
-    const mockResults = {
-      items: sortedResults
-    };
-    
-    console.log('Generated mock image results:', mockResults.items.length);
-    return mockResults;
+    return request;
   } catch (error) {
     console.error('Image Search API error:', error);
     

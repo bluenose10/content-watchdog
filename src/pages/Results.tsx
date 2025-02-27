@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getSearchQueryById, getSearchResults, performGoogleSearch, performImageSearch, createSearchResults } from "@/lib/db-service";
 import { SearchResult } from "@/lib/db-types";
-import { SearchResultCard } from "@/components/ui/search-result-card";
+import { PaginatedResults } from "@/components/ui/paginated-results";
 import { useAuth } from "@/context/AuthContext";
 import { DeleteSearchButton } from "@/components/ui/delete-search-button";
 import { useProtectedRoute, AccessLevel } from "@/hooks/useProtectedRoute";
@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
 import { SearchFilters, SortOption, MatchLevelFilter, SourceFilter } from "@/components/ui/search-filters";
+import { getCacheKey, clearCache } from "@/lib/search-cache";
 
 export default function Results() {
   const [searchParams] = useSearchParams();
@@ -55,25 +56,32 @@ export default function Results() {
   const [matchLevelFilter, setMatchLevelFilter] = useState<MatchLevelFilter>("all");
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>([]);
   const [keywordFilter, setKeywordFilter] = useState("");
-
-  // Result limits based on access level - defines how many unblurred results to show
-  const getResultLimit = () => {
-    switch (accessLevel) {
-      case AccessLevel.PREMIUM:
-        return 20; // Pro users can see all 20 results unblurred
-      case AccessLevel.BASIC:
-        return 5;  // Registered users can see 5 unblurred results
-      case AccessLevel.ANONYMOUS:
-      default:
-        return 0;  // Anonymous users see 0 unlocked results (all blurred)
-    }
-  };
-
-  // Show up to 20 results for all user types, regardless of their access level
-  const getDisplayCount = () => {
-    return Math.min(20, filteredResults.length);
-  };
   
+  // Items per page for pagination (adjust for different screen sizes)
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  
+  // Update items per page based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1280) {
+        setItemsPerPage(9); // For large screens
+      } else if (window.innerWidth >= 768) {
+        setItemsPerPage(6); // For medium screens
+      } else {
+        setItemsPerPage(3); // For small screens
+      }
+    };
+    
+    // Set initial value
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Filter and sort results based on current filters
   const filteredResults = useMemo(() => {
     let filtered = [...results];
@@ -406,6 +414,21 @@ export default function Results() {
     document.body.removeChild(link);
   };
 
+  const handleNewSearch = () => {
+    // Clear any search caches for the current query if it exists
+    if (searchData) {
+      if (searchData.query_type === "image" && searchData.image_url) {
+        const cacheKey = getCacheKey('image', searchData.image_url, searchData.search_params);
+        clearCache(cacheKey);
+      } else if ((searchData.query_type === "name" || searchData.query_type === "hashtag") && searchData.query_text) {
+        const cacheKey = getCacheKey('text', searchData.query_text, searchData.search_params);
+        clearCache(cacheKey);
+      }
+    }
+    
+    navigate('/');
+  };
+
   const handleUpgrade = () => {
     navigate('/#pricing');
   };
@@ -424,15 +447,25 @@ export default function Results() {
           <main className="flex-1 p-4 md:p-6">
             <div className="container mx-auto max-w-6xl">
               <div className="flex items-center justify-between mb-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => navigate(-1)}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => navigate(-1)}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleNewSearch}
+                  >
+                    New Search
+                  </Button>
+                </div>
                 
                 <div className="flex items-center gap-2">
                   {user && searchData && (
@@ -512,6 +545,7 @@ export default function Results() {
                               src={searchData.image_url}
                               alt="Search image"
                               className="h-full w-full object-cover"
+                              loading="lazy"
                             />
                           </div>
                           <div>
@@ -553,12 +587,12 @@ export default function Results() {
                     </Alert>
                   )}
                   
-                  {accessLevel === AccessLevel.BASIC && results.length > getResultLimit() && (
+                  {accessLevel === AccessLevel.BASIC && results.length > 5 && (
                     <Alert className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
                       <LockIcon className="h-4 w-4 text-blue-500" />
                       <AlertTitle className="text-blue-700 dark:text-blue-300">Basic Access</AlertTitle>
                       <AlertDescription className="text-blue-600 dark:text-blue-400">
-                        <p>You can view {getResultLimit()} out of {results.length} results without blur. Upgrade to Pro for full access.</p>
+                        <p>You can view 5 out of {results.length} results without blur. Upgrade to Pro for full access.</p>
                         <Button 
                           size="sm" 
                           className="bg-blue-600 hover:bg-blue-700 text-white mt-2"
@@ -587,24 +621,13 @@ export default function Results() {
                     </div>
                   ) : (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                        {filteredResults.slice(0, getDisplayCount()).map((result, index) => (
-                          <SearchResultCard
-                            key={result.id || index}
-                            result={{
-                              id: result.id || `result-${index}`,
-                              title: result.title,
-                              url: result.url,
-                              thumbnail: result.thumbnail,
-                              source: result.source,
-                              matchLevel: result.match_level,
-                              date: result.found_at,
-                            }}
-                            isPremium={index < getResultLimit()}
-                            isFreePreview={accessLevel === AccessLevel.ANONYMOUS && index < 2}
-                            onUpgrade={handleUpgrade}
-                          />
-                        ))}
+                      <div className="mb-12">
+                        <PaginatedResults 
+                          results={filteredResults}
+                          accessLevel={accessLevel}
+                          itemsPerPage={itemsPerPage}
+                          onUpgrade={handleUpgrade}
+                        />
                       </div>
                       
                       {/* Upgrade card at the bottom */}
