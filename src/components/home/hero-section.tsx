@@ -14,15 +14,14 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center">
-          <Link to="/signup">
-            <Button 
-              variant="purple"
-              size="lg"
-              className="text-base font-medium shadow-lg"
-            >
-              Open Account
-            </Button>
-          </Link>
+          <Button 
+            variant="purple"
+            size="lg"
+            className="text-base font-medium shadow-lg" 
+            onClick={() => window.location.href = "/signup"}
+          >
+            Open Account
+          </Button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
