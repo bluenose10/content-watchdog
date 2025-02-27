@@ -1,8 +1,9 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { ArrowRight, BarChart, FileClock, Image, Search, Shield, Upload, User } from "lucide-react";
+import { ArrowRight, BarChart, FileClock, Home, Image, Search, Shield, Upload, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
@@ -29,12 +30,20 @@ const Dashboard = () => {
                 Welcome back, {firstName}! Monitor and protect your content.
               </p>
             </div>
-            <Button asChild>
-              <Link to="/search">
-                <Search className="mr-2 h-4 w-4" />
-                New Search
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button asChild variant="outline">
+                <Link to="/">
+                  <Home className="mr-2 h-4 w-4" />
+                  Home
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/search">
+                  <Search className="mr-2 h-4 w-4" />
+                  New Search
+                </Link>
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -194,6 +203,12 @@ const Dashboard = () => {
                     <Link to="/analytics">
                       <BarChart className="mr-2 h-4 w-4" />
                       View Analytics
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" asChild>
+                    <Link to="/">
+                      <Home className="mr-2 h-4 w-4" />
+                      Back to Home
                     </Link>
                   </Button>
                   <Button variant="outline" className="w-full justify-start" asChild>
