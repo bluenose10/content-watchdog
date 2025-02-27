@@ -30,20 +30,20 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <button 
-            onClick={handleSearchClick}
+          <a 
+            href="#content-search-section"
             className="flex items-center justify-center h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-md cursor-pointer transition-colors"
           >
             <Search className="mr-2 h-5 w-5" />
             Search Now
-          </button>
-          <button 
-            onClick={handleCreateAccountClick}
+          </a>
+          <a 
+            href="/signup"
             className="flex items-center justify-center h-12 px-6 bg-white hover:bg-gray-100 text-purple-600 border border-purple-200 rounded-md cursor-pointer transition-colors"
           >
             <Shield className="mr-2 h-5 w-5" />
             Create Account
-          </button>
+          </a>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
@@ -77,13 +77,13 @@ export const HeroSection = () => {
           </div>
         </div>
         <div className="mt-8 flex items-center">
-          <button 
-            onClick={handleLearnMoreClick}
+          <a 
+            href="#features"
             className="flex items-center text-sm text-muted-foreground hover:text-foreground group cursor-pointer"
           >
             Learn more about our features
             <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </a>
         </div>
       </div>
     </section>
