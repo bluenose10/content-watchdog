@@ -16,6 +16,36 @@ import { useQuery } from "@tanstack/react-query";
 import { Plan, SearchResult } from "@/lib/db-types";
 import { AnimatedGradientBorder } from "@/components/ui/animated-gradient-border";
 
+const PLACEHOLDER_IMAGES = [
+  {
+    id: "placeholder-1",
+    title: "Your search results will appear here",
+    url: "https://example.com",
+    thumbnail: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+    source: "Waiting for search",
+    match_level: "Medium",
+    found_at: new Date().toISOString()
+  },
+  {
+    id: "placeholder-2",
+    title: "Try searching for your content",
+    url: "https://example.com",
+    thumbnail: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
+    source: "Try a new search",
+    match_level: "Low",
+    found_at: new Date().toISOString()
+  },
+  {
+    id: "placeholder-3",
+    title: "Upload an image to find matches",
+    url: "https://example.com",
+    thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
+    source: "Image search",
+    match_level: "High",
+    found_at: new Date().toISOString()
+  }
+];
+
 const Results = () => {
   const { toast } = useToast();
   const { user } = useProtectedRoute();
@@ -81,9 +111,12 @@ const Results = () => {
     });
   };
   
-  const visibleResults = searchResults ? 
-    (isPremium ? searchResults : searchResults.slice(0, resultLimit)) : 
-    [];
+  // Show placeholder images when there are no search results yet
+  const displayedResults = searchId ? 
+    (searchResults ? 
+      (isPremium ? searchResults : searchResults.slice(0, resultLimit)) : 
+      []) :
+    PLACEHOLDER_IMAGES;
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
@@ -109,7 +142,7 @@ const Results = () => {
                     Results for: <span className="font-medium text-blue-600 dark:text-blue-400">
                       {searchQuery?.query_type === 'image' 
                         ? 'Image Search' 
-                        : searchQuery?.query_text || '@johndoe'}
+                        : searchQuery?.query_text || (searchId ? '@johndoe' : 'Start a search to see results')}
                     </span>
                   </p>
                 </div>
@@ -121,7 +154,7 @@ const Results = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    disabled={!isPremium}
+                    disabled={!isPremium || !searchId}
                     className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/50"
                     onClick={() => {
                       if (!isPremium) {
@@ -188,7 +221,7 @@ const Results = () => {
             </AnimatedGradientBorder>
           )}
 
-          {!isPremium && searchResults && searchResults.length > resultLimit && (
+          {!isPremium && searchId && searchResults && searchResults.length > resultLimit && (
             <AnimatedGradientBorder 
               gradientClasses="from-purple-600 via-blue-600 to-indigo-700" 
               className="mb-8 p-0"
@@ -211,7 +244,7 @@ const Results = () => {
             </AnimatedGradientBorder>
           )}
 
-          {resultsLoading ? (
+          {searchId && resultsLoading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-4">
               <div className="w-16 h-16 relative">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-200 dark:border-blue-900 opacity-25"></div>
@@ -219,7 +252,7 @@ const Results = () => {
               </div>
               <p className="text-blue-600 dark:text-blue-400 font-medium">Searching across platforms...</p>
             </div>
-          ) : searchResults?.length === 0 ? (
+          ) : searchId && searchResults?.length === 0 ? (
             <Card className="text-center py-12 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm shadow-md">
               <div className="max-w-md mx-auto px-6">
                 <Image className="h-16 w-16 mx-auto mb-4 text-blue-500 opacity-50" />
@@ -233,31 +266,52 @@ const Results = () => {
               </div>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleResults.map((result: SearchResult, index: number) => (
-                <SearchResultCard
-                  key={result.id}
-                  result={{
-                    id: result.id || '',
-                    title: result.title,
-                    url: result.url,
-                    thumbnail: result.thumbnail,
-                    source: result.source,
-                    matchLevel: result.match_level,
-                    date: result.found_at
-                  }}
-                  isPremium={isPremium}
-                  isFreePreview={!isPremium && index < FREE_PREVIEW_COUNT}
-                  onUpgrade={handleUpgrade}
-                />
-              ))}
-            </div>
+            <>
+              {!searchId && (
+                <div className="mb-8">
+                  <Card className="text-center py-8 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm shadow-md">
+                    <div className="max-w-md mx-auto px-6">
+                      <Search className="h-16 w-16 mx-auto mb-4 text-blue-500 opacity-70" />
+                      <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">Start a New Search</h2>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6">
+                        Search for your content across platforms to discover where it appears online. Find unauthorized uses and protect your work.
+                      </p>
+                      <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm">
+                        <Link to="/search">
+                          <Search className="mr-2 h-4 w-4" />
+                          Start a Search
+                        </Link>
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedResults.map((result: SearchResult, index: number) => (
+                  <SearchResultCard
+                    key={result.id}
+                    result={{
+                      id: result.id || '',
+                      title: result.title,
+                      url: result.url,
+                      thumbnail: result.thumbnail,
+                      source: result.source,
+                      matchLevel: result.match_level,
+                      date: result.found_at
+                    }}
+                    isPremium={isPremium}
+                    isFreePreview={searchId && !isPremium && index < FREE_PREVIEW_COUNT}
+                    onUpgrade={handleUpgrade}
+                  />
+                ))}
+              </div>
+            </>
           )}
 
-          {!isPremium && searchResults && searchResults.length > resultLimit && (
+          {searchId && !isPremium && searchResults && searchResults.length > resultLimit && (
             <div className="mt-12 text-center">
               <p className="text-gray-500 mb-4 dark:text-gray-400">
-                {visibleResults.length} of {searchResults.length} results shown
+                {displayedResults.length} of {searchResults.length} results shown
               </p>
               <AnimatedGradientBorder 
                 gradientClasses="from-blue-500 via-purple-600 to-indigo-600"
