@@ -28,10 +28,8 @@ export function SearchResultCard({
   onUpgrade,
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
-  
-  // Use a default content image for all results
-  // If thumbnail is explicitly provided, use that instead
-  const imageSrc = thumbnail || 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=400&q=80';
+  const [imgSrc, setImgSrc] = useState(thumbnail || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=400&q=80");
+  const [imgError, setImgError] = useState(false);
   
   // Truncate long titles
   const truncatedTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
@@ -48,20 +46,38 @@ export function SearchResultCard({
       return 'Recently';
     }
   })();
+
+  // Handle image error with multiple fallbacks
+  const handleImageError = () => {
+    if (!imgError) {
+      // Try these alternative images in sequence
+      const fallbackImages = [
+        "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=600&h=400&q=80",
+        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&h=400&q=80",
+        "https://images.unsplash.com/photo-1483058712412-4245e9b90334?auto=format&fit=crop&w=600&h=400&q=80",
+        "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=600&h=400&q=80",
+        "/placeholder.svg"
+      ];
+      
+      // Use the first fallback image
+      setImgSrc(fallbackImages[0]);
+      setImgError(true);
+    } else {
+      // If the fallback also fails, use placeholder
+      setImgSrc("/placeholder.svg");
+    }
+  };
   
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
         <div className="overflow-hidden" style={{ height: "225px" }}>
           <img
-            src={imageSrc}
+            src={imgSrc}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             style={{ aspectRatio: "600/400" }}
-            onError={(e) => {
-              // If even the default image fails, fall back to placeholder
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
-            }}
+            onError={handleImageError}
           />
         </div>
         <Badge 
