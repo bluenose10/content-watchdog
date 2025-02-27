@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -48,6 +49,15 @@ export default function PaymentSuccess() {
             <p className="text-muted-foreground">
               Thank you for your purchase. Your subscription has been activated.
             </p>
+            
+            <Alert className="my-4 bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertTitle className="text-blue-700">Demo Mode</AlertTitle>
+              <AlertDescription className="text-blue-600 text-sm">
+                This is a demonstration. No actual payment was processed. In a production environment, this page would only appear after completing the payment process.
+              </AlertDescription>
+            </Alert>
+            
             <div className="pt-4">
               <Button onClick={() => navigate("/dashboard")} className="w-full">
                 Go to Dashboard
