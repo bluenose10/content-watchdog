@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
@@ -72,6 +73,7 @@ export function SearchResultCard({
     }
   };
   
+  // Map social media platforms to their respective logos
   const getSocialMediaInfo = () => {
     const platform = cleanSource.toLowerCase();
     
@@ -79,63 +81,63 @@ export function SearchResultCard({
       return {
         Icon: Facebook,
         color: 'text-blue-600',
-        bgColor: 'bg-gradient-to-br from-blue-500 to-blue-600',
+        bgColor: 'bg-white',
         name: 'Facebook',
-        brandColor: 'from-blue-600 to-blue-800',
-        logoUrl: 'public/lovable-uploads/af0938db-0832-49ee-9207-a0d7eb137c15.png'
+        brandColor: 'from-white to-white',
+        logoUrl: '/lovable-uploads/af0938db-0832-49ee-9207-a0d7eb137c15.png'
       };
     } else if (platform.includes('twitter') || platform.includes('x.com')) {
       return {
         Icon: Twitter,
         color: 'text-sky-500',
-        bgColor: 'bg-sky-50 dark:bg-sky-900/30',
+        bgColor: 'bg-white',
         name: 'Twitter/X',
-        brandColor: 'from-sky-400 to-sky-600',
+        brandColor: 'from-white to-white',
         logoUrl: null
       };
     } else if (platform.includes('instagram')) {
       return {
         Icon: Instagram,
         color: 'text-pink-600',
-        bgColor: 'bg-gradient-to-br from-pink-500 via-purple-500 to-orange-500',
+        bgColor: 'bg-white',
         name: 'Instagram',
-        brandColor: 'from-pink-500 via-purple-500 to-orange-500',
-        logoUrl: 'public/lovable-uploads/21d7103e-7ada-436c-a3d2-70cf9ac9f6f1.png'
+        brandColor: 'from-white to-white',
+        logoUrl: '/lovable-uploads/21d7103e-7ada-436c-a3d2-70cf9ac9f6f1.png'
       };
     } else if (platform.includes('linkedin')) {
       return {
         Icon: Linkedin,
         color: 'text-blue-700',
-        bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+        bgColor: 'bg-white',
         name: 'LinkedIn',
-        brandColor: 'from-blue-700 to-blue-900',
-        logoUrl: 'public/lovable-uploads/18311b5e-f517-4b56-9ff2-fa50c1f8a507.png'
+        brandColor: 'from-white to-white',
+        logoUrl: '/lovable-uploads/18311b5e-f517-4b56-9ff2-fa50c1f8a507.png'
       };
     } else if (platform.includes('youtube')) {
       return {
         Icon: Youtube,
         color: 'text-red-600',
-        bgColor: 'bg-red-50 dark:bg-red-900/30',
+        bgColor: 'bg-white',
         name: 'YouTube',
-        brandColor: 'from-red-600 to-red-800',
-        logoUrl: 'public/lovable-uploads/fc63dd69-3373-476b-82ef-89b335e91207.png'
+        brandColor: 'from-white to-white',
+        logoUrl: '/lovable-uploads/fc63dd69-3373-476b-82ef-89b335e91207.png'
       };
     } else if (platform.includes('tiktok')) {
       return {
         Icon: Search,
         color: 'text-black dark:text-white',
-        bgColor: 'bg-pink-50 dark:bg-pink-900/30',
+        bgColor: 'bg-white',
         name: 'TikTok',
-        brandColor: 'from-black via-cyan-500 to-pink-500',
+        brandColor: 'from-white to-white',
         logoUrl: null
       };
     } else {
       return {
         Icon: Search,
         color: 'text-gray-600 dark:text-gray-400',
-        bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+        bgColor: 'bg-white',
         name: cleanSource,
-        brandColor: 'from-gray-500 to-gray-700',
+        brandColor: 'from-white to-white',
         logoUrl: null
       };
     }
@@ -253,11 +255,18 @@ export function SearchResultCard({
     }
   };
   
+  // Debug what's happening with the logos
+  useEffect(() => {
+    if (socialMedia.logoUrl) {
+      console.log(`Rendering logo for ${socialMedia.name}:`, socialMedia.logoUrl);
+    }
+  }, [socialMedia]);
+  
   return (
     <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80`}>
       <div className="relative">
         <div 
-          className={`overflow-hidden flex items-center justify-center ${bgColor}`}
+          className={`overflow-hidden flex items-center justify-center bg-white`}
           style={{ height: "200px" }}
         >
           {isValidThumbnail() ? (
@@ -268,25 +277,26 @@ export function SearchResultCard({
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="relative w-full h-full">
-              <div className={`absolute inset-0 bg-gradient-to-br ${socialMedia.brandColor} flex items-center justify-center p-8`}>
-                {socialMedia.logoUrl ? (
-                  <img 
-                    src={socialMedia.logoUrl} 
-                    alt={socialMedia.name}
-                    className="max-w-[80%] max-h-[80%] object-contain drop-shadow-lg"
-                    onError={(e) => {
-                      console.error("Error loading logo:", e);
-                    }}
-                  />
-                ) : (
-                  <socialMedia.Icon className="text-white/80" size={120} strokeWidth={1} />
-                )}
-              </div>
-              <div className="absolute bottom-0 inset-x-0 bg-black/50 p-2 flex items-center justify-center">
-                <div className="text-lg font-bold text-white">
-                  Content found on {socialMedia.name}
+            <div className="relative w-full h-full flex items-center justify-center bg-white">
+              {socialMedia.logoUrl ? (
+                <img 
+                  src={socialMedia.logoUrl} 
+                  alt={`${socialMedia.name} logo`}
+                  className="max-w-[80%] max-h-[80%] object-contain"
+                  onError={(e) => {
+                    console.error(`Error loading ${socialMedia.name} logo:`, e);
+                    setImageError(true);
+                  }}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center">
+                  <socialMedia.Icon size={80} className={socialMedia.color} />
+                  <p className="mt-2 text-lg font-semibold">{socialMedia.name}</p>
                 </div>
+              )}
+              
+              <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white p-2 text-center">
+                Content found on {socialMedia.name}
               </div>
             </div>
           )}
