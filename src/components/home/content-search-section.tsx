@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SEARCH_TYPES } from "@/lib/constants";
-import { createSearchQuery, performGoogleSearch, uploadSearchImage, createSearchResults } from "@/lib/db-service";
+import { createSearchQuery, performGoogleSearch, uploadSearchImage, createSearchResults, performImageSearch } from "@/lib/db-service";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -173,6 +173,8 @@ export function ContentSearchSection() {
             title: "Upload complete",
             description: "Your image has been uploaded successfully",
           });
+          
+          console.log("Image uploaded successfully, URL:", imageUrl);
         } catch (error) {
           clearInterval(progressInterval);
           console.error("Upload error:", error);
@@ -187,8 +189,58 @@ export function ContentSearchSection() {
         query_type: searchType as any,
         image_url: imageUrl, // Now we pass the imageUrl if it exists
       });
+      
+      console.log("Search query created:", searchData);
 
-      if (searchType !== "image") {
+      if (searchType === "image" && imageUrl) {
+        // For image searches, use dedicated image search function
+        toast({
+          title: "Searching...",
+          description: "Looking for similar images across the web",
+        });
+        
+        try {
+          console.log("Starting image search with URL:", imageUrl);
+          // Perform the image search
+          const imageResults = await performImageSearch(imageUrl, user.id);
+          
+          if (imageResults && imageResults.items) {
+            console.log(`Found ${imageResults.items.length} image results`);
+            
+            // Transform image search results to our format
+            searchResults = imageResults.items.map((item: any) => ({
+              search_id: searchData.id,
+              title: item.title || 'Matched Image',
+              url: item.link,
+              thumbnail: item.image?.thumbnailLink || item.link || '/placeholder.svg',
+              source: new URL(item.link).hostname,
+              match_level: 'High', // For image searches we consider all matches as high
+              found_at: new Date().toISOString(),
+            }));
+            
+            // Save search results to the database
+            await createSearchResults(searchResults);
+            
+            toast({
+              title: "Search complete",
+              description: `Found ${searchResults.length} potential matches`,
+            });
+          } else {
+            console.log("No image results found or results in unexpected format:", imageResults);
+            toast({
+              title: "No matches found",
+              description: "We couldn't find any matches for your image. The API may not be able to access some sites like LinkedIn.",
+            });
+          }
+        } catch (error) {
+          console.error("Image search error:", error);
+          toast({
+            title: "Search error",
+            description: "There was a problem with your image search. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } else if (searchType !== "image") {
         // For text-based searches, use Google Custom Search API
         toast({
           title: "Searching...",

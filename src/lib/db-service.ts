@@ -96,6 +96,33 @@ export const performGoogleSearch = async (query: string, userId: string) => {
   }
 };
 
+// Image Search function - separate from text search
+export const performImageSearch = async (imageUrl: string, userId: string) => {
+  try {
+    console.log('Performing image search with URL:', imageUrl);
+    
+    // Call the same edge function but with different parameters
+    const { data, error } = await supabase.functions.invoke('google-search', {
+      body: { 
+        query: imageUrl, // Pass the image URL as the query
+        userId, 
+        isImageSearch: true // Flag to indicate this is an image search
+      }
+    });
+    
+    if (error) {
+      console.error('Image search error:', error);
+      throw error;
+    }
+    
+    console.log('Image search results:', data);
+    return data;
+  } catch (error) {
+    console.error('Image Search API error:', error);
+    throw error;
+  }
+};
+
 // File upload functions
 export const uploadSearchImage = async (file: File, userId: string) => {
   // Create a clean filename with user ID and timestamp to avoid collisions
@@ -103,8 +130,10 @@ export const uploadSearchImage = async (file: File, userId: string) => {
   const sanitizedFileName = `${userId}_${Date.now()}.${fileExt}`;
   const filePath = `search-images/${sanitizedFileName}`;
 
+  console.log(`Uploading file ${file.name} to ${filePath}`);
+
   // Upload the file to the storage bucket
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError, data: uploadData } = await supabase.storage
     .from('uploads')
     .upload(filePath, file, {
       cacheControl: '3600',
@@ -117,6 +146,8 @@ export const uploadSearchImage = async (file: File, userId: string) => {
     throw new Error(`Error uploading file: ${uploadError.message}`);
   }
   
+  console.log('File uploaded successfully:', uploadData);
+  
   // Get the public URL of the uploaded file
   const { data } = supabase.storage
     .from('uploads')
@@ -126,6 +157,7 @@ export const uploadSearchImage = async (file: File, userId: string) => {
     throw new Error('Failed to get public URL for uploaded file');
   }
   
+  console.log('Public URL:', data.publicUrl);
   return data.publicUrl;
 };
 

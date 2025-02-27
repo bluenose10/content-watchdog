@@ -9,3 +9,4 @@ schemas = ["public", "storage"]
 [functions]
 [functions.google-search]
 verify_jwt = false
+

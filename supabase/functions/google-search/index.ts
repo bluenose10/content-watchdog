@@ -18,10 +18,10 @@ Deno.serve(async (req) => {
 
   try {
     // Get the request body
-    const { query, userId } = await req.json()
+    const { query, userId, isImageSearch } = await req.json()
     
     // Validate request
-    if (!query) {
+    if (!query && !isImageSearch) {
       return new Response(
         JSON.stringify({ error: 'Query parameter is required' }),
         { 
@@ -51,16 +51,28 @@ Deno.serve(async (req) => {
     const searchUrl = new URL('https://www.googleapis.com/customsearch/v1')
     searchUrl.searchParams.append('key', GOOGLE_API_KEY)
     searchUrl.searchParams.append('cx', GOOGLE_CSE_ID)
-    searchUrl.searchParams.append('q', query)
-    searchUrl.searchParams.append('searchType', 'image') // Remove this if you want to search for all types of content
+    
+    if (isImageSearch) {
+      // For image searches, we use 'searchType=image' and the imageUrl as the query
+      searchUrl.searchParams.append('searchType', 'image')
+      // If this is a reverse image search, include proper parameters
+      searchUrl.searchParams.append('q', query || 'reverse image search')
+      // Add sites to focus on, including social media platforms
+      searchUrl.searchParams.append('siteSearch', 'linkedin.com,facebook.com,instagram.com,twitter.com')
+    } else {
+      // For text searches
+      searchUrl.searchParams.append('q', query)
+    }
 
-    console.log(`Performing search for query: ${query}`)
+    console.log(`Performing ${isImageSearch ? 'image' : 'text'} search for query: ${query}`)
+    console.log(`Search URL: ${searchUrl.toString()}`)
 
     // Make the request to Google Custom Search API
     const response = await fetch(searchUrl.toString())
     const data = await response.json()
 
     console.log(`Got response with ${data.items?.length || 0} results`)
+    console.log(`Response data:`, JSON.stringify(data).substring(0, 500) + '...')
     
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -75,7 +87,7 @@ Deno.serve(async (req) => {
           user_id: userId,
           query: query,
           results_count: data.items?.length || 0,
-          search_type: 'google-cse',
+          search_type: isImageSearch ? 'image' : 'text',
         })
       
       if (error) {
@@ -95,7 +107,7 @@ Deno.serve(async (req) => {
     console.error('Error processing request:', error)
     
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', details: error.message }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
