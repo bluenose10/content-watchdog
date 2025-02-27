@@ -2,24 +2,6 @@
 import { ArrowRight, Search, Shield, Zap } from "lucide-react";
 
 export const HeroSection = () => {
-  const handleSearchClick = () => {
-    const element = document.getElementById('content-search-section');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleCreateAccountClick = () => {
-    window.location.href = '/signup';
-  };
-
-  const handleLearnMoreClick = () => {
-    const element = document.getElementById('features');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -40,6 +22,10 @@ export const HeroSection = () => {
           <a 
             href="/signup"
             className="flex items-center justify-center h-12 px-6 bg-white hover:bg-gray-100 text-purple-600 border border-purple-200 rounded-md cursor-pointer transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = '/signup';
+            }}
           >
             <Shield className="mr-2 h-5 w-5" />
             Create Account
