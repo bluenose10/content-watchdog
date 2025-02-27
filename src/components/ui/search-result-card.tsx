@@ -63,8 +63,8 @@ export function SearchResultCard({
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
         <div 
-          className="overflow-hidden flex items-center justify-center bg-slate-100" 
-          style={{ height: "225px" }}
+          className="overflow-hidden flex items-center justify-center" 
+          style={{ height: "225px", backgroundColor: "#F2FCE2" }}
         >
           <div className="relative p-6 flex flex-col items-center justify-center text-center">
             <div style={{ color: color }}>
