@@ -60,17 +60,17 @@ export function SearchResultCard({
   const { size, color, Icon } = getIconParams();
   
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md border-green-100">
       <div className="relative">
         <div 
-          className="overflow-hidden flex items-center justify-center" 
-          style={{ height: "225px", backgroundColor: "#F2FCE2" }}
+          className="overflow-hidden flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100" 
+          style={{ height: "225px" }}
         >
           <div className="relative p-6 flex flex-col items-center justify-center text-center">
             <div style={{ color: color }}>
               <Icon size={size} strokeWidth={1.5} />
             </div>
-            <div className="mt-3 text-sm font-medium text-slate-700 bg-white/80 px-3 py-1 rounded-full">
+            <div className="mt-3 text-sm font-medium text-green-800 bg-white/90 px-3 py-1 rounded-full border border-green-200">
               Content Match Found
             </div>
           </div>
