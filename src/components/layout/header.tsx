@@ -16,6 +16,9 @@ export function Header() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
+  // We're adding this console log to debug auth state
+  console.log("Header render - Auth state:", !!user);
+
   const isAuthenticated = !!user;
   const isOnHomePage = location.pathname === '/';
 
@@ -57,8 +60,8 @@ export function Header() {
         description: "You have been logged out successfully",
       });
       
-      // Redirect to home page after logout
-      navigate('/');
+      // Force a re-render by navigating to home page
+      navigate('/', { replace: true });
     } catch (error) {
       console.error("Error signing out:", error);
       toast({

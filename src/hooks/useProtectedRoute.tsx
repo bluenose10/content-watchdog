@@ -21,12 +21,16 @@ export const useProtectedRoute = (
   const [accessLevel, setAccessLevel] = useState<AccessLevel>(AccessLevel.ANONYMOUS);
   const [isReady, setIsReady] = useState(false);
 
+  // Add a debug log to see the auth state
+  console.log("useProtectedRoute - Auth state:", { user: !!user, loading });
+
   useEffect(() => {
     const determineAccessLevel = async () => {
       if (loading) return;
       
       // If user is not logged in
       if (!user) {
+        console.log("useProtectedRoute - Setting anonymous access level");
         setAccessLevel(AccessLevel.ANONYMOUS);
         
         // If route requires authentication, redirect to login
@@ -50,6 +54,7 @@ export const useProtectedRoute = (
       // If user is logged in
       else {
         try {
+          console.log("useProtectedRoute - User is authenticated");
           // Check if the user has a premium subscription
           // For demo purposes, we're assuming this logic will be implemented later
           // This would typically involve checking a subscription status in the database
