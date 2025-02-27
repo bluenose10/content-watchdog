@@ -1,8 +1,25 @@
 
-import { Button } from "@/components/ui/button";
 import { ArrowRight, Search, Shield, Zap } from "lucide-react";
 
 export const HeroSection = () => {
+  const handleSearchClick = () => {
+    const element = document.getElementById('content-search-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleCreateAccountClick = () => {
+    window.location.href = '/signup';
+  };
+
+  const handleLearnMoreClick = () => {
+    const element = document.getElementById('features');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -13,24 +30,20 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <Button 
-            variant="default" 
-            size="lg" 
-            onClick={() => document.getElementById('content-search-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+          <button 
+            onClick={handleSearchClick}
+            className="flex items-center justify-center h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-md cursor-pointer transition-colors"
           >
             <Search className="mr-2 h-5 w-5" />
             Search Now
-          </Button>
-          <Button 
-            variant="secondary" 
-            size="lg"
-            onClick={() => window.location.href = '/signup'}
-            className="border border-indigo-200"
+          </button>
+          <button 
+            onClick={handleCreateAccountClick}
+            className="flex items-center justify-center h-12 px-6 bg-white hover:bg-gray-100 text-purple-600 border border-purple-200 rounded-md cursor-pointer transition-colors"
           >
             <Shield className="mr-2 h-5 w-5" />
             Create Account
-          </Button>
+          </button>
         </div>
         <div className="w-full max-w-3xl pt-8 md:pt-12">
           <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
@@ -64,14 +77,13 @@ export const HeroSection = () => {
           </div>
         </div>
         <div className="mt-8 flex items-center">
-          <Button 
-            variant="link" 
-            onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-            className="flex items-center text-sm text-muted-foreground hover:text-foreground group"
+          <button 
+            onClick={handleLearnMoreClick}
+            className="flex items-center text-sm text-muted-foreground hover:text-foreground group cursor-pointer"
           >
             Learn more about our features
             <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          </button>
         </div>
       </div>
     </section>
