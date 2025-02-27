@@ -25,11 +25,11 @@ const testimonials = [
 
 export function TestimonialsSection() {
   return (
-    <section id="testimonials" className="section-padding">
-      <div className="container">
-        <div className="mb-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">What Our Users Say</h2>
-          <p className="text-muted-foreground">
+    <section id="testimonials" className="h-full">
+      <div className="h-full">
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold mb-2">What Our Users Say</h2>
+          <p className="text-sm text-muted-foreground">
             Trusted by content creators worldwide
           </p>
         </div>

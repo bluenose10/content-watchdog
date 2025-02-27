@@ -41,7 +41,7 @@ export default function Index() {
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
           
-          {/* First row with 3 sections */}
+          {/* First row with Key Features, Content Search, and Testimonials */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div className="col-span-1">
               <FeaturesSection />
@@ -54,7 +54,7 @@ export default function Index() {
             </div>
           </div>
           
-          {/* Second row with 3 sections */}
+          {/* Second row with About, Pricing, and CTA */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="col-span-1">
               <AboutSection />
