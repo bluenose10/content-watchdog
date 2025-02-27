@@ -28,7 +28,7 @@ export function AboutSection() {
               
               <div className="space-y-3">            
                 <p className="text-sm text-muted-foreground">
-                  We started InfluenceGuard with a simple mission: to give content creators control over how their work is used online. After seeing countless creators struggle with content theft, we built a solution that leverages advanced technology.
+                  We started InfluenceGuard with a simple mission: to give content creators control over how their work is used online.
                 </p>
               </div>
             </div>
