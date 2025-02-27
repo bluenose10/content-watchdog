@@ -2,9 +2,12 @@
 import { ArrowRight, Shield, Zap } from "lucide-react";
 
 export const HeroSection = () => {
-  // Function to handle navigation
+  // Function to handle navigation - using the complete URL
   const handleSignUp = () => {
-    window.location.href = "/signup";
+    // Get the current base URL and navigate to the signup page
+    const baseUrl = window.location.origin;
+    window.location.href = `${baseUrl}/signup`;
+    console.log("Navigating to:", `${baseUrl}/signup`);
   };
 
   return (
