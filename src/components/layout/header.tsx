@@ -76,24 +76,46 @@ export function Header() {
     }
   };
 
-  // Function to handle section navigation
-  const scrollToSection = (sectionId: string) => {
-    // If we're already on the home page
-    if (isOnHomePage) {
-      const section = document.getElementById(sectionId);
-      if (section) {
-        window.scrollTo({
-          top: section.offsetTop - 100,
-          behavior: 'smooth'
-        });
+  const handleNavigation = (href: string) => {
+    // Handle navigation based on the href
+    if (href === "/") {
+      // Direct navigation to home page
+      navigate("/");
+    } else if (href.startsWith("/#")) {
+      const sectionId = href.substring(2); // Remove '/#'
+      if (isOnHomePage) {
+        // If already on home page, scroll to section
+        const section = document.getElementById(sectionId);
+        if (section) {
+          window.scrollTo({
+            top: section.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        }
+      } else {
+        // If not on home page, navigate to home with the section hash
+        navigate("/");
+        // Need to set a timeout to allow the home page to load before scrolling
+        setTimeout(() => {
+          const section = document.getElementById(sectionId);
+          if (section) {
+            window.scrollTo({
+              top: section.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
-      // If we're not on the home page, navigate to home page with the section hash
-      navigate(`/#${sectionId}`);
+      // For other routes, use regular navigation
+      navigate(href);
+    }
+    
+    // Close mobile menu if open
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
     }
   };
-
-  console.log("Auth state in Header:", { isAuthenticated, userId: user?.id });
 
   return (
     <header
@@ -106,10 +128,13 @@ export function Header() {
     >
       <div className="container flex items-center justify-between">
         <div className="flex items-center">
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl">
+          <button 
+            onClick={() => handleNavigation("/")}
+            className="flex items-center gap-2 font-bold text-xl"
+          >
             <Shield className="h-6 w-6" />
             <span className="text-gradient">{APP_NAME}</span>
-          </Link>
+          </button>
         </div>
 
         {/* Desktop navigation */}
@@ -118,21 +143,7 @@ export function Header() {
             <button
               key={item.name}
               className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
-              onClick={() => {
-                // For home link, just navigate to home
-                if (item.href === '/') {
-                  navigate('/');
-                }
-                // For section links, either scroll or navigate
-                else if (item.href.startsWith('/#')) {
-                  const sectionId = item.href.substring(2); // Remove '/#'
-                  scrollToSection(sectionId);
-                }
-                // For other links, use regular navigation
-                else {
-                  navigate(item.href);
-                }
-              }}
+              onClick={() => handleNavigation(item.href)}
             >
               {item.name}
             </button>
@@ -142,8 +153,11 @@ export function Header() {
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <>
-              <Button asChild variant="default">
-                <Link to="/dashboard">Dashboard</Link>
+              <Button 
+                variant="default"
+                onClick={() => handleNavigation("/dashboard")}
+              >
+                Dashboard
               </Button>
               <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
                 <LogOut className="h-4 w-4" />
@@ -152,11 +166,17 @@ export function Header() {
             </>
           ) : (
             <>
-              <Button asChild variant="ghost">
-                <Link to="/login">Log in</Link>
+              <Button 
+                variant="ghost"
+                onClick={() => handleNavigation("/login")}
+              >
+                Log in
               </Button>
-              <Button asChild className="button-animation">
-                <Link to="/signup">Sign up</Link>
+              <Button 
+                className="button-animation"
+                onClick={() => handleNavigation("/signup")}
+              >
+                Sign up
               </Button>
             </>
           )}
@@ -186,22 +206,7 @@ export function Header() {
                 <button
                   key={item.name}
                   className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
-                  onClick={() => {
-                    // For home link, just navigate to home
-                    if (item.href === '/') {
-                      navigate('/');
-                    }
-                    // For section links, either scroll or navigate
-                    else if (item.href.startsWith('/#')) {
-                      const sectionId = item.href.substring(2); // Remove '/#'
-                      scrollToSection(sectionId);
-                      setIsMobileMenuOpen(false);
-                    }
-                    // For other links, use regular navigation
-                    else {
-                      navigate(item.href);
-                    }
-                  }}
+                  onClick={() => handleNavigation(item.href)}
                 >
                   {item.name}
                 </button>
@@ -211,8 +216,11 @@ export function Header() {
             <div className="flex flex-col gap-3 mt-4">
               {isAuthenticated ? (
                 <>
-                  <Button asChild size="lg">
-                    <Link to="/dashboard">Dashboard</Link>
+                  <Button 
+                    size="lg"
+                    onClick={() => handleNavigation("/dashboard")}
+                  >
+                    Dashboard
                   </Button>
                   <Button variant="outline" size="lg" onClick={handleSignOut} className="flex items-center justify-center gap-2">
                     <LogOut className="h-4 w-4" />
@@ -221,11 +229,19 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  <Button asChild variant="outline" size="lg">
-                    <Link to="/login">Log in</Link>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => handleNavigation("/login")}
+                  >
+                    Log in
                   </Button>
-                  <Button asChild size="lg" className="button-animation">
-                    <Link to="/signup">Sign up</Link>
+                  <Button 
+                    size="lg" 
+                    className="button-animation"
+                    onClick={() => handleNavigation("/signup")}
+                  >
+                    Sign up
                   </Button>
                 </>
               )}
