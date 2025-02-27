@@ -30,19 +30,9 @@ export function ContentSearchSection() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "You must be signed in to use this feature.",
-        variant: "destructive",
-      });
-      navigate("/login");
-      return;
-    }
-
     try {
       let searchData: SearchQuery = {
-        user_id: user.id,
+        user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Anonymous user ID
         query_type: searchType as "name" | "hashtag" | "image",
       };
 
@@ -51,6 +41,15 @@ export function ContentSearchSection() {
       } else if (searchType === "hashtag" && hashtagQuery.trim()) {
         searchData.query_text = hashtagQuery.trim();
       } else if (searchType === "image" && selectedFile) {
+        if (!user) {
+          toast({
+            title: "Sign in required",
+            description: "Please sign in to use image search",
+            variant: "destructive",
+          });
+          navigate("/login");
+          return;
+        }
         setIsUploading(true);
         const imageUrl = await uploadSearchImage(selectedFile, user.id);
         searchData.image_url = imageUrl;
@@ -63,18 +62,24 @@ export function ContentSearchSection() {
         return;
       }
 
-      const newSearch = await createSearchQuery(searchData);
-      
-      if (newSearch && newSearch.id) {
-        // Direct users to the dashboard instead of results page
-        toast({
-          title: "Search created successfully",
-          description: "Your search results are available in your dashboard",
-        });
-        navigate("/dashboard");
+      let searchId;
+      if (user) {
+        // For registered users, create a permanent search query
+        const newSearch = await createSearchQuery(searchData);
+        if (newSearch && newSearch.id) {
+          searchId = newSearch.id;
+        } else {
+          throw new Error("Failed to create search");
+        }
       } else {
-        throw new Error("Failed to create search");
+        // For anonymous users, create a temporary search ID
+        searchId = crypto.randomUUID();
+        // Store search data in session storage for anonymous users
+        sessionStorage.setItem(`temp_search_${searchId}`, JSON.stringify(searchData));
       }
+
+      // Navigate to results page
+      navigate(`/results?id=${searchId}`);
     } catch (error) {
       console.error("Search error:", error);
       toast({
@@ -132,11 +137,9 @@ export function ContentSearchSection() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
-                  {!user && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      You must be <Link to="/login" className="text-primary hover:underline">signed in</Link> to use this feature
-                    </p>
-                  )}
+                  <p className="text-sm text-muted-foreground mt-2">
+                    You can try a free preview without signing in
+                  </p>
                 </TabsContent>
                 <TabsContent value="hashtag">
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -151,11 +154,9 @@ export function ContentSearchSection() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
-                  {!user && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      You must be <Link to="/login" className="text-primary hover:underline">signed in</Link> to use this feature
-                    </p>
-                  )}
+                  <p className="text-sm text-muted-foreground mt-2">
+                    You can try a free preview without signing in
+                  </p>
                 </TabsContent>
                 <TabsContent value="image">
                   <div className="flex flex-col gap-2">
@@ -200,11 +201,9 @@ export function ContentSearchSection() {
                       {isUploading ? "Uploading..." : "Search"}
                       {!isUploading && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
-                    {!user && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        You must be <Link to="/login" className="text-primary hover:underline">signed in</Link> to use this feature
-                      </p>
-                    )}
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Image search requires <Link to="/login" className="text-primary hover:underline">signing in</Link>
+                    </p>
                   </div>
                 </TabsContent>
               </form>
