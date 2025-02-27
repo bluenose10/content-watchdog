@@ -8,7 +8,7 @@ const testimonials = [
   {
     id: 1,
     name: "Sarah Johnson",
-    role: "Content\nCreator",
+    role: "Content Creator",
     avatar: "https://i.pravatar.cc/150?u=1",
     content: "InfluenceGuard helped me discover 24 instances of my content being used without permission. The DMCA assistance made the takedown process so much easier.",
     rating: 5
