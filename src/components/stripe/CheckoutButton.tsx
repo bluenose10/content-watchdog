@@ -36,17 +36,23 @@ export function CheckoutButton({
       
       // Get the return URL for after checkout
       const returnUrl = `${window.location.origin}/success`;
+      console.log('Return URL:', returnUrl);
       
       // Call the Supabase Edge Function to create a checkout session
+      console.log('Calling create-checkout with planId:', planId);
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { planId, returnUrl }
       });
       
       if (error) {
+        console.error('Supabase function error:', error);
         throw new Error(`Failed to create checkout session: ${error.message}`);
       }
       
+      console.log('Checkout session response:', data);
+      
       if (!data || !data.url) {
+        console.error('Invalid response from checkout function:', data);
         throw new Error('No checkout URL returned from server');
       }
       
@@ -55,6 +61,8 @@ export function CheckoutButton({
         id: "checkout-toast",
         description: "You'll be redirected to Stripe to complete your payment"
       });
+      
+      console.log('Redirecting to:', data.url);
       
       // Redirect to Stripe Checkout
       window.location.href = data.url;
@@ -96,6 +104,7 @@ export function CheckoutButton({
                   <ul className="list-disc ml-5 mt-2 space-y-1">
                     <li>Check your internet connection</li>
                     <li>Refresh the page and try again</li>
+                    <li>Ensure you are logged in</li>
                     <li>Contact support if the issue persists</li>
                   </ul>
                 </div>
