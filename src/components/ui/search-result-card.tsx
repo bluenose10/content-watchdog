@@ -36,6 +36,15 @@ export function SearchResultCard({
   const safeMatchLevel = matchLevel || 'Medium';
   const matchLevelColor = getMatchLevelColor(safeMatchLevel);
   
+  // Safely format the date or provide a fallback
+  const formattedDate = (() => {
+    try {
+      return date ? formatDate(date) : 'Recently';
+    } catch (error) {
+      return 'Recently';
+    }
+  })();
+  
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
       <div className="relative">
@@ -59,7 +68,7 @@ export function SearchResultCard({
       <CardHeader className="pb-2">
         <h3 className="text-lg font-semibold" title={title}>{truncatedTitle}</h3>
         <p className="text-sm text-muted-foreground">
-          Found on {source} • {formatDate(date)}
+          Found on {source} • {formattedDate}
         </p>
       </CardHeader>
       <CardContent className="pb-2">
