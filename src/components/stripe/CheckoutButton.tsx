@@ -66,45 +66,53 @@ export function CheckoutButton({
       const returnUrl = `${window.location.origin}/success`;
       console.log('Return URL:', returnUrl);
       
-      // Get the user access token
-      const accessToken = session.access_token;
-      
-      console.log('Calling create-checkout with planId:', planId);
-      
-      // Call the Supabase Edge Function to create a checkout session with auth token
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        },
-        body: { 
-          planId, 
-          priceId: selectedPlan.stripePriceId,
-          returnUrl 
+      try {
+        // Get the user's session token
+        const accessToken = session.access_token;
+        if (!accessToken) {
+          throw new Error("No access token available");
         }
-      });
-      
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(`Failed to create checkout session: ${error.message}`);
+        
+        console.log('Calling create-checkout with planId:', planId);
+        
+        // Call the Supabase Edge Function with proper authentication
+        const { data, error } = await supabase.functions.invoke('create-checkout', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          },
+          body: { 
+            planId, 
+            priceId: selectedPlan.stripePriceId,
+            returnUrl 
+          }
+        });
+        
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw new Error(`Failed to create checkout session: ${error.message}`);
+        }
+        
+        console.log('Checkout session response:', data);
+        
+        if (!data || !data.url) {
+          console.error('Invalid response from checkout function:', data);
+          throw new Error('No checkout URL returned from server');
+        }
+        
+        // Success toast
+        sonnerToast.success("Redirecting to checkout", {
+          id: "checkout-toast",
+          description: "You'll be redirected to Stripe to complete your payment"
+        });
+        
+        console.log('Redirecting to:', data.url);
+        
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } catch (functionError) {
+        console.error('Function call error:', functionError);
+        throw new Error(`Checkout error: ${functionError.message}`);
       }
-      
-      console.log('Checkout session response:', data);
-      
-      if (!data || !data.url) {
-        console.error('Invalid response from checkout function:', data);
-        throw new Error('No checkout URL returned from server');
-      }
-      
-      // Success toast
-      sonnerToast.success("Redirecting to checkout", {
-        id: "checkout-toast",
-        description: "You'll be redirected to Stripe to complete your payment"
-      });
-      
-      console.log('Redirecting to:', data.url);
-      
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
       
     } catch (error) {
       console.error('Error initiating checkout:', error);
