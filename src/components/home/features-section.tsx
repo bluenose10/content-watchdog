@@ -1,7 +1,7 @@
 
 import { FeatureCard } from "@/components/ui/feature-card";
 import { FEATURES } from "@/lib/constants";
-import { AlertTriangle, Search, Bell, FileCheck } from "lucide-react";
+import { AlertTriangle, Search, Bell, FileCheck, BarChart3 } from "lucide-react";
 
 export function FeaturesSection() {
   // Map feature titles to icons
@@ -15,6 +15,8 @@ export function FeaturesSection() {
         return <AlertTriangle className="h-6 w-6" />;
       case "DMCA Assistance":
         return <FileCheck className="h-6 w-6" />;
+      case "Match Level System":
+        return <BarChart3 className="h-6 w-6" />;
       default:
         return <Search className="h-6 w-6" />;
     }
@@ -30,7 +32,7 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {FEATURES.map((feature, index) => (
             <FeatureCard
               key={index}

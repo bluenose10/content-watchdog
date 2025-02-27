@@ -69,6 +69,10 @@ export const FEATURES = [
     description: "Set up automatic monitoring to continuously protect your content"
   },
   {
+    title: "Match Level System",
+    description: "Prioritize results with High, Medium, or Low match indicators showing content relevance"
+  },
+  {
     title: "DMCA Assistance",
     description: "Generate pre-filled DMCA takedown notices with a single click"
   }
