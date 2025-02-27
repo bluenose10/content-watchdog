@@ -11,7 +11,7 @@ export function CallToAction() {
         <p className="text-sm text-primary-foreground/80 mb-6 text-center">
           Join thousands of content creators who trust InfluenceGuard to protect their work across the internet.
         </p>
-        <Button asChild size="lg" variant="secondary" className="button-animation">
+        <Button asChild size="lg" variant="secondary" className="bg-white/80 text-primary hover:bg-white button-animation">
           <Link to="/signup">
             Get Started Today
             <ArrowRight className="ml-2 h-4 w-4" />
