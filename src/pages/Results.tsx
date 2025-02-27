@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getSearchQueryById, getSearchResults, getUserSubscription, getFreePlan } from "@/lib/db-service";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { ArrowLeft, ArrowRight, Download, Filter, Loader, Image } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, Filter, Loader, Image, Search as SearchIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -271,14 +271,14 @@ const Results = () => {
                 <div className="mb-8">
                   <Card className="text-center py-8 border-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm shadow-md">
                     <div className="max-w-md mx-auto px-6">
-                      <Search className="h-16 w-16 mx-auto mb-4 text-blue-500 opacity-70" />
+                      <SearchIcon className="h-16 w-16 mx-auto mb-4 text-blue-500 opacity-70" />
                       <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">Start a New Search</h2>
                       <p className="text-gray-600 dark:text-gray-300 mb-6">
                         Search for your content across platforms to discover where it appears online. Find unauthorized uses and protect your work.
                       </p>
                       <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm">
                         <Link to="/search">
-                          <Search className="mr-2 h-4 w-4" />
+                          <SearchIcon className="mr-2 h-4 w-4" />
                           Start a Search
                         </Link>
                       </Button>
