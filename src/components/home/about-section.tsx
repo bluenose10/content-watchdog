@@ -13,7 +13,7 @@ export function AboutSection() {
         
         <Card className="glass-card h-[calc(100%-4rem)]">
           <CardContent className="p-4 sm:p-6 h-full flex flex-col">
-            <div className="space-y-4 flex-grow">
+            <div className="space-y-4">
               <AnimatedGradientBorder 
                 gradientClasses="from-primary/20 via-primary/40 to-primary/20"
                 animationDuration="8s" 
@@ -26,7 +26,7 @@ export function AboutSection() {
                 />
               </AnimatedGradientBorder>
               
-              <div className="space-y-3">            
+              <div>            
                 <p className="text-sm text-muted-foreground">
                   We started Influence Guard with a simple mission: to give content creators control over how their work is used online.
                 </p>

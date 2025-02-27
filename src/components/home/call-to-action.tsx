@@ -12,8 +12,8 @@ export function CallToAction() {
           <p className="text-sm text-muted-foreground">Secure your creative work today</p>
         </div>
         
-        <div className="bg-primary text-primary-foreground rounded-xl p-5 h-[calc(100%-4rem)] flex flex-col justify-center">
-          <div className="flex-grow flex flex-col justify-center items-center">
+        <div className="bg-primary text-primary-foreground rounded-xl p-5 h-[calc(100%-4rem)] flex flex-col">
+          <div className="flex flex-col justify-center items-center">
             <p className="text-sm text-primary-foreground/80 mb-4 text-center">
               Join thousands of content creators who trust Influence Guard to protect their work across the internet.
             </p>
