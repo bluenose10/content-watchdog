@@ -33,11 +33,23 @@ const Login = () => {
       const { error } = await signIn(formData.email, formData.password);
       
       if (error) {
-        toast({
-          title: "Login failed",
-          description: error.message || "Invalid email or password",
-          variant: "destructive",
-        });
+        console.error("Login error:", error);
+        
+        // Check if the error is about email not being confirmed
+        if (error.message?.includes("Email not confirmed")) {
+          toast({
+            title: "Email not verified",
+            description: "Please check your email and click the verification link before logging in.",
+            variant: "destructive",
+            duration: 6000,
+          });
+        } else {
+          toast({
+            title: "Login failed",
+            description: error.message || "Invalid email or password",
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Welcome back!",
