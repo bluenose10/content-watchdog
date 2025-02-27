@@ -145,15 +145,18 @@ export function SearchResultCard({
     return str;
   }
 
-  // Check if thumbnail is a valid URL
+  // Check if thumbnail is a valid URL and not a Supabase URL
   const isValidThumbnail = () => {
     if (!thumbnail || imageError) return false;
     
+    // Check if the thumbnail is from Supabase
+    if (thumbnail.includes('phkdkwusblkngypuwgao.supabase.co')) {
+      return false;
+    }
+    
     // Check if the thumbnail is actually the full image URL or a data URL
     // These are signs the API couldn't find a proper thumbnail
-    if (thumbnail === url || 
-        thumbnail.includes('data:image') || 
-        thumbnail.startsWith('https://phkdkwusblkngypuwgao.supabase.co/storage/')) {
+    if (thumbnail === url || thumbnail.includes('data:image')) {
       return false;
     }
     
@@ -162,6 +165,19 @@ export function SearchResultCard({
       return true;
     } catch (e) {
       return false;
+    }
+  };
+  
+  // Get a fallback image based on safeMatchLevel
+  const getFallbackImage = () => {
+    // Use consistent placeholder images based on match level
+    switch(safeMatchLevel) {
+      case 'High':
+        return 'https://picsum.photos/seed/high/300/200';
+      case 'Medium':
+        return 'https://picsum.photos/seed/medium/300/200';
+      default:
+        return 'https://picsum.photos/seed/low/300/200';
     }
   };
   
@@ -234,7 +250,7 @@ export function SearchResultCard({
             size="sm" 
             className={`w-full border ${matchColor.border} ${matchColor.hover} transition-all duration-300 group`}
           >
-            <a href={cleanUrl} target="_blank" rel="noopener noreferrer">
+            <a href={cleanUrl.includes('Content Match Found') ? '#' : cleanUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className={`h-4 w-4 mr-2 ${matchColor.text} group-hover:rotate-12 transition-transform duration-300`} />
               Visit Site
             </a>
