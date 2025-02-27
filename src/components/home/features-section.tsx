@@ -1,7 +1,7 @@
 
 import { FeatureCard } from "@/components/ui/feature-card";
 import { FEATURES } from "@/lib/constants";
-import { AlertTriangle, Search, Bell, FileCheck, BarChart3 } from "lucide-react";
+import { AlertTriangle, Search, Bell, FileCheck, BarChart3, Shield } from "lucide-react";
 
 export function FeaturesSection() {
   // Map feature titles to icons
@@ -22,8 +22,8 @@ export function FeaturesSection() {
     }
   };
 
-  // Select just two features for the compact display
-  const displayFeatures = FEATURES.slice(0, 2);
+  // Select three features for the compact display
+  const displayFeatures = FEATURES.slice(0, 3);
 
   return (
     <section id="features" className="h-full">
