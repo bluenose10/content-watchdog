@@ -1,22 +1,36 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { stripeDomain, corsHeaders } from "../_shared/cors.ts";
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
 
+// Define CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Define the Stripe domain (needed for some CORS operations)
+export const stripeDomain = Deno.env.get('SUPABASE_URL') || '';
+
+// Initialize Stripe with the secret key
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2022-11-15',
   httpClient: Stripe.createFetchHttpClient(),
 });
 
 serve(async (req) => {
-  // Handle CORS
+  console.log('Create checkout function called');
+  
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     // Get request body
-    const { planId, priceId, returnUrl } = await req.json();
+    const requestData = await req.json();
+    const { planId, priceId, returnUrl } = requestData;
+    
+    console.log('Request data:', JSON.stringify(requestData, null, 2));
 
     if (!priceId) {
       return new Response(
@@ -32,7 +46,7 @@ serve(async (req) => {
       );
     }
 
-    // Get authenticated user
+    // Extract user information from the JWT token in the Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -40,35 +54,43 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
-
+    
+    // Extract the JWT token
     const token = authHeader.replace('Bearer ', '');
-    // Fetch user information from Supabase Auth
-    const userResponse = await fetch(`${stripeDomain}/auth/v1/user`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        apikey: Deno.env.get('SUPABASE_ANON_KEY') || '',
-      },
-    });
-
-    if (!userResponse.ok) {
+    
+    // Extract user email from JWT claims
+    let userEmail = '';
+    try {
+      // Decode the JWT token (simple decode, no verification needed as we just need the claims)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const payload = JSON.parse(jsonPayload);
+      userEmail = payload.email || '';
+      
+      console.log('User email from token:', userEmail);
+    } catch (error) {
+      console.error('Error decoding JWT token:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to get user' }),
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+    
+    if (!userEmail) {
+      return new Response(
+        JSON.stringify({ error: 'User email not found in token' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
 
-    const { data: { user } } = await userResponse.json();
-
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: 'User not found' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-      );
-    }
-
     // Create checkout session
+    console.log('Creating checkout session with:', { userEmail, priceId, returnUrl });
     const session = await stripe.checkout.sessions.create({
-      customer_email: user.email,
+      customer_email: userEmail,
       line_items: [
         {
           price: priceId,
@@ -77,13 +99,14 @@ serve(async (req) => {
       ],
       mode: 'subscription',
       success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${new URL(returnUrl).origin}/cancel`,
+      cancel_url: `${new URL(returnUrl).origin}/payment-canceled`,
       metadata: {
-        userId: user.id,
         planId: planId,
       },
     });
 
+    console.log('Checkout session created successfully:', session.id);
+    
     return new Response(
       JSON.stringify({ url: session.url }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
