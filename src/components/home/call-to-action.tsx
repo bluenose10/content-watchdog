@@ -31,10 +31,6 @@ export function CallToAction() {
                 <FileText className="text-primary-foreground/90 h-4 w-4" />
                 <p className="text-sm text-primary-foreground/90">Articles & Blog Posts</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Star className="text-primary-foreground/90 h-4 w-4" />
-                <p className="text-sm text-primary-foreground/90">92% success rate in content takedowns</p>
-              </div>
             </div>
             
             <p className="text-sm text-primary-foreground/80 mb-4 text-center">
