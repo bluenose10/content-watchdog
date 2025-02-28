@@ -65,7 +65,7 @@ export function ImageSearch({ onSearch, isLoading = false }: ImageSearchProps) {
         />
         <Button 
           type="submit" 
-          className="mt-2"
+          className="mt-2 cursor-pointer"
           disabled={isLoading || !selectedFile}
         >
           {isLoading ? "Uploading..." : "Search"}

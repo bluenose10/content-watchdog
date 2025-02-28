@@ -40,7 +40,7 @@ export function CallToAction() {
             <p className="text-sm text-primary-foreground/80 mb-4 text-center">
               Our customers have protected over 1.5 million pieces of content and recovered thousands in lost revenue.
             </p>
-            <Button asChild size="lg" variant="secondary" className="bg-background text-primary hover:bg-background/90 button-animation">
+            <Button asChild size="lg" variant="secondary" className="bg-background text-primary hover:bg-background/90 button-animation cursor-pointer">
               <Link to="/signup">
                 Start Protecting Your Content Now
                 <ArrowRight className="ml-2 h-4 w-4" />

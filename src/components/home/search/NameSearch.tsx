@@ -29,7 +29,7 @@ export function NameSearch({ onSearch, isLoading = false }: NameSearchProps) {
           onChange={(e) => setNameQuery(e.target.value)}
           required
         />
-        <Button type="submit" className="whitespace-nowrap" disabled={isLoading}>
+        <Button type="submit" className="whitespace-nowrap cursor-pointer" disabled={isLoading}>
           {isLoading ? "Searching..." : "Search"}
           {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>

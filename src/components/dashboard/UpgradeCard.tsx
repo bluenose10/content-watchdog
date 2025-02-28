@@ -52,7 +52,7 @@ export function UpgradeCard() {
           </div>
           <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-purple-100 dark:border-purple-900">
             <p className="text-3xl font-bold mb-2">$49<span className="text-sm font-normal text-muted-foreground">.99/mo</span></p>
-            <Button className="button-animation w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700" asChild>
+            <Button className="button-animation w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 cursor-pointer" asChild>
               <Link to="/#pricing">
                 Upgrade Now
                 <Zap className="ml-2 h-4 w-4" />
