@@ -34,7 +34,7 @@ export const HeroSection = () => {
           
           {/* Core Services - Updated with specific examples */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left mb-12 md:mb-16">
-            <div className="flex flex-col space-y-2 md:space-y-3 shimmer-effect">
+            <div className="flex flex-col space-y-2 md:space-y-3">
               <div className="flex items-center">
                 <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full mr-3">
                   <Shield className="h-4 w-4 md:h-5 md:w-5 text-purple-700 dark:text-purple-500" />
@@ -45,7 +45,7 @@ export const HeroSection = () => {
                 We provide comprehensive findings for your legal team to use when issuing DMCA takedowns, with detailed proof of infringement
               </p>
             </div>
-            <div className="flex flex-col space-y-2 md:space-y-3 shimmer-effect">
+            <div className="flex flex-col space-y-2 md:space-y-3">
               <div className="flex items-center">
                 <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full mr-3">
                   <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600 dark:text-blue-500" />
@@ -56,7 +56,7 @@ export const HeroSection = () => {
                 Our specialized search finds where others have duplicated your content, even when they've slightly modified it
               </p>
             </div>
-            <div className="flex flex-col space-y-2 md:space-y-3 shimmer-effect">
+            <div className="flex flex-col space-y-2 md:space-y-3">
               <div className="flex items-center">
                 <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-full mr-3">
                   <FileCheck className="h-4 w-4 md:h-5 md:w-5 text-indigo-700 dark:text-indigo-500" />
@@ -77,7 +77,7 @@ export const HeroSection = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
-              <div className="flex flex-col space-y-2 md:space-y-3 hover:translate-y-[-4px] transition-transform duration-300">
+              <div className="flex flex-col space-y-2 md:space-y-3">
                 <div className="flex items-center">
                   <div className="flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 mr-3 shadow-sm">
                     <Search className="h-5 w-5 md:h-6 md:w-6 text-purple-700 dark:text-purple-400" />
@@ -89,7 +89,7 @@ export const HeroSection = () => {
                 </p>
               </div>
               
-              <div className="flex flex-col space-y-2 md:space-y-3 hover:translate-y-[-4px] transition-transform duration-300">
+              <div className="flex flex-col space-y-2 md:space-y-3">
                 <div className="flex items-center">
                   <div className="flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mr-3 shadow-sm">
                     <Bell className="h-5 w-5 md:h-6 md:w-6 text-blue-700 dark:text-blue-400" />
@@ -101,7 +101,7 @@ export const HeroSection = () => {
                 </p>
               </div>
               
-              <div className="flex flex-col space-y-2 md:space-y-3 hover:translate-y-[-4px] transition-transform duration-300">
+              <div className="flex flex-col space-y-2 md:space-y-3">
                 <div className="flex items-center">
                   <div className="flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mr-3 shadow-sm">
                     <UserCheck className="h-5 w-5 md:h-6 md:w-6 text-indigo-700 dark:text-indigo-400" />
@@ -141,3 +141,4 @@ export const HeroSection = () => {
     </section>
   );
 };
+
