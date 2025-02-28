@@ -210,7 +210,7 @@ export const getCacheStats = () => {
 /**
  * Pre-warm the cache with results from recent searches
  */
-export const getSearchResults = async (searchId: string): Promise<any[]> => {
+export const getSearchResults = async (searchId: string): Promise<{ query: string, results: any[] }> => {
   // This is a mock function that returns fake results for pre-fetching
   // In a real implementation, this would call your actual search API
   
@@ -231,7 +231,10 @@ export const getSearchResults = async (searchId: string): Promise<any[]> => {
     });
   }
   
-  return mockResults;
+  return {
+    query: `Search ${searchId}`,
+    results: mockResults
+  };
 };
 
 // Set up periodic cache cleanup
