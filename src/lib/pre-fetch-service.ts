@@ -41,10 +41,21 @@ const isLowSystemLoad = (): boolean => {
 };
 
 /**
- * Check Google API quota availability before pre-fetching
+ * Check API quota availability before pre-fetching
+ * We check both Google and Bing search availability
  */
 const hasAvailableQuota = (): boolean => {
-  return searchApiManager.canMakeRequest('search');
+  return searchApiManager.canMakeRequest('google') || searchApiManager.canMakeRequest('bing');
+};
+
+/**
+ * Get the list of engines to use for pre-fetching
+ * This allows us to pre-fetch using available engines
+ */
+const getPreFetchEngines = (): string[] => {
+  return searchApiManager.getAvailableSearchEngines().filter(engine => 
+    engine === 'google' || engine === 'bing'
+  );
 };
 
 /**
@@ -73,11 +84,11 @@ export const preFetchQuery = async (
     
     console.log(`[Pre-fetch] Fetching: ${queryType} - ${query}`);
     
-    // Use Search API Manager for optimized, throttled access
+    // Use optimizedSearch which will automatically use available engines
     const results = await optimizedSearch(queryType, query, params);
     
     // Cache the results
-    cacheResults(cacheKey, results, 'google', 0.01); // Tracking cost per request
+    cacheResults(cacheKey, results, 'multi-engine', 0.01); // Tracking cost per request
     
     console.log(`[Pre-fetch] Successfully cached: ${queryType} - ${query}`);
     return true;
@@ -126,7 +137,7 @@ export const batchPreFetch = async (queries: PreFetchQuery[]): Promise<number> =
       
       if (result) {
         const cacheKey = getCacheKey(query.queryType, query.query, query.params);
-        cacheResults(cacheKey, result, 'google', 0.01);
+        cacheResults(cacheKey, result, 'multi-engine', 0.01);
         cachedCount++;
       }
     });
@@ -149,7 +160,14 @@ export const startPreFetching = async (customQueries?: PreFetchQuery[]): Promise
     return;
   }
   
-  console.log('[Pre-fetch] Starting pre-fetch process');
+  // Check if any search engines are available
+  const availableEngines = getPreFetchEngines();
+  if (availableEngines.length === 0) {
+    console.log('[Pre-fetch] No search engines available for pre-fetching');
+    return;
+  }
+  
+  console.log(`[Pre-fetch] Starting pre-fetch process using engines: ${availableEngines.join(', ')}`);
   
   // Combine default and custom queries
   const queriesToFetch = [...DEFAULT_PREFETCH_QUERIES, ...(customQueries || [])];
