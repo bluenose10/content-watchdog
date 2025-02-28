@@ -25,6 +25,29 @@ export function PricingSection() {
     }
   };
 
+  // Update pricing plans to include scheduled searches
+  const updatedPlans = PRICING_PLANS.map(plan => {
+    if (plan.id === "pro") {
+      return {
+        ...plan,
+        features: [
+          ...plan.features,
+          "5 scheduled automated searches",
+        ]
+      };
+    }
+    if (plan.id === "business") {
+      return {
+        ...plan,
+        features: [
+          ...plan.features,
+          "20 scheduled automated searches",
+        ]
+      };
+    }
+    return plan;
+  });
+
   return (
     <section id="pricing" className="py-16 relative overflow-hidden">
       <div className="container mx-auto px-4">
@@ -36,7 +59,7 @@ export function PricingSection() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-6 max-w-6xl mx-auto">
-          {PRICING_PLANS.map((plan) => (
+          {updatedPlans.map((plan) => (
             <PricingCard
               key={plan.id}
               name={plan.name}

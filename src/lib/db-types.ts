@@ -7,6 +7,9 @@ export type SearchQuery = {
   image_url?: string;
   created_at?: string;
   search_params?: any; // Advanced search parameters
+  scheduled?: boolean; // Whether this is a scheduled search
+  schedule_interval?: string; // Schedule interval (hourly, daily, weekly, etc.)
+  last_run?: string; // When the scheduled search was last executed
 }
 
 export type SearchResult = {
@@ -40,5 +43,6 @@ export type Plan = {
   search_limit: number;
   result_limit: number;
   monitoring_limit: number;
+  scheduled_search_limit?: number; // New field: Number of scheduled searches allowed
   created_at?: string;
 }
