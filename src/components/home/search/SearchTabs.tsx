@@ -177,7 +177,7 @@ export function SearchTabs({
           </CardHeader>
           <CardContent className="px-4 py-2 text-sm">
             {activeTab !== "image" ? (
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="multiple" className="w-full">
                 <AccordionItem value="basic">
                   <AccordionTrigger className="text-sm py-2">Basic Filters</AccordionTrigger>
                   <AccordionContent>
@@ -328,7 +328,7 @@ export function SearchTabs({
                 
                 <AccordionItem value="advanced-filters">
                   <AccordionTrigger className="text-sm py-2">More Filters</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="pb-4">
                     <div className="space-y-4">
                       <div className="space-y-1.5">
                         <Label htmlFor="language" className="text-sm">Language</Label>
@@ -422,7 +422,7 @@ export function SearchTabs({
               </Accordion>
             ) : (
               <div>
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="multiple" className="w-full">
                   <AccordionItem value="basic-image">
                     <AccordionTrigger className="text-sm py-2">Basic Image Filters</AccordionTrigger>
                     <AccordionContent>
