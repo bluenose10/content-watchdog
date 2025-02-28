@@ -131,7 +131,7 @@ export default function Results() {
           variant: "default",
         });
       } finally {
-        // Shorter loading time for better UX
+        // Reduced loading time
         setTimeout(() => {
           setIsLoading(false);
         }, 300);
