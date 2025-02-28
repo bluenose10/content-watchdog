@@ -36,7 +36,7 @@ export default function Contact() {
               
               <div className="space-y-4 mb-6">
                 <p>
-                  I'm a skilled digital detective with a knack for uncovering valuable content across the vast expanse of the internet. My expertise lies in combining technical know-how with creative problem-solving to find exactly what's needed—fast, accurately, and ethically. Let's turn the internet's chaos into your competitive advantage.
+                  I'm a skilled digital detective with a knack for uncovering valuable content across the vast expanse of the internet.
                 </p>
                 {/* Adding a hidden timestamp to force refresh */}
                 <span className="hidden">{timestamp}</span>
