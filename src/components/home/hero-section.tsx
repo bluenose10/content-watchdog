@@ -10,6 +10,10 @@ export const HeroSection = () => {
     navigate("/signup");
   };
 
+  const handleTryContentSearch = () => {
+    navigate("/search");
+  };
+
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -37,7 +41,7 @@ export const HeroSection = () => {
             <ArrowRight className="h-4 w-4" />
           </Button>
           <Button 
-            onClick={() => navigate("/search")} 
+            onClick={handleTryContentSearch}
             size="lg" 
             variant="outline" 
             className="secondary-button"
