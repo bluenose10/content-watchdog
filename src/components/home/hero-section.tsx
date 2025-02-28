@@ -6,16 +6,6 @@ import { Button } from "@/components/ui/button";
 export const HeroSection = () => {
   const navigate = useNavigate();
 
-  const scrollToFeatures = () => {
-    const featuresElement = document.getElementById('features');
-    if (featuresElement) {
-      featuresElement.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // If for some reason the element isn't found on the current page
-      console.log("Features section not found on this page");
-    }
-  };
-
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -102,16 +92,6 @@ export const HeroSection = () => {
           </div>
         </div>
         
-        <div className="mt-6">
-          <Button 
-            variant="ghost" 
-            onClick={scrollToFeatures}
-            className="flex items-center text-sm text-muted-foreground hover:text-foreground group"
-          >
-            Learn more about our features
-            <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </div>
       </div>
     </section>
   );
