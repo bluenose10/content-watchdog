@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 export function AboutSection() {
   return (
-    <section id="about" className="py-6 md:py-10 relative">
+    <section id="about" className="py-6 md:py-4 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold mb-2">About Influence Guard</h2>
