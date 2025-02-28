@@ -12,6 +12,8 @@ import { PremiumFeature, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { ScheduledSearches } from "@/components/dashboard/ScheduledSearches";
 import { BarChart3, Search, Shield } from "lucide-react";
 import { getUserSearchQueries } from "@/lib/db-service";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/utils";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -48,6 +50,11 @@ export default function Dashboard() {
     return <LoadingState />;
   }
 
+  // Get user information
+  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const userInitials = getInitials(userName);
+
   // Determine if user needs to see the upgrade card
   const showUpgradeCard = !hasPremiumFeature(PremiumFeature.UNLIMITED_RESULTS);
 
@@ -55,7 +62,18 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8 pt-8 text-primary">Dashboard</h1>
+        <div className="flex items-center gap-4 mb-8 pt-8">
+          <Avatar className="h-16 w-16 border-2 border-primary/10">
+            <AvatarImage src={avatarUrl} alt={userName} />
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Welcome back, {userName}</h1>
+            <p className="text-muted-foreground">Here's an overview of your content monitoring</p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <StatsCard 
