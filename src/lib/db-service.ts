@@ -1,6 +1,8 @@
+
 import { supabase } from './supabase';
 import { SearchQuery, SearchResult, UserSubscription } from './db-types';
 import { getCacheKey, getCachedResults, cacheResults } from './search-cache';
+import { User } from '@supabase/supabase-js';
 
 const pendingRequests: Record<string, Promise<any>> = {};
 
