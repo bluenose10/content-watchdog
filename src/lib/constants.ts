@@ -1,4 +1,3 @@
-
 // Constants for the application
 export const APP_NAME = "InfluenceGuard";
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -122,4 +121,11 @@ export const PROTECTED_ROUTES = [
 export const API_TIMEOUT = 30000; // 30 seconds
 
 // Cache constants
-export const SEARCH_CACHE_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+export const SEARCH_CACHE_EXPIRATION = 30 * 60 * 1000; // 30 minutes
+
+// Rate limiting settings
+export const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+export const RATE_LIMIT_MAX_REQUESTS = 30; // 30 requests per minute default
+
+// API endpoints
+export const API_ENDPOINT = 'https://api.example.com';

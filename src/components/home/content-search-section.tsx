@@ -9,6 +9,7 @@ import { SearchTabs } from "./search/SearchTabs";
 import { handleTextSearch, handleImageSearch } from "./search/searchService";
 import { AlertCircle } from "lucide-react";
 import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
+import { checkRateLimit, getUserRateLimits } from "@/lib/rate-limiter";
 
 export function ContentSearchSection() {
   const navigate = useNavigate();
@@ -18,6 +19,32 @@ export function ContentSearchSection() {
   const [error, setError] = useState<string | null>(null);
   const { accessLevel } = useProtectedRoute(false);
 
+  const checkUserRateLimit = () => {
+    // Skip rate limiting for non-production environments
+    if (import.meta.env.DEV && !import.meta.env.VITE_ENABLE_RATE_LIMIT_IN_DEV) {
+      return { allowed: true };
+    }
+    
+    // Determine user tier from accessLevel
+    let userTier: 'anonymous' | 'basic' | 'premium' | 'admin' = 'anonymous';
+    
+    if (!user) {
+      userTier = 'anonymous';
+    } else if (accessLevel === AccessLevel.ADMIN) {
+      userTier = 'admin';
+    } else if (accessLevel === AccessLevel.PREMIUM) {
+      userTier = 'premium';
+    } else {
+      userTier = 'basic';
+    }
+    
+    // Get appropriate rate limits for user tier
+    const { maxRequests, timeWindow } = getUserRateLimits(user?.id || null, userTier);
+    
+    // Check if user is within rate limits
+    return checkRateLimit(user?.id || 'anonymous', maxRequests, timeWindow);
+  };
+
   const handleNameSearch = async (query: string, params?: any) => {
     // If anonymous user, redirect to signup
     if (!user) {
@@ -26,6 +53,22 @@ export function ContentSearchSection() {
     }
 
     try {
+      // Check rate limits before proceeding
+      const rateLimitResult = checkUserRateLimit();
+      if (!rateLimitResult.allowed) {
+        const retrySeconds = rateLimitResult.retryAfter || 60;
+        const retryMinutes = Math.ceil(retrySeconds / 60);
+        
+        toast({
+          title: "Rate limit exceeded",
+          description: `You've reached your search limit. Please try again in ${retryMinutes} ${retryMinutes === 1 ? 'minute' : 'minutes'}.`,
+          variant: "destructive",
+        });
+        
+        setError(`Rate limit exceeded. Please try again in ${retryMinutes} ${retryMinutes === 1 ? 'minute' : 'minutes'}.`);
+        return;
+      }
+      
       setIsLoading(true);
       setError(null);
       console.log("Name search with query:", query, "and params:", params);
@@ -58,6 +101,22 @@ export function ContentSearchSection() {
     }
 
     try {
+      // Check rate limits before proceeding
+      const rateLimitResult = checkUserRateLimit();
+      if (!rateLimitResult.allowed) {
+        const retrySeconds = rateLimitResult.retryAfter || 60;
+        const retryMinutes = Math.ceil(retrySeconds / 60);
+        
+        toast({
+          title: "Rate limit exceeded",
+          description: `You've reached your search limit. Please try again in ${retryMinutes} ${retryMinutes === 1 ? 'minute' : 'minutes'}.`,
+          variant: "destructive",
+        });
+        
+        setError(`Rate limit exceeded. Please try again in ${retryMinutes} ${retryMinutes === 1 ? 'minute' : 'minutes'}.`);
+        return;
+      }
+      
       setIsLoading(true);
       setError(null);
       console.log("Hashtag search with query:", query, "and params:", params);
@@ -90,6 +149,22 @@ export function ContentSearchSection() {
     }
 
     try {
+      // Check rate limits before proceeding
+      const rateLimitResult = checkUserRateLimit();
+      if (!rateLimitResult.allowed) {
+        const retrySeconds = rateLimitResult.retryAfter || 60;
+        const retryMinutes = Math.ceil(retrySeconds / 60);
+        
+        toast({
+          title: "Rate limit exceeded",
+          description: `You've reached your search limit. Please try again in ${retryMinutes} ${retryMinutes === 1 ? 'minute' : 'minutes'}.`,
+          variant: "destructive",
+        });
+        
+        setError(`Rate limit exceeded. Please try again in ${retryMinutes} ${retryMinutes === 1 ? 'minute' : 'minutes'}.`);
+        return;
+      }
+      
       setIsLoading(true);
       setError(null);
       console.log("Image search with file:", file.name, "and params:", params);
