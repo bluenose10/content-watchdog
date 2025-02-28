@@ -174,8 +174,8 @@ export default function Results() {
           <Sidebar />
         </div>
         <main className="flex-grow p-6">
-          <div className="container mx-auto">
-            <div className="flex items-center mb-6">
+          <div className="container mx-auto pt-6">
+            <div className="flex items-center mb-8">
               <Button 
                 variant="ghost" 
                 className="mr-4"
