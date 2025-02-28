@@ -159,9 +159,10 @@ export function RateLimitMonitor() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>User ID</TableHead>
-                      <TableHead>Request Count</TableHead>
+                      <TableHead>Minute Usage</TableHead>
+                      <TableHead>Weekly Usage</TableHead>
+                      <TableHead>Monthly Usage</TableHead>
                       <TableHead>Last Request</TableHead>
-                      <TableHead>Usage</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -169,18 +170,9 @@ export function RateLimitMonitor() {
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.id.substring(0, 8)}...</TableCell>
                         <TableCell>{user.requestCount}</TableCell>
+                        <TableCell>{user.weeklyCount || 0}</TableCell>
+                        <TableCell>{user.monthlyCount || 0}</TableCell>
                         <TableCell>{formatDistanceToNow(user.lastRequest, { addSuffix: true })}</TableCell>
-                        <TableCell className="w-[180px]">
-                          <div className="flex flex-col space-y-1">
-                            <Progress 
-                              value={Math.min(100, (user.requestCount / 30) * 100)} 
-                              className="h-2" 
-                            />
-                            <span className="text-xs text-muted-foreground">
-                              {user.requestCount}/30 requests
-                            </span>
-                          </div>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

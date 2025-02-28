@@ -1,3 +1,4 @@
+
 // Constants for the application
 export const APP_NAME = "InfluenceGuard";
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -43,9 +44,13 @@ export const MAX_SEARCH_HISTORY = 10;
 // Search limits by plan
 export const SEARCH_LIMITS = {
   ANONYMOUS: 0, // No searches for unregistered users
-  BASIC: 3, // 3 searches per month for free plan
+  BASIC: {
+    MONTHLY: 4, // 4 searches per month for free plan
+    WEEKLY: 1, // Only 1 search per 7 days
+  },
   PRO: {
     MONTHLY: 40, // 40 searches per calendar month for professional accounts
+    WEEKLY: 10, // 10 searches per week limit
   }
 };
 
@@ -57,7 +62,7 @@ export const PRICING_PLANS = [
     description: "Essential monitoring for individuals",
     price: 0,
     features: [
-      "3 searches per month",
+      "4 searches per month (1 per week)",
       "Basic content alerts",
       "Email support",
     ],
@@ -72,7 +77,7 @@ export const PRICING_PLANS = [
     price: 49,
     interval: "month",
     features: [
-      "40 searches per month",
+      "40 searches per month (10 per week)",
       "Real-time monitoring",
       "Automated takedown notices",
       "Priority support",
