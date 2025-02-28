@@ -43,7 +43,7 @@ export function QuickActions() {
             </Link>
           </Button>
           <Button variant="secondary" className="justify-start h-auto py-3 px-4 bg-gradient-to-r from-indigo-500/5 to-blue-500/5 hover:from-indigo-500/10 hover:to-blue-500/10" asChild>
-            <Link to="/account">
+            <Link to="/settings">
               <User className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-400" />
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium">Account</span>
