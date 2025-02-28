@@ -40,6 +40,8 @@ export function PricingCard({
     <div
       className={cn(
         "relative glass-card overflow-hidden rounded-xl p-6 transition-all duration-300",
+        "before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10",
+        "after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-900 after:-z-10",
         popular ? "scale-105 shadow-xl" : "hover:shadow-lg hover:translate-y-[-4px]",
         className
       )}
