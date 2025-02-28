@@ -13,7 +13,7 @@ export const HeroSection = () => {
           Find Your Stolen Content & Get DMCA Takedowns
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          For Content Creators Needing DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, then help you remove them with effective DMCA takedowns.
+          For Content Creators Needing DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, providing detailed evidence for your legal team to issue takedowns.
         </p>
         
         {/* Enhanced content protection section with workflow included */}
@@ -25,10 +25,10 @@ export const HeroSection = () => {
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <Shield className="h-5 w-5 text-purple-700 dark:text-purple-500 mr-2" />
-                <h3 className="font-medium">DMCA Takedowns</h3>
+                <h3 className="font-medium">DMCA Evidence</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                We handle the entire DMCA process for you once we've located your stolen content, with 92% successful removal rate
+                We provide comprehensive findings for your legal team to use when issuing DMCA takedowns, with detailed proof of infringement
               </p>
             </div>
             <div className="flex flex-col space-y-3">
@@ -46,7 +46,7 @@ export const HeroSection = () => {
                 <h3 className="font-medium">Creator Protection</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                Made specifically for content creators who need help identifying and removing unauthorized duplicates of their work
+                Made specifically for content creators who need comprehensive evidence to support their legal team's DMCA actions
               </p>
             </div>
           </div>
@@ -85,10 +85,10 @@ export const HeroSection = () => {
                   <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mr-3">
                     <UserCheck className="h-5 w-5 text-indigo-700 dark:text-indigo-400" />
                   </div>
-                  <h4 className="font-medium">3. Issue DMCA</h4>
+                  <h4 className="font-medium">3. Prepare Evidence</h4>
                 </div>
                 <p className="text-sm text-muted-foreground pl-[52px]">
-                  With one click, we'll generate and send proper DMCA takedown notices to get your stolen content removed, with all legal documentation prepared for you.
+                  We compile comprehensive documentation for your legal team to use when issuing DMCA takedowns, saving your solicitors time in preparing strong cases.
                 </p>
               </div>
             </div>
