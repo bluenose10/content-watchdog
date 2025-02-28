@@ -1,7 +1,7 @@
 
 import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/search-cache';
 import { getRecentSearches } from '@/lib/db-service';
-import { googleApiManager } from '@/lib/google-api-manager';
+import { searchApiManager, optimizedSearch } from '@/lib/google-api-manager';
 
 // Popular search types and terms that we want to pre-fetch
 interface PreFetchQuery {
@@ -44,7 +44,7 @@ const isLowSystemLoad = (): boolean => {
  * Check Google API quota availability before pre-fetching
  */
 const hasAvailableQuota = (): boolean => {
-  return googleApiManager.canMakeRequest('search');
+  return searchApiManager.canMakeRequest('search');
 };
 
 /**
@@ -73,8 +73,8 @@ export const preFetchQuery = async (
     
     console.log(`[Pre-fetch] Fetching: ${queryType} - ${query}`);
     
-    // Use Google API Manager for optimized, throttled access
-    const results = await googleApiManager.optimizedSearch(queryType, query, params);
+    // Use Search API Manager for optimized, throttled access
+    const results = await optimizedSearch(queryType, query, params);
     
     // Cache the results
     cacheResults(cacheKey, results, 'google', 0.01); // Tracking cost per request
