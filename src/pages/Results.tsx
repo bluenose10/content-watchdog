@@ -173,44 +173,37 @@ export default function Results() {
         <div className="hidden md:block w-64 border-r">
           <Sidebar />
         </div>
-        <main className="flex-grow p-6">
-          <div className="container mx-auto pt-6">
-            <div className="flex items-center mb-8">
+        <main className="flex-grow">
+          <div className="px-8 py-8 max-w-6xl mx-auto">
+            <div className="mb-4">
               <Button 
                 variant="ghost" 
-                className="mr-4"
+                className="mb-6"
                 onClick={() => navigate("/search")}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Search
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold mb-1">Search Results</h1>
-                <p className="text-muted-foreground">
-                  {query ? (
-                    <span>Results for <span className="font-medium">{query}</span></span>
-                  ) : (
-                    <span>Recent search results</span>
-                  )}
-                </p>
-              </div>
+              
+              <h1 className="text-3xl font-bold mb-2">Search Results</h1>
+              <p className="text-muted-foreground text-lg">
+                Results for {query ? <span>{query}</span> : <span>Unknown search</span>}
+              </p>
             </div>
 
-            <Card className="mb-6">
-              <CardContent className="p-4">
-                <div className="flex flex-wrap gap-4 items-center">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">Searched on {searchDate}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Image className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">Content search</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Info className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">Found {results.length} matches</span>
-                  </div>
+            <Card className="mb-8 mt-6">
+              <CardContent className="p-6 flex flex-col gap-4 md:flex-row md:gap-8">
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-3 text-muted-foreground" />
+                  <span>Searched on {searchDate}</span>
+                </div>
+                <div className="flex items-center">
+                  <Image className="h-5 w-5 mr-3 text-muted-foreground" />
+                  <span>Content search</span>
+                </div>
+                <div className="flex items-center">
+                  <Info className="h-5 w-5 mr-3 text-muted-foreground" />
+                  <span>Found {results.length} matches</span>
                 </div>
               </CardContent>
             </Card>
