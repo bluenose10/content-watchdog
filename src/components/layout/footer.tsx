@@ -13,7 +13,7 @@ export function Footer() {
       <div className="container px-4 md:px-6 py-12 flex flex-col gap-8 md:flex-row">
         <div className="flex flex-col gap-4 md:w-1/3">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white font-bold">IG</div>
+            <img src="/lovable-uploads/5953bc93-b6b1-4b80-b98c-3ac53016c5b3.png" alt="Logo" className="w-10 h-10 rounded-full object-cover" />
             <span className="text-xl font-bold tracking-tight">{APP_NAME}</span>
           </Link>
           <p className="text-sm text-muted-foreground mt-2">
