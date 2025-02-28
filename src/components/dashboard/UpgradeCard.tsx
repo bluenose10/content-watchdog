@@ -28,7 +28,7 @@ export function UpgradeCard() {
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">
                   <Shield className="h-3 w-3 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
                 </div>
-                <span className="group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">Unlimited search results</span>
+                <span className="group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">40 searches per month</span>
               </li>
               <li className="flex items-center text-sm group">
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">
@@ -40,7 +40,7 @@ export function UpgradeCard() {
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">
                   <Shield className="h-3 w-3 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
                 </div>
-                <span className="group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">10 automated monitoring sessions</span>
+                <span className="group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">5 automated monitoring sessions</span>
               </li>
               <li className="flex items-center text-sm group">
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">

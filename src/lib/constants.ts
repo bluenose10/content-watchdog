@@ -46,7 +46,6 @@ export const SEARCH_LIMITS = {
   ANONYMOUS: 0, // No searches for unregistered users
   BASIC: 3, // 3 searches per month for free plan
   PRO: {
-    WEEKLY: 10, // 10 searches per week for professional accounts
     MONTHLY: 40, // 40 searches per calendar month for professional accounts
   }
 };
@@ -74,7 +73,7 @@ export const PRICING_PLANS = [
     price: 49,
     interval: "month",
     features: [
-      "10 searches per week (40 per month)",
+      "40 searches per month",
       "Real-time monitoring",
       "Automated takedown notices",
       "Priority support",

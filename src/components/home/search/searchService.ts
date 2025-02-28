@@ -34,7 +34,7 @@ const DEFAULT_IMAGE_PARAMS: ImageSearchParams = {
 };
 
 // Track user search counts (in-memory for demo purposes, should be persisted in production)
-const userSearchCounts: Record<string, { monthly: number, weekly: number, lastReset: { weekly: number, monthly: number } }> = {};
+const userSearchCounts: Record<string, { monthly: number, lastReset: { monthly: number } }> = {};
 
 /**
  * Check if user has exceeded their search limits based on subscription tier
@@ -47,24 +47,15 @@ async function checkSearchLimits(userId: string, isPro: boolean): Promise<{ isAl
   if (!userSearchCounts[userId]) {
     userSearchCounts[userId] = {
       monthly: 0,
-      weekly: 0,
       lastReset: {
-        weekly: Date.now(),
         monthly: Date.now()
       }
     };
   }
 
   const now = Date.now();
-  const oneWeek = 7 * 24 * 60 * 60 * 1000;
   const oneMonth = 30 * 24 * 60 * 60 * 1000;
   const user = userSearchCounts[userId];
-
-  // Check if we need to reset weekly count
-  if (now - user.lastReset.weekly > oneWeek) {
-    user.weekly = 0;
-    user.lastReset.weekly = now;
-  }
 
   // Check if we need to reset monthly count
   if (now - user.lastReset.monthly > oneMonth) {
@@ -75,13 +66,6 @@ async function checkSearchLimits(userId: string, isPro: boolean): Promise<{ isAl
   // Check limits based on subscription tier
   if (isPro) {
     // Pro user checks
-    if (user.weekly >= SEARCH_LIMITS.PRO.WEEKLY) {
-      return { 
-        isAllowed: false, 
-        message: `You've reached your weekly search limit (${SEARCH_LIMITS.PRO.WEEKLY} searches). Weekly limit resets in ${formatTimeRemaining(user.lastReset.weekly + oneWeek - now)}.`
-      };
-    }
-    
     if (user.monthly >= SEARCH_LIMITS.PRO.MONTHLY) {
       return { 
         isAllowed: false, 
@@ -121,16 +105,13 @@ function incrementSearchCount(userId: string): void {
   if (!userSearchCounts[userId]) {
     userSearchCounts[userId] = {
       monthly: 0,
-      weekly: 0,
       lastReset: {
-        weekly: Date.now(),
         monthly: Date.now()
       }
     };
   }
   
   userSearchCounts[userId].monthly += 1;
-  userSearchCounts[userId].weekly += 1;
 }
 
 // Handles text-based searches (name or hashtag) with enhanced parameters
