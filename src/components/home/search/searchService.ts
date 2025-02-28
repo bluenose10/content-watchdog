@@ -2,9 +2,9 @@
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
-import { useToast } from "@/hooks/use-toast";
 import { SEARCH_LIMITS } from "@/lib/constants";
 import { getCacheKey, getCachedResults, cacheResults } from "@/lib/search-cache";
+import { optimizedSearch, getAvailableSearchEngines, getSearchEngineStats } from "@/lib/google-api-manager";
 
 // Enhanced search parameters for text-based searches
 const DEFAULT_TEXT_PARAMS: TextSearchParams = {
@@ -210,6 +210,10 @@ export async function handleTextSearch(
 
   console.log(`Performing ${queryType} search with enhanced parameters:`, mergedParams);
   
+  // Get available search engines
+  const availableEngines = getAvailableSearchEngines();
+  console.log(`Available search engines: ${availableEngines.join(', ')}`);
+  
   const searchData: SearchQuery = {
     user_id: user.id,
     query_type: queryType,
@@ -332,11 +336,36 @@ async function processSearch(
     throw new Error("User must be signed in to perform searches");
   }
   
+  // Show search engine stats for debugging
+  const engineStats = getSearchEngineStats();
+  console.log("Current search engine stats:", engineStats);
+  
   // For registered users, create a permanent search query
   const newSearch = await createSearchQuery(searchData);
   if (!newSearch || !newSearch.id) {
     throw new Error("Failed to create search");
   }
   
+  // Run the search across multiple engines
+  try {
+    if (searchData.query_type === "image") {
+      // For image searches, we'll use a specific search type
+      await optimizedSearch("image", searchData.image_url || "", JSON.parse(searchData.search_params_json || "{}"));
+    } else {
+      // For text searches
+      await optimizedSearch(
+        searchData.query_type || "web", 
+        searchData.query_text || "", 
+        JSON.parse(searchData.search_params_json || "{}")
+      );
+    }
+  } catch (error) {
+    console.error("Error during multi-engine search:", error);
+    // Continue despite errors - we'll still return the search ID
+  }
+  
   return newSearch.id;
 }
+
+// Export search engine management functions
+export { getSearchEngineStats, getAvailableSearchEngines };

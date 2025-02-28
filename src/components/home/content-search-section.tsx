@@ -2,14 +2,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { SearchTabs } from "./search/SearchTabs";
-import { handleTextSearch, handleImageSearch } from "./search/searchService";
-import { AlertCircle } from "lucide-react";
+import { handleTextSearch, handleImageSearch, getAvailableSearchEngines } from "./search/searchService";
+import { AlertCircle, Search } from "lucide-react";
 import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { checkRateLimit, getUserRateLimits } from "@/lib/rate-limiter";
+import { Badge } from "@/components/ui/badge";
 
 export function ContentSearchSection() {
   const navigate = useNavigate();
@@ -18,6 +19,19 @@ export function ContentSearchSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { accessLevel } = useProtectedRoute(false);
+  const [availableEngines, setAvailableEngines] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Get available search engines
+    setAvailableEngines(getAvailableSearchEngines());
+    
+    // Refresh the list every 30 seconds
+    const interval = setInterval(() => {
+      setAvailableEngines(getAvailableSearchEngines());
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const checkUserRateLimit = (): { 
     allowed: boolean; 
@@ -257,6 +271,24 @@ export function ContentSearchSection() {
           <p className="text-sm text-muted-foreground">
             Find and protect your content
           </p>
+          
+          {availableEngines.length > 0 && (
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              <div className="text-xs text-muted-foreground flex items-center">
+                <Search className="h-3 w-3 mr-1" />
+                Powered by:
+              </div>
+              {availableEngines.map(engine => (
+                <Badge 
+                  key={engine} 
+                  variant="outline" 
+                  className="text-xs capitalize"
+                >
+                  {engine}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         {error && (
