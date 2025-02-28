@@ -78,6 +78,8 @@ export function Header() {
 
   // Function to handle navigation to home page sections
   const navigateToSection = (sectionId: string) => {
+    console.log("Navigating to section:", sectionId);
+    
     if (location.pathname !== '/') {
       // If not on home page, navigate to home with hash
       // Using navigate directly instead of window.location to prevent full page reload
@@ -85,8 +87,11 @@ export function Header() {
     } else {
       // If already on home page, scroll to section
       const element = document.getElementById(sectionId);
+      console.log("Element found:", !!element);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        console.log("Element with ID not found:", sectionId);
       }
     }
   };
@@ -123,12 +128,12 @@ export function Header() {
           >
             Home
           </Link>
-          <button 
-            onClick={() => navigateToSection('features')} 
+          <Link 
+            to="/#features" 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
           >
             Features
-          </button>
+          </Link>
           <button 
             onClick={() => navigateToSection('pricing')} 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
@@ -197,12 +202,12 @@ export function Header() {
               >
                 Home
               </Link>
-              <button
-                onClick={() => navigateToSection('features')}
+              <Link
+                to="/#features"
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
               >
                 Features
-              </button>
+              </Link>
               <button
                 onClick={() => navigateToSection('pricing')}
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"

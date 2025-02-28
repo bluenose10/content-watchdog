@@ -65,7 +65,7 @@ export default function Index() {
           </div>
           
           {/* Features and Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8 mb-10 md:mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8 mb-10 md:mb-24" id="features">
             <div className="col-span-1">
               <div className="mb-4 md:mb-0 text-center md:text-left">
                 <h3 className="text-xl md:text-2xl font-bold mb-2">Key Features</h3>
