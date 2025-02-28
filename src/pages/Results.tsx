@@ -10,7 +10,7 @@ import { PaginatedResults } from "@/components/ui/paginated-results";
 import { useAuth } from "@/context/AuthContext";
 import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { getSearchResults } from "@/lib/search-cache";
-import { ArrowLeft, Calendar, Image, Info } from "lucide-react";
+import { Calendar, Image, Info } from "lucide-react";
 import { Sidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -175,16 +175,7 @@ export default function Results() {
         </div>
         <main className="flex-grow">
           <div className="px-8 py-8 max-w-6xl mx-auto">
-            <div className="mb-4">
-              <Button 
-                variant="ghost" 
-                className="mb-6"
-                onClick={() => navigate("/search")}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Search
-              </Button>
-              
+            <div className="mb-6">
               <h1 className="text-3xl font-bold mb-2">Search Results</h1>
               <p className="text-muted-foreground text-lg">
                 Results for {query ? <span>{query}</span> : <span>Unknown search</span>}
