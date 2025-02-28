@@ -37,6 +37,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
 import { SearchFilters, SortOption, MatchLevelFilter, SourceFilter } from "@/components/ui/search-filters";
 import { getCacheKey, clearCache } from "@/lib/search-cache";
+import { ExportMenu } from "@/components/ui/export-menu";
 
 export default function Results() {
   const [searchParams] = useSearchParams();
@@ -464,46 +465,6 @@ export default function Results() {
     }
   };
 
-  const handleDownload = () => {
-    // Create a CSV of the search results
-    const headers = [
-      "Title",
-      "URL",
-      "Source",
-      "Match Level",
-      "Found Date",
-    ].join(",");
-    
-    // Use filtered results for the download
-    const rows = filteredResults.map((result) => {
-      return [
-        `"${result.title.replace(/"/g, '""')}"`,
-        `"${result.url.replace(/"/g, '""')}"`,
-        `"${result.source.replace(/"/g, '""')}"`,
-        `"${result.match_level}"`,
-        `"${new Date(result.found_at).toLocaleDateString()}"`,
-      ].join(",");
-    });
-    
-    const csv = [headers, ...rows].join("\n");
-    
-    // Create a download link
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `search-results-${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    link.style.visibility = "hidden";
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleNewSearch = () => {
     // Clear any search caches for the current query if it exists
     if (searchData) {
@@ -558,6 +519,14 @@ export default function Results() {
                 </div>
                 
                 <div className="flex items-center gap-2">
+                  {accessLevel !== AccessLevel.ANONYMOUS && (
+                    <ExportMenu 
+                      results={filteredResults}
+                      filename={`search-${searchData?.query_text || searchId}`}
+                      buttonSize="sm"
+                    />
+                  )}
+                
                   {user && searchData && (
                     <DeleteSearchButton 
                       searchId={searchId || ''} 
@@ -578,12 +547,6 @@ export default function Results() {
                         <Share className="mr-2 h-4 w-4" />
                         Share Results
                       </DropdownMenuItem>
-                      {accessLevel !== AccessLevel.ANONYMOUS && (
-                        <DropdownMenuItem onClick={handleDownload}>
-                          <Download className="mr-2 h-4 w-4" />
-                          Download CSV
-                        </DropdownMenuItem>
-                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -711,6 +674,15 @@ export default function Results() {
                     </div>
                   ) : (
                     <>
+                      <div className="mb-4 flex justify-end">
+                        {accessLevel !== AccessLevel.ANONYMOUS && filteredResults.length > 0 && (
+                          <ExportMenu 
+                            results={filteredResults}
+                            filename={`search-${searchData?.query_text || searchId}`}
+                          />
+                        )}
+                      </div>
+                      
                       <div className="mb-12">
                         <PaginatedResults 
                           results={filteredResults}
