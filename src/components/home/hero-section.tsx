@@ -17,7 +17,7 @@ export const HeroSection = () => {
         </p>
         
         {/* Enhanced content protection section with workflow included */}
-        <div className="w-full max-w-4xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl p-8 border border-purple-100 dark:border-purple-900/40">
+        <div className="w-full max-w-4xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl p-8 pt-6 border border-purple-100 dark:border-purple-900/40">
           <h2 className="text-xl font-semibold mb-6 text-purple-800 dark:text-purple-400">Comprehensive Content Protection Services</h2>
           
           {/* Core Services - Updated with specific examples */}
