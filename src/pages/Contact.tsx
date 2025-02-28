@@ -31,7 +31,7 @@ export default function Contact() {
             <CardContent className="p-6 flex flex-col justify-center">
               <h2 className="text-2xl font-bold mb-3">Mark Moran</h2>
               <p className="text-muted-foreground mb-6">
-                Founder & Content Protection Specialist
+                Skilled at finding hard to locate content
               </p>
               
               <div className="space-y-4 mb-6">
