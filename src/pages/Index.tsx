@@ -43,11 +43,8 @@ export default function Index() {
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
           
-          {/* First section with About Us, Content Search, and Call to Action */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
-            <div className="col-span-1">
-              <AboutSection />
-            </div>
+          {/* First section with Content Search and Call to Action */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
             <div className="col-span-1" id="content-search-section">
               <ContentSearchSection />
             </div>
@@ -57,12 +54,22 @@ export default function Index() {
           </div>
           
           {/* Separator */}
-          <div className="max-w-4xl mx-auto mb-32">
+          <div className="max-w-4xl mx-auto mb-24">
+            <Separator className="border-dotted border-t-2" />
+          </div>
+          
+          {/* About Us section is now standalone */}
+          <div className="mb-24" id="about">
+            <AboutSection />
+          </div>
+          
+          {/* Separator */}
+          <div className="max-w-4xl mx-auto mb-24">
             <Separator className="border-dotted border-t-2" />
           </div>
           
           {/* Second section with Features and Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
             <div className="col-span-1">
               <FeaturesSection />
             </div>
@@ -72,12 +79,12 @@ export default function Index() {
           </div>
           
           {/* Separator */}
-          <div className="max-w-4xl mx-auto mb-32">
+          <div className="max-w-4xl mx-auto mb-24">
             <Separator className="border-dotted border-t-2" />
           </div>
           
           {/* Pricing section */}
-          <div className="mb-32" id="pricing">
+          <div className="mb-24" id="pricing">
             <PricingSection />
           </div>
           
@@ -87,7 +94,7 @@ export default function Index() {
           </div>
           
           {/* FAQ section */}
-          <div className="mb-32" id="faq">
+          <div className="mb-24" id="faq">
             <FAQSection />
           </div>
         </div>
