@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
+  
+  const handleSearchNow = () => {
+    navigate('/search');
+  };
+  
+  const handleCreateAccount = () => {
+    navigate('/signup');
+  };
+  
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -150,6 +160,26 @@ export const HeroSection = () => {
           </div>
         </div>
         
+        {/* Add the two action buttons that appear in the screenshot */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center w-full max-w-md mx-auto">
+          <Button 
+            onClick={handleSearchNow} 
+            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+            size="lg"
+          >
+            <Search className="mr-2 h-4 w-4" />
+            Search Now
+          </Button>
+          <Button 
+            onClick={handleCreateAccount}
+            className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200"
+            size="lg"
+            variant="outline"
+          >
+            <UserCheck className="mr-2 h-4 w-4" />
+            Create Account
+          </Button>
+        </div>
       </div>
     </section>
   );
