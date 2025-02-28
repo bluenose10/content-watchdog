@@ -97,7 +97,7 @@ export const PRICING_PLANS = [
     features: [
       "All Pro features",
       "Custom API access",
-      "Dedicated account manager",
+      "Account manager",
       "Legal assistance",
       "Custom integrations",
       "Advanced analytics",
