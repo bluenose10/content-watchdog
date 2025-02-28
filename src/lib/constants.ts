@@ -62,7 +62,7 @@ export const PRICING_PLANS = [
     description: "Essential monitoring for individuals",
     price: 0,
     features: [
-      "4 searches per month (1 per week)",
+      "4 searches per month",
       "Basic content alerts",
       "Email support",
     ],
@@ -77,7 +77,7 @@ export const PRICING_PLANS = [
     price: 49,
     interval: "month",
     features: [
-      "40 searches per month (10 per week)",
+      "40 searches per month",
       "Real-time monitoring",
       "Automated takedown notices",
       "Priority support",
