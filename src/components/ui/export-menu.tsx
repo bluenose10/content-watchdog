@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { Download, FileSpreadsheet, FileText, FileJson } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, FileJson, FilePdf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -80,6 +80,10 @@ export function ExportMenu({
         <DropdownMenuItem onClick={() => handleExport("json")}>
           <FileJson className="mr-2 h-4 w-4" />
           JSON
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleExport("pdf")}>
+          <FilePdf className="mr-2 h-4 w-4" />
+          PDF
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

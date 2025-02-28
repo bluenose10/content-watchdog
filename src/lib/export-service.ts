@@ -2,8 +2,10 @@
 import { SearchResult } from './db-types';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
-export type ExportFormat = 'csv' | 'excel' | 'json';
+export type ExportFormat = 'csv' | 'excel' | 'json' | 'pdf';
 
 // Function to export search results in different formats
 export const exportSearchResults = (
@@ -39,6 +41,9 @@ export const exportSearchResults = (
       break;
     case 'json':
       exportToJson(exportData, fullFilename);
+      break;
+    case 'pdf':
+      exportToPdf(exportData, fullFilename);
       break;
     default:
       throw new Error(`Export format '${format}' not supported`);
@@ -88,4 +93,42 @@ const exportToJson = (data: any[], filename: string) => {
   const jsonContent = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonContent], { type: 'application/json' });
   saveAs(blob, `${filename}.json`);
+};
+
+// PDF export implementation
+const exportToPdf = (data: any[], filename: string) => {
+  // Initialize jsPDF
+  const doc = new jsPDF();
+  
+  // Add a title
+  doc.setFontSize(16);
+  doc.text('Search Results', 14, 15);
+  doc.setFontSize(10);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 22);
+  
+  // Extract headers and rows for autoTable
+  const headers = Object.keys(data[0]);
+  const rows = data.map(item => headers.map(key => item[key]?.toString() || ''));
+  
+  // Generate the table
+  (doc as any).autoTable({
+    head: [headers],
+    body: rows,
+    startY: 25,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [100, 50, 150], textColor: 255 },
+    columnStyles: { 
+      0: { cellWidth: 'auto' }, // Title
+      1: { cellWidth: 'auto' }, // URL
+      2: { cellWidth: 20 }, // Source
+      3: { cellWidth: 20 }, // Match Level
+      4: { cellWidth: 20 }, // Found Date
+      5: { cellWidth: 20 }, // Similarity Score
+      6: { cellWidth: 20 }  // Relevance Score
+    }
+  });
+  
+  // Save the PDF
+  doc.save(`${filename}.pdf`);
 };
