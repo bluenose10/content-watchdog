@@ -69,6 +69,10 @@ export default function Contact() {
               <div className="font-medium">Master's Degree in Cyber Security</div>
               <div className="text-sm text-muted-foreground">Edge Hill University, UK</div>
             </li>
+            <li>
+              <div className="font-medium">BSc (Hons) In Computing</div>
+              <div className="text-sm text-muted-foreground">Edge Hill University, UK</div>
+            </li>
           </ul>
           
           <h2 className="text-xl font-semibold mt-8 mb-4">Certifications</h2>
