@@ -63,7 +63,7 @@ export const HeroSection = () => {
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-6 shadow-sm">
                   <Search className="h-8 w-8 text-purple-700 dark:text-purple-400" />
                 </div>
-                <h4 className="text-lg font-medium mb-3">1. Find Content</h4>
+                <h4 className="text-lg font-medium mb-5">1. Find Content</h4>
                 <p className="text-sm text-muted-foreground">
                   Our technology scans millions of websites and social platforms to locate where your images, videos, and text content appear online, even when modified.
                 </p>
@@ -73,7 +73,7 @@ export const HeroSection = () => {
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6 shadow-sm">
                   <Bell className="h-8 w-8 text-blue-700 dark:text-blue-400" />
                 </div>
-                <h4 className="text-lg font-medium mb-3">2. Monitor Usage</h4>
+                <h4 className="text-lg font-medium mb-5">2. Monitor Usage</h4>
                 <p className="text-sm text-muted-foreground">
                   Get instant alerts when your content is found with our 24/7 monitoring system that checks 50+ platforms, including Instagram, TikTok, Twitter, and websites.
                 </p>
@@ -83,7 +83,7 @@ export const HeroSection = () => {
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-6 shadow-sm">
                   <UserCheck className="h-8 w-8 text-indigo-700 dark:text-indigo-400" />
                 </div>
-                <h4 className="text-lg font-medium mb-3">3. Take Action</h4>
+                <h4 className="text-lg font-medium mb-5">3. Take Action</h4>
                 <p className="text-sm text-muted-foreground">
                   With a 92% success rate, our automated DMCA takedown system removes unauthorized content quickly, with all evidence and legal documentation handled for you.
                 </p>
