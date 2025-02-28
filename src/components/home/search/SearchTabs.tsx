@@ -621,11 +621,11 @@ export function SearchTabs({
       )}
       
       <TabsContent value="name">
-        <NameSearch onSearch={handleNameSearch} isLoading={isLoading} />
+        <NameSearch onSearch={handleNameSearch} isLoading={isLoading} isAuthenticated={isAuthenticated} />
       </TabsContent>
       
       <TabsContent value="hashtag">
-        <HashtagSearch onSearch={handleHashtagSearch} isLoading={isLoading} />
+        <HashtagSearch onSearch={handleHashtagSearch} isLoading={isLoading} isAuthenticated={isAuthenticated} />
       </TabsContent>
       
       <TabsContent value="image">
