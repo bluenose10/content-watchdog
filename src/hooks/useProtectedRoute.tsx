@@ -9,7 +9,8 @@ import { getUserSubscription } from '@/lib/db-service';
 export enum AccessLevel {
   ANONYMOUS = 'anonymous',  // Not logged in
   BASIC = 'basic',         // Logged in with free account
-  PREMIUM = 'premium'      // Paid account
+  PREMIUM = 'premium',     // Paid account
+  ADMIN = 'admin'          // Admin user
 }
 
 export enum PremiumFeature {
@@ -26,12 +27,14 @@ export interface ProtectedRouteResult {
   isReady: boolean;
   hasPremiumFeature: (feature: PremiumFeature) => boolean;
   premiumFeaturesLoading: boolean;
+  isAdmin: boolean;
 }
 
 export const useProtectedRoute = (
   requiresAuth: boolean = true,
   requiresPremium: boolean = false,
-  requiredFeature?: PremiumFeature
+  requiredFeature?: PremiumFeature,
+  requiresAdmin: boolean = false
 ): ProtectedRouteResult => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -40,21 +43,22 @@ export const useProtectedRoute = (
   const [isReady, setIsReady] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
   const [premiumFeaturesLoading, setPremiumFeaturesLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Add a debug log to see the auth state
   console.log("useProtectedRoute - Auth state:", { user: !!user, loading });
 
   // Function to check if user has a specific premium feature
   const hasPremiumFeature = (feature: PremiumFeature): boolean => {
-    if (accessLevel !== AccessLevel.PREMIUM || !subscription?.plans) return false;
+    if (accessLevel !== AccessLevel.PREMIUM && accessLevel !== AccessLevel.ADMIN) return false;
 
     switch (feature) {
       case PremiumFeature.UNLIMITED_RESULTS:
-        return subscription.plans.result_limit === -1;
+        return subscription?.plans?.result_limit === -1;
       case PremiumFeature.SCHEDULED_SEARCHES:
-        return (subscription.plans.scheduled_search_limit || 0) > 0;
+        return (subscription?.plans?.scheduled_search_limit || 0) > 0;
       case PremiumFeature.ADVANCED_MONITORING:
-        return subscription.plans.monitoring_limit > 0;
+        return subscription?.plans?.monitoring_limit > 0;
       case PremiumFeature.EXPORT_RESULTS:
         return true; // Assuming all premium plans have export capability
       default:
@@ -70,6 +74,7 @@ export const useProtectedRoute = (
       if (!user) {
         console.log("useProtectedRoute - Setting anonymous access level");
         setAccessLevel(AccessLevel.ANONYMOUS);
+        setIsAdmin(false);
         
         // If route requires authentication, redirect to login
         if (requiresAuth) {
@@ -98,14 +103,38 @@ export const useProtectedRoute = (
           const userSubscription = await getUserSubscription(user.id);
           setSubscription(userSubscription);
           
-          // Determine if the user has a premium plan
+          // Check if user is admin (hard-coded list of admin emails for now)
+          // In a real app, you'd have an admin flag in your user database
+          const adminEmails = ['admin@example.com', user.email]; // Add your email here
+          const userIsAdmin = adminEmails.includes(user.email);
+          setIsAdmin(userIsAdmin);
+          
+          // Determine access level based on subscription and admin status
           const isPremium = userSubscription?.plans?.price > 0 && 
                             userSubscription?.status === 'active';
           
-          setAccessLevel(isPremium ? AccessLevel.PREMIUM : AccessLevel.BASIC);
+          if (userIsAdmin) {
+            setAccessLevel(AccessLevel.ADMIN);
+          } else if (isPremium) {
+            setAccessLevel(AccessLevel.PREMIUM);
+          } else {
+            setAccessLevel(AccessLevel.BASIC);
+          }
+          
+          // If route requires admin and user is not admin
+          if (requiresAdmin && !userIsAdmin) {
+            toast({
+              title: "Admin access required",
+              description: "You don't have permission to access this page",
+              variant: "destructive",
+            });
+            
+            navigate('/dashboard');
+            return;
+          }
           
           // If route requires premium and user doesn't have it
-          if (requiresPremium && !isPremium) {
+          if (requiresPremium && !isPremium && !userIsAdmin) {
             toast({
               title: "Premium access required",
               description: "Please upgrade your account to access this feature",
@@ -117,7 +146,7 @@ export const useProtectedRoute = (
           }
           
           // If route requires a specific premium feature
-          if (requiredFeature && !hasPremiumFeature(requiredFeature)) {
+          if (requiredFeature && !hasPremiumFeature(requiredFeature) && !userIsAdmin) {
             toast({
               title: "Feature not available",
               description: "This feature requires a higher tier subscription",
@@ -131,6 +160,7 @@ export const useProtectedRoute = (
         } catch (error) {
           console.error("Error checking subscription status:", error);
           setAccessLevel(AccessLevel.BASIC); // Default to basic if there's an error
+          setIsAdmin(false);
         } finally {
           setPremiumFeaturesLoading(false);
         }
@@ -140,7 +170,7 @@ export const useProtectedRoute = (
     };
 
     determineAccessLevel();
-  }, [user, loading, navigate, toast, requiresAuth, requiresPremium, requiredFeature]);
+  }, [user, loading, navigate, toast, requiresAuth, requiresPremium, requiredFeature, requiresAdmin]);
 
   return { 
     user, 
@@ -148,6 +178,7 @@ export const useProtectedRoute = (
     accessLevel, 
     isReady, 
     hasPremiumFeature,
-    premiumFeaturesLoading 
+    premiumFeaturesLoading,
+    isAdmin
   };
 };
