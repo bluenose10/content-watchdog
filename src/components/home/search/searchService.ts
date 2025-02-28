@@ -34,7 +34,14 @@ const DEFAULT_IMAGE_PARAMS: ImageSearchParams = {
 };
 
 // Track user search counts (in-memory for demo purposes, should be persisted in production)
-const userSearchCounts: Record<string, { monthly: number, lastReset: { monthly: number } }> = {};
+const userSearchCounts: Record<string, { 
+  monthly: number, 
+  weekly: number,
+  lastReset: { 
+    monthly: number,
+    weekly: number
+  } 
+}> = {};
 
 /**
  * Check if user has exceeded their search limits based on subscription tier
@@ -47,20 +54,29 @@ async function checkSearchLimits(userId: string, isPro: boolean): Promise<{ isAl
   if (!userSearchCounts[userId]) {
     userSearchCounts[userId] = {
       monthly: 0,
+      weekly: 0,
       lastReset: {
-        monthly: Date.now()
+        monthly: Date.now(),
+        weekly: Date.now()
       }
     };
   }
 
   const now = Date.now();
   const oneMonth = 30 * 24 * 60 * 60 * 1000;
+  const oneWeek = 7 * 24 * 60 * 60 * 1000;
   const user = userSearchCounts[userId];
 
   // Check if we need to reset monthly count
   if (now - user.lastReset.monthly > oneMonth) {
     user.monthly = 0;
     user.lastReset.monthly = now;
+  }
+  
+  // Check if we need to reset weekly count
+  if (now - user.lastReset.weekly > oneWeek) {
+    user.weekly = 0;
+    user.lastReset.weekly = now;
   }
 
   // Check limits based on subscription tier
@@ -72,12 +88,26 @@ async function checkSearchLimits(userId: string, isPro: boolean): Promise<{ isAl
         message: `You've reached your monthly search limit (${SEARCH_LIMITS.PRO.MONTHLY} searches). Monthly limit resets in ${formatTimeRemaining(user.lastReset.monthly + oneMonth - now)}.`
       };
     }
+    
+    if (user.weekly >= SEARCH_LIMITS.PRO.WEEKLY) {
+      return {
+        isAllowed: false,
+        message: `You've reached your weekly search limit (${SEARCH_LIMITS.PRO.WEEKLY} searches). Weekly limit resets in ${formatTimeRemaining(user.lastReset.weekly + oneWeek - now)}.`
+      };
+    }
   } else {
     // Basic user checks
-    if (user.monthly >= SEARCH_LIMITS.BASIC) {
+    if (user.monthly >= SEARCH_LIMITS.BASIC.MONTHLY) {
       return { 
         isAllowed: false, 
-        message: `You've reached your monthly search limit (${SEARCH_LIMITS.BASIC} searches). Monthly limit resets in ${formatTimeRemaining(user.lastReset.monthly + oneMonth - now)}.`
+        message: `You've reached your monthly search limit (${SEARCH_LIMITS.BASIC.MONTHLY} searches). Monthly limit resets in ${formatTimeRemaining(user.lastReset.monthly + oneMonth - now)}.`
+      };
+    }
+    
+    if (user.weekly >= SEARCH_LIMITS.BASIC.WEEKLY) {
+      return {
+        isAllowed: false,
+        message: `You've reached your weekly search limit (${SEARCH_LIMITS.BASIC.WEEKLY} search). Weekly limit resets in ${formatTimeRemaining(user.lastReset.weekly + oneWeek - now)}.`
       };
     }
   }
@@ -105,13 +135,16 @@ function incrementSearchCount(userId: string): void {
   if (!userSearchCounts[userId]) {
     userSearchCounts[userId] = {
       monthly: 0,
+      weekly: 0,
       lastReset: {
-        monthly: Date.now()
+        monthly: Date.now(),
+        weekly: Date.now()
       }
     };
   }
   
   userSearchCounts[userId].monthly += 1;
+  userSearchCounts[userId].weekly += 1;
 }
 
 // Handles text-based searches (name or hashtag) with enhanced parameters
