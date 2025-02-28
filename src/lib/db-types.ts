@@ -6,7 +6,7 @@ export type SearchQuery = {
   query_type: 'name' | 'hashtag' | 'image';
   image_url?: string;
   created_at?: string;
-  search_params?: any; // Advanced search parameters
+  search_params_json?: string | null; // Changed from search_params to search_params_json
   scheduled?: boolean; // Whether this is a scheduled search
   schedule_interval?: string; // Schedule interval (hourly, daily, weekly, etc.)
   last_run?: string; // When the scheduled search was last executed

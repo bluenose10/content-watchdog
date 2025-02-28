@@ -19,7 +19,8 @@ export async function handleTextSearch(
     user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Anonymous user ID
     query_type: queryType,
     query_text: query,
-    search_params: searchParams
+    // Store searchParams as a JSON string instead of directly
+    search_params_json: searchParams ? JSON.stringify(searchParams) : null
   };
 
   return await processSearch(searchData, user);
@@ -45,7 +46,8 @@ export async function handleImageSearch(
     user_id: user.id,
     query_type: "image",
     image_url: imageUrl,
-    search_params: searchParams
+    // Store searchParams as a JSON string instead of directly
+    search_params_json: searchParams ? JSON.stringify(searchParams) : null
   };
 
   return await processSearch(searchData, user);
