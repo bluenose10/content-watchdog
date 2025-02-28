@@ -25,7 +25,7 @@ export const HeroSection = () => {
         </p>
         
         <p className="text-sm md:text-base text-purple-600 dark:text-purple-400 max-w-2xl mx-auto animate-scale-in font-medium" style={{ animationDelay: "0.5s" }}>
-          Sign up for a free basic account to start searching - our free plan includes 3 searches per month so you can see what's out there.
+          Sign up for a free basic account to start searching - our free plan includes 4 searches per month so you can see what's out there.
         </p>
         
         {/* Enhanced content protection section with workflow included */}
