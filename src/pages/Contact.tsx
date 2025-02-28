@@ -21,7 +21,7 @@ export default function Contact() {
             </div>
             
             <CardContent className="p-6 flex flex-col justify-center">
-              <h2 className="text-2xl font-bold mb-3">John Smith</h2>
+              <h2 className="text-2xl font-bold mb-3">Mark Moran</h2>
               <p className="text-muted-foreground mb-6">
                 Founder & Content Protection Specialist
               </p>
