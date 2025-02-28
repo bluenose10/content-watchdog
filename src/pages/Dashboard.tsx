@@ -51,9 +51,11 @@ export default function Dashboard() {
   }
 
   // Get user information
-  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  const fullName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  // Extract first name only
+  const firstName = fullName.split(' ')[0];
   const avatarUrl = user?.user_metadata?.avatar_url;
-  const userInitials = getInitials(userName);
+  const userInitials = getInitials(fullName);
 
   // Determine if user needs to see the upgrade card
   const showUpgradeCard = !hasPremiumFeature(PremiumFeature.UNLIMITED_RESULTS);
@@ -64,13 +66,13 @@ export default function Dashboard() {
       <main className="flex-grow container px-4 py-12">
         <div className="flex items-center gap-4 mb-8 pt-8">
           <Avatar className="h-16 w-16 border-2 border-primary/10">
-            <AvatarImage src={avatarUrl} alt={userName} />
+            <AvatarImage src={avatarUrl} alt={fullName} />
             <AvatarFallback className="bg-primary text-primary-foreground">
               {userInitials}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-3xl font-bold text-primary">Welcome back, {userName}</h1>
+            <h1 className="text-2xl font-bold text-primary">Welcome back, {firstName}</h1>
             <p className="text-muted-foreground">Here's an overview of your content monitoring</p>
           </div>
         </div>
