@@ -22,6 +22,10 @@ export const HeroSection = () => {
           For Content Creators Needing DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, providing detailed evidence for your legal team to issue takedowns.
         </p>
         
+        <p className="text-sm md:text-base text-purple-600 dark:text-purple-400 max-w-2xl mx-auto animate-scale-in font-medium" style={{ animationDelay: "0.5s" }}>
+          You can try a free preview without signing up or needing an account - see what we find online, you might be surprised.
+        </p>
+        
         <div className="flex flex-col sm:flex-row gap-4 mt-2 animate-scale-in" style={{ animationDelay: "0.6s" }}>
           <Button asChild size="lg" className="primary-button flex items-center gap-2 px-8 cursor-pointer">
             <Link to="/signup">
