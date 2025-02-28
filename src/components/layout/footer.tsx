@@ -48,12 +48,10 @@ export function Footer() {
             <Link to="/#features" className="text-muted-foreground hover:text-foreground text-sm">Features</Link>
             <Link to="/#pricing" className="text-muted-foreground hover:text-foreground text-sm">Pricing</Link>
             <Link to="/search" className="text-muted-foreground hover:text-foreground text-sm">Search</Link>
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground text-sm">Dashboard</Link>
           </div>
           <div className="flex flex-col gap-3">
             <div className="font-medium mb-1">Company</div>
             <Link to="/about" className="text-muted-foreground hover:text-foreground text-sm">About Us</Link>
-            <Link to="/careers" className="text-muted-foreground hover:text-foreground text-sm">Careers</Link>
             <Link to="/blog" className="text-muted-foreground hover:text-foreground text-sm">Blog</Link>
             <Link to="/contact" className="text-muted-foreground hover:text-foreground text-sm">Contact</Link>
           </div>
