@@ -33,7 +33,7 @@ function App() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <ThemeProvider defaultTheme="system" storageKey="influence-guard-theme">
+        <ThemeProvider defaultTheme="dark" storageKey="influence-guard-theme">
           <Router>
             <Routes>
               <Route path="/" element={<Index />} />
