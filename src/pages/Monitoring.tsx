@@ -141,7 +141,7 @@ export default function Monitoring() {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow container px-4 py-12">
-          <h1 className="text-3xl font-bold mb-8 pt-8 text-[#403E43]">Monitoring</h1>
+          <h1 className="text-3xl font-bold mb-8 pt-8 text-primary">Monitoring</h1>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <Skeleton className="h-[300px] w-full rounded-md" />
@@ -161,7 +161,7 @@ export default function Monitoring() {
       <Header />
       <main className="flex-grow container px-4 py-12">
         <div className="flex justify-between items-center mb-8 pt-8">
-          <h1 className="text-3xl font-bold text-[#403E43]">Monitoring</h1>
+          <h1 className="text-3xl font-bold text-primary">Monitoring</h1>
           <Button 
             onClick={toggleAlerts}
             variant={alertsEnabled ? "default" : "outline"}
