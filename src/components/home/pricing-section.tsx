@@ -29,8 +29,8 @@ export function PricingSection() {
         });
         navigate("/signup");
       } else {
-        // Navigate to checkout or show pricing details
-        navigate("/checkout");
+        // Navigate to checkout with plan ID parameter
+        navigate(`/checkout?plan_id=${planId}`);
       }
     }
   };

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,16 +7,42 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PRICING_PLANS } from "@/lib/constants";
 import { CreditCard, Lock } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MockCheckout() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
   
   // Get parameters from URL
-  const sessionId = searchParams.get("session_id");
+  const sessionId = searchParams.get("session_id") || `mock_sess_${Date.now()}`;
   const planId = searchParams.get("plan_id");
-  const returnUrl = searchParams.get("return_url") || "/success";
+  const returnUrl = searchParams.get("return_url") || "/payment/success";
+  
+  useEffect(() => {
+    // Check if user is logged in
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to continue with checkout",
+        variant: "destructive"
+      });
+      navigate("/login");
+    }
+
+    // Check if plan ID is valid
+    if (!planId || !PRICING_PLANS.some(plan => plan.id === planId)) {
+      toast({
+        title: "Invalid plan",
+        description: "The selected plan is invalid or no longer available",
+        variant: "destructive"
+      });
+      navigate("/");
+    }
+  }, [user, planId, navigate, toast]);
   
   // Find plan details
   const selectedPlan = PRICING_PLANS.find(plan => plan.id === planId) || {
@@ -39,12 +65,41 @@ export default function MockCheckout() {
     // Simulate payment processing delay
     setTimeout(() => {
       // Redirect to success page with session ID
-      navigate(`/success?session_id=${sessionId}`);
+      navigate(`/payment/success?session_id=${sessionId}&plan_id=${planId}`);
     }, 1500);
   };
   
   const handleCancel = () => {
-    navigate("/canceled");
+    navigate("/payment/canceled");
+  };
+  
+  // Format card number with spaces
+  const formatCardNumber = (value: string) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const matches = v.match(/\d{4,16}/g);
+    const match = matches && matches[0] || '';
+    const parts = [];
+    
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    
+    if (parts.length) {
+      return parts.join(' ');
+    } else {
+      return value;
+    }
+  };
+  
+  // Format expiry date MM/YY
+  const formatExpiry = (value: string) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    
+    if (v.length >= 3) {
+      return `${v.slice(0, 2)}/${v.slice(2, 4)}`;
+    }
+    
+    return v;
   };
   
   return (
@@ -95,7 +150,7 @@ export default function MockCheckout() {
               <Input 
                 id="card-number" 
                 value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, '').slice(0, 16))}
+                onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                 placeholder="4242 4242 4242 4242"
                 required
                 maxLength={19}
@@ -108,9 +163,10 @@ export default function MockCheckout() {
                 <Input 
                   id="expiry" 
                   value={expiry}
-                  onChange={(e) => setExpiry(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                   placeholder="MM/YY"
                   required
+                  maxLength={5}
                 />
               </div>
               <div>

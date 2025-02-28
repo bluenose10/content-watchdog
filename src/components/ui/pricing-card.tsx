@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
@@ -32,9 +33,25 @@ export function PricingCard({
   ...props
 }: PricingCardProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Ensure price is properly formatted
   const formattedPrice = price === 0 ? "Free" : `$${price.toFixed(2)}`;
+
+  const handlePlanClick = () => {
+    if (!user && planId !== "basic") {
+      // Redirect to signup for non-basic plans if not logged in
+      navigate("/signup");
+      return;
+    }
+    
+    if (onClick) {
+      onClick();
+    } else if (planId && price > 0) {
+      // For paid plans, navigate to checkout page with plan ID
+      navigate(`/checkout?plan_id=${planId}`);
+    }
+  };
 
   return (
     <div
@@ -75,26 +92,16 @@ export function PricingCard({
         ))}
       </div>
       
-      {/* Conditionally render either the CheckoutButton or regular Button */}
-      {user && planId && price > 0 ? (
-        <CheckoutButton
-          planId={planId}
-          variant={popular ? "blue" : "default"}
-          className="mt-6 w-full button-animation"
-        >
-          {cta}
-        </CheckoutButton>
-      ) : (
-        <Button
-          className={cn(
-            "mt-6 w-full button-animation",
-            popular ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
-          )}
-          onClick={onClick}
-        >
-          {cta}
-        </Button>
-      )}
+      {/* Pricing card button - updated for proper checkout flow */}
+      <Button
+        className={cn(
+          "mt-6 w-full button-animation",
+          popular ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+        )}
+        onClick={handlePlanClick}
+      >
+        {cta}
+      </Button>
     </div>
   );
 }
