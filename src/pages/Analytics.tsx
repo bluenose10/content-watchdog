@@ -73,8 +73,10 @@ const Analytics = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container max-w-7xl mx-auto py-12 px-4 sm:px-6">
-        <h1 className="text-3xl font-bold mb-6 text-gradient">Analytics Dashboard</h1>
+      {/* Added pt-24 to increase space between navbar and content */}
+      <main className="flex-grow container max-w-7xl mx-auto pt-24 pb-12 px-4 sm:px-6">
+        {/* Reduced text size from text-3xl to text-2xl */}
+        <h1 className="text-2xl font-bold mb-8 text-gradient">Analytics Dashboard</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatsCard 
