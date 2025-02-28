@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, CheckCircle, Clock, GraduationCap, Shield, Users } from "lucide-react";
+import { CalendarClock, CheckCircle, Clock, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function AboutSection() {
@@ -43,21 +43,6 @@ export function AboutSection() {
                 </p>
                 <p className="text-muted-foreground">
                   Cybersecurity is a top qualification among our staff. Our team includes certified security professionals with backgrounds in threat detection, digital forensics, and content protection technologies.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="glass-card">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4 flex items-center">
-                  <GraduationCap className="h-5 w-5 mr-2 text-primary" />
-                  Our Qualifications
-                </h3>
-                <p className="mb-4 text-muted-foreground">
-                  Our experts hold industry-leading certifications in cybersecurity, including CISSP, CEH, and CISM. We regularly contribute to research in content protection and digital rights management.
-                </p>
-                <p className="text-muted-foreground">
-                  This expertise allows us to stay ahead of emerging threats and develop cutting-edge solutions that keep your content safe across the rapidly evolving digital landscape.
                 </p>
               </CardContent>
             </Card>
