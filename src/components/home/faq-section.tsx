@@ -17,10 +17,11 @@ export function FAQSection() {
         </div>
         
         <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="w-full space-y-4">
-            <AccordionItem value="item-1" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-sm 
-              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
-              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-800 after:-z-10">
+          <Accordion type="single" collapsible className="w-full space-y-6">
+            <AccordionItem value="item-1" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 How does the content monitoring system work?
               </AccordionTrigger>
@@ -29,9 +30,10 @@ export function FAQSection() {
               </AccordionContent>
             </AccordionItem>
             
-            <AccordionItem value="item-2" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-sm 
-              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
-              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-800 after:-z-10">
+            <AccordionItem value="item-2" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 What types of content can I protect using your service?
               </AccordionTrigger>
@@ -40,9 +42,10 @@ export function FAQSection() {
               </AccordionContent>
             </AccordionItem>
             
-            <AccordionItem value="item-3" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-sm 
-              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
-              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-800 after:-z-10">
+            <AccordionItem value="item-3" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 How do I initiate a takedown request for unauthorized content?
               </AccordionTrigger>
@@ -51,9 +54,10 @@ export function FAQSection() {
               </AccordionContent>
             </AccordionItem>
             
-            <AccordionItem value="item-4" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-sm 
-              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
-              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-800 after:-z-10">
+            <AccordionItem value="item-4" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 What's the difference between the free and premium plans?
               </AccordionTrigger>
@@ -62,9 +66,10 @@ export function FAQSection() {
               </AccordionContent>
             </AccordionItem>
             
-            <AccordionItem value="item-5" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-sm 
-              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
-              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-800 after:-z-10">
+            <AccordionItem value="item-5" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 How accurate is your content matching technology?
               </AccordionTrigger>
@@ -73,9 +78,10 @@ export function FAQSection() {
               </AccordionContent>
             </AccordionItem>
             
-            <AccordionItem value="item-6" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-sm 
-              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
-              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-800 after:-z-10">
+            <AccordionItem value="item-6" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 Can I use this service internationally?
               </AccordionTrigger>
