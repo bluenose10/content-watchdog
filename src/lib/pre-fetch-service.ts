@@ -1,6 +1,7 @@
 
-import { getCacheKey, getCachedResults, cacheResults, getSearchResults } from '@/lib/search-cache';
+import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/search-cache';
 import { getRecentSearches } from '@/lib/db-service';
+import { googleApiManager } from '@/lib/google-api-manager';
 
 // Popular search types and terms that we want to pre-fetch
 interface PreFetchQuery {
@@ -40,6 +41,13 @@ const isLowSystemLoad = (): boolean => {
 };
 
 /**
+ * Check Google API quota availability before pre-fetching
+ */
+const hasAvailableQuota = (): boolean => {
+  return googleApiManager.canMakeRequest('search');
+};
+
+/**
  * Pre-fetch a specific search query and cache the results
  */
 export const preFetchQuery = async (
@@ -57,20 +65,77 @@ export const preFetchQuery = async (
       return false;
     }
     
+    // Skip if we don't have quota available
+    if (!hasAvailableQuota()) {
+      console.log(`[Pre-fetch] Skipping due to quota limits: ${queryType} - ${query}`);
+      return false;
+    }
+    
     console.log(`[Pre-fetch] Fetching: ${queryType} - ${query}`);
     
-    // In a real implementation, this would call your actual search API
-    // For this demo, we'll use the mock getSearchResults
-    const results = await getSearchResults('1'); // Using a mock ID for demo
+    // Use Google API Manager for optimized, throttled access
+    const results = await googleApiManager.optimizedSearch(queryType, query, params);
     
     // Cache the results
-    cacheResults(cacheKey, results);
+    cacheResults(cacheKey, results, 'google', 0.01); // Tracking cost per request
     
     console.log(`[Pre-fetch] Successfully cached: ${queryType} - ${query}`);
     return true;
   } catch (error) {
     console.error(`[Pre-fetch] Error pre-fetching ${queryType} - ${query}:`, error);
     return false;
+  }
+};
+
+/**
+ * Batch pre-fetch multiple queries at once for efficiency
+ */
+export const batchPreFetch = async (queries: PreFetchQuery[]): Promise<number> => {
+  // Skip if we don't have sufficient quota
+  if (!hasAvailableQuota()) {
+    console.log(`[Pre-fetch] Skipping batch pre-fetch due to quota limits`);
+    return 0;
+  }
+  
+  // Filter out queries that are already cached
+  const queriesToFetch = queries.filter(q => {
+    const cacheKey = getCacheKey(q.queryType, q.query, q.params);
+    return !getCachedResults(cacheKey);
+  });
+  
+  if (queriesToFetch.length === 0) {
+    console.log(`[Pre-fetch] All queries already cached`);
+    return 0;
+  }
+  
+  try {
+    // Create search IDs for each query
+    const searchIds = queriesToFetch.map(q => 
+      `${q.queryType}_${q.query.replace(/\W+/g, '_')}`
+    );
+    
+    // Batch fetch the results
+    const batchResults = await batchGetSearchResults(searchIds);
+    
+    // Cache each result
+    let cachedCount = 0;
+    
+    queriesToFetch.forEach((query, index) => {
+      const searchId = searchIds[index];
+      const result = batchResults[searchId];
+      
+      if (result) {
+        const cacheKey = getCacheKey(query.queryType, query.query, query.params);
+        cacheResults(cacheKey, result, 'google', 0.01);
+        cachedCount++;
+      }
+    });
+    
+    console.log(`[Pre-fetch] Batch cached ${cachedCount} of ${queriesToFetch.length} queries`);
+    return cachedCount;
+  } catch (error) {
+    console.error(`[Pre-fetch] Error batch pre-fetching:`, error);
+    return 0;
   }
 };
 
@@ -116,26 +181,30 @@ export const startPreFetching = async (customQueries?: PreFetchQuery[]): Promise
     // Continue with default queries if we can't get recent searches
   }
   
-  // Perform pre-fetching with a small delay between each request to avoid overloading
-  let fetchedCount = 0;
+  // Use batch pre-fetching for efficiency
+  const batchSize = 5;
+  let totalFetched = 0;
   
-  for (const query of queriesToFetch) {
-    // Skip invalid queries
-    if (!query.query) continue;
+  for (let i = 0; i < queriesToFetch.length; i += batchSize) {
+    const batch = queriesToFetch.slice(i, i + batchSize);
     
-    // Add a small delay between fetches
-    if (fetchedCount > 0) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    // Process in batches for better performance
+    const fetched = await batchPreFetch(batch);
+    totalFetched += fetched;
+    
+    // If we've hit quota limits, stop
+    if (!hasAvailableQuota()) {
+      console.log(`[Pre-fetch] Stopping due to quota limits after ${totalFetched} fetches`);
+      break;
     }
     
-    const success = await preFetchQuery(query.queryType, query.query, query.params);
-    if (success) fetchedCount++;
-    
-    // Limit the number of pre-fetches in one batch
-    if (fetchedCount >= 20) break;
+    // Small delay between batches
+    if (i + batchSize < queriesToFetch.length) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
   }
   
-  console.log(`[Pre-fetch] Completed pre-fetching. Cached ${fetchedCount} queries.`);
+  console.log(`[Pre-fetch] Completed pre-fetching. Cached ${totalFetched} queries.`);
 };
 
 /**
