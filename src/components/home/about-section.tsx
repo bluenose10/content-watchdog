@@ -1,8 +1,7 @@
 
-import { AnimatedGradientBorder } from "@/components/ui/animated-gradient-border";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, CheckCircle, Clock, Shield, Users } from "lucide-react";
+import { CalendarClock, CheckCircle, Clock, GraduationCap, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function AboutSection() {
@@ -16,7 +15,7 @@ export function AboutSection() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div className="space-y-8">
             <Card className="glass-card">
               <CardContent className="p-6">
@@ -39,26 +38,32 @@ export function AboutSection() {
                   <Users className="h-5 w-5 mr-2 text-primary" />
                   Our Team
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="mb-4 text-muted-foreground">
                   Founded by a team of content protection experts and technology innovators, Influence Guard brings together decades of experience in digital rights management, intellectual property law, and artificial intelligence.
+                </p>
+                <p className="text-muted-foreground">
+                  Cybersecurity is a top qualification among our staff. Our team includes certified security professionals with backgrounds in threat detection, digital forensics, and content protection technologies.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center">
+                  <GraduationCap className="h-5 w-5 mr-2 text-primary" />
+                  Our Qualifications
+                </h3>
+                <p className="mb-4 text-muted-foreground">
+                  Our experts hold industry-leading certifications in cybersecurity, including CISSP, CEH, and CISM. We regularly contribute to research in content protection and digital rights management.
+                </p>
+                <p className="text-muted-foreground">
+                  This expertise allows us to stay ahead of emerging threats and develop cutting-edge solutions that keep your content safe across the rapidly evolving digital landscape.
                 </p>
               </CardContent>
             </Card>
           </div>
           
-          <div className="space-y-6">
-            <AnimatedGradientBorder 
-              gradientClasses="from-primary/20 via-primary/40 to-primary/20"
-              animationDuration="8s" 
-              className="rounded-xl overflow-hidden"
-            >
-              <img 
-                src="https://placehold.co/600x400/png" 
-                alt="Influence Guard Team" 
-                className="w-full h-auto rounded-lg"
-              />
-            </AnimatedGradientBorder>
-            
+          <div className="space-y-8">
             <div className="bg-gradient-to-r from-purple-100/50 to-blue-100/50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-xl p-6 border border-purple-200/50 dark:border-purple-800/30">
               <h3 className="text-xl font-semibold mb-4">Choose Your Protection Level</h3>
               
