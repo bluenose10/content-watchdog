@@ -66,12 +66,8 @@ export default function Contact() {
           <h2 className="text-xl font-semibold mb-4">Educational Background</h2>
           <ul className="space-y-4">
             <li>
-              <div className="font-medium">Master of Science in Computer Science</div>
-              <div className="text-sm text-muted-foreground">University of Technology, 2015</div>
-            </li>
-            <li>
-              <div className="font-medium">Bachelor of Science in Information Security</div>
-              <div className="text-sm text-muted-foreground">State University, 2013</div>
+              <div className="font-medium">Master's Degree in Cyber Security</div>
+              <div className="text-sm text-muted-foreground">Edge Hill University, UK</div>
             </li>
           </ul>
           
