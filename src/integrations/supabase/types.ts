@@ -39,6 +39,33 @@ export type Database = {
         }
         Relationships: []
       }
+      search_metrics: {
+        Row: {
+          cache_hit: boolean
+          created_at: string | null
+          execution_time_ms: number
+          id: number
+          query_type: string
+          result_count: number
+        }
+        Insert: {
+          cache_hit?: boolean
+          created_at?: string | null
+          execution_time_ms: number
+          id?: number
+          query_type: string
+          result_count: number
+        }
+        Update: {
+          cache_hit?: boolean
+          created_at?: string | null
+          execution_time_ms?: number
+          id?: number
+          query_type?: string
+          result_count?: number
+        }
+        Relationships: []
+      }
       search_queries: {
         Row: {
           created_at: string | null
@@ -84,7 +111,9 @@ export type Database = {
           found_at: string
           id: string
           match_level: string
+          relevance_score: number | null
           search_id: string
+          similarity_score: number | null
           source: string
           thumbnail: string
           title: string
@@ -95,7 +124,9 @@ export type Database = {
           found_at: string
           id?: string
           match_level: string
+          relevance_score?: number | null
           search_id: string
+          similarity_score?: number | null
           source: string
           thumbnail: string
           title: string
@@ -106,7 +137,9 @@ export type Database = {
           found_at?: string
           id?: string
           match_level?: string
+          relevance_score?: number | null
           search_id?: string
+          similarity_score?: number | null
           source?: string
           thumbnail?: string
           title?: string
@@ -159,7 +192,14 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      popular_searches: {
+        Row: {
+          query_text: string | null
+          query_type: string | null
+          search_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
