@@ -20,6 +20,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CookiePolicy from "./pages/CookiePolicy";
 import Analytics from "./pages/Analytics";
 import Monitoring from "./pages/Monitoring";
+import AccountSettings from "./pages/AccountSettings";
 import { useAuth } from "./context/AuthContext";
 
 // Create a protected route component
@@ -119,6 +120,11 @@ const AppRoutes = () => {
       <Route path="/monitoring" element={
         <ProtectedRoute>
           <Monitoring />
+        </ProtectedRoute>
+      } />
+      <Route path="/account" element={
+        <ProtectedRoute>
+          <AccountSettings />
         </ProtectedRoute>
       } />
       

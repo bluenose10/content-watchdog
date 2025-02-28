@@ -7,7 +7,6 @@ import { RecentSearches } from "@/components/dashboard/RecentSearches";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
 import { LoadingState } from "@/components/dashboard/LoadingState";
-import { AccountSettings } from "@/components/dashboard/AccountSettings";
 import { useAuth } from "@/context/AuthContext";
 import { PremiumFeature, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { ScheduledSearches } from "@/components/dashboard/ScheduledSearches";
@@ -90,10 +89,6 @@ export default function Dashboard() {
             <QuickActions />
             {showUpgradeCard && <UpgradeCard />}
           </div>
-        </div>
-
-        <div className="mb-8">
-          <AccountSettings />
         </div>
 
         <div className="mt-8">
