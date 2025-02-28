@@ -1,7 +1,6 @@
 
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { ContentSearchSection } from "@/components/home/content-search-section";
 import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -42,7 +41,6 @@ const Search = () => {
             )}
           </p>
         </div>
-        <ContentSearchSection />
       </main>
       <Footer />
     </div>
