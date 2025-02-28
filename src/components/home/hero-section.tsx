@@ -51,39 +51,39 @@ export const HeroSection = () => {
             </div>
           </div>
           
-          {/* How It Works Section - Enhanced workflow */}
+          {/* How It Works Section - Enhanced workflow with more spacing */}
           <div className="relative">
-            <h3 className="text-lg font-medium mb-6 text-center">How Our Protection Process Works</h3>
+            <h3 className="text-lg font-medium mb-8 text-center">How Our Protection Process Works</h3>
             
-            {/* Connecting line */}
-            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 -z-10 translate-y-4"></div>
+            {/* Connecting line - positioned lower with more space */}
+            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 -z-10 translate-y-8"></div>
             
-            <div className="grid md:grid-cols-3 gap-8 relative">
+            <div className="grid md:grid-cols-3 gap-12 md:gap-16 relative">
               <div className="flex flex-col items-center text-center">
-                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4 shadow-sm">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-6 shadow-sm">
                   <Search className="h-8 w-8 text-purple-700 dark:text-purple-400" />
                 </div>
-                <h4 className="text-lg font-medium mb-2">1. Find Content</h4>
+                <h4 className="text-lg font-medium mb-3">1. Find Content</h4>
                 <p className="text-sm text-muted-foreground">
                   Our advanced search technology scans across platforms to locate your images and text content anywhere it appears online.
                 </p>
               </div>
               
               <div className="flex flex-col items-center text-center">
-                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4 shadow-sm">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6 shadow-sm">
                   <Bell className="h-8 w-8 text-blue-700 dark:text-blue-400" />
                 </div>
-                <h4 className="text-lg font-medium mb-2">2. Monitor Usage</h4>
+                <h4 className="text-lg font-medium mb-3">2. Monitor Usage</h4>
                 <p className="text-sm text-muted-foreground">
                   Set up continuous monitoring to receive alerts when new matches of your content are detected, with detailed reports and analytics.
                 </p>
               </div>
               
               <div className="flex flex-col items-center text-center">
-                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-4 shadow-sm">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-6 shadow-sm">
                   <UserCheck className="h-8 w-8 text-indigo-700 dark:text-indigo-400" />
                 </div>
-                <h4 className="text-lg font-medium mb-2">3. Take Action</h4>
+                <h4 className="text-lg font-medium mb-3">2. Take Action</h4>
                 <p className="text-sm text-muted-foreground">
                   Generate and send legally-binding DMCA takedown notices with all required evidence automatically compiled for you.
                 </p>
