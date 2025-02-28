@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingState } from "@/components/dashboard/LoadingState";
+import { supabase } from "@/lib/supabase";
 import {
   Card,
   CardContent,
@@ -19,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserRound, Mail, Shield, Settings, BellRing, Lock, CreditCard } from "lucide-react";
+import { UserRound, Mail, Shield, Settings, BellRing, Lock, CreditCard, Upload } from "lucide-react";
 
 export default function AccountSettings() {
   const { user } = useAuth();
@@ -28,6 +29,9 @@ export default function AccountSettings() {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState<string>(user?.user_metadata?.name || "");
   const [email, setEmail] = useState<string>(user?.email || "");
+  const [isUploading, setIsUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>(user?.user_metadata?.avatar_url || "");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Show loading state while auth is being checked
   if (!isReady) {
@@ -44,7 +48,14 @@ export default function AccountSettings() {
   const handleSaveProfile = async () => {
     try {
       // In a real implementation, this would update the user profile
-      // await supabase.auth.updateUser({ data: { name } });
+      const { error } = await supabase.auth.updateUser({
+        data: { 
+          name,
+          avatar_url: avatarUrl
+        }
+      });
+      
+      if (error) throw error;
       
       toast({
         title: "Profile updated",
@@ -58,6 +69,70 @@ export default function AccountSettings() {
         description: "There was a problem updating your profile.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handlePhotoButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setIsUploading(true);
+    try {
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update state with new avatar URL
+      const publicUrl = data.publicUrl;
+      setAvatarUrl(publicUrl);
+      
+      toast({
+        title: "Photo uploaded",
+        description: "Your profile photo has been uploaded successfully.",
+      });
+      
+      // Auto-save the profile with the new avatar
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl }
+      });
+      
+      if (updateError) throw updateError;
+      
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast({
+        title: "Upload failed",
+        description: "There was a problem uploading your photo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -102,13 +177,39 @@ export default function AccountSettings() {
                 <div className="flex flex-col md:flex-row gap-6 items-start">
                   <div className="flex flex-col items-center">
                     <Avatar className="h-24 w-24 mb-2">
-                      <AvatarImage src={user?.user_metadata?.avatar_url} alt={name} />
+                      <AvatarImage src={avatarUrl} alt={name} />
                       <AvatarFallback className="text-xl bg-primary text-primary-foreground">
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      Change Photo
+                    
+                    {/* Hidden file input */}
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={handlePhotoButtonClick}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? (
+                        <>
+                          <span className="animate-spin mr-2">⏳</span>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={14} className="mr-2" />
+                          Change Photo
+                        </>
+                      )}
                     </Button>
                   </div>
                   
