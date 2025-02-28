@@ -37,7 +37,7 @@ export const HeroSection = () => {
             <ArrowRight className="h-4 w-4" />
           </Button>
           <Button 
-            onClick={() => navigate("/#content-search-section")} 
+            onClick={() => navigate("/search")} 
             size="lg" 
             variant="outline" 
             className="secondary-button"
