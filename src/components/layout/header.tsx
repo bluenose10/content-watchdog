@@ -80,6 +80,7 @@ export function Header() {
   const navigateToSection = (sectionId: string) => {
     if (location.pathname !== '/') {
       // If not on home page, navigate to home with hash
+      // Using navigate directly instead of window.location to prevent full page reload
       navigate(`/#${sectionId}`);
     } else {
       // If already on home page, scroll to section
@@ -101,8 +102,8 @@ export function Header() {
     >
       <div className="container flex items-center justify-between">
         <div className="flex items-center">
-          <a 
-            href="/"
+          <Link 
+            to="/"
             className="flex items-center gap-2 font-bold text-xl"
           >
             <img 
@@ -111,17 +112,17 @@ export function Header() {
               className="h-9 w-9" 
             />
             <span className="text-gradient">Influence Guard</span>
-          </a>
+          </Link>
         </div>
 
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <a 
-            href="/" 
+          <Link 
+            to="/" 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
           >
             Home
-          </a>
+          </Link>
           <button 
             onClick={() => navigateToSection('features')} 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
@@ -190,12 +191,12 @@ export function Header() {
         <div className="fixed inset-0 top-[57px] z-50 bg-background/95 backdrop-blur-sm animate-fade-in md:hidden">
           <div className="container py-6 flex flex-col gap-6">
             <nav className="flex flex-col gap-4">
-              <a
-                href="/"
+              <Link
+                to="/"
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
               >
                 Home
-              </a>
+              </Link>
               <button
                 onClick={() => navigateToSection('features')}
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
