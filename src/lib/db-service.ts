@@ -131,6 +131,27 @@ export const getSearchResults = async (searchId: string) => {
   return data;
 };
 
+/**
+ * Fetch recent searches for pre-fetching and analytics
+ * @param limit Maximum number of recent searches to retrieve
+ * @returns Array of recent search queries
+ */
+export const getRecentSearches = async (limit: number = 10) => {
+  try {
+    const { data, error } = await supabase
+      .from('search_queries')
+      .select('id, query_type, query_text, created_at, search_params_json')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching recent searches:', error);
+    return [];
+  }
+};
+
 export const getUserSubscription = async (userId: string) => {
   const { data, error } = await supabase
     .from('user_subscriptions')
