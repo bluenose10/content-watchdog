@@ -25,6 +25,7 @@ import MockCheckout from "@/pages/MockCheckout";
 import Monitoring from "@/pages/Monitoring";
 import Protection from "@/pages/Protection";
 import SearchHistory from "@/pages/SearchHistory";
+import Contact from "@/pages/Contact";
 
 import "./App.css";
 
@@ -53,6 +54,7 @@ function App() {
               <Route path="/checkout" element={<MockCheckout />} />
               <Route path="/monitoring" element={<Monitoring />} />
               <Route path="/protection" element={<Protection />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
