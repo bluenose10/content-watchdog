@@ -28,20 +28,6 @@ export const HeroSection = () => {
           Sign up for a free basic account to start searching - our free plan includes 3 searches per month so you can see what's out there.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 mt-2 animate-scale-in" style={{ animationDelay: "0.6s" }}>
-          <Button asChild size="lg" className="primary-button flex items-center gap-2 px-8 cursor-pointer">
-            <Link to="/signup">
-              Get Started
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="secondary-button cursor-pointer">
-            <Link to="/signup">
-              Try Content Search
-            </Link>
-          </Button>
-        </div>
-        
         {/* Enhanced content protection section with workflow included */}
         <div className="w-full max-w-4xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl px-8 py-8 pt-14 border border-purple-100 dark:border-purple-900/40 mt-12 shadow-md hover:shadow-lg transition-shadow duration-300 purple-glow">
           <h2 className="text-xl font-semibold mb-6 text-purple-800 dark:text-purple-400">Duplicate Content Detection & DMCA Services</h2>
