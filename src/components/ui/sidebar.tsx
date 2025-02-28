@@ -14,7 +14,7 @@ import {
   Bell,
   Shield
 } from "lucide-react";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarProps {
   className?: string;
@@ -23,7 +23,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   const menuItems = [
     {
