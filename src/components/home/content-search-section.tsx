@@ -143,7 +143,7 @@ export function ContentSearchSection() {
               onHashtagSearch={handleHashtagSearch}
               onImageSearch={handleImageSearchSubmit}
               isLoading={isLoading}
-              isAuthenticated={isAuthenticated}
+              isAuthenticated={false} // Force non-authenticated UI for all users on homepage
             />
           </CardContent>
         </Card>
