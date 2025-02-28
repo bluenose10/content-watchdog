@@ -55,7 +55,7 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-8 pt-8 text-primary">Dashboard</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <StatsCard 
