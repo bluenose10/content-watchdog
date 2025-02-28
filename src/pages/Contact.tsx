@@ -22,7 +22,7 @@ export default function Contact() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="aspect-square md:aspect-auto relative overflow-hidden">
               <img 
-                src="/lovable-uploads/49fb3d99-27c7-4580-b9a5-125358452305.png" 
+                src="/lovable-uploads/5953bc93-b6b1-4b80-b98c-3ac53016c5b3.png" 
                 alt="Mark Moran" 
                 className="w-full h-full object-cover"
               />
