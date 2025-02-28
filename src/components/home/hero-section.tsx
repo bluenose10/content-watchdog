@@ -1,5 +1,5 @@
 
-import { ArrowRight, Shield, Zap, FileCheck } from "lucide-react";
+import { ArrowRight, Shield, Zap, FileCheck, Bell, Search, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
@@ -15,11 +15,13 @@ export const HeroSection = () => {
           Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
         </p>
         
-        {/* Added service highlight section */}
-        <div className="w-full max-w-3xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl p-6 border border-purple-100 dark:border-purple-900/40">
-          <h2 className="text-xl font-semibold mb-4 text-purple-800 dark:text-purple-400">Comprehensive Content Protection Services</h2>
-          <div className="grid md:grid-cols-3 gap-4 text-left">
-            <div className="flex flex-col space-y-2">
+        {/* Enhanced content protection section with workflow included */}
+        <div className="w-full max-w-4xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl p-8 border border-purple-100 dark:border-purple-900/40">
+          <h2 className="text-xl font-semibold mb-6 text-purple-800 dark:text-purple-400">Comprehensive Content Protection Services</h2>
+          
+          {/* Core Services */}
+          <div className="grid md:grid-cols-3 gap-6 text-left mb-10">
+            <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <Shield className="h-5 w-5 text-purple-700 dark:text-purple-500 mr-2" />
                 <h3 className="font-medium">Copyright Enforcement</h3>
@@ -28,7 +30,7 @@ export const HeroSection = () => {
                 Automated detection and enforcement of your copyright claims across multiple platforms
               </p>
             </div>
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <Zap className="h-5 w-5 text-blue-600 dark:text-blue-500 mr-2" />
                 <h3 className="font-medium">Plagiarism Detection</h3>
@@ -37,7 +39,7 @@ export const HeroSection = () => {
                 Advanced algorithms to identify copied content, even when slightly modified
               </p>
             </div>
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <FileCheck className="h-5 w-5 text-indigo-700 dark:text-indigo-500 mr-2" />
                 <h3 className="font-medium">DMCA Takedowns</h3>
@@ -47,40 +49,49 @@ export const HeroSection = () => {
               </p>
             </div>
           </div>
-        </div>
-        
-        <div className="w-full max-w-3xl pt-8 md:pt-12">
-          <div className="grid gap-6 md:grid-cols-3 purple-dot-pattern p-8 rounded-xl glass-card">
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4">
-                <Shield className="h-6 w-6 text-purple-700 dark:text-purple-400" />
+          
+          {/* How It Works Section - Enhanced workflow */}
+          <div className="relative">
+            <h3 className="text-lg font-medium mb-6 text-center">How Our Protection Process Works</h3>
+            
+            {/* Connecting line */}
+            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 -z-10 translate-y-4"></div>
+            
+            <div className="grid md:grid-cols-3 gap-8 relative">
+              <div className="flex flex-col items-center text-center">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4 shadow-sm">
+                  <Search className="h-8 w-8 text-purple-700 dark:text-purple-400" />
+                </div>
+                <h4 className="text-lg font-medium mb-2">1. Find Content</h4>
+                <p className="text-sm text-muted-foreground">
+                  Our advanced search technology scans across platforms to locate your images and text content anywhere it appears online.
+                </p>
               </div>
-              <h3 className="text-xl font-medium mb-1">Find Content</h3>
-              <p className="text-sm text-muted-foreground">
-                Search across platforms to locate your images and text
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
-                <Zap className="h-6 w-6 text-blue-700 dark:text-blue-400" />
+              
+              <div className="flex flex-col items-center text-center">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4 shadow-sm">
+                  <Bell className="h-8 w-8 text-blue-700 dark:text-blue-400" />
+                </div>
+                <h4 className="text-lg font-medium mb-2">2. Monitor Usage</h4>
+                <p className="text-sm text-muted-foreground">
+                  Set up continuous monitoring to receive alerts when new matches of your content are detected, with detailed reports and analytics.
+                </p>
               </div>
-              <h3 className="text-xl font-medium mb-1">Monitor Usage</h3>
-              <p className="text-sm text-muted-foreground">
-                Get alerts when new matches of your content are detected
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-4">
-                <Shield className="h-6 w-6 text-indigo-700 dark:text-indigo-400" />
+              
+              <div className="flex flex-col items-center text-center">
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-4 shadow-sm">
+                  <UserCheck className="h-8 w-8 text-indigo-700 dark:text-indigo-400" />
+                </div>
+                <h4 className="text-lg font-medium mb-2">3. Take Action</h4>
+                <p className="text-sm text-muted-foreground">
+                  Generate and send legally-binding DMCA takedown notices with all required evidence automatically compiled for you.
+                </p>
               </div>
-              <h3 className="text-xl font-medium mb-1">Take Action</h3>
-              <p className="text-sm text-muted-foreground">
-                Send DMCA takedown notices with evidence provided
-              </p>
             </div>
           </div>
         </div>
-        <div className="mt-8 flex items-center">
+        
+        <div className="mt-6 flex items-center">
           <button 
             onClick={() => {
               document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
