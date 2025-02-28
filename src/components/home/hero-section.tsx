@@ -2,18 +2,9 @@
 import { ArrowRight, Shield, Zap, FileCheck, Bell, Search, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
-  const navigate = useNavigate();
-
-  const handleGetStarted = () => {
-    navigate("/signup");
-  };
-
-  const handleTryContentSearch = () => {
-    navigate("/search");
-  };
-
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
@@ -32,21 +23,16 @@ export const HeroSection = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 mt-2 animate-scale-in" style={{ animationDelay: "0.6s" }}>
-          <Button 
-            onClick={handleGetStarted} 
-            size="lg" 
-            className="primary-button flex items-center gap-2 px-8 cursor-pointer"
-          >
-            Get Started
-            <ArrowRight className="h-4 w-4" />
+          <Button asChild size="lg" className="primary-button flex items-center gap-2 px-8 cursor-pointer">
+            <Link to="/signup">
+              Get Started
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
-          <Button 
-            onClick={handleTryContentSearch}
-            size="lg" 
-            variant="outline" 
-            className="secondary-button cursor-pointer"
-          >
-            Try Content Search
+          <Button asChild size="lg" variant="outline" className="secondary-button cursor-pointer">
+            <Link to="/search">
+              Try Content Search
+            </Link>
           </Button>
         </div>
         

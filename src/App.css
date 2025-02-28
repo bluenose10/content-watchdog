@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,17 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Add this to ensure all buttons show pointer cursor */
+button, 
+.button-animation, 
+a[role="button"],
+[class*="cursor-pointer"] {
+  cursor: pointer !important;
+}
+
+/* Target Link components wrapped in Button */
+a {
+  cursor: pointer !important;
 }
