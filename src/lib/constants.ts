@@ -79,7 +79,7 @@ export const PRICING_PLANS = [
     features: [
       "40 searches per month",
       "Real-time monitoring",
-      "Automated takedown notices",
+      "Automated takedowns",
       "Priority support",
       "Monthly reports",
       "5 scheduled automated searches",
