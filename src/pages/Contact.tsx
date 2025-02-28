@@ -19,7 +19,7 @@ export default function Contact() {
   return (
     <Layout>
       <div className="container max-w-4xl py-12 md:py-20">
-        <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">Contact Us</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-center mb-8 text-gradient">Contact Us</h1>
         
         <Card className="mb-10 overflow-hidden border border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300">
           <div className="grid md:grid-cols-2 gap-6">
