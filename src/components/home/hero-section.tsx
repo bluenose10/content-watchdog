@@ -10,50 +10,50 @@ export const HeroSection = () => {
     <section className="w-full pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-8">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-gradient max-w-3xl mx-auto" style={{ color: 'hsl(262, 83%, 38%)' }}>
-          Protect Your Digital Content from Unauthorized Use
+          Find Your Stolen Content & Get DMCA Takedowns
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Protecting Content Creators, Photographers, Writers, and Brands. Discover where your photos, videos, articles, and designs appear across the web and take action to protect your intellectual property.
+          For Content Creators Needing DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, then help you remove them with effective DMCA takedowns.
         </p>
         
         {/* Enhanced content protection section with workflow included */}
         <div className="w-full max-w-4xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl px-8 py-8 pt-14 border border-purple-100 dark:border-purple-900/40">
-          <h2 className="text-xl font-semibold mb-6 text-purple-800 dark:text-purple-400">Comprehensive Content Protection Services</h2>
+          <h2 className="text-xl font-semibold mb-6 text-purple-800 dark:text-purple-400">Duplicate Content Detection & DMCA Services</h2>
           
           {/* Core Services - Updated with specific examples */}
           <div className="grid md:grid-cols-3 gap-6 text-left mb-16">
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <Shield className="h-5 w-5 text-purple-700 dark:text-purple-500 mr-2" />
-                <h3 className="font-medium">Copyright Enforcement</h3>
+                <h3 className="font-medium">DMCA Takedowns</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                Automated detection and enforcement of your copyright claims for photos, videos, written content, and designs
+                We handle the entire DMCA process for you once we've located your stolen content, with 92% successful removal rate
               </p>
             </div>
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <Zap className="h-5 w-5 text-blue-600 dark:text-blue-500 mr-2" />
-                <h3 className="font-medium">Plagiarism Detection</h3>
+                <h3 className="font-medium">Stolen Content Finder</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                Our AI identifies even slightly modified copies of your content across social media and websites
+                Our specialized search finds where others have duplicated your content, even when they've slightly modified it
               </p>
             </div>
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <FileCheck className="h-5 w-5 text-indigo-700 dark:text-indigo-500 mr-2" />
-                <h3 className="font-medium">DMCA Takedowns</h3>
+                <h3 className="font-medium">Creator Protection</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                We've helped remove over 10,000+ unauthorized content copies with our legally-binding takedown process
+                Made specifically for content creators who need help identifying and removing unauthorized duplicates of their work
               </p>
             </div>
           </div>
           
           {/* How It Works Section - Restyled to match core services section */}
           <div>
-            <h3 className="text-lg font-medium mb-8 text-center">How Our Protection Process Works</h3>
+            <h3 className="text-lg font-medium mb-8 text-center">How Our DMCA Protection Works</h3>
             
             <div className="grid md:grid-cols-3 gap-10">
               <div className="flex flex-col space-y-3">
@@ -61,10 +61,10 @@ export const HeroSection = () => {
                   <div className="flex items-center justify-center h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/30 mr-3">
                     <Search className="h-5 w-5 text-purple-700 dark:text-purple-400" />
                   </div>
-                  <h4 className="font-medium">1. Find Content</h4>
+                  <h4 className="font-medium">1. Find Duplicates</h4>
                 </div>
                 <p className="text-sm text-muted-foreground pl-[52px]">
-                  Our technology scans millions of websites and social platforms to locate where your images, videos, and text content appear online, even when modified.
+                  Our search technology locates where your content has been duplicated across websites and social platforms, identifying unauthorized copies of your work.
                 </p>
               </div>
               
@@ -73,10 +73,10 @@ export const HeroSection = () => {
                   <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 mr-3">
                     <Bell className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                   </div>
-                  <h4 className="font-medium">2. Monitor Usage</h4>
+                  <h4 className="font-medium">2. Verify Usage</h4>
                 </div>
                 <p className="text-sm text-muted-foreground pl-[52px]">
-                  Get instant alerts when your content is found with our 24/7 monitoring system that checks 50+ platforms, including Instagram, TikTok, Twitter, and websites.
+                  Review our detailed reports showing where your content appears without permission, with screenshots and links to where each unauthorized duplicate was found.
                 </p>
               </div>
               
@@ -85,10 +85,10 @@ export const HeroSection = () => {
                   <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mr-3">
                     <UserCheck className="h-5 w-5 text-indigo-700 dark:text-indigo-400" />
                   </div>
-                  <h4 className="font-medium">3. Take Action</h4>
+                  <h4 className="font-medium">3. Issue DMCA</h4>
                 </div>
                 <p className="text-sm text-muted-foreground pl-[52px]">
-                  With a 92% success rate, our automated DMCA takedown system removes unauthorized content quickly, with all evidence and legal documentation handled for you.
+                  With one click, we'll generate and send proper DMCA takedown notices to get your stolen content removed, with all legal documentation prepared for you.
                 </p>
               </div>
             </div>
