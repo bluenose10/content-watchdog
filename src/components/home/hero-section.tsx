@@ -35,7 +35,7 @@ export const HeroSection = () => {
           <Button 
             onClick={handleGetStarted} 
             size="lg" 
-            className="primary-button flex items-center gap-2 px-8"
+            className="primary-button flex items-center gap-2 px-8 cursor-pointer"
           >
             Get Started
             <ArrowRight className="h-4 w-4" />
@@ -44,7 +44,7 @@ export const HeroSection = () => {
             onClick={handleTryContentSearch}
             size="lg" 
             variant="outline" 
-            className="secondary-button"
+            className="secondary-button cursor-pointer"
           >
             Try Content Search
           </Button>
