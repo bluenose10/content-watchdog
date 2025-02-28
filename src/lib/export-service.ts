@@ -3,7 +3,7 @@ import { SearchResult } from './db-types';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export type ExportFormat = 'csv' | 'excel' | 'json' | 'pdf';
 
@@ -110,8 +110,8 @@ const exportToPdf = (data: any[], filename: string) => {
   const headers = Object.keys(data[0]);
   const rows = data.map(item => headers.map(key => item[key]?.toString() || ''));
   
-  // Generate the table
-  (doc as any).autoTable({
+  // Generate the table - properly using the autoTable plugin
+  autoTable(doc, {
     head: [headers],
     body: rows,
     startY: 25,
