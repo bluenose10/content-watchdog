@@ -22,6 +22,8 @@ export function ContentSearchSection() {
       setError(null);
       console.log("Name search with query:", query, "and params:", params);
       const searchId = await handleTextSearch(query, "name", user, params);
+      
+      // Use the searchId directly in the URL for results
       navigate(`/results?id=${searchId}`);
     } catch (error) {
       console.error("Name search error:", error);
@@ -46,6 +48,8 @@ export function ContentSearchSection() {
       setError(null);
       console.log("Hashtag search with query:", query, "and params:", params);
       const searchId = await handleTextSearch(query, "hashtag", user, params);
+      
+      // Use the searchId directly in the URL for results
       navigate(`/results?id=${searchId}`);
     } catch (error) {
       console.error("Hashtag search error:", error);
@@ -66,6 +70,11 @@ export function ContentSearchSection() {
 
   const handleImageSearchSubmit = async (file: File, params?: any) => {
     try {
+      setIsLoading(true);
+      setError(null);
+      console.log("Image search with file:", file.name, "and params:", params);
+      
+      // Only require authentication for image search
       if (!user) {
         toast({
           title: "Sign in required",
@@ -76,10 +85,9 @@ export function ContentSearchSection() {
         return;
       }
       
-      setIsLoading(true);
-      setError(null);
-      console.log("Image search with file:", file.name, "and params:", params);
       const searchId = await handleImageSearch(file, user, params);
+      
+      // Use the searchId directly in the URL for results
       navigate(`/results?id=${searchId}`);
     } catch (error) {
       console.error("Image search error:", error);

@@ -35,7 +35,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/monitoring" element={<Monitoring />} />
               <Route path="/protection" element={<Protection />} />
-              <Route path="/results/:id" element={<Results />} />
+              <Route path="/results" element={<Results />} />
               <Route path="/search" element={<Search />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<AccountSettings />} />

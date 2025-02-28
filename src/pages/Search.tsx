@@ -2,34 +2,19 @@
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { ContentSearchSection } from "@/components/home/content-search-section";
-import { useAuth } from "@/context/AuthContext";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 
 const Search = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // If user is authenticated, they can use the search page
-    // If not authenticated, redirect to login
-    if (!loading && !user) {
-      navigate("/login");
-    }
-  }, [user, loading, navigate]);
+  // Use the protected route hook but don't require authentication
+  const { isReady, accessLevel } = useProtectedRoute(false);
 
   // Show loading indicator while checking authentication
-  if (loading) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
-  }
-
-  // Only render the search page for authenticated users
-  if (!user) {
-    return null; // Will redirect in useEffect
   }
 
   return (
@@ -40,6 +25,11 @@ const Search = () => {
           <h1 className="text-2xl font-bold text-primary mb-4">Search For Content</h1>
           <p className="text-muted-foreground mb-8">
             Use our powerful search engine to find unauthorized uses of your content across the web.
+            {accessLevel === AccessLevel.ANONYMOUS && (
+              <span className="block mt-2 text-sm text-purple-600 dark:text-purple-400">
+                You're using the free preview. Sign up for a full account to access more results and features.
+              </span>
+            )}
           </p>
         </div>
         <ContentSearchSection />
