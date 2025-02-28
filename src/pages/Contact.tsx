@@ -18,7 +18,7 @@ export default function Contact() {
       <div className="container max-w-4xl py-12 md:py-20">
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">Contact Us</h1>
         
-        <Card className="mb-10 overflow-hidden">
+        <Card className="mb-10 overflow-hidden border border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="aspect-square md:aspect-auto relative overflow-hidden">
               <img 
@@ -66,7 +66,7 @@ export default function Contact() {
           </div>
         </Card>
         
-        <div className="bg-muted/50 rounded-lg p-6 md:p-8">
+        <div className="bg-muted/50 rounded-lg p-6 md:p-8 border border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300">
           <h2 className="text-xl font-semibold mb-4">Educational Background</h2>
           <ul className="space-y-4">
             <li>
