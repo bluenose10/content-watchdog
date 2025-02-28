@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { SearchTabs } from "./search/SearchTabs";
 import { handleTextSearch, handleImageSearch } from "./search/searchService";
 import { AlertCircle } from "lucide-react";
+import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 
 export function ContentSearchSection() {
   const navigate = useNavigate();
@@ -15,8 +16,15 @@ export function ContentSearchSection() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { accessLevel } = useProtectedRoute(false);
 
   const handleNameSearch = async (query: string, params?: any) => {
+    // If anonymous user, redirect to signup
+    if (!user || accessLevel === AccessLevel.ANONYMOUS) {
+      navigate('/signup');
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -43,6 +51,12 @@ export function ContentSearchSection() {
   };
 
   const handleHashtagSearch = async (query: string, params?: any) => {
+    // If anonymous user, redirect to signup
+    if (!user || accessLevel === AccessLevel.ANONYMOUS) {
+      navigate('/signup');
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -69,21 +83,16 @@ export function ContentSearchSection() {
   };
 
   const handleImageSearchSubmit = async (file: File, params?: any) => {
+    // If anonymous user, redirect to signup
+    if (!user || accessLevel === AccessLevel.ANONYMOUS) {
+      navigate('/signup');
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
       console.log("Image search with file:", file.name, "and params:", params);
-      
-      // Only require authentication for image search
-      if (!user) {
-        toast({
-          title: "Sign in required",
-          description: "Please sign in to use image search",
-          variant: "destructive",
-        });
-        navigate("/login");
-        return;
-      }
       
       const searchId = await handleImageSearch(file, user, params);
       
@@ -105,6 +114,9 @@ export function ContentSearchSection() {
       setIsLoading(false);
     }
   };
+
+  // Determine if the user is authenticated
+  const isAuthenticated = user && accessLevel !== AccessLevel.ANONYMOUS;
 
   return (
     <section id="content-search-section" className="h-full">
@@ -131,6 +143,7 @@ export function ContentSearchSection() {
               onHashtagSearch={handleHashtagSearch}
               onImageSearch={handleImageSearchSubmit}
               isLoading={isLoading}
+              isAuthenticated={isAuthenticated}
             />
           </CardContent>
         </Card>

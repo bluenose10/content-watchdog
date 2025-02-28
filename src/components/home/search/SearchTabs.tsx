@@ -29,6 +29,7 @@ interface SearchTabsProps {
   onHashtagSearch: (query: string, params?: TextSearchParams) => Promise<void>;
   onImageSearch: (file: File, params?: ImageSearchParams) => Promise<void>;
   isLoading: boolean;
+  isAuthenticated?: boolean;
 }
 
 export function SearchTabs({
@@ -36,6 +37,7 @@ export function SearchTabs({
   onHashtagSearch,
   onImageSearch,
   isLoading,
+  isAuthenticated = false,
 }: SearchTabsProps) {
   const [activeTab, setActiveTab] = useState("name");
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -169,6 +171,9 @@ export function SearchTabs({
     </div>
   );
   
+  // Update the Advanced Search toggling to be disabled for non-authenticated users
+  const advancedSearchButtonDisabled = !isAuthenticated;
+  
   return (
     <Tabs 
       defaultValue="name" 
@@ -182,20 +187,23 @@ export function SearchTabs({
         <TabsTrigger value="image">Image</TabsTrigger>
       </TabsList>
       
-      {/* Advanced Search Toggle */}
-      <div className="mb-4">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-2 text-xs"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-        >
-          <Sliders className="w-3.5 h-3.5" />
-          {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
-        </Button>
-      </div>
+      {/* Advanced Search Toggle - only for authenticated users */}
+      {isAuthenticated && (
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2 text-xs"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            disabled={advancedSearchButtonDisabled}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
+          </Button>
+        </div>
+      )}
       
-      {showAdvanced && (
+      {isAuthenticated && showAdvanced && (
         <Card className="mb-4 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
           <CardHeader className="py-3">
             <CardTitle className="text-sm font-medium flex items-center">
@@ -597,6 +605,19 @@ export function SearchTabs({
             )}
           </CardContent>
         </Card>
+      )}
+      
+      {!isAuthenticated && (
+        <div className="mb-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center gap-2 mb-2">
+            <Lock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <h3 className="text-sm font-medium text-purple-800 dark:text-purple-300">Sign Up Required</h3>
+          </div>
+          <p className="text-sm text-purple-600 dark:text-purple-400 mb-2">
+            You need to create an account to use our content search features. 
+            Our free plan includes 3 searches per month.
+          </p>
+        </div>
       )}
       
       <TabsContent value="name">
