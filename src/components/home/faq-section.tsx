@@ -4,9 +4,9 @@ import { HelpCircle } from "lucide-react"
 
 export function FAQSection() {
   return (
-    <div className="py-16 bg-gray-50/50 dark:bg-gray-900/50 rounded-3xl">
+    <div className="py-6 md:py-4 bg-gray-50/50 dark:bg-gray-900/50 rounded-3xl">
       <div className="container px-4 md:px-6">
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg mb-4">
             <HelpCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
           </div>
