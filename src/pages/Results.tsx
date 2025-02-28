@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -14,15 +14,21 @@ import { getSearchResults } from "@/lib/search-cache";
 import { ArrowLeft, Calendar, Image, Info } from "lucide-react";
 import { Sidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Results() {
-  const { id } = useParams<{ id: string }>();
+  // Use search params to get the ID instead of URL parameters
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isReady, accessLevel, hasPremiumFeature } = useProtectedRoute(true);
+  // Allow anonymous users to view results
+  const { isReady, accessLevel, hasPremiumFeature } = useProtectedRoute(false);
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<any[]>([]);
   const [query, setQuery] = useState<string>("");
+  const [searchDate, setSearchDate] = useState<string>("Today");
   const { toast } = useToast();
 
   // Handler for upgrade button click
@@ -37,7 +43,16 @@ export default function Results() {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!id) return;
+      if (!id) {
+        toast({
+          title: "Error",
+          description: "No search ID provided. Please try your search again.",
+          variant: "destructive",
+        });
+        navigate("/search");
+        return;
+      }
+      
       try {
         setIsLoading(true);
         // In a real app, we would fetch results from an API
@@ -45,6 +60,10 @@ export default function Results() {
         const data = await getSearchResults(id);
         setResults(data.results);
         setQuery(data.query);
+        
+        // Set a realistic search date
+        const now = new Date();
+        setSearchDate(now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
       } catch (error) {
         console.error("Error fetching results:", error);
         toast({
@@ -52,6 +71,7 @@ export default function Results() {
           description: "Failed to load search results. Please try again.",
           variant: "destructive",
         });
+        navigate("/search");
       } finally {
         setTimeout(() => {
           setIsLoading(false);
@@ -59,13 +79,53 @@ export default function Results() {
       }
     };
     
-    if (isReady && id) {
+    if (isReady) {
       fetchResults();
     }
-  }, [isReady, id, toast]);
+  }, [isReady, id, toast, navigate]);
 
+  // Show loading state while fetching results
   if (!isReady || isLoading) {
-    return <LoadingState />;
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex justify-center items-center p-6">
+          <div className="w-full max-w-4xl">
+            <div className="mb-8">
+              <Skeleton className="h-8 w-64 mb-2" />
+              <Skeleton className="h-4 w-full max-w-md" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // If no results found
+  if (!results || results.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex justify-center items-center p-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">No Results Found</h2>
+            <p className="text-muted-foreground mb-6">
+              We couldn't find any matches for your search. Please try a different search.
+            </p>
+            <Button onClick={() => navigate("/search")}>
+              Try Another Search
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -81,10 +141,10 @@ export default function Results() {
               <Button 
                 variant="ghost" 
                 className="mr-4"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/search")}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                Back to Search
               </Button>
               <div>
                 <h1 className="text-2xl font-bold mb-1">Search Results</h1>
@@ -103,11 +163,11 @@ export default function Results() {
                 <div className="flex flex-wrap gap-4 items-center">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">Searched on April 12, 2023</span>
+                    <span className="text-sm">Searched on {searchDate}</span>
                   </div>
                   <div className="flex items-center">
                     <Image className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">Image search</span>
+                    <span className="text-sm">Content search</span>
                   </div>
                   <div className="flex items-center">
                     <Info className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -116,6 +176,30 @@ export default function Results() {
                 </div>
               </CardContent>
             </Card>
+
+            {!user && (
+              <Card className="mb-6 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-purple-800 dark:text-purple-300">Free Preview</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        You're viewing limited results as a guest. Sign up for free to save your searches and access more features.
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      <Button 
+                        onClick={() => navigate("/signup")}
+                        variant="default"
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        Sign Up Free
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Tabs defaultValue="all" className="mb-6">
               <TabsList>
