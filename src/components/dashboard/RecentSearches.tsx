@@ -1,18 +1,53 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { ArrowRight, Search, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SearchQuery } from "@/lib/db-types";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { getUserSearchQueries } from "@/lib/db-service";
 
 interface RecentSearchesProps {
-  searchQueries: SearchQuery[];
+  searchQueries?: SearchQuery[];
   onSelectSearch?: (searchId: string) => void;
   selectedSearchId?: string | null;
+  limit?: number;
 }
 
-export function RecentSearches({ searchQueries, onSelectSearch, selectedSearchId }: RecentSearchesProps) {
+export function RecentSearches({ 
+  searchQueries: propSearchQueries, 
+  onSelectSearch, 
+  selectedSearchId,
+  limit = 5
+}: RecentSearchesProps) {
+  const { user } = useAuth();
+  const [searchQueries, setSearchQueries] = useState<SearchQuery[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (propSearchQueries) {
+      setSearchQueries(propSearchQueries);
+      return;
+    }
+
+    const fetchSearchQueries = async () => {
+      if (!user) return;
+      
+      try {
+        setLoading(true);
+        const queries = await getUserSearchQueries(user.id);
+        setSearchQueries(queries.slice(0, limit));
+      } catch (error) {
+        console.error("Error fetching search queries:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSearchQueries();
+  }, [user, propSearchQueries, limit]);
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border border-purple-100/50 dark:border-purple-800/30 bg-gradient-to-br from-white to-purple-50/50 dark:from-gray-900 dark:to-purple-950/40 md:col-span-2">
       <CardHeader className="border-b border-purple-100/30 dark:border-purple-900/30 bg-gradient-to-r from-purple-50/50 to-blue-50/50 dark:from-purple-900/30 dark:to-blue-900/30">
@@ -37,7 +72,7 @@ export function RecentSearches({ searchQueries, onSelectSearch, selectedSearchId
               </Button>
             </div>
           ) : (
-            searchQueries.slice(0, 3).map((search) => (
+            searchQueries.slice(0, limit).map((search) => (
               <div 
                 key={search.id} 
                 className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-all duration-200 ${

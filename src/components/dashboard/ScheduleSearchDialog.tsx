@@ -17,12 +17,84 @@ import { useAuth } from "@/context/AuthContext";
 import { createSearchQuery } from "@/lib/db-service";
 import { SearchQuery } from "@/lib/db-types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ImageUpload } from "../home/search/ImageSearch";
+import { UploadCloud } from "lucide-react";
 
 interface ScheduleSearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onScheduleCreated: (search: SearchQuery) => void;
+}
+
+// Create a simple ImageUpload component since the original one isn't exported
+function ImageUpload({ 
+  onImageSelected, 
+  maxSizeMB = 5 
+}: { 
+  onImageSelected: (file: File) => void;
+  maxSizeMB?: number;
+}) {
+  const [preview, setPreview] = useState<string | null>(null);
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file size
+    const maxSize = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+    if (file.size > maxSize) {
+      alert(`File size exceeds ${maxSizeMB}MB limit.`);
+      return;
+    }
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Call callback
+    onImageSelected(file);
+  };
+  
+  return (
+    <div className="space-y-4">
+      <div 
+        className="border-2 border-dashed rounded-lg p-6 cursor-pointer hover:bg-accent/50 transition-colors flex flex-col items-center justify-center"
+        onClick={() => document.getElementById('image-upload')?.click()}
+      >
+        {preview ? (
+          <img src={preview} alt="Preview" className="max-h-40 rounded-md" />
+        ) : (
+          <>
+            <UploadCloud className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground mb-1">Click to upload an image</p>
+            <p className="text-xs text-muted-foreground">PNG, JPG or WEBP (max. {maxSizeMB}MB)</p>
+          </>
+        )}
+        <input 
+          type="file" 
+          id="image-upload" 
+          className="hidden" 
+          accept="image/png, image/jpeg, image/webp"
+          onChange={handleFileChange}
+        />
+      </div>
+      {preview && (
+        <Button 
+          variant="outline" 
+          type="button" 
+          className="w-full" 
+          onClick={() => {
+            setPreview(null);
+            (document.getElementById('image-upload') as HTMLInputElement).value = '';
+          }}
+        >
+          Remove image
+        </Button>
+      )}
+    </div>
+  );
 }
 
 export function ScheduleSearchDialog({ 
