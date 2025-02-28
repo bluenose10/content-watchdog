@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
@@ -146,7 +147,7 @@ export function RecentSearches({
         {searchQueries.length > 0 && (
           <div className="mt-6 text-center">
             <Button variant="outline" className="py-2 px-4 bg-white dark:bg-gray-900 backdrop-blur-sm border-purple-200 dark:border-purple-800 hover:border-purple-300 dark:hover:border-purple-700" asChild>
-              <Link to="/history">
+              <Link to="/search/history">
                 View All Searches
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
