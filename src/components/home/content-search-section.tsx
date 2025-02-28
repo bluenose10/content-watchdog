@@ -20,7 +20,7 @@ export function ContentSearchSection() {
 
   const handleNameSearch = async (query: string, params?: any) => {
     // If anonymous user, redirect to signup
-    if (!user) {
+    if (!user || accessLevel === AccessLevel.ANONYMOUS) {
       navigate('/signup');
       return;
     }
@@ -52,7 +52,7 @@ export function ContentSearchSection() {
 
   const handleHashtagSearch = async (query: string, params?: any) => {
     // If anonymous user, redirect to signup
-    if (!user) {
+    if (!user || accessLevel === AccessLevel.ANONYMOUS) {
       navigate('/signup');
       return;
     }
@@ -84,7 +84,7 @@ export function ContentSearchSection() {
 
   const handleImageSearchSubmit = async (file: File, params?: any) => {
     // If anonymous user, redirect to signup
-    if (!user) {
+    if (!user || accessLevel === AccessLevel.ANONYMOUS) {
       navigate('/signup');
       return;
     }
@@ -115,9 +115,12 @@ export function ContentSearchSection() {
     }
   };
 
+  // Determine if the user is authenticated
+  const isAuthenticated = user && accessLevel !== AccessLevel.ANONYMOUS;
+
   return (
     <section id="content-search-section" className="h-full">
-      <div className="container px-4 md:px-6 h-full">
+      <div className="h-full">
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-bold mb-2">Content Search</h2>
           <p className="text-sm text-muted-foreground">
@@ -140,7 +143,7 @@ export function ContentSearchSection() {
               onHashtagSearch={handleHashtagSearch}
               onImageSearch={handleImageSearchSubmit}
               isLoading={isLoading}
-              isAuthenticated={!!user} // Pass actual authentication state
+              isAuthenticated={false} // Force non-authenticated UI for all users on homepage
             />
           </CardContent>
         </Card>

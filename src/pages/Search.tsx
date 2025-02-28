@@ -5,12 +5,10 @@ import { ContentSearchSection } from "@/components/home/content-search-section";
 import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
 
 const Search = () => {
   // Use the protected route hook but don't require authentication
   const { isReady, accessLevel } = useProtectedRoute(false);
-  const { user } = useAuth();
 
   // Show loading indicator while checking authentication
   if (!isReady) {
@@ -29,7 +27,7 @@ const Search = () => {
           <h1 className="text-2xl font-bold text-primary mb-4">Search For Content</h1>
           <p className="text-muted-foreground mb-8">
             Use our powerful search engine to find unauthorized uses of your content across the web.
-            {!user && (
+            {accessLevel === AccessLevel.ANONYMOUS && (
               <div className="mt-6 p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                 <h3 className="text-lg font-medium text-purple-800 dark:text-purple-300 mb-2">Sign Up Required</h3>
                 <p className="text-sm text-purple-600 dark:text-purple-400 mb-4">
@@ -42,7 +40,7 @@ const Search = () => {
             )}
           </p>
         </div>
-        <ContentSearchSection />
+        {accessLevel !== AccessLevel.ANONYMOUS && <ContentSearchSection />}
       </main>
       <Footer />
     </div>
