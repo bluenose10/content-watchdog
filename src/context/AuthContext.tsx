@@ -136,6 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Sign out
   const signOut = async () => {
     try {
+      console.log("Signing out...");
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Sign out error:", error);
@@ -145,6 +146,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setSession(null);
         setIsAdmin(false);
+        
+        // Force a reload of the page to ensure all auth state is fresh
+        window.location.href = '/';
       }
     } catch (error) {
       console.error("Sign out error:", error);
