@@ -57,7 +57,13 @@ a {
 
 /* Consistent section padding */
 section {
-  padding: 4rem 0;
+  padding: 2rem 0;
+}
+
+@media (min-width: 768px) {
+  section {
+    padding: 4rem 0;
+  }
 }
 
 /* Consistent container */
