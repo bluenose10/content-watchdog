@@ -1,6 +1,6 @@
 
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
-import { SearchQuery } from "@/lib/db-types";
+import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
 
 // Handles text-based searches (name or hashtag)
@@ -8,12 +8,7 @@ export async function handleTextSearch(
   query: string, 
   queryType: "name" | "hashtag", 
   user: User | null,
-  searchParams?: {
-    exactMatch?: boolean;
-    dateRestrict?: string; // last24h, lastWeek, lastMonth, lastYear
-    searchType?: string; // web, image, news, etc.
-    contentFilter?: string; // high, medium, off
-  }
+  searchParams?: TextSearchParams
 ): Promise<string> {
   const searchData: SearchQuery = {
     user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Anonymous user ID
@@ -30,11 +25,7 @@ export async function handleTextSearch(
 export async function handleImageSearch(
   file: File, 
   user: User | null,
-  searchParams?: {
-    similarityThreshold?: number; // 0.0 - 1.0
-    maxResults?: number;
-    searchMode?: "strict" | "relaxed";
-  }
+  searchParams?: ImageSearchParams
 ): Promise<string> {
   if (!user) {
     throw new Error("User must be signed in for image search");

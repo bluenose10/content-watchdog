@@ -1,6 +1,6 @@
 
 import { supabase } from './supabase';
-import { SearchQuery, SearchResult, UserSubscription } from './db-types';
+import { SearchQuery, SearchResult, UserSubscription, TextSearchParams, ImageSearchParams } from './db-types';
 import { getCacheKey, getCachedResults, cacheResults } from './search-cache';
 import { User } from '@supabase/supabase-js';
 
@@ -172,7 +172,7 @@ async function processSearch(
   return searchId;
 }
 
-export const performGoogleSearch = async (query: string, userId: string, searchParams: any = {}) => {
+export const performGoogleSearch = async (query: string, userId: string, searchParams: TextSearchParams = {}) => {
   try {
     const cacheKey = getCacheKey('text', query, searchParams);
     
@@ -208,6 +208,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
           num: '20'
         });
         
+        // Apply advanced search parameters
         if (searchParams?.exactMatch) {
           params.append('exactTerms', query);
         }
@@ -222,6 +223,39 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         
         if (searchParams?.contentFilter) {
           params.append('safe', searchParams.contentFilter === 'high' ? 'active' : 'off');
+        }
+        
+        if (searchParams?.siteFilter && searchParams.siteFilter.length > 0) {
+          params.append('siteSearch', searchParams.siteFilter.join('|'));
+          params.append('siteSearchFilter', 'i'); // include sites
+        }
+        
+        if (searchParams?.excludeSites && searchParams.excludeSites.length > 0) {
+          // If already filtering to specific sites, we can't also exclude sites
+          if (!searchParams?.siteFilter || searchParams.siteFilter.length === 0) {
+            params.append('siteSearch', searchParams.excludeSites.join('|'));
+            params.append('siteSearchFilter', 'e'); // exclude sites
+          }
+        }
+        
+        if (searchParams?.language) {
+          params.append('lr', `lang_${searchParams.language}`);
+        }
+        
+        if (searchParams?.country) {
+          params.append('cr', `country${searchParams.country.toUpperCase()}`);
+        }
+        
+        if (searchParams?.fileType) {
+          params.append('fileType', searchParams.fileType);
+        }
+        
+        if (searchParams?.rights) {
+          params.append('rights', searchParams.rights);
+        }
+        
+        if (searchParams?.sortBy === 'date') {
+          params.append('sort', 'date');
         }
         
         const response = await fetch(`https://www.googleapis.com/customsearch/v1?${params.toString()}`);
@@ -258,12 +292,14 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
   }
 };
 
-function generateMockSearchResults(query: string, searchParams: any = {}) {
+function generateMockSearchResults(query: string, searchParams: TextSearchParams = {}) {
   console.log('Generating mock search results for:', query, 'with params:', searchParams);
   
   const exactMatch = searchParams?.exactMatch;
   const dateRestrict = searchParams?.dateRestrict;
   const contentFilter = searchParams?.contentFilter || 'medium';
+  const siteFilter = searchParams?.siteFilter;
+  const excludeSites = searchParams?.excludeSites;
   
   const getTitlePrefix = () => {
     if (exactMatch) return `Exact match: "${query}"`;
@@ -282,20 +318,38 @@ function generateMockSearchResults(query: string, searchParams: any = {}) {
       'gettyimages.com', 'stock.adobe.com', 'istockphoto.com', 'medium.com'
     ];
     
-    if (contentFilter === 'high') {
-      return allSources.filter(s => !['tiktok.com', 'reddit.com', 'twitch.tv'].includes(s));
+    // Apply site filters if provided
+    let filteredSources = [...allSources];
+    
+    if (siteFilter && siteFilter.length > 0) {
+      filteredSources = allSources.filter(source => 
+        siteFilter.some(site => source.includes(site) || site.includes(source))
+      );
     }
     
-    return allSources;
+    if (excludeSites && excludeSites.length > 0) {
+      filteredSources = filteredSources.filter(source => 
+        !excludeSites.some(site => source.includes(site) || site.includes(source))
+      );
+    }
+    
+    if (contentFilter === 'high') {
+      filteredSources = filteredSources.filter(s => !['tiktok.com', 'reddit.com', 'twitch.tv'].includes(s));
+    }
+    
+    return filteredSources;
   };
   
   const sources = getSources();
   const titlePrefix = getTitlePrefix();
   
+  // Generate fewer results if we have filters applied to simulate filtering effect
+  const resultCount = sources.length;
+  
   const mockResults = {
     items: sources.map((source, index) => {
-      const isHighlyRelevant = index < 5 || (exactMatch && index < 8);
-      const isSomewhatRelevant = index < 10 || (dateRestrict && index < 12);
+      const isHighlyRelevant = index < Math.ceil(resultCount * 0.25) || (exactMatch && index < Math.ceil(resultCount * 0.4));
+      const isSomewhatRelevant = index < Math.ceil(resultCount * 0.6) || (dateRestrict && index < Math.ceil(resultCount * 0.75));
       
       return {
         title: `${titlePrefix} Profile on ${source.split('.')[0]}`,
@@ -314,7 +368,7 @@ function generateMockSearchResults(query: string, searchParams: any = {}) {
   return mockResults;
 }
 
-export const performImageSearch = async (imageUrl: string, userId: string, searchParams: any = {}) => {
+export const performImageSearch = async (imageUrl: string, userId: string, searchParams: ImageSearchParams = {}) => {
   try {
     const cacheKey = getCacheKey('image', imageUrl, searchParams);
     
@@ -335,8 +389,24 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
         const similarityThreshold = searchParams?.similarityThreshold || 0.6;
         const maxResults = searchParams?.maxResults || 20;
         const searchMode = searchParams?.searchMode || 'relaxed';
+        const includeSimilarColors = searchParams?.includeSimilarColors !== false;
+        const includePartialMatches = searchParams?.includePartialMatches !== false;
+        const minSize = searchParams?.minSize || 'medium';
+        const imageType = searchParams?.imageType || undefined;
+        const imageColorType = searchParams?.imageColorType || undefined;
+        const dominantColor = searchParams?.dominantColor || undefined;
         
-        console.log('Image search params:', { similarityThreshold, maxResults, searchMode });
+        console.log('Image search params:', { 
+          similarityThreshold, 
+          maxResults, 
+          searchMode,
+          includeSimilarColors,
+          includePartialMatches,
+          minSize,
+          imageType,
+          imageColorType,
+          dominantColor
+        });
         
         const getMatchQuality = (index: number) => {
           if (searchMode === 'strict') {
@@ -350,7 +420,8 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
           return { quality: 'low', score: 0.3 + (Math.random() * 0.3) };
         };
         
-        const sources = [
+        // Filter sources based on image search parameters
+        let sources = [
           'linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 
           'youtube.com', 'tiktok.com', 'pinterest.com', 'reddit.com', 
           'tumblr.com', 'flickr.com', 'deviantart.com', 'behance.net', 
@@ -358,10 +429,52 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
           'gettyimages.com', 'stock.adobe.com', 'istockphoto.com', 'medium.com'
         ];
         
+        // If we're looking for specific image types, filter accordingly
+        if (imageType) {
+          switch (imageType) {
+            case 'face':
+              sources = sources.filter(s => ['facebook.com', 'linkedin.com', 'instagram.com'].includes(s));
+              break;
+            case 'photo':
+              sources = sources.filter(s => ['unsplash.com', 'pexels.com', 'flickr.com', 'instagram.com'].includes(s));
+              break;
+            case 'clipart':
+              sources = sources.filter(s => ['shutterstock.com', 'stock.adobe.com', 'istockphoto.com'].includes(s));
+              break;
+            case 'lineart':
+              sources = sources.filter(s => ['behance.net', 'dribbble.com', 'deviantart.com'].includes(s));
+              break;
+            case 'animated':
+              sources = sources.filter(s => ['giphy.com', 'tenor.com', 'tumblr.com'].includes(s));
+              break;
+          }
+        }
+        
         const mockItems = sources.map((source, index) => {
           const matchQuality = getMatchQuality(index);
           
+          // Apply similarity threshold filter
           if (matchQuality.score < similarityThreshold) {
+            return null;
+          }
+          
+          // Apply color type filter (for demonstration)
+          if (imageColorType && Math.random() > 0.7) {
+            return null;
+          }
+          
+          // Apply dominant color filter (for demonstration)
+          if (dominantColor && Math.random() > 0.6) {
+            return null;
+          }
+          
+          // Apply partial match filtering
+          if (!includePartialMatches && Math.random() < 0.3) {
+            return null;
+          }
+          
+          // Apply color similarity filtering
+          if (!includeSimilarColors && Math.random() < 0.4) {
             return null;
           }
           
@@ -375,7 +488,11 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
               thumbnailLink: `https://picsum.photos/200/300?random=${index+1}`,
             },
             similarityScore: matchQuality.score,
-            matchQuality: matchQuality.quality
+            matchQuality: matchQuality.quality,
+            // Additional metadata for advanced filtering
+            size: minSize,
+            colorType: imageColorType,
+            dominantColor: dominantColor
           };
         }).filter(Boolean);
         
