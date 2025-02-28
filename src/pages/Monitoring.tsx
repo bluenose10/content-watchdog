@@ -3,6 +3,7 @@ import React from 'react';
 import { Layout } from '@/components/layout/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RateLimitMonitor } from '@/components/monitoring/RateLimitMonitor';
+import { SearchAnalytics } from '@/components/monitoring/SearchAnalytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCacheStats } from '@/lib/search-cache';
 
@@ -19,6 +20,7 @@ export default function Monitoring() {
           <TabsList className="mb-4">
             <TabsTrigger value="rate-limits">Rate Limits</TabsTrigger>
             <TabsTrigger value="cache">Cache Status</TabsTrigger>
+            <TabsTrigger value="search-analytics">Search Analytics</TabsTrigger>
             <TabsTrigger value="api">API Usage</TabsTrigger>
           </TabsList>
           
@@ -65,6 +67,10 @@ export default function Monitoring() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="search-analytics">
+            <SearchAnalytics />
           </TabsContent>
           
           <TabsContent value="api">
