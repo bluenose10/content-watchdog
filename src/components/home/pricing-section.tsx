@@ -36,9 +36,9 @@ export function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="relative overflow-hidden py-6 md:py-10">
+    <section id="pricing" className="relative overflow-hidden py-6 md:py-4">
       <div className="container mx-auto">
-        <div className="mb-10 text-center">
+        <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold mb-3">Pricing Plans</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Choose the plan that fits your needs
@@ -63,7 +63,7 @@ export function PricingSection() {
           ))}
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             14-day money-back guarantee. No contracts.
           </p>
