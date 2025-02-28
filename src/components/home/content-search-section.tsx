@@ -19,10 +19,14 @@ export function ContentSearchSection() {
   const [error, setError] = useState<string | null>(null);
   const { accessLevel } = useProtectedRoute(false);
 
-  const checkUserRateLimit = () => {
-    // Skip rate limiting for non-production environments
+  const checkUserRateLimit = (): { allowed: boolean; remaining: number; resetTime: number; retryAfter?: number } => {
+    // Skip rate limiting for non-production environments but maintain consistent return type
     if (import.meta.env.DEV && !import.meta.env.VITE_ENABLE_RATE_LIMIT_IN_DEV) {
-      return { allowed: true };
+      return { 
+        allowed: true, 
+        remaining: 1000, 
+        resetTime: Date.now() + 3600000 // 1 hour from now
+      };
     }
     
     // Determine user tier from accessLevel
