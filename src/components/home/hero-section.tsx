@@ -51,12 +51,12 @@ export const HeroSection = () => {
             </div>
           </div>
           
-          {/* How It Works Section - Enhanced with more specific details */}
+          {/* How It Works Section - Enhanced with more specific details and increased spacing */}
           <div className="relative">
             <h3 className="text-lg font-medium mb-8 text-center">How Our Protection Process Works</h3>
             
             {/* Connecting line - positioned lower with more space */}
-            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 -z-10 translate-y-8"></div>
+            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 -z-10 translate-y-4"></div>
             
             <div className="grid md:grid-cols-3 gap-12 md:gap-16 relative">
               <div className="flex flex-col items-center text-center">
