@@ -18,6 +18,7 @@ import MockCheckout from "./pages/MockCheckout";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CookiePolicy from "./pages/CookiePolicy";
+import Analytics from "./pages/Analytics";
 import { useAuth } from "./context/AuthContext";
 
 // Create a protected route component
@@ -107,6 +108,11 @@ const AppRoutes = () => {
       <Route path="/search" element={
         <ProtectedRoute>
           <Search />
+        </ProtectedRoute>
+      } />
+      <Route path="/analytics" element={
+        <ProtectedRoute>
+          <Analytics />
         </ProtectedRoute>
       } />
       
