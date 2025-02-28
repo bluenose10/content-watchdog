@@ -370,7 +370,7 @@ interface ChartProps {
   dataKey: string;
   nameKey: string;
   height?: number;
-  width?: number;
+  width?: number | string; // Updated to accept both number and string
   title?: string;
   fill?: string;
   stroke?: string;
@@ -396,6 +396,12 @@ export const Chart = ({
       label: title || dataKey,
       color: fill || stroke || "#8884d8"
     }
+  };
+
+  // Convert width to a style object that accepts either string or number
+  const styleProps = {
+    height: height,
+    width: width
   };
 
   let chartComponent;
@@ -481,7 +487,7 @@ export const Chart = ({
     <ChartContainer 
       config={config} 
       className="h-[300px] w-full"
-      style={{ height: height, width: width }}
+      style={styleProps}
     >
       {chartComponent}
     </ChartContainer>
