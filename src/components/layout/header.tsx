@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { LogOut, Menu, Shield, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -97,7 +97,11 @@ export function Header() {
             href="/"
             className="flex items-center gap-2 font-bold text-xl"
           >
-            <Shield className="h-6 w-6" />
+            <img 
+              src="/lovable-uploads/822ca5bd-71ae-4f2a-b354-b4182a9f42d7.png" 
+              alt="Influence Guard Logo" 
+              className="h-9 w-9" 
+            />
             <span className="text-gradient">Influence Guard</span>
           </a>
         </div>
