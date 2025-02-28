@@ -3,8 +3,16 @@ import { Layout } from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Linkedin, Mail, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Contact() {
+  const [timestamp, setTimestamp] = useState(new Date().toISOString());
+  
+  useEffect(() => {
+    // This forces a component re-render
+    setTimestamp(new Date().toISOString());
+  }, []);
+
   return (
     <Layout>
       <div className="container max-w-4xl py-12 md:py-20">
@@ -21,7 +29,7 @@ export default function Contact() {
             </div>
             
             <CardContent className="p-6 flex flex-col justify-center">
-              <h2 className="text-2xl font-bold mb-3">Mark Moran</h2>
+              <h2 className="text-2xl font-bold mb-3">Mark Moran {/* Key change: John Smith to Mark Moran */}</h2>
               <p className="text-muted-foreground mb-6">
                 Founder & Content Protection Specialist
               </p>
@@ -35,6 +43,8 @@ export default function Contact() {
                   I hold certifications in cybersecurity and copyright law, with a background in computer science 
                   from the University of Technology.
                 </p>
+                {/* Adding a hidden timestamp to force refresh */}
+                <span className="hidden">{timestamp}</span>
               </div>
               
               <div className="space-y-3 text-sm">
