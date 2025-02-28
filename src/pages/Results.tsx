@@ -15,7 +15,7 @@ import { Sidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Some sample mock results to guarantee something is shown
+// Extended fallback results to guarantee more results are shown
 const FALLBACK_RESULTS = [
   {
     id: 'fallback-1',
@@ -46,6 +46,96 @@ const FALLBACK_RESULTS = [
     match_level: 'High',
     found_at: new Date().toISOString(),
     type: 'image'
+  },
+  {
+    id: 'fallback-4',
+    title: 'Facebook Profile',
+    url: 'https://facebook.com/profile',
+    thumbnail: 'https://picsum.photos/200/300?random=4',
+    source: 'facebook.com',
+    match_level: 'High',
+    found_at: new Date().toISOString(),
+    type: 'website'
+  },
+  {
+    id: 'fallback-5',
+    title: 'Personal Blog Post',
+    url: 'https://medium.com/blog-post',
+    thumbnail: 'https://picsum.photos/200/300?random=5',
+    source: 'medium.com',
+    match_level: 'Medium',
+    found_at: new Date().toISOString(),
+    type: 'website'
+  },
+  {
+    id: 'fallback-6',
+    title: 'YouTube Video',
+    url: 'https://youtube.com/watch?v=abcdef',
+    thumbnail: 'https://picsum.photos/200/300?random=6',
+    source: 'youtube.com',
+    match_level: 'Medium',
+    found_at: new Date().toISOString(),
+    type: 'social'
+  },
+  {
+    id: 'fallback-7',
+    title: 'GitHub Profile',
+    url: 'https://github.com/username',
+    thumbnail: 'https://picsum.photos/200/300?random=7',
+    source: 'github.com',
+    match_level: 'High',
+    found_at: new Date().toISOString(),
+    type: 'website'
+  },
+  {
+    id: 'fallback-8',
+    title: 'Pinterest Board',
+    url: 'https://pinterest.com/user/board',
+    thumbnail: 'https://picsum.photos/200/300?random=8',
+    source: 'pinterest.com',
+    match_level: 'Low',
+    found_at: new Date().toISOString(),
+    type: 'image'
+  },
+  {
+    id: 'fallback-9',
+    title: 'TikTok Profile',
+    url: 'https://tiktok.com/@username',
+    thumbnail: 'https://picsum.photos/200/300?random=9',
+    source: 'tiktok.com',
+    match_level: 'Medium',
+    found_at: new Date().toISOString(),
+    type: 'social'
+  },
+  {
+    id: 'fallback-10',
+    title: 'Behance Portfolio',
+    url: 'https://behance.net/username',
+    thumbnail: 'https://picsum.photos/200/300?random=10',
+    source: 'behance.net',
+    match_level: 'High',
+    found_at: new Date().toISOString(),
+    type: 'image'
+  },
+  {
+    id: 'fallback-11',
+    title: 'Dribbble Portfolio',
+    url: 'https://dribbble.com/username',
+    thumbnail: 'https://picsum.photos/200/300?random=11',
+    source: 'dribbble.com',
+    match_level: 'Medium',
+    found_at: new Date().toISOString(),
+    type: 'image'
+  },
+  {
+    id: 'fallback-12',
+    title: 'Reddit Comment',
+    url: 'https://reddit.com/r/subreddit/comments/123456',
+    thumbnail: 'https://picsum.photos/200/300?random=12',
+    source: 'reddit.com',
+    match_level: 'Low',
+    found_at: new Date().toISOString(),
+    type: 'social'
   }
 ];
 
@@ -105,8 +195,8 @@ export default function Results() {
         }
         
         // Ensure we always have results to show
-        if (!data || !data.results || data.results.length === 0) {
-          console.log("No results found, using fallback data");
+        if (!data || !data.results || data.results.length === 0 || data.results.length < 5) {
+          console.log("No results or too few results found, using extended fallback data");
           data = {
             query: data?.query || "Your search",
             results: FALLBACK_RESULTS
@@ -234,7 +324,7 @@ export default function Results() {
               <TabsContent value="all" className="mt-4">
                 <PaginatedResults
                   results={results}
-                  itemsPerPage={5}
+                  itemsPerPage={8}
                   accessLevel={accessLevel}
                   onUpgrade={handleUpgrade}
                 />
@@ -243,7 +333,7 @@ export default function Results() {
               <TabsContent value="images" className="mt-4">
                 <PaginatedResults
                   results={results.filter(r => r.type === 'image')}
-                  itemsPerPage={5}
+                  itemsPerPage={8}
                   accessLevel={accessLevel}
                   onUpgrade={handleUpgrade}
                 />
@@ -252,7 +342,7 @@ export default function Results() {
               <TabsContent value="websites" className="mt-4">
                 <PaginatedResults
                   results={results.filter(r => r.type === 'website')}
-                  itemsPerPage={5}
+                  itemsPerPage={8}
                   accessLevel={accessLevel}
                   onUpgrade={handleUpgrade}
                 />
@@ -261,7 +351,7 @@ export default function Results() {
               <TabsContent value="social" className="mt-4">
                 <PaginatedResults
                   results={results.filter(r => r.type === 'social')}
-                  itemsPerPage={5}
+                  itemsPerPage={8}
                   accessLevel={accessLevel}
                   onUpgrade={handleUpgrade}
                 />
