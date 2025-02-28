@@ -44,24 +44,36 @@ export type Database = {
           created_at: string | null
           id: string
           image_url: string | null
+          last_run: string | null
           query_text: string | null
           query_type: string
+          schedule_interval: string | null
+          scheduled: boolean | null
+          search_params_json: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          last_run?: string | null
           query_text?: string | null
           query_type: string
+          schedule_interval?: string | null
+          scheduled?: boolean | null
+          search_params_json?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          last_run?: string | null
           query_text?: string | null
           query_type?: string
+          schedule_interval?: string | null
+          scheduled?: boolean | null
+          search_params_json?: string | null
           user_id?: string
         }
         Relationships: []
