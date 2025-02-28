@@ -7,6 +7,10 @@ CREATE TABLE search_queries (
   query_type TEXT NOT NULL CHECK (query_type IN ('name', 'hashtag', 'image')),
   image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  search_params_json TEXT,
+  scheduled BOOLEAN DEFAULT false,
+  schedule_interval TEXT,
+  last_run TIMESTAMP WITH TIME ZONE,
   
   -- Make sure image_url is present for image searches, and query_text for other types
   CONSTRAINT valid_search_data CHECK (
@@ -14,6 +18,12 @@ CREATE TABLE search_queries (
     (query_type != 'image' AND query_text IS NOT NULL)
   )
 );
+
+-- ADD INDEXES for frequently queried columns
+CREATE INDEX idx_search_queries_user_id ON search_queries(user_id);
+CREATE INDEX idx_search_queries_query_type ON search_queries(query_type);
+CREATE INDEX idx_search_queries_created_at ON search_queries(created_at DESC);
+CREATE INDEX idx_search_queries_scheduled ON search_queries(scheduled) WHERE scheduled = true;
 
 -- Create search_results table
 CREATE TABLE search_results (
@@ -25,8 +35,16 @@ CREATE TABLE search_results (
   source TEXT NOT NULL,
   match_level TEXT NOT NULL CHECK (match_level IN ('Low', 'Medium', 'High')),
   found_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  similarity_score FLOAT,
+  relevance_score FLOAT
 );
+
+-- ADD INDEXES for search_results
+CREATE INDEX idx_search_results_search_id ON search_results(search_id);
+CREATE INDEX idx_search_results_match_level ON search_results(match_level, search_id);
+CREATE INDEX idx_search_results_similarity ON search_results(similarity_score DESC) WHERE similarity_score IS NOT NULL;
+CREATE INDEX idx_search_results_relevance ON search_results(relevance_score DESC) WHERE relevance_score IS NOT NULL;
 
 -- Create plans table for subscription plans
 CREATE TABLE plans (
@@ -36,6 +54,7 @@ CREATE TABLE plans (
   search_limit INTEGER NOT NULL,
   result_limit INTEGER NOT NULL,
   monitoring_limit INTEGER NOT NULL,
+  scheduled_search_limit INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -50,13 +69,15 @@ CREATE TABLE user_subscriptions (
   UNIQUE (user_id)
 );
 
--- Insert default plans
-INSERT INTO plans (id, name, price, search_limit, result_limit, monitoring_limit) VALUES
-('free', 'Free', 0, 5, 5, 0),
-('pro', 'Pro', 19.99, 50, -1, 10),
-('business', 'Business', 49.99, -1, -1, -1);
+-- ADD INDEX for subscription lookup
+CREATE INDEX idx_user_subscriptions_user_id ON user_subscriptions(user_id);
+CREATE INDEX idx_user_subscriptions_status ON user_subscriptions(status, current_period_end);
 
--- Create RLS policies
+-- Insert default plans
+INSERT INTO plans (id, name, price, search_limit, result_limit, monitoring_limit, scheduled_search_limit) VALUES
+('free', 'Free', 0, 5, 5, 0, 0),
+('pro', 'Pro', 19.99, 50, -1, 10, 5),
+('business', 'Business', 49.99, -1, -1, -1, -1);
 
 -- Enable RLS on all tables
 ALTER TABLE search_queries ENABLE ROW LEVEL SECURITY;
@@ -97,3 +118,50 @@ CREATE POLICY select_own_subscription ON user_subscriptions
 -- Set up storage RLS
 -- GRANT ALL ON storage.buckets TO authenticated;
 -- GRANT ALL ON storage.objects TO authenticated;
+
+-- Create stats tables for performance monitoring
+CREATE TABLE search_metrics (
+  id SERIAL PRIMARY KEY,
+  query_type TEXT NOT NULL,
+  execution_time_ms INTEGER NOT NULL,
+  result_count INTEGER NOT NULL,
+  cache_hit BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create materialized view for popular searches
+CREATE MATERIALIZED VIEW popular_searches AS
+SELECT 
+  query_text,
+  query_type,
+  COUNT(*) as search_count
+FROM 
+  search_queries
+WHERE 
+  created_at > (CURRENT_DATE - INTERVAL '30 days')
+  AND query_text IS NOT NULL
+GROUP BY 
+  query_text, query_type
+ORDER BY 
+  search_count DESC
+LIMIT 100;
+
+-- Create index on the materialized view
+CREATE INDEX idx_popular_searches_count ON popular_searches(search_count DESC);
+
+-- Create function to refresh the materialized view
+CREATE OR REPLACE FUNCTION refresh_popular_searches()
+RETURNS TRIGGER AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW CONCURRENTLY popular_searches;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a trigger to refresh the view periodically (every 100 inserts)
+CREATE TRIGGER refresh_popular_searches_trigger
+AFTER INSERT ON search_queries
+REFERENCING NEW TABLE AS new_table
+FOR EACH STATEMENT
+WHEN (pg_trigger_depth() = 0)
+EXECUTE PROCEDURE refresh_popular_searches();

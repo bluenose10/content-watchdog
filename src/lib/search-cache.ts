@@ -1,452 +1,241 @@
 
-/**
- * Enhanced in-memory cache for search results to prevent redundant API calls
- */
-interface CacheItem {
+// Define a more structured cache entry type
+interface CacheEntry {
+  data: any;
   timestamp: number;
-  results: any;
-  hitCount: number;     // Track how often this cache entry is accessed
-  lastAccessed: number; // When was this entry last accessed
+  hits: number;
+  lastAccessed: number;
 }
 
-// Cache storage
-const cache: Record<string, CacheItem> = {};
+// In-memory cache with improved structure
+const cache: Record<string, CacheEntry> = {};
 
-// Import cache expiration time from constants
-import { SEARCH_CACHE_EXPIRATION } from "./constants";
+// Cache statistics
+const cacheStats = {
+  hits: 0,
+  misses: 0,
+  size: 0,
+  maxSize: 100, // Default max size
+  keyAccess: {} as Record<string, number>,
+};
+
+// Cache configuration
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+const CACHE_CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Generate a unique cache key based on search params
+ * Generate a consistent cache key for a search query
  */
-export const getCacheKey = (queryType: string, query: string, params?: any): string => {
-  // Normalize the query to improve cache hit rate
-  const normalizedQuery = query.trim().toLowerCase();
+export const getCacheKey = (type: string, query: string, params: any = {}): string => {
+  // Sort params to ensure consistent keys regardless of property order
+  const sortedParams = params ? 
+    JSON.stringify(params, Object.keys(params).sort()) : 
+    '{}';
   
-  // Handle different parameter formats consistently
-  const normalizedParams = params ? JSON.stringify(sortObjectKeys(params)) : 'default';
-  
-  return `${queryType}_${normalizedQuery}_${normalizedParams}`;
+  return `${type}:${query.toLowerCase()}:${sortedParams}`;
 };
 
 /**
- * Sort object keys to ensure consistent cache keys regardless of parameter order
+ * Set the maximum cache size
  */
-const sortObjectKeys = (obj: Record<string, any>): Record<string, any> => {
-  return Object.keys(obj).sort().reduce((result, key) => {
-    result[key] = obj[key];
-    return result;
-  }, {} as Record<string, any>);
+export const setCacheMaxSize = (size: number): void => {
+  cacheStats.maxSize = size;
+  cleanupCache();
 };
 
 /**
- * Get cached search results if available and not expired
- * Returns null if cache miss or expired
+ * Get cached search results if available
  */
 export const getCachedResults = (key: string): any | null => {
-  const item = cache[key];
+  const entry = cache[key];
   
-  if (!item) {
-    console.log('Cache miss for key:', key);
+  if (!entry) {
+    cacheStats.misses++;
     return null;
   }
   
   const now = Date.now();
   
-  // Check if cache has expired (with dynamic expiration based on popularity)
-  const adjustedExpiration = getAdjustedExpiration(item);
-  if (now - item.timestamp > adjustedExpiration) {
-    console.log('Cache expired for key:', key);
+  // Check if entry has expired
+  if (now - entry.timestamp > CACHE_TTL) {
     delete cache[key];
+    cacheStats.size = Object.keys(cache).length;
+    cacheStats.misses++;
     return null;
   }
   
-  // Update hit count and last accessed time
-  item.hitCount += 1;
-  item.lastAccessed = now;
+  // Update hit count and last access time
+  entry.hits++;
+  entry.lastAccessed = now;
   
-  console.log(`Cache hit for key: ${key} (hit count: ${item.hitCount})`);
-  return item.results;
+  // Update access stats
+  cacheStats.hits++;
+  cacheStats.keyAccess[key] = (cacheStats.keyAccess[key] || 0) + 1;
+  
+  return entry.data;
 };
 
 /**
- * Calculate adjusted expiration time based on item popularity
- * Popular items get longer expiration times
+ * Store search results in cache
  */
-const getAdjustedExpiration = (item: CacheItem): number => {
-  // Base expiration from constants
-  let expiration = SEARCH_CACHE_EXPIRATION;
-  
-  // Items with more hits stay in cache longer (up to 3x longer for very popular items)
-  if (item.hitCount > 10) {
-    expiration = expiration * 3;
-  } else if (item.hitCount > 5) {
-    expiration = expiration * 2;
-  } else if (item.hitCount > 2) {
-    expiration = expiration * 1.5;
+export const cacheResults = (key: string, data: any): void => {
+  // Before adding new entry, check if we need to cleanup
+  if (Object.keys(cache).length >= cacheStats.maxSize) {
+    cleanupCache();
   }
   
-  return expiration;
-};
-
-/**
- * Cache search results with additional metadata
- */
-export const cacheResults = (key: string, results: any): void => {
+  // Store the data
   cache[key] = {
+    data,
     timestamp: Date.now(),
-    results,
-    hitCount: 1,
-    lastAccessed: Date.now()
+    hits: 0,
+    lastAccessed: Date.now(),
   };
   
-  console.log('Cached results for key:', key);
+  cacheStats.size = Object.keys(cache).length;
   
-  // Perform smart cache cleanup if it's getting too large
-  if (Object.keys(cache).length > 100) {
-    performSmartCacheCleanup();
-  }
+  console.log(`Cached results for key: ${key}`);
 };
 
 /**
- * Smart cache cleanup that considers both age and usage patterns
+ * Remove specific entry from cache
  */
-const performSmartCacheCleanup = (): void => {
-  const keys = Object.keys(cache);
-  if (keys.length <= 50) return; // Don't clean up if we're under 50 items
-  
-  // Score each cache entry based on age, hit count, and recency of access
-  const scoredEntries = keys.map(key => {
-    const item = cache[key];
-    const now = Date.now();
-    
-    // Calculate age score (older items get higher scores = more likely to be removed)
-    const ageScore = (now - item.timestamp) / SEARCH_CACHE_EXPIRATION;
-    
-    // Calculate popularity score (less popular items get higher scores = more likely to be removed)
-    const popularityScore = 1 / (Math.max(item.hitCount, 1));
-    
-    // Calculate recency score (less recently accessed items get higher scores = more likely to be removed)
-    const recencyScore = (now - item.lastAccessed) / SEARCH_CACHE_EXPIRATION;
-    
-    // Combined score with different weights for each factor
-    const combinedScore = (ageScore * 0.4) + (popularityScore * 0.4) + (recencyScore * 0.2);
-    
-    return { key, score: combinedScore };
-  });
-  
-  // Sort by score (highest first = most likely to be removed)
-  scoredEntries.sort((a, b) => b.score - a.score);
-  
-  // Remove the top 20% of entries with highest scores
-  const removeCount = Math.ceil(keys.length * 0.2);
-  for (let i = 0; i < removeCount; i++) {
-    if (scoredEntries[i]) {
-      delete cache[scoredEntries[i].key];
-    }
-  }
-  
-  console.log(`Smart cache cleanup: removed ${removeCount} entries based on age, popularity, and recency`);
-};
-
-/**
- * Clear the entire cache or specific keys
- */
-export const clearCache = (key?: string): void => {
-  if (key) {
+export const invalidateCache = (key: string): boolean => {
+  if (cache[key]) {
     delete cache[key];
-    console.log('Cleared cache for key:', key);
-  } else {
-    Object.keys(cache).forEach(k => delete cache[k]);
-    console.log('Cleared entire cache');
+    cacheStats.size = Object.keys(cache).length;
+    
+    // Also remove from access stats
+    if (cacheStats.keyAccess[key]) {
+      delete cacheStats.keyAccess[key];
+    }
+    
+    return true;
   }
+  return false;
 };
 
 /**
- * Pre-warm the cache with frequently used searches
+ * Clear the entire cache
  */
-export const preWarmCache = async (commonQueries: Array<{type: string, query: string, params?: any}>): Promise<void> => {
-  console.log('Pre-warming cache with common queries...');
-  
-  for (const entry of commonQueries) {
-    const key = getCacheKey(entry.type, entry.query, entry.params);
-    
-    // Only fetch if not already in cache
-    if (!cache[key]) {
-      try {
-        // Simulate API call to get results (replace with actual implementation)
-        const results = await getSearchResults(entry.query);
-        
-        // Cache the results
-        cacheResults(key, results);
-      } catch (error) {
-        console.error(`Error pre-warming cache for query "${entry.query}":`, error);
-      }
-    }
-  }
-  
-  console.log('Cache pre-warming complete');
-};
-
-/**
- * Get search usage statistics from cache
- */
-export const getCacheStats = (): { 
-  size: number, 
-  oldestEntry: number, 
-  newestEntry: number,
-  averageHitCount: number,
-  hitRate: number,
-  totalHits: number,
-  totalMisses: number,
-  popularQueries: Array<{key: string, hits: number}>
-} => {
-  const keys = Object.keys(cache);
-  if (keys.length === 0) {
-    return { 
-      size: 0, 
-      oldestEntry: 0, 
-      newestEntry: 0,
-      averageHitCount: 0,
-      hitRate: 0,
-      totalHits: 0,
-      totalMisses: 0,
-      popularQueries: []
-    };
-  }
-  
-  // Calculate statistics
-  let totalHitCount = 0;
-  let oldestEntry = Date.now();
-  let newestEntry = 0;
-  
-  // Track hit statistics for each cached item
-  keys.forEach(key => {
-    const item = cache[key];
-    totalHitCount += item.hitCount;
-    
-    if (item.timestamp < oldestEntry) {
-      oldestEntry = item.timestamp;
-    }
-    
-    if (item.timestamp > newestEntry) {
-      newestEntry = item.timestamp;
-    }
+export const clearCache = (): void => {
+  Object.keys(cache).forEach(key => {
+    delete cache[key];
   });
   
-  // Calculate hit rate (approximate from metadata)
-  const totalHits = totalHitCount;
-  const totalMisses = Math.max(0, globalHitsMisses.misses);
-  const hitRate = totalHits / (totalHits + totalMisses);
+  // Reset stats
+  cacheStats.size = 0;
+  cacheStats.keyAccess = {};
   
-  // Get popular queries (top 5)
-  const popularQueries = keys
-    .map(key => ({ key, hits: cache[key].hitCount }))
-    .sort((a, b) => b.hits - a.hits)
-    .slice(0, 5);
-  
-  return {
-    size: keys.length,
-    oldestEntry,
-    newestEntry,
-    averageHitCount: totalHitCount / keys.length,
-    hitRate,
-    totalHits,
-    totalMisses,
-    popularQueries
-  };
-};
-
-// Global counter for tracking cache hits/misses
-const globalHitsMisses = {
-  hits: 0,
-  misses: 0
+  console.log('Search cache cleared');
 };
 
 /**
- * Update the global hit/miss counters
+ * Cleanup the cache by removing expired or least used entries
  */
-export const updateHitMissStats = (isHit: boolean): void => {
-  if (isHit) {
-    globalHitsMisses.hits++;
+const cleanupCache = (): void => {
+  const now = Date.now();
+  const entries = Object.entries(cache);
+  
+  if (entries.length <= cacheStats.maxSize * 0.9) {
+    // If we're under 90% capacity, only remove expired entries
+    entries.forEach(([key, entry]) => {
+      if (now - entry.timestamp > CACHE_TTL) {
+        delete cache[key];
+      }
+    });
   } else {
-    globalHitsMisses.misses++;
-  }
-};
-
-/**
- * Save cache to localStorage for persistence between sessions
- */
-export const persistCache = (): void => {
-  try {
-    // Only save minimal cache data to avoid localStorage size limits
-    const serializedCache = Object.entries(cache).map(([key, item]) => ({
-      key,
-      timestamp: item.timestamp,
-      hitCount: item.hitCount,
-      results: item.results
-    }));
-    
-    localStorage.setItem('search_cache', JSON.stringify(serializedCache));
-    console.log(`Cache persisted with ${serializedCache.length} entries`);
-  } catch (error) {
-    console.error('Error persisting cache to localStorage:', error);
-  }
-};
-
-/**
- * Load cache from localStorage
- */
-export const loadPersistedCache = (): void => {
-  try {
-    const serializedCache = localStorage.getItem('search_cache');
-    if (!serializedCache) return;
-    
-    const cacheData = JSON.parse(serializedCache);
-    
-    // Restore cache entries
-    cacheData.forEach((entry: any) => {
-      cache[entry.key] = {
-        timestamp: entry.timestamp,
-        results: entry.results,
-        hitCount: entry.hitCount,
-        lastAccessed: Date.now()
-      };
+    // If we're over 90% capacity, also remove least recently used entries
+    const sortedEntries = entries.sort((a, b) => {
+      // First sort by expiration
+      const aExpired = now - a[1].timestamp > CACHE_TTL;
+      const bExpired = now - b[1].timestamp > CACHE_TTL;
+      
+      if (aExpired && !bExpired) return -1;
+      if (!aExpired && bExpired) return 1;
+      
+      // Then sort by hits (least used first)
+      if (a[1].hits !== b[1].hits) {
+        return a[1].hits - b[1].hits;
+      }
+      
+      // Finally sort by last accessed time
+      return a[1].lastAccessed - b[1].lastAccessed;
     });
     
-    console.log(`Loaded ${cacheData.length} entries from persisted cache`);
-  } catch (error) {
-    console.error('Error loading persisted cache from localStorage:', error);
+    // Remove entries until we're at 80% capacity
+    const targetSize = Math.floor(cacheStats.maxSize * 0.8);
+    const entriesToRemove = sortedEntries.slice(0, sortedEntries.length - targetSize);
+    
+    entriesToRemove.forEach(([key]) => {
+      delete cache[key];
+      if (cacheStats.keyAccess[key]) {
+        delete cacheStats.keyAccess[key];
+      }
+    });
   }
-};
-
-// Mock data for search results
-const mockResults = {
-  '1': {
-    query: 'Digital artwork sunset',
-    results: [
-      {
-        id: '1',
-        title: 'Digital Sunset Artwork',
-        url: 'https://example.com/digital-sunset',
-        thumbnail: 'https://example.com/images/sunset-thumb.jpg',
-        source: 'instagram.com',
-        match_level: 'High',
-        found_at: '2023-04-10T15:30:00Z',
-        type: 'image'
-      },
-      {
-        id: '2',
-        title: 'Sunset Digital Art Collection',
-        url: 'https://example.com/sunset-collection',
-        thumbnail: 'https://example.com/images/collection-thumb.jpg',
-        source: 'behance.net',
-        match_level: 'Medium',
-        found_at: '2023-04-09T12:45:00Z',
-        type: 'website'
-      },
-      {
-        id: '3',
-        title: 'Sunset Artwork Repost',
-        url: 'https://example.com/sunset-repost',
-        thumbnail: 'https://example.com/images/repost-thumb.jpg',
-        source: 'facebook.com',
-        match_level: 'High',
-        found_at: '2023-04-08T18:20:00Z',
-        type: 'social'
-      }
-    ]
-  },
-  '2': {
-    query: 'Mountain landscape photo',
-    results: [
-      {
-        id: '4',
-        title: 'Mountain Landscape Photography',
-        url: 'https://example.com/mountain-landscape',
-        thumbnail: 'https://example.com/images/mountain-thumb.jpg',
-        source: 'flickr.com',
-        match_level: 'High',
-        found_at: '2023-04-07T09:15:00Z',
-        type: 'image'
-      },
-      {
-        id: '5',
-        title: 'Mountain Photo Collection',
-        url: 'https://example.com/mountain-collection',
-        thumbnail: 'https://example.com/images/mountain-collection-thumb.jpg',
-        source: '500px.com',
-        match_level: 'Low',
-        found_at: '2023-04-06T14:30:00Z',
-        type: 'website'
-      }
-    ]
-  },
-  '3': {
-    query: '#naturebeauty',
-    results: [
-      {
-        id: '6',
-        title: 'Nature Beauty Post',
-        url: 'https://example.com/nature-beauty',
-        thumbnail: 'https://example.com/images/nature-thumb.jpg',
-        source: 'twitter.com',
-        match_level: 'Medium',
-        found_at: '2023-04-05T11:45:00Z',
-        type: 'social'
-      },
-      {
-        id: '7',
-        title: 'Nature Photography Website',
-        url: 'https://example.com/nature-photography',
-        thumbnail: 'https://example.com/images/nature-website-thumb.jpg',
-        source: 'wordpress.com',
-        match_level: 'Low',
-        found_at: '2023-04-04T16:20:00Z',
-        type: 'website'
-      },
-      {
-        id: '8',
-        title: 'Nature Beauty Images',
-        url: 'https://example.com/nature-images',
-        thumbnail: 'https://example.com/images/nature-images-thumb.jpg',
-        source: 'pinterest.com',
-        match_level: 'High',
-        found_at: '2023-04-03T13:10:00Z',
-        type: 'image'
-      }
-    ]
-  }
+  
+  cacheStats.size = Object.keys(cache).length;
+  console.log(`Cache cleanup complete. New size: ${cacheStats.size}`);
 };
 
 /**
- * Mock function to get search results - simulates an API call
+ * Get cache statistics for monitoring
  */
-export const getSearchResults = async (id: string): Promise<any> => {
-  // Update miss counter for tracking
-  updateHitMissStats(false);
+export const getCacheStats = () => {
+  const totalRequests = cacheStats.hits + cacheStats.misses;
+  const hitRate = totalRequests > 0 ? cacheStats.hits / totalRequests : 0;
   
-  return new Promise((resolve) => {
-    // Simulate API delay
-    setTimeout(() => {
-      const results = mockResults[id as keyof typeof mockResults] || { 
-        query: 'Unknown search',
-        results: [] 
-      };
-      resolve(results);
-    }, 500);
-  });
+  // Get most popular queries
+  const popularQueries = Object.entries(cacheStats.keyAccess)
+    .map(([key, hits]) => ({ key, hits }))
+    .sort((a, b) => b.hits - a.hits)
+    .slice(0, 10);
+  
+  // Calculate average hit count
+  const totalHits = Object.values(cache).reduce((sum, entry) => sum + entry.hits, 0);
+  const averageHitCount = Object.keys(cache).length > 0 ? totalHits / Object.keys(cache).length : 0;
+  
+  return {
+    size: cacheStats.size,
+    maxSize: cacheStats.maxSize,
+    hits: cacheStats.hits,
+    misses: cacheStats.misses,
+    hitRate,
+    popularQueries,
+    averageHitCount,
+  };
 };
 
-// Initialize cache on module load - run this to hydrate cache from localStorage
-(() => {
-  try {
-    loadPersistedCache();
-    
-    // Set up periodic persistence
-    if (typeof window !== 'undefined') {
-      setInterval(persistCache, 5 * 60 * 1000); // Save cache every 5 minutes
-    }
-  } catch (error) {
-    console.error('Error initializing cache:', error);
+/**
+ * Pre-warm the cache with results from recent searches
+ */
+export const getSearchResults = async (searchId: string): Promise<any[]> => {
+  // This is a mock function that returns fake results for pre-fetching
+  // In a real implementation, this would call your actual search API
+  
+  const mockResults = [];
+  
+  // Generate some mock results
+  for (let i = 0; i < 5; i++) {
+    mockResults.push({
+      id: `result_${i}_${searchId}`,
+      search_id: searchId,
+      title: `Sample Result ${i}`,
+      url: `https://example.com/result-${i}`,
+      thumbnail: `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/200/300`,
+      source: ['instagram.com', 'twitter.com', 'facebook.com', 'linkedin.com'][Math.floor(Math.random() * 4)],
+      match_level: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
+      found_at: new Date().toISOString(),
+      similarity_score: Math.random()
+    });
   }
-})();
+  
+  return mockResults;
+};
+
+// Set up periodic cache cleanup
+setInterval(cleanupCache, CACHE_CLEANUP_INTERVAL);
+
+// Initialize cache
+console.log('Search cache initialized');

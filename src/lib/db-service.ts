@@ -6,6 +6,10 @@ import { User } from '@supabase/supabase-js';
 
 const pendingRequests: Record<string, Promise<any>> = {};
 
+// Cache for user subscription data to reduce DB calls
+const userSubscriptionCache: Record<string, { data: any, timestamp: number }> = {};
+const SUBSCRIPTION_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export const createSearchQuery = async (searchQuery: SearchQuery) => {
   const { data, error } = await supabase
     .from('search_queries')
@@ -102,18 +106,29 @@ export const createSearchResults = async (results: SearchResult[]) => {
     
     console.log('Inserting valid results:', validResults.length);
     
-    const { data, error } = await supabase
-      .from('search_results')
-      .insert(validResults)
-      .select();
+    // Batch inserts for better performance with large result sets
+    const BATCH_SIZE = 50;
+    let allInsertedData = [];
     
-    if (error) {
-      console.error('Error creating search results:', error);
-      throw error;
+    for (let i = 0; i < validResults.length; i += BATCH_SIZE) {
+      const batch = validResults.slice(i, i + BATCH_SIZE);
+      const { data, error } = await supabase
+        .from('search_results')
+        .insert(batch)
+        .select();
+      
+      if (error) {
+        console.error('Error creating search results batch:', error);
+        throw error;
+      }
+      
+      if (data) {
+        allInsertedData = [...allInsertedData, ...data];
+      }
     }
     
-    console.log('Created search results:', data?.length);
-    return data;
+    console.log('Created search results:', allInsertedData.length);
+    return allInsertedData;
   } catch (error) {
     console.error('Exception creating search results:', error);
     throw error;
@@ -132,15 +147,36 @@ export const getSearchResults = async (searchId: string) => {
 };
 
 /**
- * Fetch recent searches for pre-fetching and analytics
+ * Fetch recent searches for pre-fetching and analytics with optimized query
  * @param limit Maximum number of recent searches to retrieve
  * @returns Array of recent search queries
  */
 export const getRecentSearches = async (limit: number = 10) => {
   try {
+    // Try to get data from the materialized view for popular searches first
+    const { data: popularData, error: popularError } = await supabase
+      .from('popular_searches')
+      .select('query_text, query_type')
+      .order('search_count', { ascending: false })
+      .limit(limit);
+    
+    if (!popularError && popularData && popularData.length > 0) {
+      console.log('Using popular searches from materialized view');
+      // Transform to match expected format
+      return popularData.map(item => ({
+        id: `popular_${item.query_type}_${item.query_text}`,
+        query_type: item.query_type,
+        query_text: item.query_text,
+        created_at: new Date().toISOString(),
+        search_params_json: null
+      }));
+    }
+    
+    // Fall back to recent searches if materialized view is not available
     const { data, error } = await supabase
       .from('search_queries')
       .select('id, query_type, query_text, created_at, search_params_json')
+      .not('query_text', 'is', null)
       .order('created_at', { ascending: false })
       .limit(limit);
     
@@ -153,14 +189,36 @@ export const getRecentSearches = async (limit: number = 10) => {
 };
 
 export const getUserSubscription = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('user_subscriptions')
-    .select('*, plans(*)')
-    .eq('user_id', userId)
-    .maybeSingle();
-  
-  if (error && error.code !== 'PGRST116') throw error;
-  return data;
+  try {
+    // Check cache first
+    const now = Date.now();
+    const cachedData = userSubscriptionCache[userId];
+    
+    if (cachedData && (now - cachedData.timestamp) < SUBSCRIPTION_CACHE_TTL) {
+      console.log('Using cached subscription data for user:', userId);
+      return cachedData.data;
+    }
+    
+    // If not in cache or expired, fetch from database
+    const { data, error } = await supabase
+      .from('user_subscriptions')
+      .select('*, plans(*)')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    
+    // Cache the result
+    userSubscriptionCache[userId] = {
+      data,
+      timestamp: now
+    };
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching user subscription:', error);
+    throw error;
+  }
 };
 
 export const createUserSubscription = async (subscription: UserSubscription) => {
@@ -170,6 +228,12 @@ export const createUserSubscription = async (subscription: UserSubscription) => 
     .select();
   
   if (error) throw error;
+  
+  // Invalidate cache for this user
+  if (userSubscriptionCache[subscription.user_id]) {
+    delete userSubscriptionCache[subscription.user_id];
+  }
+  
   return data?.[0];
 };
 
@@ -890,4 +954,36 @@ export const getPlans = async () => {
   
   if (error) throw error;
   return data;
+};
+
+// Add a new function to log search metrics for performance monitoring
+export const logSearchMetrics = async (
+  queryType: string, 
+  executionTimeMs: number, 
+  resultCount: number, 
+  cacheHit: boolean
+): Promise<void> => {
+  try {
+    await supabase
+      .from('search_metrics')
+      .insert({
+        query_type: queryType,
+        execution_time_ms: executionTimeMs,
+        result_count: resultCount,
+        cache_hit: cacheHit
+      });
+      
+    console.log(`Logged search metrics: ${queryType}, ${executionTimeMs}ms, ${resultCount} results, cache: ${cacheHit}`);
+  } catch (error) {
+    console.error('Error logging search metrics:', error);
+    // Non-critical, so we don't throw the error
+  }
+};
+
+// Clear the subscription cache for testing or when needed
+export const clearSubscriptionCache = (): void => {
+  Object.keys(userSubscriptionCache).forEach(key => {
+    delete userSubscriptionCache[key];
+  });
+  console.log('Subscription cache cleared');
 };
