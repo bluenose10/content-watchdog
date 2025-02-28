@@ -37,8 +37,8 @@ export default function Index() {
         <HeroSection />
         
         <div className="container px-4 md:px-8 lg:px-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center pt-8 md:pt-16">Comprehensive Content Protection</h2>
-          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-12 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center pt-6 md:py-4">Comprehensive Content Protection</h2>
+          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-8 text-center">
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
           
