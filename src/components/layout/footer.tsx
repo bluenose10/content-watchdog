@@ -20,7 +20,7 @@ export function Footer() {
           <p className="text-xs md:text-sm text-muted-foreground mt-1 md:mt-2">
             Protecting your digital content across the web with advanced monitoring technology.
           </p>
-          <div className="flex gap-3 mt-2 md:mt-4">
+          <div className="flex gap-3 mt-2 md:mt-4 justify-center md:justify-start">
             <Button variant="outline" size="icon" className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-800 border-purple-300 dark:border-purple-700" asChild>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
                 <Twitter className="h-3 w-3 md:h-4 md:w-4 text-purple-600 dark:text-purple-400" />
