@@ -17,11 +17,10 @@ export function AboutSection() {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div className="space-y-8">
-            <div className="relative rounded-xl shadow-md
-              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
-              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-800 after:-z-10
-              hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
+            <Card className="relative overflow-hidden glass-card transition-all duration-300 hover:shadow-lg
+              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
+              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-900 after:-z-10">
+              <CardContent className="pt-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
                   <Shield className="h-5 w-5 mr-2 text-primary" />
                   Our Mission
@@ -33,13 +32,12 @@ export function AboutSection() {
                   In today's digital landscape, protecting your intellectual property is more challenging than ever. Our team of experts combines advanced technology with personalized service to ensure your content remains yours.
                 </p>
               </CardContent>
-            </div>
+            </Card>
             
-            <div className="relative rounded-xl shadow-md
-              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
-              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-800 after:-z-10
-              hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
+            <Card className="relative overflow-hidden glass-card transition-all duration-300 hover:shadow-lg
+              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
+              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-900 after:-z-10">
+              <CardContent className="pt-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
                   <Users className="h-5 w-5 mr-2 text-primary" />
                   Our Team & Technology
@@ -51,15 +49,14 @@ export function AboutSection() {
                   Our proprietary scanning technology processes over 1 million pieces of content daily, comparing visual fingerprints and text patterns to detect even slightly modified copies of your work.
                 </p>
               </CardContent>
-            </div>
+            </Card>
           </div>
           
           <div className="space-y-8">
-            <div className="relative rounded-xl shadow-md
-              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
-              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-800 after:-z-10
-              hover:shadow-lg transition-all duration-300">
-              <div className="p-6">
+            <Card className="relative overflow-hidden glass-card transition-all duration-300 hover:shadow-lg
+              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
+              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-900 after:-z-10">
+              <CardContent className="pt-6">
                 <h3 className="text-xl font-semibold mb-4">Choose Your Protection Level</h3>
                 
                 <div className="space-y-6">
@@ -120,8 +117,8 @@ export function AboutSection() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
