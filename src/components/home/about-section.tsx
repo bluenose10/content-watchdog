@@ -18,8 +18,8 @@ export function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div className="space-y-8">
             <div className="relative rounded-xl shadow-md
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
-              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
+              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
@@ -36,8 +36,8 @@ export function AboutSection() {
             </div>
             
             <div className="relative rounded-xl shadow-md
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
-              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
+              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
@@ -56,8 +56,8 @@ export function AboutSection() {
           
           <div className="space-y-8">
             <div className="relative rounded-xl shadow-md
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
-              after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
+              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-4">Choose Your Protection Level</h3>
