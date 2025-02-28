@@ -65,6 +65,8 @@ export const PRICING_PLANS = [
       "4 searches per month",
       "Basic content alerts",
       "Email support",
+      "Monthly report",
+      "Basic analytics"
     ],
     stripePriceId: "", // Free plan doesn't need a Stripe Price ID
     popular: false,
