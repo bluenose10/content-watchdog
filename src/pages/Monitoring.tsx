@@ -6,6 +6,7 @@ import { RateLimitMonitor } from '@/components/monitoring/RateLimitMonitor';
 import { SearchAnalytics } from '@/components/monitoring/SearchAnalytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCacheStats } from '@/lib/search-cache';
+import { PreFetchManager } from '@/components/monitoring/PreFetchManager';
 
 export default function Monitoring() {
   // Get cache statistics
@@ -22,6 +23,7 @@ export default function Monitoring() {
             <TabsTrigger value="cache">Cache Status</TabsTrigger>
             <TabsTrigger value="search-analytics">Search Analytics</TabsTrigger>
             <TabsTrigger value="api">API Usage</TabsTrigger>
+            <TabsTrigger value="prefetch">Pre-Fetching</TabsTrigger>
           </TabsList>
           
           <TabsContent value="rate-limits">
@@ -85,6 +87,47 @@ export default function Monitoring() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="prefetch">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PreFetchManager />
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>How Pre-Fetching Works</CardTitle>
+                  <CardDescription>Understanding the pre-caching system</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 text-sm">
+                    <p>
+                      Pre-fetching automatically caches results for common searches during low-traffic periods,
+                      reducing response times for users and server load during peak hours.
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Benefits:</h4>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Faster search results for common queries</li>
+                        <li>Reduced API costs by minimizing redundant searches</li>
+                        <li>Lower server load during peak traffic hours</li>
+                        <li>Improved user experience with instant results</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium">How it works:</h4>
+                      <ol className="list-decimal pl-5 space-y-1">
+                        <li>System identifies popular searches from user history</li>
+                        <li>During off-peak hours, these searches are automatically performed</li>
+                        <li>Results are stored in the application cache</li>
+                        <li>When users perform these searches, cached results are returned instantly</li>
+                      </ol>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
