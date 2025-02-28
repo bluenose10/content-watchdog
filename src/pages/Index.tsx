@@ -6,6 +6,7 @@ import { PricingSection } from "@/components/home/pricing-section";
 import { AboutSection } from "@/components/home/about-section";
 import { CallToAction } from "@/components/home/call-to-action";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
+import { FAQSection } from "@/components/home/faq-section";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
@@ -76,8 +77,18 @@ export default function Index() {
           </div>
           
           {/* Pricing section */}
-          <div className="mb-32">
+          <div className="mb-32" id="pricing">
             <PricingSection />
+          </div>
+          
+          {/* Separator */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <Separator className="border-dotted border-t-2" />
+          </div>
+          
+          {/* FAQ section */}
+          <div className="mb-32" id="faq">
+            <FAQSection />
           </div>
         </div>
       </main>
