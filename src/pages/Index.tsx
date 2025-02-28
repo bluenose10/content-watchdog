@@ -1,7 +1,6 @@
 
 import { HeroSection } from "@/components/home/hero-section";
 import { FeaturesSection } from "@/components/home/features-section";
-import { ContentSearchSection } from "@/components/home/content-search-section";
 import { PricingSection } from "@/components/home/pricing-section";
 import { AboutSection } from "@/components/home/about-section";
 import { CallToAction } from "@/components/home/call-to-action";
@@ -43,11 +42,8 @@ export default function Index() {
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
           
-          {/* First section with Content Search and Call to Action */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
-            <div className="col-span-1" id="content-search-section">
-              <ContentSearchSection />
-            </div>
+          {/* First section with Call to Action only (ContentSearch removed) */}
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-8 mb-24">
             <div className="col-span-1">
               <CallToAction />
             </div>
