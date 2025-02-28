@@ -134,7 +134,7 @@ export function Sidebar({ className }: SidebarProps) {
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="p-0">
+        <SheetContent side="left" className="p-0 bg-purple-50 dark:bg-gray-900 border-r border-purple-100 dark:border-purple-900/40">
           <SidebarContent />
         </SheetContent>
       </Sheet>
