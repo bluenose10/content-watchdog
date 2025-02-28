@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Layout } from '@/components/layout/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RateLimitMonitor } from '@/components/monitoring/RateLimitMonitor';
@@ -7,10 +7,47 @@ import { SearchAnalytics } from '@/components/monitoring/SearchAnalytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCacheStats } from '@/lib/search-cache';
 import { PreFetchManager } from '@/components/monitoring/PreFetchManager';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Monitoring() {
   // Get cache statistics
   const cacheStats = getCacheStats();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Check authentication
+  useEffect(() => {
+    if (!loading && !user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access System Monitoring",
+        variant: "destructive",
+      });
+      navigate('/login');
+    }
+  }, [user, loading, navigate, toast]);
+  
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container py-8 max-w-7xl">
+          <h1 className="text-3xl font-bold mb-6">System Monitoring</h1>
+          <div className="flex justify-center py-12">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
+  // Don't render anything if user is not authenticated
+  if (!user) {
+    return null;
+  }
   
   return (
     <Layout>
