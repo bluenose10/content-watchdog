@@ -6,10 +6,10 @@ import { Link } from "react-router-dom";
 
 export function AboutSection() {
   return (
-    <section id="about" className="py-16 relative">
+    <section id="about" className="py-10 relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-3">About Influence Guard</h2>
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold mb-2">About Influence Guard</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Trusted by over 5,000+ content creators to protect their digital assets
           </p>
