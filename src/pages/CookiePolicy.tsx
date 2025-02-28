@@ -5,7 +5,6 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { FileText, Shield } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { useEffect } from "react";
 
 export default function CookiePolicy() {
@@ -57,46 +56,46 @@ export default function CookiePolicy() {
                 <p className="text-sm md:text-base">These cookies are used to enable you to share pages and content that you find interesting on our platform through third-party social networking and other websites. These cookies may also be used for advertising purposes.</p>
                 
                 <h2 className="text-lg md:text-xl font-semibold mt-6 md:mt-8 mb-3 md:mb-4">3. Specific Cookies We Use</h2>
-                <div className="overflow-x-auto -mx-4 md:mx-0">
-                  <table className="min-w-full my-4 md:my-6 border border-gray-200 dark:border-gray-700 text-xs md:text-sm">
+                <div className="overflow-x-auto -mx-4 md:mx-0 my-4 md:my-6">
+                  <table className="min-w-full border border-gray-200 dark:border-gray-700 text-xs md:text-sm">
                     <thead>
                       <tr className="bg-gray-50 dark:bg-gray-800">
-                        <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cookie Name</th>
-                        <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                        <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Purpose</th>
-                        <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Duration</th>
+                        <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cookie Name</th>
+                        <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                        <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Purpose</th>
+                        <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Duration</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                       <tr>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">session_id</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Essential</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm">Session management</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Session</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">session_id</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Essential</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm">Session</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Session</td>
                       </tr>
                       <tr>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">auth_token</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Essential</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm">Authentication</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">30 days</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">auth_token</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Essential</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm">Auth</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">30 days</td>
                       </tr>
                       <tr>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">preferences</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Functionality</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm">User preferences</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">1 year</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">preferences</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Function</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm">Prefs</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">1 year</td>
                       </tr>
                       <tr>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">_ga</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Analytics</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm">Google Analytics</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">2 years</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">_ga</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Analytics</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm">Google</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">2 years</td>
                       </tr>
                       <tr>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">_fbp</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Advertising</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm">Facebook ads</td>
-                        <td className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">3 months</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">_fbp</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">Ads</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm">FB ads</td>
+                        <td className="px-2 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">3 months</td>
                       </tr>
                     </tbody>
                   </table>
@@ -108,20 +107,20 @@ export default function CookiePolicy() {
                 <h3 className="text-base md:text-lg font-medium mt-4 md:mt-6 mb-2 md:mb-3">Browser Controls</h3>
                 <p className="text-sm md:text-base">Most browsers allow you to control cookies through their settings preferences. Here's how to access cookie settings in various browsers:</p>
                 <ul className="list-disc pl-5 space-y-1 md:space-y-2 my-2 md:my-4 text-xs md:text-sm">
-                  <li><strong>Chrome:</strong> Settings → Privacy and Security → Cookies and other site data</li>
-                  <li><strong>Firefox:</strong> Options → Privacy & Security → Cookies and Site Data</li>
-                  <li><strong>Safari:</strong> Preferences → Privacy → Cookies and website data</li>
-                  <li><strong>Edge:</strong> Settings → Cookies and site permissions → Cookies and site data</li>
+                  <li><strong>Chrome:</strong> Settings → Privacy</li>
+                  <li><strong>Firefox:</strong> Options → Privacy</li>
+                  <li><strong>Safari:</strong> Preferences → Privacy</li>
+                  <li><strong>Edge:</strong> Settings → Cookies</li>
                 </ul>
                 
-                <h3 className="text-base md:text-lg font-medium mt-4 md:mt-6 mb-2 md:mb-3">Opting Out of Specific Cookies</h3>
+                <h3 className="text-base md:text-lg font-medium mt-4 md:mt-6 mb-2 md:mb-3">Opting Out</h3>
                 <p className="text-sm md:text-base">For more information about specific cookies used for targeting and advertising, visit:</p>
                 <ul className="list-disc pl-5 space-y-1 md:space-y-2 my-2 md:my-4 text-xs md:text-sm">
                   <li><a href="http://www.aboutads.info/choices/" className="text-purple-600 dark:text-purple-400 hover:underline">Digital Advertising Alliance</a></li>
                   <li><a href="http://www.youronlinechoices.com/" className="text-purple-600 dark:text-purple-400 hover:underline">Your Online Choices (EU)</a></li>
                 </ul>
                 
-                <h2 className="text-lg md:text-xl font-semibold mt-6 md:mt-8 mb-3 md:mb-4">5. Changes to this Cookie Policy</h2>
+                <h2 className="text-lg md:text-xl font-semibold mt-6 md:mt-8 mb-3 md:mb-4">5. Changes to this Policy</h2>
                 <p className="text-sm md:text-base">We may update this Cookie Policy from time to time to reflect changes in technology, regulation, or our business practices. Any changes will become effective when we post the revised Cookie Policy. You are advised to check this page regularly to stay informed of updates.</p>
                 
                 <h2 className="text-lg md:text-xl font-semibold mt-6 md:mt-8 mb-3 md:mb-4">6. Contact Us</h2>
