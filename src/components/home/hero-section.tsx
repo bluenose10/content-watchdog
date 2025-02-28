@@ -11,7 +11,7 @@ export const HeroSection = () => {
     <section className="w-full pt-16 md:pt-24 lg:pt-40 pb-16 md:pb-20 lg:pb-32 hero-background">
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-6 md:space-y-8">
         <div className="space-y-3 md:space-y-4">
-          <div className="inline-block animate-fade-in bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full px-3 py-1 text-xs md:text-sm font-medium text-purple-800 dark:text-purple-300 mb-2 mt-4 md:mt-6">
+          <div className="inline-block animate-fade-in bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full px-3 py-1 text-xs md:text-sm font-medium text-purple-800 dark:text-purple-300 mb-2 mt-4 md:mt-0">
             Content Protection for Creators
           </div>
           
