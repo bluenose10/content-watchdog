@@ -4,6 +4,41 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, BarChart3, CheckCircle, Linkedin, Mail, Shield, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+// Custom style to hide footer content on mobile just for this page
+const MobileFooterHider = () => {
+  const isMobile = useIsMobile();
+  
+  useEffect(() => {
+    if (isMobile) {
+      // Add custom style to hide footer content on mobile
+      const style = document.createElement('style');
+      style.innerHTML = `
+        @media (max-width: 767px) {
+          footer .grid, 
+          footer .flex-col.gap-3,
+          footer .container .flex-col.gap-4.md\\:w-1\\/3 > .flex.gap-4 {
+            display: none !important;
+          }
+          
+          footer .container .flex-col.gap-4.md\\:w-1\\/3 > p,
+          footer .container .flex-col.gap-4.md\\:w-1\\/3 > a {
+            display: block !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        // Remove style when component unmounts
+        document.head.removeChild(style);
+      };
+    }
+  }, [isMobile]);
+  
+  return null;
+};
 
 export default function Contact() {
   const [timestamp, setTimestamp] = useState(new Date().toISOString());
@@ -18,7 +53,10 @@ export default function Contact() {
 
   return (
     <Layout>
-      <div className="container max-w-5xl py-12 md:py-20">
+      {/* Mobile footer content hider component */}
+      <MobileFooterHider />
+      
+      <div className="container max-w-5xl py-16 md:py-24">
         <h1 className="text-2xl md:text-3xl font-bold text-center mb-8 text-gradient">About Us</h1>
         
         {/* Company mission section */}
@@ -46,7 +84,7 @@ export default function Contact() {
             <CardContent className="pt-6">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
                 <Users className="h-5 w-5 mr-2 text-primary" />
-                Our Team & Technology
+                Our Technology
               </h3>
               <p className="mb-4 text-muted-foreground">
                 Founded by a team of content protection experts and technology innovators, Influence Guard brings together decades of experience in digital rights management, intellectual property law, and artificial intelligence.
