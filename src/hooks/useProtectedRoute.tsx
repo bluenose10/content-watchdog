@@ -1,9 +1,10 @@
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { getUserSubscription } from '@/lib/db-service';
+import { PROTECTED_ROUTES } from '@/lib/constants';
 
 // Define an enum for access levels
 export enum AccessLevel {
@@ -38,6 +39,7 @@ export const useProtectedRoute = (
 ): ProtectedRouteResult => {
   const { user, loading, isAdmin: authIsAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [accessLevel, setAccessLevel] = useState<AccessLevel>(AccessLevel.ANONYMOUS);
   const [isReady, setIsReady] = useState(false);
@@ -45,8 +47,19 @@ export const useProtectedRoute = (
   const [premiumFeaturesLoading, setPremiumFeaturesLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Add a debug log to see the auth state
-  console.log("useProtectedRoute - Auth state:", { user: !!user, loading, isAdmin: authIsAdmin });
+  // Add debug logs
+  console.log("useProtectedRoute - Auth state:", { 
+    user: !!user, 
+    loading, 
+    isAdmin: authIsAdmin,
+    currentPath: location.pathname,
+    requiresAuth
+  });
+
+  // Check if current path is a protected route
+  const isProtectedRoute = PROTECTED_ROUTES.some(route => 
+    location.pathname === route || location.pathname.startsWith(route + '/')
+  );
 
   // Function to check if user has a specific premium feature
   const hasPremiumFeature = (feature: PremiumFeature): boolean => {
@@ -73,6 +86,13 @@ export const useProtectedRoute = (
     const determineAccessLevel = async () => {
       if (loading) return;
       
+      // Only apply protection logic if we're on a protected route
+      if (!isProtectedRoute && !requiresAuth) {
+        console.log("useProtectedRoute - Not a protected route and auth not required, skipping auth checks");
+        setIsReady(true);
+        return;
+      }
+      
       // If user is not logged in
       if (!user) {
         console.log("useProtectedRoute - Setting anonymous access level");
@@ -80,7 +100,7 @@ export const useProtectedRoute = (
         setIsAdmin(false);
         
         // If route requires authentication, redirect to login
-        if (requiresAuth) {
+        if (requiresAuth && isProtectedRoute) {
           toast({
             title: "Authentication required",
             description: "Please log in to access this page",
@@ -175,7 +195,7 @@ export const useProtectedRoute = (
     };
 
     determineAccessLevel();
-  }, [user, loading, navigate, toast, requiresAuth, requiresPremium, requiredFeature, requiresAdmin, authIsAdmin]);
+  }, [user, loading, navigate, toast, requiresAuth, requiresPremium, requiredFeature, requiresAdmin, authIsAdmin, isProtectedRoute, location.pathname]);
 
   return { 
     user, 

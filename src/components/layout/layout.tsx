@@ -4,6 +4,8 @@ import { Header } from "@/components/layout/header";
 import { PreFetchInitializer } from "@/components/PreFetchInitializer";
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "react-router-dom";
+import { PROTECTED_ROUTES } from "@/lib/constants";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,11 +13,18 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const { user } = useAuth();
+  const location = useLocation();
   
   // Log the authentication state for debugging
   useEffect(() => {
     console.log("Layout component - Auth state:", !!user);
-  }, [user]);
+    console.log("Current path:", location.pathname);
+  }, [user, location]);
+
+  // Check if the current path is a protected route
+  const isProtectedRoute = PROTECTED_ROUTES.some(route => 
+    location.pathname === route || location.pathname.startsWith(route + '/')
+  );
 
   return (
     <div className="flex min-h-screen flex-col">

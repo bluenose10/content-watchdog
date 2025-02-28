@@ -118,6 +118,8 @@ export const PROTECTED_ROUTES = [
   "/dashboard",
   "/search",
   "/alerts",
+  "/monitoring",
+  "/protection",
   "/settings",
   "/results"
 ];
