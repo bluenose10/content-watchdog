@@ -6,8 +6,14 @@ import { Check, FileText, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import { useEffect } from "react";
 
 export default function TermsOfService() {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
