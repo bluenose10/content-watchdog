@@ -53,7 +53,7 @@ export default function Contact() {
                 className="mt-6 flex items-center gap-2" 
                 asChild
               >
-                <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.linkedin.com/in/mark-moran-blockchain-solutions-architect/" target="_blank" rel="noopener noreferrer">
                   <Linkedin className="h-4 w-4" />
                   Connect on LinkedIn
                 </a>
