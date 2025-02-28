@@ -53,9 +53,9 @@ export default function Index() {
             </div>
           </div>
           
-          {/* Separator */}
+          {/* Separator with gradient colors */}
           <div className="max-w-4xl mx-auto mb-24">
-            <Separator className="border-dotted border-t-2" />
+            <Separator className="h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30" />
           </div>
           
           {/* About Us section is now standalone */}
@@ -63,9 +63,9 @@ export default function Index() {
             <AboutSection />
           </div>
           
-          {/* Separator */}
+          {/* Separator with gradient colors */}
           <div className="max-w-4xl mx-auto mb-24">
-            <Separator className="border-dotted border-t-2" />
+            <Separator className="h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30" />
           </div>
           
           {/* Second section with Features and Testimonials */}
@@ -78,9 +78,9 @@ export default function Index() {
             </div>
           </div>
           
-          {/* Separator */}
+          {/* Separator with gradient colors */}
           <div className="max-w-4xl mx-auto mb-24">
-            <Separator className="border-dotted border-t-2" />
+            <Separator className="h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30" />
           </div>
           
           {/* Pricing section */}
@@ -88,9 +88,9 @@ export default function Index() {
             <PricingSection />
           </div>
           
-          {/* Separator */}
+          {/* Separator with gradient colors */}
           <div className="max-w-4xl mx-auto mb-16">
-            <Separator className="border-dotted border-t-2" />
+            <Separator className="h-0.5 bg-gradient-to-r from-purple-200 via-blue-200 to-indigo-200 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30" />
           </div>
           
           {/* FAQ section */}

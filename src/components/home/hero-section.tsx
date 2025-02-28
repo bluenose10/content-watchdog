@@ -83,7 +83,7 @@ export const HeroSection = () => {
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-6 shadow-sm">
                   <UserCheck className="h-8 w-8 text-indigo-700 dark:text-indigo-400" />
                 </div>
-                <h4 className="text-lg font-medium mb-3">2. Take Action</h4>
+                <h4 className="text-lg font-medium mb-3">3. Take Action</h4>
                 <p className="text-sm text-muted-foreground">
                   Generate and send legally-binding DMCA takedown notices with all required evidence automatically compiled for you.
                 </p>
