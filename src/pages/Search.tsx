@@ -37,7 +37,7 @@ const Search = () => {
       <Header />
       <main className="flex-grow pt-16 pb-16">
         <div className="container px-4 md:px-6 pt-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-4">Search For Content</h1>
+          <h1 className="text-2xl font-bold text-primary mb-4">Search For Content</h1>
           <p className="text-muted-foreground mb-8">
             Use our powerful search engine to find unauthorized uses of your content across the web.
           </p>
