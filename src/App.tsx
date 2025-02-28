@@ -15,6 +15,9 @@ import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import MockCheckout from "./pages/MockCheckout";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import CookiePolicy from "./pages/CookiePolicy";
 import { useAuth } from "./context/AuthContext";
 
 // Create a protected route component
@@ -74,6 +77,11 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignUp />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      
+      {/* Legal pages */}
+      <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/cookie-policy" element={<CookiePolicy />} />
       
       {/* Handle reset-password route - redirect to login page */}
       <Route path="/reset-password" element={<Navigate to="/login" replace />} />
