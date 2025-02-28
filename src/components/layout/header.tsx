@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -54,6 +55,7 @@ export function Header() {
 
   const handleSignOut = async () => {
     try {
+      setIsLoggingOut(true);
       await signOut();
       toast({
         title: "Success",
@@ -69,6 +71,8 @@ export function Header() {
         description: "There was a problem signing out",
         variant: "destructive",
       });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -132,9 +136,14 @@ export function Header() {
               <Button asChild variant="default">
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
-              <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleSignOut} 
+                disabled={isLoggingOut}
+                className="flex items-center gap-2"
+              >
                 <LogOut className="h-4 w-4" />
-                Log out
+                {isLoggingOut ? "Logging out..." : "Log out"}
               </Button>
             </>
           ) : (
@@ -201,9 +210,15 @@ export function Header() {
                   <Button asChild size="lg">
                     <Link to="/dashboard">Dashboard</Link>
                   </Button>
-                  <Button variant="outline" size="lg" onClick={handleSignOut} className="flex items-center justify-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    onClick={handleSignOut} 
+                    disabled={isLoggingOut}
+                    className="flex items-center justify-center gap-2"
+                  >
                     <LogOut className="h-4 w-4" />
-                    Log out
+                    {isLoggingOut ? "Logging out..." : "Log out"}
                   </Button>
                 </>
               ) : (
