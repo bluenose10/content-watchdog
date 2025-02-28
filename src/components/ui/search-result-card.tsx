@@ -1,11 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, HighlightCard, PriorityCard, ImageCard, SocialCard } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
-import { ExternalLink, Search, FileSearch, Image, AlertTriangle, Facebook, Twitter, Linkedin, Instagram, Youtube, ArrowRight } from "lucide-react";
+import { ExternalLink, Search, FileSearch, Image, AlertTriangle, Facebook, Twitter, Linkedin, Instagram, Youtube, ArrowRight, Globe, FileText, Video } from "lucide-react";
 import { Badge } from "./badge";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface SearchResultCardProps {
   result: {
@@ -16,6 +17,8 @@ interface SearchResultCardProps {
     source: string;
     matchLevel: string;
     date: string;
+    type?: string;
+    snippet?: string;
   };
   isPremium?: boolean;
   isFreePreview?: boolean;
@@ -28,7 +31,7 @@ export function SearchResultCard({
   isFreePreview = false,
   onUpgrade,
 }: SearchResultCardProps) {
-  const { title, url, thumbnail, source, matchLevel, date } = result;
+  const { title, url, thumbnail, source, matchLevel, date, type = "website", snippet } = result;
   const [imageError, setImageError] = useState(false);
   const navigate = useNavigate();
   
@@ -36,6 +39,7 @@ export function SearchResultCard({
   const validTitle = title || "Untitled Content";
   const validUrl = url || "#";
   const validSource = source || "Unknown Source";
+  const validType = type || "website";
   
   const cleanTitle = cleanSupabaseUrls(validTitle, "title", validSource);
   const cleanUrl = cleanSupabaseUrls(validUrl, "url", validSource);
@@ -120,13 +124,25 @@ export function SearchResultCard({
         };
       } else if (platform.includes('tiktok')) {
         return {
-          Icon: Search,
+          Icon: Video,
           color: 'text-black dark:text-white',
           name: 'TikTok',
         };
+      } else if (validType === 'image') {
+        return {
+          Icon: Image,
+          color: 'text-blue-600 dark:text-blue-400',
+          name: cleanSource,
+        };
+      } else if (validType === 'social') {
+        return {
+          Icon: FileText,
+          color: 'text-green-600 dark:text-green-400',
+          name: cleanSource,
+        };
       } else {
         return {
-          Icon: Search,
+          Icon: Globe,
           color: 'text-gray-600 dark:text-gray-400',
           name: cleanSource,
         };
@@ -223,10 +239,19 @@ export function SearchResultCard({
     }
   };
 
+  // Choose the right card component based on type and match level
+  const CardComponent = (() => {
+    if (validType === 'image') return ImageCard;
+    if (validType === 'social') return SocialCard;
+    if (safeMatchLevel === 'High') return PriorityCard;
+    if (safeMatchLevel === 'Medium') return HighlightCard;
+    return Card;
+  })();
+
   try {
     return (
-      <Card 
-        className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 cursor-pointer`}
+      <CardComponent 
+        className={`overflow-hidden transition-all duration-300 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 cursor-pointer`}
         onClick={viewDetails}
       >
         <div className="flex items-center p-4">
@@ -252,7 +277,13 @@ export function SearchResultCard({
               <span>{formattedDate}</span>
             </div>
             
-            {isPremium || isFreePreview ? (
+            {(isPremium || isFreePreview) && snippet && (
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2" title={snippet}>
+                {snippet}
+              </p>
+            )}
+            
+            {(isPremium || isFreePreview) ? (
               <p className="text-xs truncate text-gray-600 dark:text-gray-300 mt-1" title={cleanUrl}>
                 {cleanUrl}
               </p>
@@ -267,7 +298,7 @@ export function SearchResultCard({
             <ArrowRight className={`h-5 w-5 ${matchColor.text}`} />
           </div>
         </div>
-      </Card>
+      </CardComponent>
     );
   } catch (error) {
     console.error("Fatal rendering error in SearchResultCard:", error);

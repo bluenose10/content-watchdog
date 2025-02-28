@@ -153,6 +153,7 @@ export default function Results() {
   const [results, setResults] = useState<any[]>([]);
   const [query, setQuery] = useState<string>("");
   const [searchDate, setSearchDate] = useState<string>("Today");
+  const [totalResults, setTotalResults] = useState<number>(0);
   const { toast } = useToast();
 
   // Handler for upgrade button click
@@ -214,33 +215,81 @@ export default function Results() {
               console.log("Google API response:", searchResponse);
               
               if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
+                setTotalResults(searchResponse.searchInformation?.totalResults || searchResponse.items.length);
+                
                 // Transform Google API response to our format
                 const formattedResults = searchResponse.items.map((item: any, index: number) => {
-                  const thumbnailUrl = item.pagemap?.cse_image?.[0]?.src || 
-                                      item.image?.thumbnailLink ||
-                                      `https://picsum.photos/200/300?random=${index+1}`;
+                  // Extract thumbnail with fallbacks
+                  const thumbnailUrl = 
+                    item.pagemap?.cse_thumbnail?.[0]?.src || 
+                    item.pagemap?.cse_image?.[0]?.src || 
+                    item.image?.thumbnailLink ||
+                    `https://picsum.photos/200/300?random=${index+1}`;
                   
-                  // Determine result type based on URL or other factors
+                  // Determine result type based on URL, pagemap, or other factors
                   const source = item.displayLink || "unknown";
                   let type = 'website';
                   
-                  if (item.pagemap?.videoobject || source.includes('youtube') || 
-                      source.includes('vimeo') || source.includes('tiktok')) {
+                  if (item.pagemap?.videoobject || 
+                      source.includes('youtube') || 
+                      source.includes('vimeo') || 
+                      source.includes('tiktok') ||
+                      item.title?.toLowerCase().includes('video')) {
                     type = 'social';
-                  } else if (item.pagemap?.imageobject || source.includes('instagram') || 
-                           source.includes('flickr') || source.includes('pinterest') ||
-                           queryType === 'image') {
+                  } else if (
+                      item.pagemap?.imageobject || 
+                      item.pagemap?.cse_image ||
+                      source.includes('instagram') || 
+                      source.includes('flickr') || 
+                      source.includes('pinterest') ||
+                      item.title?.toLowerCase().includes('image') ||
+                      item.title?.toLowerCase().includes('photo') ||
+                      queryType === 'image'
+                  ) {
                     type = 'image';
-                  } else if (source.includes('twitter') || source.includes('facebook') || 
-                           source.includes('linkedin') || source.includes('reddit')) {
+                  } else if (
+                      source.includes('twitter') || 
+                      source.includes('facebook') || 
+                      source.includes('linkedin') || 
+                      source.includes('reddit') ||
+                      item.title?.toLowerCase().includes('profile')
+                  ) {
                     type = 'social';
                   }
                   
-                  // Determine match level based on relevance score
-                  const relevanceScore = item.relevanceScore || item.similarityScore || Math.random();
+                  // Determine match level based on ranking factors
+                  // Consider: position in results, title match, metatags match
+                  let matchScore = 0;
+                  
+                  // Position in results matters (earlier = better)
+                  matchScore += Math.max(0, 1 - (index / searchResponse.items.length));
+                  
+                  // Exact title match is a strong signal
+                  if (item.title && item.title.toLowerCase().includes(queryText.toLowerCase())) {
+                    matchScore += 0.4;
+                  }
+                  
+                  // Snippet/description match is also important
+                  if (item.snippet && item.snippet.toLowerCase().includes(queryText.toLowerCase())) {
+                    matchScore += 0.2;
+                  }
+                  
+                  // Metatags match
+                  if (item.pagemap?.metatags?.[0]?.['og:title']?.toLowerCase().includes(queryText.toLowerCase())) {
+                    matchScore += 0.2;
+                  }
+                  
+                  // URL match
+                  if (item.link?.toLowerCase().includes(queryText.toLowerCase().replace(/\s+/g, ''))) {
+                    matchScore += 0.2;
+                  }
+
+                  // Final normalization of score to 0-1 range
+                  matchScore = Math.min(1, matchScore);
+                  
                   let matchLevel = 'Medium';
-                  if (relevanceScore > 0.8) matchLevel = 'High';
-                  else if (relevanceScore < 0.5) matchLevel = 'Low';
+                  if (matchScore > 0.65) matchLevel = 'High';
+                  else if (matchScore < 0.3) matchLevel = 'Low';
                   
                   return {
                     id: `result-${index}`,
@@ -250,18 +299,31 @@ export default function Results() {
                     source: source,
                     match_level: matchLevel,
                     found_at: new Date().toISOString(),
-                    type: type
+                    type: type,
+                    snippet: item.snippet || null
                   };
                 });
                 
                 setResults(formattedResults);
                 console.log("Formatted results:", formattedResults);
+              } else if (searchResponse && searchResponse.error) {
+                // Handle API-reported errors
+                console.error("API error:", searchResponse.error);
+                throw new Error(searchResponse.error.message || "API error");
               } else {
-                throw new Error("No results from Google API");
+                // Handle empty results
+                setResults([]);
+                setTotalResults(0);
+                toast({
+                  title: "No Results Found",
+                  description: "Your search didn't return any results. Try different keywords or parameters.",
+                  variant: "default",
+                });
               }
             } catch (error) {
               console.error("Error performing direct search:", error);
               setResults(FALLBACK_RESULTS);
+              setTotalResults(FALLBACK_RESULTS.length);
               toast({
                 title: "API Error",
                 description: "Could not fetch search results from Google API. Showing sample results instead.",
@@ -271,6 +333,7 @@ export default function Results() {
           } else {
             console.error("No temporary search data found");
             setResults(FALLBACK_RESULTS);
+            setTotalResults(FALLBACK_RESULTS.length);
             setQuery("Unknown search");
           }
         } else {
@@ -283,6 +346,7 @@ export default function Results() {
               console.log("Using cached results:", cachedData);
               setResults(cachedData.results);
               setQuery(cachedData.query);
+              setTotalResults(cachedData.results.length);
             } else {
               // If no cached results, fetch the search query from the database
               const searchQuery = await getSearchQueryById(id);
@@ -311,33 +375,81 @@ export default function Results() {
                   console.log("Google API response:", searchResponse);
                   
                   if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
+                    setTotalResults(searchResponse.searchInformation?.totalResults || searchResponse.items.length);
+                    
                     // Transform Google API response to our format
                     const formattedResults = searchResponse.items.map((item: any, index: number) => {
-                      const thumbnailUrl = item.pagemap?.cse_image?.[0]?.src || 
-                                          item.image?.thumbnailLink ||
-                                          `https://picsum.photos/200/300?random=${index+1}`;
+                      // Extract thumbnail with fallbacks
+                      const thumbnailUrl = 
+                        item.pagemap?.cse_thumbnail?.[0]?.src || 
+                        item.pagemap?.cse_image?.[0]?.src || 
+                        item.image?.thumbnailLink ||
+                        `https://picsum.photos/200/300?random=${index+1}`;
                       
-                      // Determine result type based on URL or other factors
+                      // Determine result type based on URL, pagemap, or other factors
                       const source = item.displayLink || "unknown";
                       let type = 'website';
                       
-                      if (item.pagemap?.videoobject || source.includes('youtube') || 
-                          source.includes('vimeo') || source.includes('tiktok')) {
+                      if (item.pagemap?.videoobject || 
+                          source.includes('youtube') || 
+                          source.includes('vimeo') || 
+                          source.includes('tiktok') ||
+                          item.title?.toLowerCase().includes('video')) {
                         type = 'social';
-                      } else if (item.pagemap?.imageobject || source.includes('instagram') || 
-                               source.includes('flickr') || source.includes('pinterest') ||
-                               queryType === 'image') {
+                      } else if (
+                          item.pagemap?.imageobject || 
+                          item.pagemap?.cse_image ||
+                          source.includes('instagram') || 
+                          source.includes('flickr') || 
+                          source.includes('pinterest') ||
+                          item.title?.toLowerCase().includes('image') ||
+                          item.title?.toLowerCase().includes('photo') ||
+                          queryType === 'image'
+                      ) {
                         type = 'image';
-                      } else if (source.includes('twitter') || source.includes('facebook') || 
-                               source.includes('linkedin') || source.includes('reddit')) {
+                      } else if (
+                          source.includes('twitter') || 
+                          source.includes('facebook') || 
+                          source.includes('linkedin') || 
+                          source.includes('reddit') ||
+                          item.title?.toLowerCase().includes('profile')
+                      ) {
                         type = 'social';
                       }
                       
-                      // Determine match level based on relevance score
-                      const relevanceScore = item.relevanceScore || item.similarityScore || Math.random();
+                      // Determine match level based on ranking factors
+                      // Consider: position in results, title match, metatags match
+                      let matchScore = 0;
+                      
+                      // Position in results matters (earlier = better)
+                      matchScore += Math.max(0, 1 - (index / searchResponse.items.length));
+                      
+                      // Exact title match is a strong signal
+                      if (item.title && item.title.toLowerCase().includes(queryText.toLowerCase())) {
+                        matchScore += 0.4;
+                      }
+                      
+                      // Snippet/description match is also important
+                      if (item.snippet && item.snippet.toLowerCase().includes(queryText.toLowerCase())) {
+                        matchScore += 0.2;
+                      }
+                      
+                      // Metatags match
+                      if (item.pagemap?.metatags?.[0]?.['og:title']?.toLowerCase().includes(queryText.toLowerCase())) {
+                        matchScore += 0.2;
+                      }
+                      
+                      // URL match
+                      if (item.link?.toLowerCase().includes(queryText.toLowerCase().replace(/\s+/g, ''))) {
+                        matchScore += 0.2;
+                      }
+
+                      // Final normalization of score to 0-1 range
+                      matchScore = Math.min(1, matchScore);
+                      
                       let matchLevel = 'Medium';
-                      if (relevanceScore > 0.8) matchLevel = 'High';
-                      else if (relevanceScore < 0.5) matchLevel = 'Low';
+                      if (matchScore > 0.65) matchLevel = 'High';
+                      else if (matchScore < 0.3) matchLevel = 'Low';
                       
                       return {
                         id: `result-${index}`,
@@ -347,18 +459,31 @@ export default function Results() {
                         source: source,
                         match_level: matchLevel,
                         found_at: new Date().toISOString(),
-                        type: type
+                        type: type,
+                        snippet: item.snippet || null
                       };
                     });
                     
                     setResults(formattedResults);
                     console.log("Formatted results:", formattedResults);
+                  } else if (searchResponse && searchResponse.error) {
+                    // Handle API-reported errors
+                    console.error("API error:", searchResponse.error);
+                    throw new Error(searchResponse.error.message || "API error");
                   } else {
-                    throw new Error("No results from Google API");
+                    // Handle empty results
+                    setResults([]);
+                    setTotalResults(0);
+                    toast({
+                      title: "No Results Found",
+                      description: "Your search didn't return any results. Try different keywords or parameters.",
+                      variant: "default",
+                    });
                   }
                 } catch (error) {
                   console.error("Error performing search:", error);
                   setResults(FALLBACK_RESULTS);
+                  setTotalResults(FALLBACK_RESULTS.length);
                   toast({
                     title: "API Error",
                     description: "Could not fetch search results from Google API. Showing sample results instead.",
@@ -368,12 +493,14 @@ export default function Results() {
               } else {
                 console.error("Search query not found");
                 setResults(FALLBACK_RESULTS);
+                setTotalResults(FALLBACK_RESULTS.length);
                 setQuery("Unknown search");
               }
             }
           } catch (error) {
             console.error("Error fetching search or results:", error);
             setResults(FALLBACK_RESULTS);
+            setTotalResults(FALLBACK_RESULTS.length);
             setQuery("Unknown search");
             
             toast({
@@ -391,6 +518,7 @@ export default function Results() {
         console.error("Error in fetchResults:", error);
         // Even if everything fails, show something to the user
         setResults(FALLBACK_RESULTS);
+        setTotalResults(FALLBACK_RESULTS.length);
         setQuery("Your search");
         
         toast({
@@ -446,7 +574,7 @@ export default function Results() {
             <div className="mb-6">
               <h1 className="text-3xl font-bold mb-2">Search Results</h1>
               <p className="text-muted-foreground text-lg">
-                Results for {query ? <span>{query}</span> : <span>Unknown search</span>}
+                Results for {query ? <span className="font-medium">{query}</span> : <span>Unknown search</span>}
               </p>
             </div>
 
@@ -462,7 +590,7 @@ export default function Results() {
                 </div>
                 <div className="flex items-center">
                   <Info className="h-5 w-5 mr-3 text-muted-foreground" />
-                  <span>Found {results.length} matches</span>
+                  <span>Found {totalResults.toLocaleString()} matches</span>
                 </div>
               </CardContent>
             </Card>
@@ -491,50 +619,60 @@ export default function Results() {
               </Card>
             )}
 
-            <Tabs defaultValue="all" className="mb-6">
-              <TabsList>
-                <TabsTrigger value="all">All Results</TabsTrigger>
-                <TabsTrigger value="images">Images</TabsTrigger>
-                <TabsTrigger value="websites">Websites</TabsTrigger>
-                <TabsTrigger value="social">Social Media</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="all" className="mt-4">
-                <PaginatedResults
-                  results={results}
-                  itemsPerPage={8}
-                  accessLevel={accessLevel}
-                  onUpgrade={handleUpgrade}
-                />
-              </TabsContent>
-              
-              <TabsContent value="images" className="mt-4">
-                <PaginatedResults
-                  results={results.filter(r => r.type === 'image')}
-                  itemsPerPage={8}
-                  accessLevel={accessLevel}
-                  onUpgrade={handleUpgrade}
-                />
-              </TabsContent>
-              
-              <TabsContent value="websites" className="mt-4">
-                <PaginatedResults
-                  results={results.filter(r => r.type === 'website')}
-                  itemsPerPage={8}
-                  accessLevel={accessLevel}
-                  onUpgrade={handleUpgrade}
-                />
-              </TabsContent>
-              
-              <TabsContent value="social" className="mt-4">
-                <PaginatedResults
-                  results={results.filter(r => r.type === 'social')}
-                  itemsPerPage={8}
-                  accessLevel={accessLevel}
-                  onUpgrade={handleUpgrade}
-                />
-              </TabsContent>
-            </Tabs>
+            {results.length === 0 ? (
+              <Card className="p-8 my-8 text-center">
+                <h3 className="text-xl font-medium mb-2">No results found</h3>
+                <p className="text-muted-foreground mb-6">
+                  We couldn't find any matches for your search. Try using different keywords or search parameters.
+                </p>
+                <Button onClick={() => navigate("/search")}>Try a New Search</Button>
+              </Card>
+            ) : (
+              <Tabs defaultValue="all" className="mb-6">
+                <TabsList>
+                  <TabsTrigger value="all">All Results</TabsTrigger>
+                  <TabsTrigger value="images">Images</TabsTrigger>
+                  <TabsTrigger value="websites">Websites</TabsTrigger>
+                  <TabsTrigger value="social">Social Media</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="all" className="mt-4">
+                  <PaginatedResults
+                    results={results}
+                    itemsPerPage={8}
+                    accessLevel={accessLevel}
+                    onUpgrade={handleUpgrade}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="images" className="mt-4">
+                  <PaginatedResults
+                    results={results.filter(r => r.type === 'image')}
+                    itemsPerPage={8}
+                    accessLevel={accessLevel}
+                    onUpgrade={handleUpgrade}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="websites" className="mt-4">
+                  <PaginatedResults
+                    results={results.filter(r => r.type === 'website')}
+                    itemsPerPage={8}
+                    accessLevel={accessLevel}
+                    onUpgrade={handleUpgrade}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="social" className="mt-4">
+                  <PaginatedResults
+                    results={results.filter(r => r.type === 'social')}
+                    itemsPerPage={8}
+                    accessLevel={accessLevel}
+                    onUpgrade={handleUpgrade}
+                  />
+                </TabsContent>
+              </Tabs>
+            )}
           </div>
         </main>
       </div>

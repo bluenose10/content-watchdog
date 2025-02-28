@@ -77,4 +77,76 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+// Enhanced high-level card types for search results
+const HighlightCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <Card
+    ref={ref}
+    className={cn(
+      "border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 bg-amber-50/50 dark:bg-amber-900/10",
+      className
+    )}
+    {...props}
+  />
+))
+HighlightCard.displayName = "HighlightCard"
+
+const PriorityCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <Card
+    ref={ref}
+    className={cn(
+      "border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 bg-red-50/50 dark:bg-red-900/10",
+      className
+    )}
+    {...props}
+  />
+))
+PriorityCard.displayName = "PriorityCard"
+
+const ImageCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <Card
+    ref={ref}
+    className={cn(
+      "border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 bg-blue-50/50 dark:bg-blue-900/10",
+      className
+    )}
+    {...props}
+  />
+))
+ImageCard.displayName = "ImageCard"
+
+const SocialCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <Card
+    ref={ref}
+    className={cn(
+      "border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 bg-green-50/50 dark:bg-green-900/10",
+      className
+    )}
+    {...props}
+  />
+))
+SocialCard.displayName = "SocialCard"
+
+export { 
+  Card, 
+  CardHeader, 
+  CardFooter, 
+  CardTitle, 
+  CardDescription, 
+  CardContent,
+  HighlightCard,
+  PriorityCard,
+  ImageCard,
+  SocialCard
+}
