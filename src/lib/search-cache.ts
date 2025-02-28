@@ -5,6 +5,8 @@
 interface CacheItem {
   timestamp: number;
   results: any;
+  hitCount: number;     // Track how often this cache entry is accessed
+  lastAccessed: number; // When was this entry last accessed
 }
 
 // Cache storage
@@ -19,64 +21,131 @@ import { SEARCH_CACHE_EXPIRATION } from "./constants";
 export const getCacheKey = (queryType: string, query: string, params?: any): string => {
   // Normalize the query to improve cache hit rate
   const normalizedQuery = query.trim().toLowerCase();
-  return `${queryType}_${normalizedQuery}_${params ? JSON.stringify(params) : 'default'}`;
+  
+  // Handle different parameter formats consistently
+  const normalizedParams = params ? JSON.stringify(sortObjectKeys(params)) : 'default';
+  
+  return `${queryType}_${normalizedQuery}_${normalizedParams}`;
+};
+
+/**
+ * Sort object keys to ensure consistent cache keys regardless of parameter order
+ */
+const sortObjectKeys = (obj: Record<string, any>): Record<string, any> => {
+  return Object.keys(obj).sort().reduce((result, key) => {
+    result[key] = obj[key];
+    return result;
+  }, {} as Record<string, any>);
 };
 
 /**
  * Get cached search results if available and not expired
+ * Returns null if cache miss or expired
  */
 export const getCachedResults = (key: string): any | null => {
   const item = cache[key];
   
-  if (!item) return null;
+  if (!item) {
+    console.log('Cache miss for key:', key);
+    return null;
+  }
   
-  // Check if cache has expired
-  if (Date.now() - item.timestamp > SEARCH_CACHE_EXPIRATION) {
+  const now = Date.now();
+  
+  // Check if cache has expired (with dynamic expiration based on popularity)
+  const adjustedExpiration = getAdjustedExpiration(item);
+  if (now - item.timestamp > adjustedExpiration) {
+    console.log('Cache expired for key:', key);
     delete cache[key];
     return null;
   }
   
-  console.log('Cache hit for key:', key);
+  // Update hit count and last accessed time
+  item.hitCount += 1;
+  item.lastAccessed = now;
+  
+  console.log(`Cache hit for key: ${key} (hit count: ${item.hitCount})`);
   return item.results;
 };
 
 /**
- * Cache search results
+ * Calculate adjusted expiration time based on item popularity
+ * Popular items get longer expiration times
+ */
+const getAdjustedExpiration = (item: CacheItem): number => {
+  // Base expiration from constants
+  let expiration = SEARCH_CACHE_EXPIRATION;
+  
+  // Items with more hits stay in cache longer (up to 3x longer for very popular items)
+  if (item.hitCount > 10) {
+    expiration = expiration * 3;
+  } else if (item.hitCount > 5) {
+    expiration = expiration * 2;
+  } else if (item.hitCount > 2) {
+    expiration = expiration * 1.5;
+  }
+  
+  return expiration;
+};
+
+/**
+ * Cache search results with additional metadata
  */
 export const cacheResults = (key: string, results: any): void => {
   cache[key] = {
     timestamp: Date.now(),
-    results
+    results,
+    hitCount: 1,
+    lastAccessed: Date.now()
   };
+  
   console.log('Cached results for key:', key);
   
-  // Perform cache cleanup if it's getting too large (over 100 items)
+  // Perform smart cache cleanup if it's getting too large
   if (Object.keys(cache).length > 100) {
-    performCacheCleanup();
+    performSmartCacheCleanup();
   }
 };
 
 /**
- * Clean up oldest cache entries when cache gets too large
+ * Smart cache cleanup that considers both age and usage patterns
  */
-const performCacheCleanup = (): void => {
+const performSmartCacheCleanup = (): void => {
   const keys = Object.keys(cache);
   if (keys.length <= 50) return; // Don't clean up if we're under 50 items
   
-  // Sort keys by timestamp (oldest first)
-  const sortedKeys = keys.sort((a, b) => 
-    cache[a].timestamp - cache[b].timestamp
-  );
+  // Score each cache entry based on age, hit count, and recency of access
+  const scoredEntries = keys.map(key => {
+    const item = cache[key];
+    const now = Date.now();
+    
+    // Calculate age score (older items get higher scores = more likely to be removed)
+    const ageScore = (now - item.timestamp) / SEARCH_CACHE_EXPIRATION;
+    
+    // Calculate popularity score (less popular items get higher scores = more likely to be removed)
+    const popularityScore = 1 / (Math.max(item.hitCount, 1));
+    
+    // Calculate recency score (less recently accessed items get higher scores = more likely to be removed)
+    const recencyScore = (now - item.lastAccessed) / SEARCH_CACHE_EXPIRATION;
+    
+    // Combined score with different weights for each factor
+    const combinedScore = (ageScore * 0.4) + (popularityScore * 0.4) + (recencyScore * 0.2);
+    
+    return { key, score: combinedScore };
+  });
   
-  // Remove the oldest 20% of cache entries
-  const removeCount = Math.ceil(sortedKeys.length * 0.2);
+  // Sort by score (highest first = most likely to be removed)
+  scoredEntries.sort((a, b) => b.score - a.score);
+  
+  // Remove the top 20% of entries with highest scores
+  const removeCount = Math.ceil(keys.length * 0.2);
   for (let i = 0; i < removeCount; i++) {
-    if (sortedKeys[i]) {
-      delete cache[sortedKeys[i]];
+    if (scoredEntries[i]) {
+      delete cache[scoredEntries[i].key];
     }
   }
   
-  console.log(`Cache cleanup: removed ${removeCount} old entries`);
+  console.log(`Smart cache cleanup: removed ${removeCount} entries based on age, popularity, and recency`);
 };
 
 /**
@@ -93,24 +162,161 @@ export const clearCache = (key?: string): void => {
 };
 
 /**
- * Get search usage statistics from cache
+ * Pre-warm the cache with frequently used searches
  */
-export const getCacheStats = (): { size: number, oldestEntry: number, newestEntry: number } => {
-  const keys = Object.keys(cache);
-  if (keys.length === 0) {
-    return { size: 0, oldestEntry: 0, newestEntry: 0 };
+export const preWarmCache = async (commonQueries: Array<{type: string, query: string, params?: any}>): Promise<void> => {
+  console.log('Pre-warming cache with common queries...');
+  
+  for (const entry of commonQueries) {
+    const key = getCacheKey(entry.type, entry.query, entry.params);
+    
+    // Only fetch if not already in cache
+    if (!cache[key]) {
+      try {
+        // Simulate API call to get results (replace with actual implementation)
+        const results = await getSearchResults(entry.query);
+        
+        // Cache the results
+        cacheResults(key, results);
+      } catch (error) {
+        console.error(`Error pre-warming cache for query "${entry.query}":`, error);
+      }
+    }
   }
   
-  // Find oldest and newest timestamps
-  const timestamps = keys.map(key => cache[key].timestamp);
-  const oldestEntry = Math.min(...timestamps);
-  const newestEntry = Math.max(...timestamps);
+  console.log('Cache pre-warming complete');
+};
+
+/**
+ * Get search usage statistics from cache
+ */
+export const getCacheStats = (): { 
+  size: number, 
+  oldestEntry: number, 
+  newestEntry: number,
+  averageHitCount: number,
+  hitRate: number,
+  totalHits: number,
+  totalMisses: number,
+  popularQueries: Array<{key: string, hits: number}>
+} => {
+  const keys = Object.keys(cache);
+  if (keys.length === 0) {
+    return { 
+      size: 0, 
+      oldestEntry: 0, 
+      newestEntry: 0,
+      averageHitCount: 0,
+      hitRate: 0,
+      totalHits: 0,
+      totalMisses: 0,
+      popularQueries: []
+    };
+  }
+  
+  // Calculate statistics
+  let totalHitCount = 0;
+  let oldestEntry = Date.now();
+  let newestEntry = 0;
+  
+  // Track hit statistics for each cached item
+  keys.forEach(key => {
+    const item = cache[key];
+    totalHitCount += item.hitCount;
+    
+    if (item.timestamp < oldestEntry) {
+      oldestEntry = item.timestamp;
+    }
+    
+    if (item.timestamp > newestEntry) {
+      newestEntry = item.timestamp;
+    }
+  });
+  
+  // Calculate hit rate (approximate from metadata)
+  const totalHits = totalHitCount;
+  const totalMisses = Math.max(0, globalHitsMisses.misses);
+  const hitRate = totalHits / (totalHits + totalMisses);
+  
+  // Get popular queries (top 5)
+  const popularQueries = keys
+    .map(key => ({ key, hits: cache[key].hitCount }))
+    .sort((a, b) => b.hits - a.hits)
+    .slice(0, 5);
   
   return {
     size: keys.length,
     oldestEntry,
-    newestEntry
+    newestEntry,
+    averageHitCount: totalHitCount / keys.length,
+    hitRate,
+    totalHits,
+    totalMisses,
+    popularQueries
   };
+};
+
+// Global counter for tracking cache hits/misses
+const globalHitsMisses = {
+  hits: 0,
+  misses: 0
+};
+
+/**
+ * Update the global hit/miss counters
+ */
+export const updateHitMissStats = (isHit: boolean): void => {
+  if (isHit) {
+    globalHitsMisses.hits++;
+  } else {
+    globalHitsMisses.misses++;
+  }
+};
+
+/**
+ * Save cache to localStorage for persistence between sessions
+ */
+export const persistCache = (): void => {
+  try {
+    // Only save minimal cache data to avoid localStorage size limits
+    const serializedCache = Object.entries(cache).map(([key, item]) => ({
+      key,
+      timestamp: item.timestamp,
+      hitCount: item.hitCount,
+      results: item.results
+    }));
+    
+    localStorage.setItem('search_cache', JSON.stringify(serializedCache));
+    console.log(`Cache persisted with ${serializedCache.length} entries`);
+  } catch (error) {
+    console.error('Error persisting cache to localStorage:', error);
+  }
+};
+
+/**
+ * Load cache from localStorage
+ */
+export const loadPersistedCache = (): void => {
+  try {
+    const serializedCache = localStorage.getItem('search_cache');
+    if (!serializedCache) return;
+    
+    const cacheData = JSON.parse(serializedCache);
+    
+    // Restore cache entries
+    cacheData.forEach((entry: any) => {
+      cache[entry.key] = {
+        timestamp: entry.timestamp,
+        results: entry.results,
+        hitCount: entry.hitCount,
+        lastAccessed: Date.now()
+      };
+    });
+    
+    console.log(`Loaded ${cacheData.length} entries from persisted cache`);
+  } catch (error) {
+    console.error('Error loading persisted cache from localStorage:', error);
+  }
 };
 
 // Mock data for search results
@@ -216,6 +422,9 @@ const mockResults = {
  * Mock function to get search results - simulates an API call
  */
 export const getSearchResults = async (id: string): Promise<any> => {
+  // Update miss counter for tracking
+  updateHitMissStats(false);
+  
   return new Promise((resolve) => {
     // Simulate API delay
     setTimeout(() => {
@@ -227,3 +436,17 @@ export const getSearchResults = async (id: string): Promise<any> => {
     }, 500);
   });
 };
+
+// Initialize cache on module load - run this to hydrate cache from localStorage
+(() => {
+  try {
+    loadPersistedCache();
+    
+    // Set up periodic persistence
+    if (typeof window !== 'undefined') {
+      setInterval(persistCache, 5 * 60 * 1000); // Save cache every 5 minutes
+    }
+  } catch (error) {
+    console.error('Error initializing cache:', error);
+  }
+})();
