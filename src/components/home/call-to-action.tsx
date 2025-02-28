@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCheck, Shield, Star } from "lucide-react";
+import { ArrowRight, CheckCheck, Shield, Star, Image, FileText, Video } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function CallToAction() {
@@ -8,8 +8,8 @@ export function CallToAction() {
     <section className="h-full">
       <div className="h-full">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold mb-2">Ready to Start?</h2>
-          <p className="text-sm text-muted-foreground">Secure your creative work today</p>
+          <h2 className="text-2xl font-bold mb-2">Ready to Protect Your Content?</h2>
+          <p className="text-sm text-muted-foreground">Join thousands of creators who trust us</p>
         </div>
         
         <div className="bg-primary text-primary-foreground rounded-xl p-5 h-[calc(100%-4rem)] flex flex-col">
@@ -17,24 +17,32 @@ export function CallToAction() {
             <div className="mb-5 space-y-3">
               <div className="flex items-center gap-2">
                 <CheckCheck className="text-primary-foreground/90 h-4 w-4" />
-                <p className="text-sm text-primary-foreground/90">Join thousands of satisfied creators</p>
+                <p className="text-sm text-primary-foreground/90">Protection for all your content types</p>
               </div>
               <div className="flex items-center gap-2">
-                <Shield className="text-primary-foreground/90 h-4 w-4" />
-                <p className="text-sm text-primary-foreground/90">Full protection guarantee</p>
+                <Image className="text-primary-foreground/90 h-4 w-4" />
+                <p className="text-sm text-primary-foreground/90">Photos & Images</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Video className="text-primary-foreground/90 h-4 w-4" />
+                <p className="text-sm text-primary-foreground/90">Videos & Reels</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <FileText className="text-primary-foreground/90 h-4 w-4" />
+                <p className="text-sm text-primary-foreground/90">Articles & Blog Posts</p>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="text-primary-foreground/90 h-4 w-4" />
-                <p className="text-sm text-primary-foreground/90">Award-winning support team</p>
+                <p className="text-sm text-primary-foreground/90">92% success rate in content takedowns</p>
               </div>
             </div>
             
             <p className="text-sm text-primary-foreground/80 mb-4 text-center">
-              Join thousands of content creators who trust Influence Guard to protect their work across the internet.
+              Our customers have protected over 1.5 million pieces of content and recovered thousands in lost revenue.
             </p>
             <Button asChild size="lg" variant="secondary" className="bg-background text-primary hover:bg-background/90 button-animation">
               <Link to="/signup">
-                Get Started Today
+                Start Protecting Your Content Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

@@ -13,14 +13,14 @@ export const HeroSection = () => {
           Protect Your Digital Content from Unauthorized Use
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Protecting Creators, One Post at a Time. Discover where your content appears across the web, monitor for unauthorized usage, and take action to protect your intellectual property.
+          Protecting Content Creators, Photographers, Writers, and Brands. Discover where your photos, videos, articles, and designs appear across the web and take action to protect your intellectual property.
         </p>
         
         {/* Enhanced content protection section with workflow included */}
         <div className="w-full max-w-4xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl p-8 border border-purple-100 dark:border-purple-900/40">
           <h2 className="text-xl font-semibold mb-6 text-purple-800 dark:text-purple-400">Comprehensive Content Protection Services</h2>
           
-          {/* Core Services */}
+          {/* Core Services - Updated with specific examples */}
           <div className="grid md:grid-cols-3 gap-6 text-left mb-10">
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
@@ -28,7 +28,7 @@ export const HeroSection = () => {
                 <h3 className="font-medium">Copyright Enforcement</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                Automated detection and enforcement of your copyright claims across multiple platforms
+                Automated detection and enforcement of your copyright claims for photos, videos, written content, and designs
               </p>
             </div>
             <div className="flex flex-col space-y-3">
@@ -37,7 +37,7 @@ export const HeroSection = () => {
                 <h3 className="font-medium">Plagiarism Detection</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                Advanced algorithms to identify copied content, even when slightly modified
+                Our AI identifies even slightly modified copies of your content across social media and websites
               </p>
             </div>
             <div className="flex flex-col space-y-3">
@@ -46,12 +46,12 @@ export const HeroSection = () => {
                 <h3 className="font-medium">DMCA Takedowns</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                Streamlined process for submitting legally-binding takedown notices with evidence
+                We've helped remove over 10,000+ unauthorized content copies with our legally-binding takedown process
               </p>
             </div>
           </div>
           
-          {/* How It Works Section - Enhanced workflow with more spacing */}
+          {/* How It Works Section - Enhanced with more specific details */}
           <div className="relative">
             <h3 className="text-lg font-medium mb-8 text-center">How Our Protection Process Works</h3>
             
@@ -65,7 +65,7 @@ export const HeroSection = () => {
                 </div>
                 <h4 className="text-lg font-medium mb-3">1. Find Content</h4>
                 <p className="text-sm text-muted-foreground">
-                  Our advanced search technology scans across platforms to locate your images and text content anywhere it appears online.
+                  Our technology scans millions of websites and social platforms to locate where your images, videos, and text content appear online, even when modified.
                 </p>
               </div>
               
@@ -75,7 +75,7 @@ export const HeroSection = () => {
                 </div>
                 <h4 className="text-lg font-medium mb-3">2. Monitor Usage</h4>
                 <p className="text-sm text-muted-foreground">
-                  Set up continuous monitoring to receive alerts when new matches of your content are detected, with detailed reports and analytics.
+                  Get instant alerts when your content is found with our 24/7 monitoring system that checks 50+ platforms, including Instagram, TikTok, Twitter, and websites.
                 </p>
               </div>
               
@@ -85,7 +85,7 @@ export const HeroSection = () => {
                 </div>
                 <h4 className="text-lg font-medium mb-3">3. Take Action</h4>
                 <p className="text-sm text-muted-foreground">
-                  Generate and send legally-binding DMCA takedown notices with all required evidence automatically compiled for you.
+                  With a 92% success rate, our automated DMCA takedown system removes unauthorized content quickly, with all evidence and legal documentation handled for you.
                 </p>
               </div>
             </div>

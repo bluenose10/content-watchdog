@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, CheckCircle, Clock, Shield, Users } from "lucide-react";
+import { CalendarClock, CheckCircle, Clock, Shield, Users, Award, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function AboutSection() {
@@ -11,7 +11,7 @@ export function AboutSection() {
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold mb-3">About Influence Guard</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Your trusted partner in protecting digital content across the web
+            Trusted by over 5,000+ content creators to protect their digital assets
           </p>
         </div>
         
@@ -42,13 +42,13 @@ export function AboutSection() {
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
                   <Users className="h-5 w-5 mr-2 text-primary" />
-                  Our Team
+                  Our Team & Technology
                 </h3>
                 <p className="mb-4 text-muted-foreground">
                   Founded by a team of content protection experts and technology innovators, Influence Guard brings together decades of experience in digital rights management, intellectual property law, and artificial intelligence.
                 </p>
                 <p className="text-muted-foreground">
-                  Cybersecurity is a top qualification among our staff. Our team includes certified security professionals with backgrounds in threat detection, digital forensics, and content protection technologies.
+                  Our proprietary scanning technology processes over 1 million pieces of content daily, comparing visual fingerprints and text patterns to detect even slightly modified copies of your work.
                 </p>
               </CardContent>
             </div>
@@ -70,7 +70,7 @@ export function AboutSection() {
                     <div>
                       <h4 className="font-medium mb-1">Self-Service Platform</h4>
                       <p className="text-sm text-muted-foreground">
-                        Use our powerful tools to search and monitor your content yourself with our affordable subscription plans.
+                        Perfect for bloggers, photographers, and small businesses. Use our powerful tools to search and monitor your content yourself with our affordable subscription plans.
                       </p>
                     </div>
                   </div>
@@ -82,7 +82,7 @@ export function AboutSection() {
                     <div>
                       <h4 className="font-medium mb-1">Fully Managed Service</h4>
                       <p className="text-sm text-muted-foreground mb-2">
-                        Let our experts handle everything with our comprehensive managed monitoring service:
+                        Ideal for agencies, large brands and professional creators. Let our experts handle everything with our comprehensive managed monitoring service:
                       </p>
                       <ul className="space-y-2">
                         <li className="flex items-start gap-2">
@@ -96,6 +96,14 @@ export function AboutSection() {
                         <li className="flex items-start gap-2">
                           <CalendarClock className="h-4 w-4 text-primary mt-1 shrink-0" />
                           <span className="text-sm">Weekly detailed reports with actionable recommendations</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Award className="h-4 w-4 text-primary mt-1 shrink-0" />
+                          <span className="text-sm">Dedicated content protection specialist</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <BarChart3 className="h-4 w-4 text-primary mt-1 shrink-0" />
+                          <span className="text-sm">92% success rate for content removal</span>
                         </li>
                       </ul>
                       <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">

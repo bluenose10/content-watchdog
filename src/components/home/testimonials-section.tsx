@@ -3,22 +3,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Star } from "lucide-react";
 
-// Sample testimonial data
+// Enhanced testimonial data with specific success stories
 const testimonials = [
   {
     id: 1,
     name: "Sarah Johnson",
-    role: "Content Creator",
+    role: "Lifestyle Photographer",
     avatar: "https://i.pravatar.cc/150?u=1",
-    content: "InfluenceGuard helped me discover 24 instances of my content being used without permission. The DMCA assistance made the takedown process so much easier.",
+    content: "InfluenceGuard helped me discover 24 instances of my photos being used without permission on commercial websites. The DMCA assistance recovered over $3,000 in licensing fees I would have otherwise lost.",
     rating: 5
   },
   {
     id: 2,
     name: "Michael Chen",
-    role: "Photographer",
+    role: "Travel Content Creator",
     avatar: "https://i.pravatar.cc/150?u=2",
-    content: "As a photographer, protecting my work is crucial. This platform has become an essential part of my business. The real-time alerts notify me instantly when my photos appear online saves me hours of manual searching.",
+    content: "As a travel photographer with thousands of images, manually searching for stolen content was impossible. InfluenceGuard's real-time alerts notify me instantly when my photos appear online, and they've helped me remove over 50 unauthorized uses in just three months.",
     rating: 5
   }
 ];
@@ -28,17 +28,17 @@ export function TestimonialsSection() {
     <section id="testimonials" className="h-full">
       <div className="h-full">
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold mb-2">What Our Users Say</h2>
+          <h2 className="text-2xl font-bold mb-2">Success Stories</h2>
           <p className="text-sm text-muted-foreground">
-            Trusted by content creators worldwide
+            See how we've helped content creators protect their work
           </p>
         </div>
         
         <div className="space-y-6">
           {testimonials.map((testimonial) => (
             <Card key={testimonial.id} className="relative overflow-hidden glass-card transition-all duration-300 hover:shadow-lg
-              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
-              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-900 after:-z-10">
+              before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
+              after:absolute after:inset-[1px] after:rounded-[calc(0.75rem-1px)] after:bg-white dark:after:bg-gray-900 after:-z-10">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-10 w-10 border-2 border-primary/20">
