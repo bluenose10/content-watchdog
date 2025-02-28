@@ -14,6 +14,9 @@ interface RateLimitRecord {
   monthlyLastReset: number;
 }
 
+// Admin emails with no rate limits
+const ADMIN_EMAILS = ['admin@influenceguard.com', 'test@example.com'];
+
 // Track rate limits by user ID
 const rateLimits: Record<string, RateLimitRecord> = {};
 
@@ -66,10 +69,19 @@ export function getUserRateLimits(
 }
 
 /**
+ * Check if user email is admin
+ */
+export function isAdminUser(email: string | undefined): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
+/**
  * Check if a request is within rate limits
  * @param userId User ID or anonymous
  * @param maxRequests Maximum requests allowed in the time window
  * @param timeWindow Time window in milliseconds
+ * @param userEmail Optional email to check for admin status
  * @returns Object with allowed status, remaining requests, and reset time
  */
 export function checkRateLimit(
@@ -77,7 +89,8 @@ export function checkRateLimit(
   maxRequests: number,
   timeWindow: number,
   maxWeeklyRequests?: number,
-  maxMonthlyRequests?: number
+  maxMonthlyRequests?: number,
+  userEmail?: string
 ): { 
   allowed: boolean; 
   remaining: number; 
@@ -88,6 +101,20 @@ export function checkRateLimit(
   monthlyRemaining?: number;
   monthlyResetTime?: number;
 } {
+  // Admin users bypass rate limits
+  if (userEmail && isAdminUser(userEmail)) {
+    console.log("Admin user detected - bypassing rate limits");
+    return {
+      allowed: true,
+      remaining: Number.MAX_SAFE_INTEGER,
+      resetTime: Date.now() + timeWindow,
+      weeklyRemaining: Number.MAX_SAFE_INTEGER,
+      weeklyResetTime: Date.now() + (7 * 24 * 60 * 60 * 1000),
+      monthlyRemaining: Number.MAX_SAFE_INTEGER,
+      monthlyResetTime: Date.now() + (30 * 24 * 60 * 60 * 1000)
+    };
+  }
+
   const now = Date.now();
   
   // Initialize if not exists

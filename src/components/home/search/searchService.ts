@@ -33,6 +33,9 @@ const DEFAULT_IMAGE_PARAMS: ImageSearchParams = {
   dominantColor: undefined
 };
 
+// Admin emails with no search limits
+const ADMIN_EMAILS = ['admin@influenceguard.com', 'test@example.com'];
+
 // Track user search counts (in-memory for demo purposes, should be persisted in production)
 const userSearchCounts: Record<string, { 
   monthly: number, 
@@ -47,9 +50,16 @@ const userSearchCounts: Record<string, {
  * Check if user has exceeded their search limits based on subscription tier
  * @param userId User ID
  * @param isPro Whether the user has a Pro subscription
+ * @param userEmail User's email address to check admin status
  * @returns Object with isAllowed and message
  */
-async function checkSearchLimits(userId: string, isPro: boolean): Promise<{ isAllowed: boolean, message: string }> {
+async function checkSearchLimits(userId: string, isPro: boolean, userEmail?: string): Promise<{ isAllowed: boolean, message: string }> {
+  // Admin users have unlimited searches
+  if (userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
+    console.log("Admin user detected - bypassing search limits");
+    return { isAllowed: true, message: "" };
+  }
+
   // Initialize user search counts if not present
   if (!userSearchCounts[userId]) {
     userSearchCounts[userId] = {
@@ -131,7 +141,13 @@ function formatTimeRemaining(timeMs: number): string {
 /**
  * Increment user search count
  */
-function incrementSearchCount(userId: string): void {
+function incrementSearchCount(userId: string, userEmail?: string): void {
+  // Admin users don't have their counts incremented
+  if (userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
+    console.log("Admin user - not incrementing search count");
+    return;
+  }
+
   if (!userSearchCounts[userId]) {
     userSearchCounts[userId] = {
       monthly: 0,
@@ -167,7 +183,7 @@ export async function handleTextSearch(
 
   // Check search limits for this user (simplified check - in production would query DB)
   const isPro = true; // Mock function - in production should check subscription status
-  const limitCheck = await checkSearchLimits(user.id, isPro);
+  const limitCheck = await checkSearchLimits(user.id, isPro, user.email);
   if (!limitCheck.isAllowed) {
     throw new Error(limitCheck.message);
   }
@@ -202,7 +218,7 @@ export async function handleTextSearch(
   };
 
   // Increment the user's search count
-  incrementSearchCount(user.id);
+  incrementSearchCount(user.id, user.email);
 
   // Process the search
   const searchId = await processSearch(searchData, user);
@@ -230,7 +246,7 @@ export async function handleImageSearch(
 
   // Check search limits for this user
   const isPro = true; // Mock function - in production should check subscription status
-  const limitCheck = await checkSearchLimits(user.id, isPro);
+  const limitCheck = await checkSearchLimits(user.id, isPro, user.email);
   if (!limitCheck.isAllowed) {
     throw new Error(limitCheck.message);
   }
@@ -266,7 +282,7 @@ export async function handleImageSearch(
     };
 
     // Increment the user's search count
-    incrementSearchCount(user.id);
+    incrementSearchCount(user.id, user.email);
 
     // Process the search
     const searchId = await processSearch(searchData, user);

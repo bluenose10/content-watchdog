@@ -36,7 +36,7 @@ export const useProtectedRoute = (
   requiredFeature?: PremiumFeature,
   requiresAdmin: boolean = false
 ): ProtectedRouteResult => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin: authIsAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [accessLevel, setAccessLevel] = useState<AccessLevel>(AccessLevel.ANONYMOUS);
@@ -46,10 +46,13 @@ export const useProtectedRoute = (
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Add a debug log to see the auth state
-  console.log("useProtectedRoute - Auth state:", { user: !!user, loading });
+  console.log("useProtectedRoute - Auth state:", { user: !!user, loading, isAdmin: authIsAdmin });
 
   // Function to check if user has a specific premium feature
   const hasPremiumFeature = (feature: PremiumFeature): boolean => {
+    // Admin users have access to all premium features
+    if (isAdmin) return true;
+    
     if (accessLevel !== AccessLevel.PREMIUM && accessLevel !== AccessLevel.ADMIN) return false;
 
     switch (feature) {
@@ -98,27 +101,30 @@ export const useProtectedRoute = (
       else {
         try {
           console.log("useProtectedRoute - User is authenticated");
-          // Check if the user has a premium subscription
-          setPremiumFeaturesLoading(true);
-          const userSubscription = await getUserSubscription(user.id);
-          setSubscription(userSubscription);
           
-          // Check if user is admin (hard-coded list of admin emails for now)
-          // In a real app, you'd have an admin flag in your user database
-          const adminEmails = ['admin@example.com', user.email]; // Add your email here
-          const userIsAdmin = adminEmails.includes(user.email);
+          // Check if user is admin from auth context
+          const userIsAdmin = authIsAdmin;
           setIsAdmin(userIsAdmin);
           
-          // Determine access level based on subscription and admin status
-          const isPremium = userSubscription?.plans?.price > 0 && 
-                            userSubscription?.status === 'active';
+          // Check if the user has a premium subscription (if not admin)
+          setPremiumFeaturesLoading(true);
           
-          if (userIsAdmin) {
-            setAccessLevel(AccessLevel.ADMIN);
-          } else if (isPremium) {
-            setAccessLevel(AccessLevel.PREMIUM);
+          if (!userIsAdmin) {
+            const userSubscription = await getUserSubscription(user.id);
+            setSubscription(userSubscription);
+            
+            // Determine access level based on subscription
+            const isPremium = userSubscription?.plans?.price > 0 && 
+                            userSubscription?.status === 'active';
+            
+            if (isPremium) {
+              setAccessLevel(AccessLevel.PREMIUM);
+            } else {
+              setAccessLevel(AccessLevel.BASIC);
+            }
           } else {
-            setAccessLevel(AccessLevel.BASIC);
+            // Admin users get the ADMIN access level
+            setAccessLevel(AccessLevel.ADMIN);
           }
           
           // If route requires admin and user is not admin
@@ -133,8 +139,8 @@ export const useProtectedRoute = (
             return;
           }
           
-          // If route requires premium and user doesn't have it
-          if (requiresPremium && !isPremium && !userIsAdmin) {
+          // If route requires premium and user doesn't have it (not applicable to admins)
+          if (requiresPremium && !userIsAdmin && accessLevel !== AccessLevel.PREMIUM) {
             toast({
               title: "Premium access required",
               description: "Please upgrade your account to access this feature",
@@ -145,8 +151,8 @@ export const useProtectedRoute = (
             return;
           }
           
-          // If route requires a specific premium feature
-          if (requiredFeature && !hasPremiumFeature(requiredFeature) && !userIsAdmin) {
+          // If route requires a specific premium feature (not applicable to admins)
+          if (requiredFeature && !userIsAdmin && !hasPremiumFeature(requiredFeature)) {
             toast({
               title: "Feature not available",
               description: "This feature requires a higher tier subscription",
@@ -160,7 +166,6 @@ export const useProtectedRoute = (
         } catch (error) {
           console.error("Error checking subscription status:", error);
           setAccessLevel(AccessLevel.BASIC); // Default to basic if there's an error
-          setIsAdmin(false);
         } finally {
           setPremiumFeaturesLoading(false);
         }
@@ -170,7 +175,7 @@ export const useProtectedRoute = (
     };
 
     determineAccessLevel();
-  }, [user, loading, navigate, toast, requiresAuth, requiresPremium, requiredFeature, requiresAdmin]);
+  }, [user, loading, navigate, toast, requiresAuth, requiresPremium, requiredFeature, requiresAdmin, authIsAdmin]);
 
   return { 
     user, 

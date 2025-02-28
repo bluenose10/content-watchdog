@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, options?: { data: any }) => Promise<{ error: any; data: any }>;
   signOut: () => Promise<void>;
@@ -15,10 +16,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Admin emails list - in production, this would come from a database
+const ADMIN_EMAILS = ['admin@influenceguard.com', 'test@example.com'];
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user email is in admin list
+  const checkAdminStatus = (email: string | undefined) => {
+    if (!email) return false;
+    return ADMIN_EMAILS.includes(email.toLowerCase());
+  };
 
   // Initialize or update the user and session when auth state changes
   useEffect(() => {
@@ -32,9 +43,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error("Error fetching session:", error);
             setSession(null);
             setUser(null);
+            setIsAdmin(false);
           } else {
             setSession(data.session);
             setUser(data.session?.user || null);
+            setIsAdmin(checkAdminStatus(data.session?.user?.email));
           }
           
           setLoading(false);
@@ -42,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error("Exception in fetching session:", e);
           setSession(null);
           setUser(null);
+          setIsAdmin(false);
           setLoading(false);
         }
       };
@@ -57,10 +71,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Clear user and session on sign out
             setSession(null);
             setUser(null);
+            setIsAdmin(false);
           } else if (newSession) {
             // Update user and session on sign in or session refresh
             setSession(newSession);
             setUser(newSession.user);
+            setIsAdmin(checkAdminStatus(newSession.user?.email));
           }
           
           setLoading(false);
@@ -82,6 +98,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       console.log("Sign in response:", data?.user?.email, error ? "Error: " + error.message : "Success");
+      
+      if (!error && data.user) {
+        setIsAdmin(checkAdminStatus(data.user.email));
+      }
+      
       return { error };
     } catch (error) {
       console.error("Sign in error:", error);
@@ -100,6 +121,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       console.log("Sign up response:", data?.user?.email, error ? "Error: " + error.message : "Success");
+      
+      if (!error && data.user) {
+        setIsAdmin(checkAdminStatus(data.user.email));
+      }
+      
       return { data, error };
     } catch (error) {
       console.error("Sign up error:", error);
@@ -118,6 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Explicitly clear user and session state
         setUser(null);
         setSession(null);
+        setIsAdmin(false);
       }
     } catch (error) {
       console.error("Sign out error:", error);
@@ -139,6 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     loading,
+    isAdmin,
     signIn,
     signUp,
     signOut,
