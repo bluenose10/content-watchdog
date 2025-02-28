@@ -60,8 +60,8 @@ export function Sidebar({ className }: SidebarProps) {
 
   const SidebarContent = () => (
     <div className="h-full py-12 flex flex-col">
-      <div className="px-5 py-4">
-        <h2 className="mb-4 px-4 text-lg font-semibold">Navigation</h2>
+      <div className="px-5 pt-8 pb-4">
+        <h2 className="mb-6 px-4 text-lg font-semibold">Navigation</h2>
         <div className="space-y-2">
           {menuItems.map((item) => (
             <Button
