@@ -78,8 +78,16 @@ export function Header() {
 
   // Function to handle navigation to home page sections
   const navigateToSection = (sectionId: string) => {
-    // Use window.location to force a complete navigation
-    window.location.href = `/#${sectionId}`;
+    if (location.pathname !== '/') {
+      // If not on home page, navigate to home with hash
+      navigate(`/#${sectionId}`);
+    } else {
+      // If already on home page, scroll to section
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   };
 
   return (
