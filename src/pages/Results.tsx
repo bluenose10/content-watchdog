@@ -14,6 +14,7 @@ import { Calendar, Image, Info } from "lucide-react";
 import { Sidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getSearchQueryById, performGoogleSearch, performImageSearch } from "@/lib/db-service";
 
 // Extended fallback results to guarantee more results are shown
 const FALLBACK_RESULTS = [
@@ -180,31 +181,208 @@ export default function Results() {
         setIsLoading(true);
         console.log("Fetching results for search ID:", id);
         
-        let data: any;
-        try {
-          // Try to get data from mock service
-          data = await getSearchResults(id);
-          console.log("Results data received:", data);
-        } catch (error) {
-          console.warn("Could not get results from mock service, using fallback data", error);
-          // If the ID is not found in mockResults, use a fallback
-          data = {
-            query: "Your search",
-            results: FALLBACK_RESULTS
-          };
-        }
+        // Check if it's a temporary search ID (for anonymous users)
+        const isTemporarySearch = id.startsWith('temp_');
         
-        // Ensure we always have results to show
-        if (!data || !data.results || data.results.length === 0 || data.results.length < 5) {
-          console.log("No results or too few results found, using extended fallback data");
-          data = {
-            query: data?.query || "Your search",
-            results: FALLBACK_RESULTS
-          };
+        if (isTemporarySearch) {
+          // For temporary searches, try to get stored search data from session storage
+          const tempSearchData = sessionStorage.getItem(`temp_search_${id}`);
+          
+          if (tempSearchData) {
+            const searchData = JSON.parse(tempSearchData);
+            const queryText = searchData.query_text || "Unknown search";
+            const queryType = searchData.query_type;
+            
+            console.log("Processing temporary search:", queryText, "of type", queryType);
+            setQuery(queryText);
+            
+            // Get search parameters if available
+            const searchParams = searchData.search_params_json ? 
+                                 JSON.parse(searchData.search_params_json) : {};
+            
+            // Perform Google search directly for temporary searches
+            try {
+              let searchResponse;
+              if (queryType === 'image') {
+                console.log("Performing image search");
+                searchResponse = await performImageSearch(searchData.image_url, 'anonymous', searchParams);
+              } else {
+                console.log("Performing Google search");
+                searchResponse = await performGoogleSearch(queryText, 'anonymous', searchParams);
+              }
+              
+              console.log("Google API response:", searchResponse);
+              
+              if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
+                // Transform Google API response to our format
+                const formattedResults = searchResponse.items.map((item: any, index: number) => {
+                  const thumbnailUrl = item.pagemap?.cse_image?.[0]?.src || 
+                                      item.image?.thumbnailLink ||
+                                      `https://picsum.photos/200/300?random=${index+1}`;
+                  
+                  // Determine result type based on URL or other factors
+                  const source = item.displayLink || "unknown";
+                  let type = 'website';
+                  
+                  if (item.pagemap?.videoobject || source.includes('youtube') || 
+                      source.includes('vimeo') || source.includes('tiktok')) {
+                    type = 'social';
+                  } else if (item.pagemap?.imageobject || source.includes('instagram') || 
+                           source.includes('flickr') || source.includes('pinterest') ||
+                           queryType === 'image') {
+                    type = 'image';
+                  } else if (source.includes('twitter') || source.includes('facebook') || 
+                           source.includes('linkedin') || source.includes('reddit')) {
+                    type = 'social';
+                  }
+                  
+                  // Determine match level based on relevance score
+                  const relevanceScore = item.relevanceScore || item.similarityScore || Math.random();
+                  let matchLevel = 'Medium';
+                  if (relevanceScore > 0.8) matchLevel = 'High';
+                  else if (relevanceScore < 0.5) matchLevel = 'Low';
+                  
+                  return {
+                    id: `result-${index}`,
+                    title: item.title,
+                    url: item.link,
+                    thumbnail: thumbnailUrl,
+                    source: source,
+                    match_level: matchLevel,
+                    found_at: new Date().toISOString(),
+                    type: type
+                  };
+                });
+                
+                setResults(formattedResults);
+                console.log("Formatted results:", formattedResults);
+              } else {
+                throw new Error("No results from Google API");
+              }
+            } catch (error) {
+              console.error("Error performing direct search:", error);
+              setResults(FALLBACK_RESULTS);
+              toast({
+                title: "API Error",
+                description: "Could not fetch search results from Google API. Showing sample results instead.",
+                variant: "destructive",
+              });
+            }
+          } else {
+            console.error("No temporary search data found");
+            setResults(FALLBACK_RESULTS);
+            setQuery("Unknown search");
+          }
+        } else {
+          // For permanent searches (logged in users)
+          try {
+            // Try to get cached results first
+            const cachedData = await getSearchResults(id);
+            
+            if (cachedData && cachedData.results && cachedData.results.length > 0) {
+              console.log("Using cached results:", cachedData);
+              setResults(cachedData.results);
+              setQuery(cachedData.query);
+            } else {
+              // If no cached results, fetch the search query from the database
+              const searchQuery = await getSearchQueryById(id);
+              
+              if (searchQuery) {
+                console.log("Found search query:", searchQuery);
+                const queryText = searchQuery.query_text || "Unknown search";
+                const queryType = searchQuery.query_type;
+                setQuery(queryText);
+                
+                // Get search parameters if available
+                const searchParams = searchQuery.search_params_json ? 
+                                    JSON.parse(searchQuery.search_params_json) : {};
+                
+                // Perform Google search
+                try {
+                  let searchResponse;
+                  if (queryType === 'image') {
+                    console.log("Performing image search");
+                    searchResponse = await performImageSearch(searchQuery.image_url, searchQuery.user_id, searchParams);
+                  } else {
+                    console.log("Performing Google search");
+                    searchResponse = await performGoogleSearch(queryText, searchQuery.user_id, searchParams);
+                  }
+                  
+                  console.log("Google API response:", searchResponse);
+                  
+                  if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
+                    // Transform Google API response to our format
+                    const formattedResults = searchResponse.items.map((item: any, index: number) => {
+                      const thumbnailUrl = item.pagemap?.cse_image?.[0]?.src || 
+                                          item.image?.thumbnailLink ||
+                                          `https://picsum.photos/200/300?random=${index+1}`;
+                      
+                      // Determine result type based on URL or other factors
+                      const source = item.displayLink || "unknown";
+                      let type = 'website';
+                      
+                      if (item.pagemap?.videoobject || source.includes('youtube') || 
+                          source.includes('vimeo') || source.includes('tiktok')) {
+                        type = 'social';
+                      } else if (item.pagemap?.imageobject || source.includes('instagram') || 
+                               source.includes('flickr') || source.includes('pinterest') ||
+                               queryType === 'image') {
+                        type = 'image';
+                      } else if (source.includes('twitter') || source.includes('facebook') || 
+                               source.includes('linkedin') || source.includes('reddit')) {
+                        type = 'social';
+                      }
+                      
+                      // Determine match level based on relevance score
+                      const relevanceScore = item.relevanceScore || item.similarityScore || Math.random();
+                      let matchLevel = 'Medium';
+                      if (relevanceScore > 0.8) matchLevel = 'High';
+                      else if (relevanceScore < 0.5) matchLevel = 'Low';
+                      
+                      return {
+                        id: `result-${index}`,
+                        title: item.title,
+                        url: item.link,
+                        thumbnail: thumbnailUrl,
+                        source: source,
+                        match_level: matchLevel,
+                        found_at: new Date().toISOString(),
+                        type: type
+                      };
+                    });
+                    
+                    setResults(formattedResults);
+                    console.log("Formatted results:", formattedResults);
+                  } else {
+                    throw new Error("No results from Google API");
+                  }
+                } catch (error) {
+                  console.error("Error performing search:", error);
+                  setResults(FALLBACK_RESULTS);
+                  toast({
+                    title: "API Error",
+                    description: "Could not fetch search results from Google API. Showing sample results instead.",
+                    variant: "destructive",
+                  });
+                }
+              } else {
+                console.error("Search query not found");
+                setResults(FALLBACK_RESULTS);
+                setQuery("Unknown search");
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching search or results:", error);
+            setResults(FALLBACK_RESULTS);
+            setQuery("Unknown search");
+            
+            toast({
+              title: "Error",
+              description: "Could not fetch search results. Showing sample results instead.",
+              variant: "destructive",
+            });
+          }
         }
-        
-        setResults(data.results);
-        setQuery(data.query);
         
         // Set a realistic search date
         const now = new Date();
