@@ -1,53 +1,90 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Chart } from "@/components/ui/chart";
 import { CircleDollarSign, Database, Search, Server } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-
-// Mock data for API usage
-const apiUsageData = [
-  { date: "2023-06", google: 350, supabase: 1200, other: 150 },
-  { date: "2023-07", google: 420, supabase: 1350, other: 180 },
-  { date: "2023-08", google: 380, supabase: 1400, other: 210 },
-  { date: "2023-09", google: 450, supabase: 1500, other: 190 },
-  { date: "2023-10", google: 520, supabase: 1650, other: 230 },
-  { date: "2023-11", google: 580, supabase: 1800, other: 250 },
-  { date: "2023-12", google: 620, supabase: 2000, other: 280 },
-  { date: "2024-01", google: 580, supabase: 1950, other: 270 },
-  { date: "2024-02", google: 650, supabase: 2100, other: 290 },
-  { date: "2024-03", google: 700, supabase: 2300, other: 310 },
-  { date: "2024-04", google: 750, supabase: 2400, other: 330 },
-  { date: "2024-05", google: 800, supabase: 2600, other: 350 },
-];
-
-// Mock data for storage usage
-const storageUsageData = [
-  { date: "2023-06", images: 1.2, data: 0.3, backups: 0.1 },
-  { date: "2023-07", images: 1.3, data: 0.4, backups: 0.1 },
-  { date: "2023-08", images: 1.5, data: 0.5, backups: 0.2 },
-  { date: "2023-09", images: 1.8, data: 0.6, backups: 0.2 },
-  { date: "2023-10", images: 2.0, data: 0.8, backups: 0.3 },
-  { date: "2023-11", images: 2.3, data: 0.9, backups: 0.3 },
-  { date: "2023-12", images: 2.5, data: 1.0, backups: 0.4 },
-  { date: "2024-01", images: 2.7, data: 1.1, backups: 0.4 },
-  { date: "2024-02", images: 3.0, data: 1.2, backups: 0.5 },
-  { date: "2024-03", images: 3.2, data: 1.3, backups: 0.5 },
-  { date: "2024-04", images: 3.5, data: 1.5, backups: 0.6 },
-  { date: "2024-05", images: 3.8, data: 1.7, backups: 0.7 },
-];
-
-// Mock data for cost breakdown
-const costBreakdownData = [
-  { name: "Google APIs", value: 350 },
-  { name: "Supabase", value: 150 },
-  { name: "Storage", value: 75 },
-  { name: "Other", value: 25 },
-];
+import { getApiCallStats, getApiCostEstimates, getStorageStats } from "@/lib/api-usage-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function AdminDashboard() {
   const [timeRange, setTimeRange] = useState("monthly");
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiCallData, setApiCallData] = useState<any[]>([]);
+  const [costData, setCostData] = useState<any>({
+    costBreakdown: [],
+    totalMonthlyCost: 0,
+    googleApiCost: 0,
+    storageCost: 0,
+    supabaseCost: 0,
+    monthlyCostData: []
+  });
+  const [storageData, setStorageData] = useState<any>({
+    storageUsage: [],
+    totalStorageGB: 0,
+    imagesStorageGB: 0,
+    databaseStorageGB: 0,
+    backupsStorageGB: 0
+  });
+  const [totalApiCalls, setTotalApiCalls] = useState(0);
+  const [googleApiDistribution, setGoogleApiDistribution] = useState<any[]>([]);
+  const [supabaseUsage, setSupabaseUsage] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        // Fetch API call statistics
+        const apiStats = await getApiCallStats(timeRange);
+        setApiCallData(apiStats.apiCalls);
+        setTotalApiCalls(apiStats.totalCalls);
+        
+        // Set Google API distribution
+        setGoogleApiDistribution([
+          { name: "Search", value: apiStats.googleApiCalls * 0.8 }, // 80% search
+          { name: "Images", value: apiStats.imageApiCalls },
+          { name: "Custom Search", value: apiStats.googleApiCalls * 0.2 }, // 20% custom search
+        ]);
+        
+        // Set Supabase usage distribution (rough estimate)
+        const readOps = apiStats.totalCalls * 3; // Assuming 3 read ops per search
+        const writeOps = apiStats.totalCalls * 0.5; // Assuming 1 write op every 2 searches
+        const deleteOps = apiStats.totalCalls * 0.1; // Assuming 1 delete every 10 searches
+        const storageOps = apiStats.imageApiCalls;
+        
+        setSupabaseUsage([
+          { operation: "Reads", count: Math.round(readOps) },
+          { operation: "Writes", count: Math.round(writeOps) },
+          { operation: "Deletes", count: Math.round(deleteOps) },
+          { operation: "Storage", count: storageOps },
+        ]);
+        
+        // Fetch cost estimates
+        const costEstimates = await getApiCostEstimates();
+        setCostData(costEstimates);
+        
+        // Fetch storage statistics
+        const storageStats = await getStorageStats();
+        setStorageData(storageStats);
+      } catch (error) {
+        console.error("Error fetching admin dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, [timeRange]);
+
+  // Helper function to render skeleton or content
+  const renderContent = (content: React.ReactNode) => {
+    return isLoading ? (
+      <div className="space-y-4">
+        <Skeleton className="h-[350px] w-full" />
+      </div>
+    ) : content;
+  };
 
   return (
     <div className="space-y-8">
@@ -61,31 +98,31 @@ export function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total API Calls"
-          value="28,429"
+          value={isLoading ? "Loading..." : totalApiCalls.toLocaleString()}
           icon={Server}
-          description="This month"
-          change={12}
+          description="All time"
+          change={12} // This would be calculated in a real application
         />
         <StatsCard
           title="Storage Used"
-          value="6.2 GB"
+          value={isLoading ? "Loading..." : `${storageData.totalStorageGB} GB`}
           icon={Database}
           description="Total usage"
-          change={8}
+          change={8} // This would be calculated in a real application
         />
         <StatsCard
           title="Search API Cost"
-          value="$247.50"
+          value={isLoading ? "Loading..." : `$${costData.googleApiCost.toLocaleString()}`}
           icon={Search}
-          description="Monthly average"
-          change={-3}
+          description="Estimated total"
+          change={-3} // This would be calculated in a real application
         />
         <StatsCard
           title="Total Monthly Cost"
-          value="$598.75"
+          value={isLoading ? "Loading..." : `$${costData.totalMonthlyCost.toLocaleString()}`}
           icon={CircleDollarSign}
-          description="Current month"
-          change={5}
+          description="Estimated"
+          change={5} // This would be calculated in a real application
         />
       </div>
 
@@ -119,15 +156,17 @@ export function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="h-96">
-              <Chart
-                type="line"
-                data={apiUsageData}
-                dataKey="google"
-                nameKey="date"
-                height={350}
-                title="Google API Calls"
-                stroke="#8884d8"
-              />
+              {renderContent(
+                <Chart
+                  type="line"
+                  data={apiCallData}
+                  dataKey="google"
+                  nameKey="date"
+                  height={350}
+                  title="Google API Calls"
+                  stroke="#8884d8"
+                />
+              )}
             </CardContent>
           </Card>
 
@@ -140,17 +179,15 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <Chart
-                  type="pie"
-                  data={[
-                    { name: "Search", value: 65 },
-                    { name: "Images", value: 25 },
-                    { name: "Custom Search", value: 10 },
-                  ]}
-                  dataKey="value"
-                  nameKey="name"
-                  height={250}
-                />
+                {renderContent(
+                  <Chart
+                    type="pie"
+                    data={googleApiDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    height={250}
+                  />
+                )}
               </CardContent>
             </Card>
             <Card>
@@ -161,19 +198,16 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <Chart
-                  type="bar"
-                  data={[
-                    { operation: "Reads", count: 1850 },
-                    { operation: "Writes", count: 430 },
-                    { operation: "Deletes", count: 120 },
-                    { operation: "Storage", count: 200 },
-                  ]}
-                  dataKey="count"
-                  nameKey="operation"
-                  height={250}
-                  fill="#82ca9d"
-                />
+                {renderContent(
+                  <Chart
+                    type="bar"
+                    data={supabaseUsage}
+                    dataKey="count"
+                    nameKey="operation"
+                    height={250}
+                    fill="#82ca9d"
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -188,16 +222,18 @@ export function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="h-96">
-              <Chart
-                type="area"
-                data={storageUsageData}
-                dataKey="images"
-                nameKey="date"
-                height={350}
-                title="Images Storage (GB)"
-                fill="rgba(136, 132, 216, 0.6)"
-                stroke="#8884d8"
-              />
+              {renderContent(
+                <Chart
+                  type="area"
+                  data={storageData.storageUsage}
+                  dataKey="images"
+                  nameKey="date"
+                  height={350}
+                  title="Images Storage (GB)"
+                  fill="rgba(136, 132, 216, 0.6)"
+                  stroke="#8884d8"
+                />
+              )}
             </CardContent>
           </Card>
 
@@ -210,17 +246,19 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <Chart
-                  type="pie"
-                  data={[
-                    { name: "Images", value: 3.8 },
-                    { name: "Database", value: 1.7 },
-                    { name: "Backups", value: 0.7 },
-                  ]}
-                  dataKey="value"
-                  nameKey="name"
-                  height={250}
-                />
+                {renderContent(
+                  <Chart
+                    type="pie"
+                    data={[
+                      { name: "Images", value: storageData.imagesStorageGB },
+                      { name: "Database", value: storageData.databaseStorageGB },
+                      { name: "Backups", value: storageData.backupsStorageGB },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                    height={250}
+                  />
+                )}
               </CardContent>
             </Card>
             <Card>
@@ -231,20 +269,24 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <Chart
-                  type="bar"
-                  data={[
-                    { month: "Jan", growth: 0.2 },
-                    { month: "Feb", growth: 0.3 },
-                    { month: "Mar", growth: 0.2 },
-                    { month: "Apr", growth: 0.3 },
-                    { month: "May", growth: 0.3 },
-                  ]}
-                  dataKey="growth"
-                  nameKey="month"
-                  height={250}
-                  fill="#82ca9d"
-                />
+                {renderContent(
+                  <Chart
+                    type="bar"
+                    data={storageData.storageUsage
+                      .slice(-5)
+                      .map((entry: any, index: number, array: any[]) => {
+                        const prevMonth = index > 0 ? array[index - 1].images : 0;
+                        return {
+                          month: entry.date.split('-')[1], // Extract month
+                          growth: +(entry.images - prevMonth).toFixed(1)
+                        };
+                      })}
+                    dataKey="growth"
+                    nameKey="month"
+                    height={250}
+                    fill="#82ca9d"
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -259,13 +301,15 @@ export function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="h-96">
-              <Chart
-                type="pie"
-                data={costBreakdownData}
-                dataKey="value"
-                nameKey="name"
-                height={350}
-              />
+              {renderContent(
+                <Chart
+                  type="pie"
+                  data={costData.costBreakdown}
+                  dataKey="value"
+                  nameKey="name"
+                  height={350}
+                />
+              )}
             </CardContent>
           </Card>
 
@@ -274,55 +318,44 @@ export function AdminDashboard() {
               <CardHeader>
                 <CardTitle>Cost Trends</CardTitle>
                 <CardDescription>
-                  Monthly costs over the past year
+                  Monthly costs over time
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <Chart
-                  type="line"
-                  data={[
-                    { month: "Jun", cost: 510 },
-                    { month: "Jul", cost: 525 },
-                    { month: "Aug", cost: 540 },
-                    { month: "Sep", cost: 550 },
-                    { month: "Oct", cost: 565 },
-                    { month: "Nov", cost: 580 },
-                    { month: "Dec", cost: 590 },
-                    { month: "Jan", cost: 575 },
-                    { month: "Feb", cost: 585 },
-                    { month: "Mar", cost: 595 },
-                    { month: "Apr", cost: 590 },
-                    { month: "May", cost: 600 },
-                  ]}
-                  dataKey="cost"
-                  nameKey="month"
-                  height={250}
-                  stroke="#ff7300"
-                />
+                {renderContent(
+                  <Chart
+                    type="line"
+                    data={costData.monthlyCostData}
+                    dataKey="cost"
+                    nameKey="month"
+                    height={250}
+                    stroke="#ff7300"
+                  />
+                )}
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Cost per User</CardTitle>
+                <CardTitle>Cost Per Service</CardTitle>
                 <CardDescription>
-                  Average monthly cost per active user
+                  Breakdown of costs by service type
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <Chart
-                  type="bar"
-                  data={[
-                    { month: "Jan", cost: 1.25 },
-                    { month: "Feb", cost: 1.22 },
-                    { month: "Mar", cost: 1.15 },
-                    { month: "Apr", cost: 1.10 },
-                    { month: "May", cost: 1.05 },
-                  ]}
-                  dataKey="cost"
-                  nameKey="month"
-                  height={250}
-                  fill="#8884d8"
-                />
+                {renderContent(
+                  <Chart
+                    type="bar"
+                    data={[
+                      { service: "Google APIs", cost: costData.googleApiCost },
+                      { service: "Supabase", cost: costData.supabaseCost },
+                      { service: "Storage", cost: costData.storageCost },
+                    ]}
+                    dataKey="cost"
+                    nameKey="service"
+                    height={250}
+                    fill="#8884d8"
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
