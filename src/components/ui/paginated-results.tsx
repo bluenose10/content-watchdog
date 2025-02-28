@@ -15,7 +15,7 @@ interface PaginatedResultsProps {
 export function PaginatedResults({
   results,
   accessLevel,
-  itemsPerPage = 6,
+  itemsPerPage = 10, // Changed from 6 to 10 to accommodate more list items
   onUpgrade,
 }: PaginatedResultsProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,7 +61,7 @@ export function PaginatedResults({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col gap-3">
         {currentResults.map((result, index) => (
           <SearchResultCard
             key={result.id || `result-${startIndex + index}`}

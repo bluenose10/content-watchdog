@@ -2,9 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDate, getMatchLevelColor } from "@/lib/utils";
-import { ExternalLink, Search, FileSearch, Image, AlertTriangle, Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
+import { ExternalLink, Search, FileSearch, Image, AlertTriangle, Facebook, Twitter, Linkedin, Instagram, Youtube, ArrowRight } from "lucide-react";
 import { Badge } from "./badge";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface SearchResultCardProps {
   result: {
@@ -29,6 +30,7 @@ export function SearchResultCard({
 }: SearchResultCardProps) {
   const { title, url, thumbnail, source, matchLevel, date } = result;
   const [imageError, setImageError] = useState(false);
+  const navigate = useNavigate();
   
   // Ensure we have valid input data
   const validTitle = title || "Untitled Content";
@@ -52,114 +54,6 @@ export function SearchResultCard({
       return 'Recently';
     }
   })();
-  
-  const getIconParams = () => {
-    switch(safeMatchLevel) {
-      case 'High':
-        return { 
-          Icon: AlertTriangle, 
-          bgColor: 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900', 
-          iconColor: 'text-red-500 dark:text-red-400',
-          borderColor: 'border-red-200 dark:border-red-800'
-        };
-      case 'Medium':
-        return { 
-          Icon: FileSearch, 
-          bgColor: 'bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900', 
-          iconColor: 'text-amber-500 dark:text-amber-400',
-          borderColor: 'border-amber-200 dark:border-amber-800'
-        };
-      default:
-        return { 
-          Icon: Search, 
-          bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900', 
-          iconColor: 'text-blue-500 dark:text-blue-400',
-          borderColor: 'border-blue-200 dark:border-blue-800'
-        };
-    }
-  };
-  
-  const getSocialMediaInfo = () => {
-    try {
-      const platform = cleanSource.toLowerCase();
-      
-      if (platform.includes('facebook')) {
-        return {
-          Icon: Facebook,
-          color: 'text-blue-600',
-          bgColor: 'bg-white',
-          name: 'Facebook',
-          iconUrl: '/lovable-uploads/1e633b91-cda1-46a7-a5ce-9eb89b5e0b17.png',
-          backgroundImage: '/lovable-uploads/2e32e60a-c5d3-4633-8478-b1bf97f4be7d.png'
-        };
-      } else if (platform.includes('instagram')) {
-        return {
-          Icon: Instagram,
-          color: 'text-pink-600',
-          bgColor: 'bg-white',
-          name: 'Instagram',
-          iconUrl: '/lovable-uploads/aa9c9191-adcd-4086-a761-9f7f6fa6cddc.png',
-          backgroundImage: '/lovable-uploads/aa9c9191-adcd-4086-a761-9f7f6fa6cddc.png'
-        };
-      } else if (platform.includes('linkedin')) {
-        return {
-          Icon: Linkedin,
-          color: 'text-blue-700',
-          bgColor: 'bg-white',
-          name: 'LinkedIn',
-          iconUrl: '/lovable-uploads/38a034f7-9a2e-4680-95eb-962ac700feef.png',
-          backgroundImage: '/lovable-uploads/38a034f7-9a2e-4680-95eb-962ac700feef.png'
-        };
-      } else if (platform.includes('twitter') || platform.includes('x.com')) {
-        return {
-          Icon: Twitter,
-          color: 'text-sky-500',
-          bgColor: 'bg-white',
-          name: 'Twitter/X',
-          iconUrl: '/lovable-uploads/2193c223-55d1-4caf-912c-7f2e8cd5e2eb.png',
-          backgroundImage: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=300'
-        };
-      } else if (platform.includes('youtube')) {
-        return {
-          Icon: Youtube,
-          color: 'text-red-600',
-          bgColor: 'bg-white',
-          name: 'YouTube',
-          iconUrl: '/lovable-uploads/51a74172-ad82-43e0-a592-9cc36ee403d2.png',
-          backgroundImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=600&h=300'
-        };
-      } else if (platform.includes('tiktok')) {
-        return {
-          Icon: Search,
-          color: 'text-black dark:text-white',
-          bgColor: 'bg-white',
-          name: 'TikTok',
-          iconUrl: '/lovable-uploads/7ee0ef56-c0e2-42fd-a5e5-9b8b4eb9aee0.png',
-          backgroundImage: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&h=300'
-        };
-      } else {
-        return {
-          Icon: Search,
-          color: 'text-gray-600 dark:text-gray-400',
-          bgColor: 'bg-white',
-          name: cleanSource,
-          iconUrl: null,
-          backgroundImage: null
-        };
-      }
-    } catch (error) {
-      console.error("Error in getSocialMediaInfo:", error);
-      // Fallback to default
-      return {
-        Icon: Search,
-        color: 'text-gray-600 dark:text-gray-400',
-        bgColor: 'bg-white',
-        name: 'Unknown',
-        iconUrl: null,
-        backgroundImage: null
-      };
-    }
-  };
   
   function getMatchColorStyles(level: string) {
     switch(level) {
@@ -190,9 +84,64 @@ export function SearchResultCard({
     }
   }
   
-  const { Icon, bgColor, iconColor, borderColor } = getIconParams();
-  const socialMedia = getSocialMediaInfo();
-
+  const getSocialMediaInfo = () => {
+    try {
+      const platform = cleanSource.toLowerCase();
+      
+      if (platform.includes('facebook')) {
+        return {
+          Icon: Facebook,
+          color: 'text-blue-600',
+          name: 'Facebook',
+        };
+      } else if (platform.includes('instagram')) {
+        return {
+          Icon: Instagram,
+          color: 'text-pink-600',
+          name: 'Instagram',
+        };
+      } else if (platform.includes('linkedin')) {
+        return {
+          Icon: Linkedin,
+          color: 'text-blue-700',
+          name: 'LinkedIn',
+        };
+      } else if (platform.includes('twitter') || platform.includes('x.com')) {
+        return {
+          Icon: Twitter,
+          color: 'text-sky-500',
+          name: 'Twitter/X',
+        };
+      } else if (platform.includes('youtube')) {
+        return {
+          Icon: Youtube,
+          color: 'text-red-600',
+          name: 'YouTube',
+        };
+      } else if (platform.includes('tiktok')) {
+        return {
+          Icon: Search,
+          color: 'text-black dark:text-white',
+          name: 'TikTok',
+        };
+      } else {
+        return {
+          Icon: Search,
+          color: 'text-gray-600 dark:text-gray-400',
+          name: cleanSource,
+        };
+      }
+    } catch (error) {
+      console.error("Error in getSocialMediaInfo:", error);
+      // Fallback to default
+      return {
+        Icon: Search,
+        color: 'text-gray-600 dark:text-gray-400',
+        name: 'Unknown',
+      };
+    }
+  };
+  
   function cleanSupabaseUrls(str: string, type: "title" | "url" | "source", sourceDomain?: string): string {
     if (!str) return type === "title" ? "Untitled Content" : type === "url" ? "#" : "Unknown Source";
     
@@ -243,30 +192,6 @@ export function SearchResultCard({
     return str;
   }
 
-  const isValidThumbnail = () => {
-    try {
-      if (!thumbnail || imageError) return false;
-      
-      if (thumbnail.includes('phkdkwusblkngypuwgao.supabase.co')) {
-        return false;
-      }
-      
-      if (thumbnail === url || thumbnail.includes('data:image')) {
-        return false;
-      }
-      
-      try {
-        new URL(thumbnail);
-        return true;
-      } catch (e) {
-        return false;
-      }
-    } catch (error) {
-      console.error("Error in isValidThumbnail:", error);
-      return false;
-    }
-  };
-
   const getVisitUrl = (): string => {
     try {
       if (cleanUrl === '#' || cleanUrl.includes('Content Match Found')) {
@@ -288,203 +213,72 @@ export function SearchResultCard({
     }
   };
   
-  // Check if we should always show the custom background image for these platforms
-  const shouldShowFacebookBackground = cleanSource.toLowerCase().includes('facebook');
-  const shouldShowInstagramBackground = cleanSource.toLowerCase().includes('instagram');
-  const shouldShowLinkedInBackground = cleanSource.toLowerCase().includes('linkedin');
+  const socialMedia = getSocialMediaInfo();
+  const viewDetails = () => {
+    if (isPremium || isFreePreview) {
+      // Here we would navigate to a detailed view if we had one
+      window.open(getVisitUrl(), '_blank');
+    } else if (onUpgrade) {
+      onUpgrade();
+    }
+  };
 
   try {
     return (
-      <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80`}>
-        <div className="relative">
-          <div 
-            className="overflow-hidden flex items-center justify-center bg-white"
-            style={{ height: "200px" }}
-          >
-            {shouldShowFacebookBackground ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                <img 
-                  src={socialMedia.backgroundImage} 
-                  alt="Facebook content"
-                  className="w-auto h-auto max-w-[70%] max-h-[70%] object-contain"
-                  onError={(e) => {
-                    console.error("Facebook image load error");
-                    setImageError(true);
-                    // Hide the broken image
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-            ) : shouldShowInstagramBackground ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                <img 
-                  src={socialMedia.backgroundImage} 
-                  alt="Instagram content"
-                  className="w-auto h-auto max-w-[60%] max-h-[60%] object-contain"
-                  onError={(e) => {
-                    console.error("Instagram image load error");
-                    setImageError(true);
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-            ) : shouldShowLinkedInBackground ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                <img 
-                  src={socialMedia.backgroundImage} 
-                  alt="LinkedIn content"
-                  className="w-auto h-auto max-w-[70%] max-h-[70%] object-contain"
-                  onError={(e) => {
-                    console.error("LinkedIn image load error");
-                    setImageError(true);
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-            ) : isValidThumbnail() ? (
-              <img 
-                src={thumbnail} 
-                alt={cleanTitle}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  console.error("Thumbnail image load error");
-                  setImageError(true);
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : socialMedia.backgroundImage ? (
-              <div className="relative w-full h-full">
-                <img 
-                  src={socialMedia.backgroundImage} 
-                  alt={`${socialMedia.name} content`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error("Social media background image load error");
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-                <div className="absolute bottom-4 left-4 bg-white rounded-full p-2 shadow-md">
-                  {socialMedia.iconUrl ? (
-                    <img 
-                      src={socialMedia.iconUrl} 
-                      alt={`${socialMedia.name} logo`}
-                      className="w-8 h-8 object-contain"
-                      onError={(e) => {
-                        console.error("Social media icon image load error");
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <socialMedia.Icon size={24} className={socialMedia.color} />
-                  )}
-                </div>
-              </div>
+      <Card 
+        className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${matchColor.border} ${matchColor.hover} ${matchColor.shadow} backdrop-blur-sm bg-white/80 dark:bg-gray-900/80 cursor-pointer`}
+        onClick={viewDetails}
+      >
+        <div className="flex items-center p-4">
+          <div className="mr-3">
+            <div className={`rounded-full p-2 ${socialMedia.color} bg-gray-100 dark:bg-gray-800`}>
+              <socialMedia.Icon size={20} />
+            </div>
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-medium truncate" title={cleanTitle}>
+                {truncatedTitle}
+              </h3>
+              <Badge className={`ml-2 shrink-0 ${matchColor.badge}`}>
+                {safeMatchLevel}
+              </Badge>
+            </div>
+            
+            <div className="flex items-center text-sm text-muted-foreground mt-1">
+              <span className="font-medium truncate">{cleanSource}</span>
+              <span className="mx-1">•</span>
+              <span>{formattedDate}</span>
+            </div>
+            
+            {isPremium || isFreePreview ? (
+              <p className="text-xs truncate text-gray-600 dark:text-gray-300 mt-1" title={cleanUrl}>
+                {cleanUrl}
+              </p>
             ) : (
-              <div className="relative w-full h-full flex items-center justify-center bg-white">
-                {socialMedia.iconUrl ? (
-                  <img 
-                    src={socialMedia.iconUrl} 
-                    alt={`${socialMedia.name} logo`}
-                    className="max-w-[80%] max-h-[80%] object-contain"
-                    onError={(e) => {
-                      console.error("Social media icon image load error in fallback");
-                      e.currentTarget.style.display = 'none';
-                      // Show icon as fallback
-                      const iconContainer = document.createElement('div');
-                      iconContainer.className = 'flex flex-col items-center justify-center';
-                      e.currentTarget.parentNode?.appendChild(iconContainer);
-                    }}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center">
-                    <socialMedia.Icon size={80} className={socialMedia.color} />
-                    <p className="mt-2 text-lg font-semibold">{socialMedia.name}</p>
-                  </div>
-                )}
-                
-                <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white p-2 text-center">
-                  Content found on {socialMedia.name}
-                </div>
-              </div>
+              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                Upgrade to view full details
+              </p>
             )}
           </div>
-          <Badge 
-            className={`absolute right-2 top-2 ${matchColor.badge}`}
-          >
-            {safeMatchLevel} Match
-          </Badge>
-          {isFreePreview && (
-            <Badge 
-              className="absolute left-2 top-2 bg-blue-500 text-white dark:bg-blue-600"
-            >
-              Free Preview
-            </Badge>
-          )}
-          {!isPremium && !isFreePreview && (
-            <Badge 
-              className="absolute left-2 top-2 bg-purple-500 text-white dark:bg-purple-600 cursor-pointer hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors"
-              onClick={onUpgrade}
-            >
-              Upgrade to View
-            </Badge>
-          )}
+          
+          <div className="ml-2 shrink-0">
+            <ArrowRight className={`h-5 w-5 ${matchColor.text}`} />
+          </div>
         </div>
-        <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50">
-          <h3 className="text-lg font-semibold" title={cleanTitle}>{truncatedTitle}</h3>
-          <p className="text-sm text-muted-foreground">
-            Found on <span className="font-medium">{cleanSource}</span> • {formattedDate}
-          </p>
-        </CardHeader>
-        <CardContent className="pb-2">
-          {isPremium || isFreePreview ? (
-            <p className="text-sm truncate text-gray-600 dark:text-gray-300" title={cleanUrl}>{cleanUrl}</p>
-          ) : (
-            <div className="space-y-1">
-              <p className="text-sm text-purple-600 dark:text-purple-400">Full details available with premium plan</p>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50">
-          {isPremium || isFreePreview ? (
-            <Button 
-              asChild 
-              variant="outline" 
-              size="sm" 
-              className={`w-full border ${matchColor.border} ${matchColor.hover} transition-all duration-300 group`}
-            >
-              <a href={getVisitUrl()} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className={`h-4 w-4 mr-2 ${matchColor.text} group-hover:rotate-12 transition-transform duration-300`} />
-                Visit Site
-              </a>
-            </Button>
-          ) : (
-            <Button 
-              onClick={onUpgrade} 
-              variant="outline" 
-              size="sm" 
-              className="w-full border border-purple-200 hover:border-purple-300 dark:border-purple-800 dark:hover:border-purple-700 transition-all duration-300 group"
-            >
-              <span className="text-purple-600 dark:text-purple-400 flex items-center">
-                <span className="mr-2 bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">Upgrade</span> to View
-              </span>
-            </Button>
-          )}
-        </CardFooter>
       </Card>
     );
   } catch (error) {
     console.error("Fatal rendering error in SearchResultCard:", error);
     return (
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-red-200 backdrop-blur-sm bg-white/80 dark:bg-gray-900/80">
-        <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50">
+        <div className="p-4">
           <h3 className="text-lg font-semibold">Content Preview</h3>
           <p className="text-sm text-muted-foreground">
-            Found on <span className="font-medium">{cleanSource}</span>
+            There was an error displaying this content.
           </p>
-        </CardHeader>
-        <CardContent className="p-4 text-center">
-          <p>There was an error displaying this content.</p>
-        </CardContent>
+        </div>
       </Card>
     );
   }
