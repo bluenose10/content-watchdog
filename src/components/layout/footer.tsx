@@ -20,24 +20,24 @@ export function Footer() {
             Protecting your digital content across the web with advanced monitoring technology.
           </p>
           <div className="flex gap-4 mt-4">
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
+            <Button variant="outline" size="icon" className="rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-800 border-purple-300 dark:border-purple-700" asChild>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                <Twitter className="h-4 w-4" />
+                <Twitter className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </a>
             </Button>
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
+            <Button variant="outline" size="icon" className="rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800 border-blue-300 dark:border-blue-700" asChild>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <Facebook className="h-4 w-4" />
+                <Facebook className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </a>
             </Button>
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
+            <Button variant="outline" size="icon" className="rounded-full bg-pink-100 hover:bg-pink-200 dark:bg-pink-900/40 dark:hover:bg-pink-800 border-pink-300 dark:border-pink-700" asChild>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                <Instagram className="h-4 w-4" />
+                <Instagram className="h-4 w-4 text-pink-600 dark:text-pink-400" />
               </a>
             </Button>
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
+            <Button variant="outline" size="icon" className="rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800 border-blue-300 dark:border-blue-700" asChild>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                <Linkedin className="h-4 w-4" />
+                <Linkedin className="h-4 w-4 text-blue-700 dark:text-blue-400" />
               </a>
             </Button>
           </div>
