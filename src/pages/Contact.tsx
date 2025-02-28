@@ -11,6 +11,9 @@ export default function Contact() {
   useEffect(() => {
     // This forces a component re-render
     setTimestamp(new Date().toISOString());
+    
+    // Scroll to the top of the page when component mounts
+    window.scrollTo(0, 0);
   }, []);
 
   return (
