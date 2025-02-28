@@ -232,8 +232,14 @@ export function SearchResultCard({
   const socialMedia = getSocialMediaInfo();
   const viewDetails = () => {
     if (isPremium || isFreePreview) {
-      // Here we would navigate to a detailed view if we had one
-      window.open(getVisitUrl(), '_blank');
+      const visitUrl = getVisitUrl();
+      if (visitUrl !== '#') {
+        // Fixed: Use window.open to properly navigate to external URLs
+        window.open(visitUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        // If we don't have a valid URL, just show a toast or similar notification
+        console.log("No valid URL to visit");
+      }
     } else if (onUpgrade) {
       onUpgrade();
     }
