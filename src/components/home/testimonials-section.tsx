@@ -36,7 +36,9 @@ export function TestimonialsSection() {
         
         <div className="space-y-6">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="glass-card overflow-hidden transition-all duration-300 hover:shadow-lg">
+            <Card key={testimonial.id} className="relative overflow-hidden glass-card transition-all duration-300 hover:shadow-lg
+              before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-purple-200 before:via-blue-200 before:to-indigo-200 dark:before:from-purple-900/30 dark:before:via-blue-900/30 dark:before:to-indigo-900/30 before:-z-10
+              after:absolute after:inset-[2px] after:rounded-[calc(0.75rem-2px)] after:bg-white dark:after:bg-gray-900 after:-z-10">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-10 w-10 border-2 border-primary/20">
