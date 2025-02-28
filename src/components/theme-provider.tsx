@@ -35,6 +35,8 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = window.document.documentElement;
+    
+    // Add 'dark' or 'light' class to the html element for Tailwind
     root.classList.remove("light", "dark");
 
     if (theme === "system") {
@@ -50,26 +52,13 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme]);
 
-  // Add listener for system theme changes
+  // Ensure the theme is applied immediately on initial render
   useEffect(() => {
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      
-      const handleChange = () => {
-        const root = window.document.documentElement;
-        root.classList.remove("light", "dark");
-        
-        const systemTheme = mediaQuery.matches ? "dark" : "light";
-        root.classList.add(systemTheme);
-      };
-      
-      mediaQuery.addEventListener("change", handleChange);
-      
-      return () => {
-        mediaQuery.removeEventListener("change", handleChange);
-      };
-    }
-  }, [theme]);
+    // Force a repaint to fix potential white screen issue
+    document.body.style.display = 'none';
+    document.body.offsetHeight; // Trigger a reflow
+    document.body.style.display = '';
+  }, []);
 
   const value = {
     theme,
