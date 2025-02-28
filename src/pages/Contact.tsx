@@ -107,11 +107,10 @@ export default function Contact() {
           </Card>
         </div>
         
-        {/* Team member contact card */}
-        <h2 className="text-2xl font-bold text-center mb-6">Our Team</h2>
-        <Card className="mb-10 overflow-hidden border border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="aspect-square md:aspect-auto relative overflow-hidden">
+        {/* Team member contact card - now smaller */}
+        <Card className="mb-10 overflow-hidden border border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 max-w-3xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="aspect-square md:aspect-auto relative overflow-hidden md:col-span-1">
               <img 
                 src="/lovable-uploads/5953bc93-b6b1-4b80-b98c-3ac53016c5b3.png" 
                 alt="Mark Moran" 
@@ -119,24 +118,24 @@ export default function Contact() {
               />
             </div>
             
-            <CardContent className="p-6 flex flex-col justify-center">
-              <h2 className="text-2xl font-bold mb-3">Mark Moran</h2>
-              <p className="text-muted-foreground mb-6">
+            <CardContent className="p-4 flex flex-col justify-center md:col-span-2">
+              <h2 className="text-xl font-bold mb-2">Mark Moran</h2>
+              <p className="text-muted-foreground mb-4 text-sm">
                 Skilled at finding hard to locate content
               </p>
               
-              <div className="space-y-4 mb-6">
-                <p>
+              <div className="space-y-3 mb-4">
+                <p className="text-sm">
                   I'm a skilled digital detective with a knack for uncovering valuable content across the vast expanse of the internet.
                 </p>
-                <p>
-                  My expertise lies in combining technical know-how with creative problem-solving to find exactly what's needed fast, accurately, and ethically. Let's turn the internet's chaos into your competitive advantage.
+                <p className="text-sm">
+                  My expertise lies in combining technical know-how with creative problem-solving to find exactly what's needed fast, accurately, and ethically.
                 </p>
                 {/* Adding a hidden timestamp to force refresh */}
                 <span className="hidden">{timestamp}</span>
               </div>
               
-              <div className="space-y-3 text-sm">
+              <div className="space-y-2 text-xs">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span>contact@influenceguard.com</span>
@@ -145,11 +144,12 @@ export default function Contact() {
               
               <Button 
                 variant="default" 
-                className="mt-6 flex items-center gap-2" 
+                className="mt-4 flex items-center gap-2 text-sm" 
+                size="sm"
                 asChild
               >
                 <a href="https://www.linkedin.com/in/mark-moran-blockchain-solutions-architect/" target="_blank" rel="noopener noreferrer">
-                  <Linkedin className="h-4 w-4" />
+                  <Linkedin className="h-3 w-3" />
                   Connect on LinkedIn
                 </a>
               </Button>
@@ -157,16 +157,16 @@ export default function Contact() {
           </div>
         </Card>
         
-        <div className="bg-muted/50 rounded-lg p-6 md:p-8 border border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300">
-          <h2 className="text-xl font-semibold mb-4">Educational Background</h2>
-          <ul className="space-y-4">
+        <div className="bg-muted/50 rounded-lg p-5 md:p-6 border border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 max-w-3xl mx-auto">
+          <h2 className="text-lg font-semibold mb-3">Educational Background</h2>
+          <ul className="space-y-3">
             <li>
-              <div className="font-medium">Master's Degree in Cyber Security</div>
-              <div className="text-sm text-muted-foreground">Edge Hill University, UK</div>
+              <div className="font-medium text-sm">Master's Degree in Cyber Security</div>
+              <div className="text-xs text-muted-foreground">Edge Hill University, UK</div>
             </li>
             <li>
-              <div className="font-medium">BSc (Hons) In Computing</div>
-              <div className="text-sm text-muted-foreground">Edge Hill University, UK</div>
+              <div className="font-medium text-sm">BSc (Hons) In Computing</div>
+              <div className="text-xs text-muted-foreground">Edge Hill University, UK</div>
             </li>
           </ul>
         </div>
