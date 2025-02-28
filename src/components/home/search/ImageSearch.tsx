@@ -30,7 +30,7 @@ export function ImageSearch({ onSearch, isLoading = false }: ImageSearchProps) {
       <div className="flex flex-col gap-2">
         <label 
           htmlFor="image-upload" 
-          className="bg-accent/30 border border-dashed border-accent hover:border-primary transition-colors rounded-lg p-4 text-center cursor-pointer"
+          className="bg-accent/30 border border-accent hover:border-primary transition-colors rounded-lg p-4 text-center cursor-pointer border-border"
         >
           {selectedFile ? (
             <>
