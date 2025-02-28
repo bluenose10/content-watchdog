@@ -59,10 +59,10 @@ export function Sidebar({ className }: SidebarProps) {
   ];
 
   const SidebarContent = () => (
-    <div className="h-full py-6 flex flex-col">
-      <div className="px-3 py-2">
-        <h2 className="mb-2 px-4 text-lg font-semibold">Navigation</h2>
-        <div className="space-y-1">
+    <div className="h-full py-12 flex flex-col">
+      <div className="px-5 py-4">
+        <h2 className="mb-4 px-4 text-lg font-semibold">Navigation</h2>
+        <div className="space-y-2">
           {menuItems.map((item) => (
             <Button
               key={item.title}
@@ -76,11 +76,11 @@ export function Sidebar({ className }: SidebarProps) {
           ))}
         </div>
       </div>
-      <Separator className="my-4" />
+      <Separator className="my-6" />
       <ScrollArea className="flex-1">
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold">Recent Searches</h2>
-          <div className="space-y-1">
+        <div className="px-5 py-4">
+          <h2 className="mb-4 px-4 text-lg font-semibold">Recent Searches</h2>
+          <div className="space-y-2">
             <Button
               variant="ghost"
               className="w-full justify-start text-sm"

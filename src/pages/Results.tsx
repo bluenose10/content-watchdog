@@ -174,7 +174,7 @@ export default function Results() {
           <Sidebar />
         </div>
         <main className="flex-grow">
-          <div className="px-8 pt-16 pb-8 max-w-6xl mx-auto">
+          <div className="px-8 pt-24 pb-8 max-w-6xl mx-auto">
             <div className="mb-6">
               <h1 className="text-3xl font-bold mb-2">Search Results</h1>
               <p className="text-muted-foreground text-lg">
