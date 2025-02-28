@@ -6,24 +6,34 @@ import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  PaginatedResults 
-} from "@/components/ui/paginated-results";
+import { PaginatedResults } from "@/components/ui/paginated-results";
 import { LoadingState } from "@/components/dashboard/LoadingState";
 import { useAuth } from "@/context/AuthContext";
-import { useProtectedRoute } from "@/hooks/useProtectedRoute";
+import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { getSearchResults } from "@/lib/search-cache";
-import { ArrowLeft, Calendar, FileType, Hash, Image, Info } from "lucide-react";
+import { ArrowLeft, Calendar, Image, Info } from "lucide-react";
 import { Sidebar } from "@/components/ui/sidebar";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Results() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isReady } = useProtectedRoute(true);
+  const { isReady, accessLevel, hasPremiumFeature } = useProtectedRoute(true);
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<any[]>([]);
   const [query, setQuery] = useState<string>("");
+  const { toast } = useToast();
+
+  // Handler for upgrade button click
+  const handleUpgrade = () => {
+    toast({
+      title: "Premium Feature",
+      description: "Upgrade your account to unlock all results and features.",
+      variant: "default",
+    });
+    navigate("/checkout");
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -37,6 +47,11 @@ export default function Results() {
         setQuery(data.query);
       } catch (error) {
         console.error("Error fetching results:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load search results. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setTimeout(() => {
           setIsLoading(false);
@@ -47,7 +62,7 @@ export default function Results() {
     if (isReady && id) {
       fetchResults();
     }
-  }, [isReady, id]);
+  }, [isReady, id, toast]);
 
   if (!isReady || isLoading) {
     return <LoadingState />;
@@ -114,6 +129,8 @@ export default function Results() {
                 <PaginatedResults
                   results={results}
                   itemsPerPage={5}
+                  accessLevel={accessLevel}
+                  onUpgrade={handleUpgrade}
                 />
               </TabsContent>
               
@@ -121,6 +138,8 @@ export default function Results() {
                 <PaginatedResults
                   results={results.filter(r => r.type === 'image')}
                   itemsPerPage={5}
+                  accessLevel={accessLevel}
+                  onUpgrade={handleUpgrade}
                 />
               </TabsContent>
               
@@ -128,6 +147,8 @@ export default function Results() {
                 <PaginatedResults
                   results={results.filter(r => r.type === 'website')}
                   itemsPerPage={5}
+                  accessLevel={accessLevel}
+                  onUpgrade={handleUpgrade}
                 />
               </TabsContent>
               
@@ -135,6 +156,8 @@ export default function Results() {
                 <PaginatedResults
                   results={results.filter(r => r.type === 'social')}
                   itemsPerPage={5}
+                  accessLevel={accessLevel}
+                  onUpgrade={handleUpgrade}
                 />
               </TabsContent>
             </Tabs>
