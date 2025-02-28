@@ -19,7 +19,7 @@ export function FAQSection() {
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="w-full space-y-6">
             <AccordionItem value="item-1" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
@@ -31,7 +31,7 @@ export function FAQSection() {
             </AccordionItem>
             
             <AccordionItem value="item-2" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
@@ -43,7 +43,7 @@ export function FAQSection() {
             </AccordionItem>
             
             <AccordionItem value="item-3" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
@@ -55,7 +55,7 @@ export function FAQSection() {
             </AccordionItem>
             
             <AccordionItem value="item-4" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
@@ -67,7 +67,7 @@ export function FAQSection() {
             </AccordionItem>
             
             <AccordionItem value="item-5" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
@@ -79,7 +79,7 @@ export function FAQSection() {
             </AccordionItem>
             
             <AccordionItem value="item-6" className="relative bg-white dark:bg-gray-800 rounded-xl px-6 shadow-md 
-              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-400 before:via-blue-400 before:to-indigo-400 dark:before:from-purple-600 dark:before:via-blue-600 dark:before:to-indigo-600 before:-z-10
+              before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
               <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
