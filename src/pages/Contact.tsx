@@ -4,41 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, BarChart3, CheckCircle, Linkedin, Mail, Shield, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-
-// Custom style to hide footer content on mobile just for this page
-const MobileFooterHider = () => {
-  const isMobile = useIsMobile();
-  
-  useEffect(() => {
-    if (isMobile) {
-      // Add custom style to hide footer content on mobile
-      const style = document.createElement('style');
-      style.innerHTML = `
-        @media (max-width: 767px) {
-          footer .grid, 
-          footer .flex-col.gap-3,
-          footer .container .flex-col.gap-4.md\\:w-1\\/3 > .flex.gap-4 {
-            display: none !important;
-          }
-          
-          footer .container .flex-col.gap-4.md\\:w-1\\/3 > p,
-          footer .container .flex-col.gap-4.md\\:w-1\\/3 > a {
-            display: block !important;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-      
-      return () => {
-        // Remove style when component unmounts
-        document.head.removeChild(style);
-      };
-    }
-  }, [isMobile]);
-  
-  return null;
-};
 
 export default function Contact() {
   const [timestamp, setTimestamp] = useState(new Date().toISOString());
@@ -53,9 +18,6 @@ export default function Contact() {
 
   return (
     <Layout>
-      {/* Mobile footer content hider component */}
-      <MobileFooterHider />
-      
       <div className="container max-w-5xl py-16 md:py-24">
         <h1 className="text-2xl md:text-3xl font-bold text-center mb-8 text-gradient">About Us</h1>
         
