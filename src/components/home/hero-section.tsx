@@ -21,7 +21,7 @@ export const HeroSection = () => {
           <h2 className="text-xl font-semibold mb-6 text-purple-800 dark:text-purple-400">Comprehensive Content Protection Services</h2>
           
           {/* Core Services - Updated with specific examples */}
-          <div className="grid md:grid-cols-3 gap-6 text-left mb-10">
+          <div className="grid md:grid-cols-3 gap-6 text-left mb-16">
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <Shield className="h-5 w-5 text-purple-700 dark:text-purple-500 mr-2" />
