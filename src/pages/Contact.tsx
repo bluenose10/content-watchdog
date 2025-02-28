@@ -89,6 +89,10 @@ export default function Contact() {
               <div className="font-medium">Certified DMCA Compliance Officer</div>
               <div className="text-sm text-muted-foreground">Digital Media Licensing Association, 2017 - Present</div>
             </li>
+            <li>
+              <div className="font-medium">Blockchain Expert</div>
+              <div className="text-sm text-muted-foreground">Blockchain Council</div>
+            </li>
           </ul>
         </div>
       </div>
