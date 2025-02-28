@@ -84,26 +84,6 @@ export default function Contact() {
               <div className="text-sm text-muted-foreground">Edge Hill University, UK</div>
             </li>
           </ul>
-          
-          <h2 className="text-xl font-semibold mt-8 mb-4">Certifications</h2>
-          <ul className="space-y-4">
-            <li>
-              <div className="font-medium">Certified Information Systems Security Professional (CISSP)</div>
-              <div className="text-sm text-muted-foreground">2018 - Present</div>
-            </li>
-            <li>
-              <div className="font-medium">Digital Rights Management Specialist</div>
-              <div className="text-sm text-muted-foreground">Copyright Alliance, 2016 - Present</div>
-            </li>
-            <li>
-              <div className="font-medium">Certified DMCA Compliance Officer</div>
-              <div className="text-sm text-muted-foreground">Digital Media Licensing Association, 2017 - Present</div>
-            </li>
-            <li>
-              <div className="font-medium">Blockchain Expert</div>
-              <div className="text-sm text-muted-foreground">Blockchain Council</div>
-            </li>
-          </ul>
         </div>
       </div>
     </Layout>
