@@ -36,8 +36,8 @@ export function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-16 relative overflow-hidden">
-      <div className="container mx-auto px-4">
+    <section id="pricing" className="relative overflow-hidden">
+      <div className="container mx-auto">
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold mb-3">Pricing Plans</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

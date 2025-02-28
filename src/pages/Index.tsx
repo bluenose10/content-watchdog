@@ -36,7 +36,7 @@ export default function Index() {
       <main className="flex-grow">
         <HeroSection />
         
-        <div className="container py-12 text-center px-4 md:px-6">
+        <div className="section-padding container px-4 md:px-8 lg:px-12 text-center">
           <h2 className="text-3xl font-bold mb-6">Comprehensive Content Protection</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-12">
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
