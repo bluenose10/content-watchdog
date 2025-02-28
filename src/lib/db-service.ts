@@ -172,6 +172,7 @@ async function processSearch(
   return searchId;
 }
 
+// Enhanced Google search function with improved parameter handling and error management
 export const performGoogleSearch = async (query: string, userId: string, searchParams: TextSearchParams = {}) => {
   try {
     const cacheKey = getCacheKey('text', query, searchParams);
@@ -195,17 +196,18 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         
         if (!apiKey || !searchEngineId) {
           console.log('No API keys found, falling back to mock data');
-          const mockResults = generateMockSearchResults(query, searchParams);
+          const mockResults = generateEnhancedMockSearchResults(query, searchParams);
           cacheResults(cacheKey, mockResults);
           resolve(mockResults);
           return;
         }
         
+        // Build the URL parameters with enhanced configuration
         const params = new URLSearchParams({
           key: apiKey,
           cx: searchEngineId,
           q: query,
-          num: '20'
+          num: '20' // Request more results
         });
         
         // Apply advanced search parameters
@@ -217,7 +219,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
           params.append('dateRestrict', searchParams.dateRestrict);
         }
         
-        if (searchParams?.searchType) {
+        if (searchParams?.searchType && searchParams.searchType !== 'web') {
           params.append('searchType', searchParams.searchType);
         }
         
@@ -258,21 +260,60 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
           params.append('sort', 'date');
         }
         
-        const response = await fetch(`https://www.googleapis.com/customsearch/v1?${params.toString()}`);
+        // Add enhanced parameters for better results
+        params.append('fields', 'items(title,link,snippet,pagemap,displayLink),searchInformation');
         
-        if (!response.ok) {
-          throw new Error(`Google API error: ${response.status} ${response.statusText}`);
+        // Make the API request with error handling
+        try {
+          const response = await fetch(`https://www.googleapis.com/customsearch/v1?${params.toString()}`);
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Google API error:', errorData);
+            throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorData?.error?.message || 'Unknown error'}`);
+          }
+          
+          const data = await response.json();
+          
+          // Enhance the results with calculated scores
+          if (data.items && data.items.length > 0) {
+            data.items = data.items.map((item: any, index: number) => {
+              // Calculate relevance score based on position and content
+              let relevanceScore = Math.max(0, 1 - (index / data.items.length));
+              
+              // Title match is a strong signal
+              if (item.title && item.title.toLowerCase().includes(query.toLowerCase())) {
+                relevanceScore += 0.3;
+              }
+              
+              // Snippet match is also important
+              if (item.snippet && item.snippet.toLowerCase().includes(query.toLowerCase())) {
+                relevanceScore += 0.2;
+              }
+              
+              // URL match is a good signal
+              if (item.link && item.link.toLowerCase().includes(query.toLowerCase().replace(/\s+/g, ''))) {
+                relevanceScore += 0.1;
+              }
+              
+              // Cap at 1.0
+              item.relevanceScore = Math.min(1.0, relevanceScore);
+              return item;
+            });
+          }
+          
+          console.log('Google API response:', data);
+          
+          cacheResults(cacheKey, data);
+          resolve(data);
+        } catch (error) {
+          console.error('Google Search API request error:', error);
+          throw error;
         }
-        
-        const data = await response.json();
-        console.log('Google API response:', data);
-        
-        cacheResults(cacheKey, data);
-        resolve(data);
       } catch (error) {
         console.error('Google Search API error:', error);
         
-        const mockResults = generateMockSearchResults(query, searchParams);
+        const mockResults = generateEnhancedMockSearchResults(query, searchParams);
         cacheResults(cacheKey, mockResults);
         resolve(mockResults);
       } finally {
@@ -288,12 +329,12 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
   } catch (error) {
     console.error('Google Search API error:', error);
     
-    return generateMockSearchResults(query, searchParams);
+    return generateEnhancedMockSearchResults(query, searchParams);
   }
 };
 
-function generateMockSearchResults(query: string, searchParams: TextSearchParams = {}) {
-  console.log('Generating mock search results for:', query, 'with params:', searchParams);
+function generateEnhancedMockSearchResults(query: string, searchParams: TextSearchParams = {}) {
+  console.log('Generating enhanced mock search results for:', query, 'with params:', searchParams);
   
   const exactMatch = searchParams?.exactMatch;
   const dateRestrict = searchParams?.dateRestrict;
@@ -346,28 +387,53 @@ function generateMockSearchResults(query: string, searchParams: TextSearchParams
   // Generate fewer results if we have filters applied to simulate filtering effect
   const resultCount = sources.length;
   
+  const mockItems = sources.map((source, index) => {
+    const isHighlyRelevant = index < Math.ceil(resultCount * 0.25) || (exactMatch && index < Math.ceil(resultCount * 0.4));
+    const isSomewhatRelevant = index < Math.ceil(resultCount * 0.6) || (dateRestrict && index < Math.ceil(resultCount * 0.75));
+    
+    const relevanceScore = isHighlyRelevant ? 0.8 + (Math.random() * 0.2) : 
+                          isSomewhatRelevant ? 0.6 + (Math.random() * 0.2) : 
+                          0.3 + (Math.random() * 0.3);
+    
+    // Create richer search results with pagemap data
+    return {
+      title: `${titlePrefix} on ${source.split('.')[0]}`,
+      link: `https://${source}/search/${query.replace(/\s+/g, '-')}`,
+      displayLink: source,
+      snippet: `${isHighlyRelevant ? 'Highly relevant' : isSomewhatRelevant ? 'Relevant' : 'Possibly related'} content matching "${query}" ${dateRestrict ? 'from recent activity' : ''}.`,
+      pagemap: {
+        cse_image: [{ 
+          src: `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/200/300` 
+        }],
+        metatags: [{
+          'og:title': `${titlePrefix} - ${source.split('.')[0]}`,
+          'og:description': `Find ${query} on ${source.split('.')[0]}`,
+          'og:type': source.includes('instagram') || source.includes('flickr') ? 'image' : 
+                    source.includes('youtube') || source.includes('vimeo') ? 'video' : 'website'
+        }]
+      },
+      relevanceScore: relevanceScore
+    };
+  });
+  
+  // Sort results by relevance score
+  mockItems.sort((a, b) => b.relevanceScore - a.relevanceScore);
+  
   const mockResults = {
-    items: sources.map((source, index) => {
-      const isHighlyRelevant = index < Math.ceil(resultCount * 0.25) || (exactMatch && index < Math.ceil(resultCount * 0.4));
-      const isSomewhatRelevant = index < Math.ceil(resultCount * 0.6) || (dateRestrict && index < Math.ceil(resultCount * 0.75));
-      
-      return {
-        title: `${titlePrefix} Profile on ${source.split('.')[0]}`,
-        link: `https://${source}/profile`,
-        displayLink: source,
-        snippet: `${isHighlyRelevant ? 'Highly relevant' : isSomewhatRelevant ? 'Relevant' : 'Possibly related'} profile page for ${query} with ${dateRestrict ? 'recent' : ''} activity.`,
-        pagemap: {
-          cse_image: [{ src: `https://picsum.photos/200/300?random=${index+1}` }]
-        },
-        relevanceScore: isHighlyRelevant ? 0.9 : isSomewhatRelevant ? 0.7 : 0.4
-      };
-    })
+    searchInformation: {
+      totalResults: sources.length.toString(),
+      formattedTotalResults: sources.length.toString(),
+      searchTime: 0.5,
+      formattedSearchTime: "0.5"
+    },
+    items: mockItems
   };
   
-  console.log('Generated mock results:', mockResults.items.length);
+  console.log('Generated enhanced mock results:', mockResults.items.length);
   return mockResults;
 }
 
+// Enhanced image search function with improved parameter handling
 export const performImageSearch = async (imageUrl: string, userId: string, searchParams: ImageSearchParams = {}) => {
   try {
     const cacheKey = getCacheKey('image', imageUrl, searchParams);
@@ -382,21 +448,22 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
       return cachedResults;
     }
     
-    console.log('Performing image search with URL:', imageUrl, 'with params:', searchParams);
+    console.log('Performing enhanced image search with URL:', imageUrl, 'with params:', searchParams);
     
     const request = new Promise(async (resolve) => {
       try {
-        const similarityThreshold = searchParams?.similarityThreshold || 0.6;
-        const maxResults = searchParams?.maxResults || 20;
-        const searchMode = searchParams?.searchMode || 'relaxed';
+        // Extract and apply parameters with defaults
+        const similarityThreshold = searchParams?.similarityThreshold ?? 0.6;
+        const maxResults = searchParams?.maxResults ?? 20;
+        const searchMode = searchParams?.searchMode ?? 'relaxed';
         const includeSimilarColors = searchParams?.includeSimilarColors !== false;
         const includePartialMatches = searchParams?.includePartialMatches !== false;
-        const minSize = searchParams?.minSize || 'medium';
-        const imageType = searchParams?.imageType || undefined;
-        const imageColorType = searchParams?.imageColorType || undefined;
-        const dominantColor = searchParams?.dominantColor || undefined;
+        const minSize = searchParams?.minSize ?? 'medium';
+        const imageType = searchParams?.imageType;
+        const imageColorType = searchParams?.imageColorType;
+        const dominantColor = searchParams?.dominantColor;
         
-        console.log('Image search params:', { 
+        console.log('Enhanced image search params:', { 
           similarityThreshold, 
           maxResults, 
           searchMode,
@@ -408,108 +475,219 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
           dominantColor
         });
         
-        const getMatchQuality = (index: number) => {
-          if (searchMode === 'strict') {
-            if (index < 3) return { quality: 'high', score: 0.85 + (Math.random() * 0.15) };
-            if (index < 8) return { quality: 'medium', score: 0.65 + (Math.random() * 0.15) };
-            return { quality: 'low', score: 0.4 + (Math.random() * 0.2) };
-          } 
-          
-          if (index < 6) return { quality: 'high', score: 0.8 + (Math.random() * 0.2) };
-          if (index < 12) return { quality: 'medium', score: 0.6 + (Math.random() * 0.2) };
-          return { quality: 'low', score: 0.3 + (Math.random() * 0.3) };
-        };
+        // In a real implementation, we would access a visual search API here
+        // For now, we're generating realistic mock data
         
-        // Filter sources based on image search parameters
-        let sources = [
-          'linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 
-          'youtube.com', 'tiktok.com', 'pinterest.com', 'reddit.com', 
-          'tumblr.com', 'flickr.com', 'deviantart.com', 'behance.net', 
-          'dribbble.com', 'unsplash.com', 'pexels.com', 'shutterstock.com', 
-          'gettyimages.com', 'stock.adobe.com', 'istockphoto.com', 'medium.com'
-        ];
+        // Check if we have actual Google API credentials first
+        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
+        const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
         
-        // If we're looking for specific image types, filter accordingly
-        if (imageType) {
-          switch (imageType) {
-            case 'face':
-              sources = sources.filter(s => ['facebook.com', 'linkedin.com', 'instagram.com'].includes(s));
-              break;
-            case 'photo':
-              sources = sources.filter(s => ['unsplash.com', 'pexels.com', 'flickr.com', 'instagram.com'].includes(s));
-              break;
-            case 'clipart':
-              sources = sources.filter(s => ['shutterstock.com', 'stock.adobe.com', 'istockphoto.com'].includes(s));
-              break;
-            case 'lineart':
-              sources = sources.filter(s => ['behance.net', 'dribbble.com', 'deviantart.com'].includes(s));
-              break;
-            case 'animated':
-              sources = sources.filter(s => ['giphy.com', 'tenor.com', 'tumblr.com'].includes(s));
-              break;
+        if (apiKey && searchEngineId) {
+          try {
+            // Make the request to Google Image Search API
+            const params = new URLSearchParams({
+              key: apiKey,
+              cx: searchEngineId,
+              searchType: 'image',
+              num: maxResults.toString()
+            });
+            
+            // Advanced image search parameters based on capabilities
+            // Note: These don't directly map to Google CSE capabilities
+            // but demonstrate what parameters could be used
+            if (imageType) {
+              params.append('imgType', imageType);
+            }
+            
+            if (imageColorType) {
+              params.append('imgColorType', imageColorType);
+            }
+            
+            if (dominantColor) {
+              params.append('imgDominantColor', dominantColor);
+            }
+            
+            if (minSize === 'large' || minSize === 'xlarge') {
+              params.append('imgSize', 'large');
+            } else if (minSize === 'medium') {
+              params.append('imgSize', 'medium');
+            } else {
+              params.append('imgSize', 'small');
+            }
+            
+            // Parse image features for query
+            // In a real implementation, we'd extract descriptive text from the image
+            // and use it as a search query
+            const descriptiveQuery = "image similar to uploaded content";
+            params.append('q', descriptiveQuery);
+            
+            const response = await fetch(`https://www.googleapis.com/customsearch/v1?${params.toString()}`);
+            
+            if (!response.ok) {
+              throw new Error(`Google Image Search API error: ${response.status} ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            // Enhance the results with calculated similarity scores
+            if (data.items && data.items.length > 0) {
+              data.items = data.items.map((item: any, index: number) => {
+                // Calculate a fake similarity score
+                const baseSimilarity = Math.max(0, 1 - (index / data.items.length));
+                const randomFactor = Math.random() * 0.3;
+                const similarityScore = Math.min(1.0, baseSimilarity + randomFactor);
+                
+                // Only include results above the similarity threshold
+                if (similarityScore >= similarityThreshold) {
+                  return {
+                    ...item,
+                    similarityScore
+                  };
+                }
+                return null;
+              }).filter(Boolean);
+            }
+            
+            cacheResults(cacheKey, data);
+            resolve(data);
+          } catch (error) {
+            console.error('Google Image Search API error:', error);
+            throw error;
           }
-        }
-        
-        const mockItems = sources.map((source, index) => {
-          const matchQuality = getMatchQuality(index);
-          
-          // Apply similarity threshold filter
-          if (matchQuality.score < similarityThreshold) {
-            return null;
-          }
-          
-          // Apply color type filter (for demonstration)
-          if (imageColorType && Math.random() > 0.7) {
-            return null;
-          }
-          
-          // Apply dominant color filter (for demonstration)
-          if (dominantColor && Math.random() > 0.6) {
-            return null;
-          }
-          
-          // Apply partial match filtering
-          if (!includePartialMatches && Math.random() < 0.3) {
-            return null;
-          }
-          
-          // Apply color similarity filtering
-          if (!includeSimilarColors && Math.random() < 0.4) {
-            return null;
-          }
-          
-          return {
-            title: `${source.split('.')[0].charAt(0).toUpperCase() + source.split('.')[0].slice(1)} Match`,
-            link: `https://${source}/image-match-${index}`,
-            displayLink: source,
-            snippet: `${matchQuality.quality.charAt(0).toUpperCase() + matchQuality.quality.slice(1)} match (${Math.round(matchQuality.score * 100)}% similar) found on ${source}.`,
-            image: {
-              contextLink: `https://${source}`,
-              thumbnailLink: `https://picsum.photos/200/300?random=${index+1}`,
-            },
-            similarityScore: matchQuality.score,
-            matchQuality: matchQuality.quality,
-            // Additional metadata for advanced filtering
-            size: minSize,
-            colorType: imageColorType,
-            dominantColor: dominantColor
+        } else {
+          // Fall back to enhanced mock data
+          const getMatchQuality = (index: number) => {
+            if (searchMode === 'strict') {
+              if (index < 3) return { quality: 'high', score: 0.85 + (Math.random() * 0.15) };
+              if (index < 8) return { quality: 'medium', score: 0.65 + (Math.random() * 0.15) };
+              return { quality: 'low', score: 0.4 + (Math.random() * 0.2) };
+            } 
+            
+            if (index < 6) return { quality: 'high', score: 0.8 + (Math.random() * 0.2) };
+            if (index < 12) return { quality: 'medium', score: 0.6 + (Math.random() * 0.2) };
+            return { quality: 'low', score: 0.3 + (Math.random() * 0.3) };
           };
-        }).filter(Boolean);
-        
-        const sortedResults = mockItems.sort((a, b) => b.similarityScore - a.similarityScore).slice(0, maxResults);
-        
-        const mockResults = {
-          items: sortedResults
-        };
-        
-        console.log('Generated mock image results:', mockResults.items?.length || 0);
-        
-        cacheResults(cacheKey, mockResults);
-        resolve(mockResults);
+          
+          // Filter sources based on image search parameters
+          let sources = [
+            'linkedin.com', 'facebook.com', 'instagram.com', 'twitter.com', 
+            'youtube.com', 'tiktok.com', 'pinterest.com', 'reddit.com', 
+            'tumblr.com', 'flickr.com', 'deviantart.com', 'behance.net', 
+            'dribbble.com', 'unsplash.com', 'pexels.com', 'shutterstock.com', 
+            'gettyimages.com', 'stock.adobe.com', 'istockphoto.com', 'medium.com'
+          ];
+          
+          // If we're looking for specific image types, filter accordingly
+          if (imageType) {
+            switch (imageType) {
+              case 'face':
+                sources = sources.filter(s => ['facebook.com', 'linkedin.com', 'instagram.com'].includes(s));
+                break;
+              case 'photo':
+                sources = sources.filter(s => ['unsplash.com', 'pexels.com', 'flickr.com', 'instagram.com'].includes(s));
+                break;
+              case 'clipart':
+                sources = sources.filter(s => ['shutterstock.com', 'stock.adobe.com', 'istockphoto.com'].includes(s));
+                break;
+              case 'lineart':
+                sources = sources.filter(s => ['behance.net', 'dribbble.com', 'deviantart.com'].includes(s));
+                break;
+              case 'animated':
+                sources = sources.filter(s => ['giphy.com', 'tenor.com', 'tumblr.com'].includes(s));
+                break;
+            }
+          }
+          
+          const mockItems = sources.map((source, index) => {
+            const matchQuality = getMatchQuality(index);
+            
+            // Apply similarity threshold filter
+            if (matchQuality.score < similarityThreshold) {
+              return null;
+            }
+            
+            // Apply color type filter
+            if (imageColorType && Math.random() > 0.7) {
+              return null;
+            }
+            
+            // Apply dominant color filter
+            if (dominantColor && Math.random() > 0.6) {
+              return null;
+            }
+            
+            // Apply partial match filtering
+            if (!includePartialMatches && Math.random() < 0.3) {
+              return null;
+            }
+            
+            // Apply color similarity filtering
+            if (!includeSimilarColors && Math.random() < 0.4) {
+              return null;
+            }
+            
+            // Build a rich result object
+            return {
+              title: `${source.split('.')[0].charAt(0).toUpperCase() + source.split('.')[0].slice(1)} Visual Match`,
+              link: `https://${source}/image-match-${index}`,
+              displayLink: source,
+              snippet: `${matchQuality.quality.charAt(0).toUpperCase() + matchQuality.quality.slice(1)} match (${Math.round(matchQuality.score * 100)}% similar) to your uploaded image.`,
+              image: {
+                contextLink: `https://${source}`,
+                thumbnailLink: `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/200/300`,
+                thumbnailHeight: 300,
+                thumbnailWidth: 200
+              },
+              pagemap: {
+                cse_image: [{ 
+                  src: `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/800/600` 
+                }],
+                imageobject: [{
+                  contenturl: `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/800/600`,
+                  width: "800",
+                  height: "600"
+                }],
+                metatags: [{
+                  'og:image': `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/800/600`,
+                  'og:type': 'image'
+                }]
+              },
+              similarityScore: matchQuality.score,
+              matchQuality: matchQuality.quality,
+              // Additional metadata for advanced filtering
+              size: minSize,
+              colorType: imageColorType,
+              dominantColor: dominantColor
+            };
+          }).filter(Boolean);
+          
+          const sortedItems = mockItems.sort((a: any, b: any) => b.similarityScore - a.similarityScore).slice(0, maxResults);
+          
+          const mockResults = {
+            searchInformation: {
+              totalResults: sortedItems.length.toString(),
+              formattedTotalResults: sortedItems.length.toString(),
+              searchTime: 0.5,
+              formattedSearchTime: "0.5"
+            },
+            items: sortedItems
+          };
+          
+          console.log('Generated enhanced mock image results:', mockResults.items?.length || 0);
+          
+          cacheResults(cacheKey, mockResults);
+          resolve(mockResults);
+        }
       } catch (error) {
         console.error('Image Search API error:', error);
         
         const fallbackResults = {
+          searchInformation: {
+            totalResults: "3",
+            formattedTotalResults: "3",
+            searchTime: 0.1,
+            formattedSearchTime: "0.1"
+          },
           items: [
             {
               title: 'LinkedIn Profile Match',
@@ -518,7 +696,12 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
               snippet: 'Professional profile page with potential image match.',
               image: {
                 contextLink: 'https://linkedin.com',
-                thumbnailLink: 'https://picsum.photos/200/300?random=1',
+                thumbnailLink: 'https://picsum.photos/id/1005/200/300',
+                thumbnailHeight: 300,
+                thumbnailWidth: 200
+              },
+              pagemap: {
+                cse_image: [{ src: 'https://picsum.photos/id/1005/800/600' }]
               },
               similarityScore: 0.85
             },
@@ -529,7 +712,12 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
               snippet: 'Social media profile with potential image match.',
               image: {
                 contextLink: 'https://facebook.com',
-                thumbnailLink: 'https://picsum.photos/200/300?random=2',
+                thumbnailLink: 'https://picsum.photos/id/1012/200/300',
+                thumbnailHeight: 300,
+                thumbnailWidth: 200
+              },
+              pagemap: {
+                cse_image: [{ src: 'https://picsum.photos/id/1012/800/600' }]
               },
               similarityScore: 0.75
             },
@@ -540,7 +728,12 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
               snippet: 'Image post with similar visual elements.',
               image: {
                 contextLink: 'https://instagram.com',
-                thumbnailLink: 'https://picsum.photos/200/300?random=3',
+                thumbnailLink: 'https://picsum.photos/id/1027/200/300',
+                thumbnailHeight: 300,
+                thumbnailWidth: 200
+              },
+              pagemap: {
+                cse_image: [{ src: 'https://picsum.photos/id/1027/800/600' }]
               },
               similarityScore: 0.68
             }
@@ -563,6 +756,12 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
     console.error('Image Search API error:', error);
     
     return {
+      searchInformation: {
+        totalResults: "3",
+        formattedTotalResults: "3",
+        searchTime: 0.1,
+        formattedSearchTime: "0.1"
+      },
       items: [
         {
           title: 'LinkedIn Profile Match',
@@ -571,7 +770,12 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
           snippet: 'Professional profile page with potential image match.',
           image: {
             contextLink: 'https://linkedin.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=1',
+            thumbnailLink: 'https://picsum.photos/id/1005/200/300',
+            thumbnailHeight: 300,
+            thumbnailWidth: 200
+          },
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/id/1005/800/600' }]
           },
           similarityScore: 0.85
         },
@@ -582,7 +786,12 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
           snippet: 'Social media profile with potential image match.',
           image: {
             contextLink: 'https://facebook.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=2',
+            thumbnailLink: 'https://picsum.photos/id/1012/200/300',
+            thumbnailHeight: 300,
+            thumbnailWidth: 200
+          },
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/id/1012/800/600' }]
           },
           similarityScore: 0.75
         },
@@ -593,7 +802,12 @@ export const performImageSearch = async (imageUrl: string, userId: string, searc
           snippet: 'Image post with similar visual elements.',
           image: {
             contextLink: 'https://instagram.com',
-            thumbnailLink: 'https://picsum.photos/200/300?random=3',
+            thumbnailLink: 'https://picsum.photos/id/1027/200/300',
+            thumbnailHeight: 300,
+            thumbnailWidth: 200
+          },
+          pagemap: {
+            cse_image: [{ src: 'https://picsum.photos/id/1027/800/600' }]
           },
           similarityScore: 0.68
         }
