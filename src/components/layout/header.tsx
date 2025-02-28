@@ -140,12 +140,12 @@ export function Header() {
           >
             Pricing
           </button>
-          <button 
-            onClick={() => navigateToSection('about')} 
+          <Link 
+            to="/contact" 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
           >
-            About
-          </button>
+            About/Contact
+          </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -214,12 +214,12 @@ export function Header() {
               >
                 Pricing
               </button>
-              <button
-                onClick={() => navigateToSection('about')}
+              <Link
+                to="/contact"
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
               >
-                About
-              </button>
+                About/Contact
+              </Link>
             </nav>
 
             <div className="flex flex-col gap-3 mt-4">
