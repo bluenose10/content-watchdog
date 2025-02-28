@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { ArrowRight, Search, Upload } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SearchQuery } from "@/lib/db-types";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -24,6 +24,7 @@ export function RecentSearches({
   const { user } = useAuth();
   const [searchQueries, setSearchQueries] = useState<SearchQuery[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (propSearchQueries) {
@@ -47,6 +48,14 @@ export function RecentSearches({
 
     fetchSearchQueries();
   }, [user, propSearchQueries, limit]);
+
+  const handleViewResults = (searchId: string) => {
+    if (onSelectSearch) {
+      onSelectSearch(searchId);
+    } else {
+      navigate(`/results?id=${searchId}`);
+    }
+  };
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border border-purple-100/50 dark:border-purple-800/30 bg-gradient-to-br from-white to-purple-50/50 dark:from-gray-900 dark:to-purple-950/40 md:col-span-2">
@@ -114,12 +123,20 @@ export function RecentSearches({
                   </p>
                 </div>
                 <div className="ml-auto">
-                  <Button size="sm" variant={selectedSearchId === search.id ? "default" : "outline"} className={
-                    selectedSearchId === search.id 
-                      ? "bg-primary hover:bg-primary/90"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }>
-                    View
+                  <Button 
+                    size="sm" 
+                    variant={selectedSearchId === search.id ? "default" : "outline"} 
+                    className={
+                      selectedSearchId === search.id 
+                        ? "bg-primary hover:bg-primary/90"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (search.id) handleViewResults(search.id);
+                    }}
+                  >
+                    View Results
                   </Button>
                 </div>
               </div>
