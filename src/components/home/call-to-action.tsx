@@ -12,7 +12,7 @@ export function CallToAction() {
           <p className="text-xs md:text-sm text-muted-foreground">Join thousands of creators who trust us</p>
         </div>
         
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-primary-foreground rounded-xl p-4 md:p-5 h-[calc(100%-4rem)] flex flex-col">
+        <div className="bg-gradient-to-r from-purple-500/80 to-blue-500/80 text-primary-foreground rounded-xl p-4 md:p-5 h-[calc(100%-4rem)] flex flex-col">
           <div className="flex flex-col justify-center items-center">
             <div className="mb-4 md:mb-5 space-y-2 md:space-y-3">
               <div className="flex items-center gap-2">
