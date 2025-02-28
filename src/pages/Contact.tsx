@@ -29,19 +29,14 @@ export default function Contact() {
             </div>
             
             <CardContent className="p-6 flex flex-col justify-center">
-              <h2 className="text-2xl font-bold mb-3">Mark Moran {/* Key change: John Smith to Mark Moran */}</h2>
+              <h2 className="text-2xl font-bold mb-3">Mark Moran</h2>
               <p className="text-muted-foreground mb-6">
                 Founder & Content Protection Specialist
               </p>
               
               <div className="space-y-4 mb-6">
                 <p>
-                  With over 10 years of experience in digital rights management and content protection, 
-                  I've helped hundreds of creators and businesses secure their intellectual property across the web.
-                </p>
-                <p>
-                  I hold certifications in cybersecurity and copyright law, with a background in computer science 
-                  from the University of Technology.
+                  I'm a skilled digital detective with a knack for uncovering valuable content across the vast expanse of the internet. My expertise lies in combining technical know-how with creative problem-solving to find exactly what's needed—fast, accurately, and ethically. Let's turn the internet's chaos into your competitive advantage.
                 </p>
                 {/* Adding a hidden timestamp to force refresh */}
                 <span className="hidden">{timestamp}</span>
