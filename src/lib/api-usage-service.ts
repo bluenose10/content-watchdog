@@ -17,11 +17,25 @@ export async function getApiCallStats(timeframe: string = 'monthly') {
       
     if (error) throw error;
     
-    // Process the data to get counts by month
-    const monthlyData = processApiCallsByMonth(searchQueries || []);
+    // Process the data to get counts by month or other time periods
+    let processedData;
+    switch(timeframe) {
+      case 'daily':
+        processedData = processApiCallsByDay(searchQueries || []);
+        break;
+      case 'weekly':
+        processedData = processApiCallsByWeek(searchQueries || []);
+        break;
+      case 'yearly':
+        processedData = processApiCallsByYear(searchQueries || []);
+        break;
+      case 'monthly':
+      default:
+        processedData = processApiCallsByMonth(searchQueries || []);
+    }
     
     return { 
-      apiCalls: monthlyData,
+      apiCalls: processedData,
       totalCalls: searchQueries?.length || 0,
       googleApiCalls: searchQueries?.filter(q => q.query_type === 'name' || q.query_type === 'hashtag')?.length || 0,
       imageApiCalls: searchQueries?.filter(q => q.query_type === 'image')?.length || 0
@@ -35,6 +49,89 @@ export async function getApiCallStats(timeframe: string = 'monthly') {
       imageApiCalls: 0
     };
   }
+}
+
+/**
+ * Processes raw query data into daily API call counts
+ */
+function processApiCallsByDay(queries: any[]) {
+  // Group queries by day
+  const dailyData: Record<string, { google: number, supabase: number, storage: number }> = {};
+  
+  queries.forEach(query => {
+    const date = new Date(query.created_at);
+    const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    
+    if (!dailyData[dayKey]) {
+      dailyData[dayKey] = { google: 0, supabase: 0, storage: 0 };
+    }
+    
+    // Increment the appropriate counter
+    if (query.query_type === 'image') {
+      dailyData[dayKey].google += 1;
+      dailyData[dayKey].storage += 1;
+    } else {
+      dailyData[dayKey].google += 1;
+    }
+    
+    // Each query involves at least one Supabase call
+    dailyData[dayKey].supabase += 1;
+  });
+  
+  // Convert to array for charting
+  return Object.entries(dailyData)
+    .map(([date, counts]) => ({
+      date,
+      google: counts.google,
+      supabase: counts.supabase,
+      storage: counts.storage
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
+ * Processes raw query data into weekly API call counts
+ */
+function processApiCallsByWeek(queries: any[]) {
+  // Group queries by week (using ISO week numbering)
+  const weeklyData: Record<string, { google: number, supabase: number, storage: number }> = {};
+  
+  queries.forEach(query => {
+    const date = new Date(query.created_at);
+    const year = date.getFullYear();
+    
+    // Get ISO week number
+    const firstDayOfYear = new Date(year, 0, 1);
+    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+    const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+    
+    const weekKey = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+    
+    if (!weeklyData[weekKey]) {
+      weeklyData[weekKey] = { google: 0, supabase: 0, storage: 0 };
+    }
+    
+    // Increment the appropriate counter
+    if (query.query_type === 'image') {
+      weeklyData[weekKey].google += 1;
+      weeklyData[weekKey].storage += 1;
+    } else {
+      weeklyData[weekKey].google += 1;
+    }
+    
+    // Each query involves at least one Supabase call
+    weeklyData[weekKey].supabase += 1;
+  });
+  
+  // Convert to array for charting
+  return Object.entries(weeklyData)
+    .map(([date, counts]) => ({
+      date,
+      google: counts.google,
+      supabase: counts.supabase,
+      storage: counts.storage
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /**
@@ -66,6 +163,44 @@ function processApiCallsByMonth(queries: any[]) {
   
   // Convert to array for charting
   return Object.entries(monthlyData)
+    .map(([date, counts]) => ({
+      date,
+      google: counts.google,
+      supabase: counts.supabase,
+      storage: counts.storage
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
+ * Processes raw query data into yearly API call counts
+ */
+function processApiCallsByYear(queries: any[]) {
+  // Group queries by year
+  const yearlyData: Record<string, { google: number, supabase: number, storage: number }> = {};
+  
+  queries.forEach(query => {
+    const date = new Date(query.created_at);
+    const yearKey = `${date.getFullYear()}`;
+    
+    if (!yearlyData[yearKey]) {
+      yearlyData[yearKey] = { google: 0, supabase: 0, storage: 0 };
+    }
+    
+    // Increment the appropriate counter
+    if (query.query_type === 'image') {
+      yearlyData[yearKey].google += 1;
+      yearlyData[yearKey].storage += 1;
+    } else {
+      yearlyData[yearKey].google += 1;
+    }
+    
+    // Each query involves at least one Supabase call
+    yearlyData[yearKey].supabase += 1;
+  });
+  
+  // Convert to array for charting
+  return Object.entries(yearlyData)
     .map(([date, counts]) => ({
       date,
       google: counts.google,
@@ -109,6 +244,19 @@ export async function getApiCostEstimates() {
       ).toFixed(2)
     }));
     
+    // Calculate month-over-month change
+    let previousMonthCost = 0;
+    let currentMonthCost = 0;
+    
+    if (monthlyCostData.length >= 2) {
+      previousMonthCost = parseFloat(monthlyCostData[monthlyCostData.length - 2].cost);
+      currentMonthCost = parseFloat(monthlyCostData[monthlyCostData.length - 1].cost);
+    }
+    
+    const costChange = previousMonthCost > 0 
+      ? Math.round(((currentMonthCost - previousMonthCost) / previousMonthCost) * 100) 
+      : 0;
+    
     return {
       costBreakdown: [
         { name: "Google APIs", value: +(googleCost + imageCost).toFixed(2) },
@@ -119,7 +267,8 @@ export async function getApiCostEstimates() {
       googleApiCost: +(googleCost + imageCost).toFixed(2),
       storageCost: +storageCost.toFixed(2),
       supabaseCost: +supabaseCost.toFixed(2),
-      monthlyCostData: monthlyCostData.slice(-12) // Last 12 months
+      monthlyCostData: monthlyCostData.slice(-12), // Last 12 months
+      costChange: costChange
     };
   } catch (error) {
     console.error('Error calculating API costs:', error);
@@ -129,7 +278,8 @@ export async function getApiCostEstimates() {
       googleApiCost: 0,
       storageCost: 0,
       supabaseCost: 0,
-      monthlyCostData: []
+      monthlyCostData: [],
+      costChange: 0
     };
   }
 }
@@ -156,12 +306,26 @@ export async function getStorageStats() {
     const totalImages = imageQueries?.length || 0;
     const estimatedStorageGB = Math.max(0.1, (totalImages * 2) / 1000); // Estimate ~2MB per image
     
+    // Calculate storage growth rate
+    let previousMonthStorage = 0;
+    let currentMonthStorage = 0;
+    
+    if (monthlyData.length >= 2) {
+      previousMonthStorage = monthlyData[monthlyData.length - 2].images;
+      currentMonthStorage = monthlyData[monthlyData.length - 1].images;
+    }
+    
+    const storageGrowthRate = previousMonthStorage > 0 
+      ? Math.round(((currentMonthStorage - previousMonthStorage) / previousMonthStorage) * 100) 
+      : 0;
+    
     return {
       storageUsage: monthlyData,
       totalStorageGB: +estimatedStorageGB.toFixed(1),
       imagesStorageGB: +(estimatedStorageGB * 0.7).toFixed(1), // 70% of storage is images
       databaseStorageGB: +(estimatedStorageGB * 0.2).toFixed(1), // 20% is database
-      backupsStorageGB: +(estimatedStorageGB * 0.1).toFixed(1) // 10% is backups
+      backupsStorageGB: +(estimatedStorageGB * 0.1).toFixed(1), // 10% is backups
+      storageGrowthRate: storageGrowthRate
     };
   } catch (error) {
     console.error('Error fetching storage stats:', error);
@@ -170,7 +334,8 @@ export async function getStorageStats() {
       totalStorageGB: 0.1,
       imagesStorageGB: 0.07,
       databaseStorageGB: 0.02,
-      backupsStorageGB: 0.01
+      backupsStorageGB: 0.01,
+      storageGrowthRate: 0
     };
   }
 }
@@ -221,4 +386,51 @@ function processStorageByMonth(queries: any[]) {
       };
     })
     .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
+ * Gets real-time usage metrics
+ */
+export async function getRealTimeMetrics() {
+  try {
+    // In a real app, this would query your real-time API usage metrics
+    // For now, generating some sample data
+    
+    // Generate timestamps for the last 24 hours, at 1 hour intervals
+    const timestamps = Array.from({ length: 24 }, (_, i) => {
+      const date = new Date();
+      date.setHours(date.getHours() - (24 - i));
+      return date.toISOString();
+    });
+    
+    // Generate simulated API load values (0-100%)
+    const apiLoad = timestamps.map(() => Math.floor(Math.random() * 100));
+    
+    // Generate response times (100-500ms)
+    const responseTime = timestamps.map(() => 100 + Math.floor(Math.random() * 400));
+    
+    // Generate error rates (0-5%)
+    const errorRate = timestamps.map(() => Math.random() * 5);
+    
+    return {
+      timestamps,
+      apiLoad,
+      responseTime,
+      errorRate,
+      currentLoad: apiLoad[apiLoad.length - 1],
+      avgResponseTime: Math.round(responseTime.reduce((a, b) => a + b, 0) / responseTime.length),
+      currentErrorRate: errorRate[errorRate.length - 1].toFixed(2)
+    };
+  } catch (error) {
+    console.error('Error fetching real-time metrics:', error);
+    return {
+      timestamps: [],
+      apiLoad: [],
+      responseTime: [],
+      errorRate: [],
+      currentLoad: 0,
+      avgResponseTime: 0,
+      currentErrorRate: '0.00'
+    };
+  }
 }

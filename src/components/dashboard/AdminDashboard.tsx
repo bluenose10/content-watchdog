@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Chart } from "@/components/ui/chart";
-import { CircleDollarSign, Database, Search, Server } from "lucide-react";
+import { CircleDollarSign, Database, BarChart, Server, Activity, AlertTriangle, Clock } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-import { getApiCallStats, getApiCostEstimates, getStorageStats } from "@/lib/api-usage-service";
+import { getApiCallStats, getApiCostEstimates, getStorageStats, getRealTimeMetrics } from "@/lib/api-usage-service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export function AdminDashboard() {
   const [timeRange, setTimeRange] = useState("monthly");
@@ -18,18 +19,30 @@ export function AdminDashboard() {
     googleApiCost: 0,
     storageCost: 0,
     supabaseCost: 0,
-    monthlyCostData: []
+    monthlyCostData: [],
+    costChange: 0
   });
   const [storageData, setStorageData] = useState<any>({
     storageUsage: [],
     totalStorageGB: 0,
     imagesStorageGB: 0,
     databaseStorageGB: 0,
-    backupsStorageGB: 0
+    backupsStorageGB: 0,
+    storageGrowthRate: 0
+  });
+  const [realTimeData, setRealTimeData] = useState<any>({
+    timestamps: [],
+    apiLoad: [],
+    responseTime: [],
+    errorRate: [],
+    currentLoad: 0,
+    avgResponseTime: 0,
+    currentErrorRate: '0.00'
   });
   const [totalApiCalls, setTotalApiCalls] = useState(0);
   const [googleApiDistribution, setGoogleApiDistribution] = useState<any[]>([]);
   const [supabaseUsage, setSupabaseUsage] = useState<any[]>([]);
+  const [refreshInterval, setRefreshInterval] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -67,6 +80,10 @@ export function AdminDashboard() {
         // Fetch storage statistics
         const storageStats = await getStorageStats();
         setStorageData(storageStats);
+        
+        // Fetch real-time metrics
+        const metrics = await getRealTimeMetrics();
+        setRealTimeData(metrics);
       } catch (error) {
         console.error("Error fetching admin dashboard data:", error);
       } finally {
@@ -75,6 +92,31 @@ export function AdminDashboard() {
     }
     
     fetchData();
+    
+    // Set up automatic refresh on the real-time tab
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+    }
+    
+    // Only set up interval if on real-time tab
+    if (timeRange === "realtime") {
+      const interval = window.setInterval(async () => {
+        try {
+          const metrics = await getRealTimeMetrics();
+          setRealTimeData(metrics);
+        } catch (error) {
+          console.error("Error refreshing real-time metrics:", error);
+        }
+      }, 30000); // Refresh every 30 seconds
+      
+      setRefreshInterval(interval);
+    }
+    
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
   }, [timeRange]);
 
   // Helper function to render skeleton or content
@@ -108,12 +150,12 @@ export function AdminDashboard() {
           value={isLoading ? "Loading..." : `${storageData.totalStorageGB} GB`}
           icon={Database}
           description="Total usage"
-          change={8} // This would be calculated in a real application
+          change={storageData.storageGrowthRate}
         />
         <StatsCard
           title="Search API Cost"
           value={isLoading ? "Loading..." : `$${costData.googleApiCost.toLocaleString()}`}
-          icon={Search}
+          icon={BarChart}
           description="Estimated total"
           change={-3} // This would be calculated in a real application
         />
@@ -122,16 +164,17 @@ export function AdminDashboard() {
           value={isLoading ? "Loading..." : `$${costData.totalMonthlyCost.toLocaleString()}`}
           icon={CircleDollarSign}
           description="Estimated"
-          change={5} // This would be calculated in a real application
+          change={costData.costChange}
         />
       </div>
 
       <Tabs defaultValue="api-usage" className="space-y-4">
         <div className="flex items-center justify-between">
-          <TabsList>
+          <TabsList className="w-fit">
             <TabsTrigger value="api-usage">API Usage</TabsTrigger>
             <TabsTrigger value="storage">Storage</TabsTrigger>
             <TabsTrigger value="costs">Cost Analysis</TabsTrigger>
+            <TabsTrigger value="realtime">Real-time</TabsTrigger>
           </TabsList>
           <div>
             <select
@@ -143,6 +186,7 @@ export function AdminDashboard() {
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
+              <option value="realtime">Real-time</option>
             </select>
           </div>
         </div>
@@ -354,6 +398,110 @@ export function AdminDashboard() {
                     nameKey="service"
                     height={250}
                     fill="#8884d8"
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="realtime" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <StatsCard
+              title="Current API Load"
+              value={`${realTimeData.currentLoad}%`}
+              icon={Activity}
+              description="Live metric"
+            />
+            <StatsCard
+              title="Avg Response Time"
+              value={`${realTimeData.avgResponseTime} ms`}
+              icon={Clock}
+              description="Last 24 hours"
+            />
+            <StatsCard
+              title="Error Rate"
+              value={`${realTimeData.currentErrorRate}%`}
+              icon={AlertTriangle}
+              description="Current"
+            />
+          </div>
+          
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>API Load (Last 24 Hours)</CardTitle>
+                  <CardDescription>
+                    Percentage of API capacity utilized
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="ml-2">
+                  Auto-refreshes every 30s
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="h-80">
+              {renderContent(
+                <Chart
+                  type="area"
+                  data={realTimeData.timestamps.map((timestamp: string, index: number) => ({
+                    time: new Date(timestamp).toLocaleTimeString(),
+                    load: realTimeData.apiLoad[index]
+                  }))}
+                  dataKey="load"
+                  nameKey="time"
+                  height={300}
+                  fill="rgba(130, 202, 157, 0.5)"
+                  stroke="#82ca9d"
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Response Time (ms)</CardTitle>
+                <CardDescription>
+                  API response times over the last 24 hours
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                {renderContent(
+                  <Chart
+                    type="line"
+                    data={realTimeData.timestamps.map((timestamp: string, index: number) => ({
+                      time: new Date(timestamp).toLocaleTimeString(),
+                      response: realTimeData.responseTime[index]
+                    }))}
+                    dataKey="response"
+                    nameKey="time"
+                    height={250}
+                    stroke="#8884d8"
+                  />
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Error Rate (%)</CardTitle>
+                <CardDescription>
+                  Percentage of API calls resulting in errors
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                {renderContent(
+                  <Chart
+                    type="line"
+                    data={realTimeData.timestamps.map((timestamp: string, index: number) => ({
+                      time: new Date(timestamp).toLocaleTimeString(),
+                      error: realTimeData.errorRate[index]
+                    }))}
+                    dataKey="error"
+                    nameKey="time"
+                    height={250}
+                    stroke="#ff7300"
                   />
                 )}
               </CardContent>
