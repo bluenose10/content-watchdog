@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -361,3 +362,128 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
+
+// Create a simplified Chart component for the Analytics page
+interface ChartProps {
+  type: 'line' | 'bar' | 'area' | 'pie';
+  data: any[];
+  dataKey: string;
+  nameKey: string;
+  height?: number;
+  width?: number;
+  title?: string;
+  fill?: string;
+  stroke?: string;
+}
+
+export const Chart = ({ 
+  type, 
+  data, 
+  dataKey, 
+  nameKey, 
+  height = 300, 
+  width = '100%',
+  title,
+  fill,
+  stroke
+}: ChartProps) => {
+  if (!data || data.length === 0) {
+    return <div className="flex items-center justify-center h-[300px]">No data available</div>;
+  }
+
+  const config: ChartConfig = {
+    [dataKey]: {
+      label: title || dataKey,
+      color: fill || stroke || "#8884d8"
+    }
+  };
+
+  let chartComponent;
+
+  switch (type) {
+    case 'bar':
+      chartComponent = (
+        <RechartsPrimitive.BarChart data={data}>
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+          <RechartsPrimitive.XAxis dataKey={nameKey} />
+          <RechartsPrimitive.YAxis />
+          <RechartsPrimitive.Tooltip />
+          <RechartsPrimitive.Legend />
+          <RechartsPrimitive.Bar dataKey={dataKey} fill={fill || "#8884d8"} />
+        </RechartsPrimitive.BarChart>
+      );
+      break;
+    case 'line':
+      chartComponent = (
+        <RechartsPrimitive.LineChart data={data}>
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+          <RechartsPrimitive.XAxis dataKey={nameKey} />
+          <RechartsPrimitive.YAxis />
+          <RechartsPrimitive.Tooltip />
+          <RechartsPrimitive.Legend />
+          <RechartsPrimitive.Line 
+            type="monotone" 
+            dataKey={dataKey} 
+            stroke={stroke || "#8884d8"} 
+            activeDot={{ r: 8 }} 
+          />
+        </RechartsPrimitive.LineChart>
+      );
+      break;
+    case 'area':
+      chartComponent = (
+        <RechartsPrimitive.AreaChart data={data}>
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+          <RechartsPrimitive.XAxis dataKey={nameKey} />
+          <RechartsPrimitive.YAxis />
+          <RechartsPrimitive.Tooltip />
+          <RechartsPrimitive.Legend />
+          <RechartsPrimitive.Area 
+            type="monotone" 
+            dataKey={dataKey} 
+            fill={fill || "#8884d8"} 
+            stroke={stroke || "#8884d8"} 
+          />
+        </RechartsPrimitive.AreaChart>
+      );
+      break;
+    case 'pie':
+      chartComponent = (
+        <RechartsPrimitive.PieChart>
+          <RechartsPrimitive.Pie 
+            data={data} 
+            cx="50%" 
+            cy="50%" 
+            labelLine={true}
+            outerRadius={80} 
+            fill="#8884d8" 
+            dataKey={dataKey} 
+            nameKey={nameKey}
+            label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          >
+            {data.map((entry, index) => (
+              <RechartsPrimitive.Cell 
+                key={`cell-${index}`} 
+                fill={['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE'][index % 5]} 
+              />
+            ))}
+          </RechartsPrimitive.Pie>
+          <RechartsPrimitive.Tooltip />
+          <RechartsPrimitive.Legend />
+        </RechartsPrimitive.PieChart>
+      );
+      break;
+    default:
+      chartComponent = <div>Invalid chart type</div>;
+  }
+
+  return (
+    <ChartContainer 
+      config={config} 
+      className="h-[300px] w-full"
+      style={{ height: height, width: width }}
+    >
+      {chartComponent}
+    </ChartContainer>
+  );
+};
