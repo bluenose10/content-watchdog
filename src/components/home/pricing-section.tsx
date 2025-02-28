@@ -12,8 +12,15 @@ export function PricingSection() {
 
   const handlePlanClick = (planId: string) => {
     if (planId === "basic") {
-      // Free plan should navigate to signup
-      navigate("/signup");
+      if (!user) {
+        // Free plan should navigate to signup
+        navigate("/signup");
+      } else {
+        toast({
+          title: "Already on Basic Plan",
+          description: "You're already using the basic plan features.",
+        });
+      }
     } else {
       if (!user) {
         toast({
@@ -21,32 +28,12 @@ export function PricingSection() {
           description: "Please sign up first to upgrade to this plan.",
         });
         navigate("/signup");
+      } else {
+        // Navigate to checkout or show pricing details
+        navigate("/checkout");
       }
     }
   };
-
-  // Update pricing plans to include scheduled searches
-  const updatedPlans = PRICING_PLANS.map(plan => {
-    if (plan.id === "pro") {
-      return {
-        ...plan,
-        features: [
-          ...plan.features,
-          "5 scheduled automated searches",
-        ]
-      };
-    }
-    if (plan.id === "business") {
-      return {
-        ...plan,
-        features: [
-          ...plan.features,
-          "20 scheduled automated searches",
-        ]
-      };
-    }
-    return plan;
-  });
 
   return (
     <section id="pricing" className="py-16 relative overflow-hidden">
@@ -59,7 +46,7 @@ export function PricingSection() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-6 max-w-6xl mx-auto">
-          {updatedPlans.map((plan) => (
+          {PRICING_PLANS.map((plan) => (
             <PricingCard
               key={plan.id}
               name={plan.name}

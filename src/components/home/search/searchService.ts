@@ -3,6 +3,8 @@ import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
+import { SEARCH_LIMITS } from "@/lib/constants";
+import { getCacheKey, getCachedResults, cacheResults } from "@/lib/search-cache";
 
 // Enhanced search parameters for text-based searches
 const DEFAULT_TEXT_PARAMS: TextSearchParams = {
@@ -31,6 +33,106 @@ const DEFAULT_IMAGE_PARAMS: ImageSearchParams = {
   dominantColor: undefined
 };
 
+// Track user search counts (in-memory for demo purposes, should be persisted in production)
+const userSearchCounts: Record<string, { monthly: number, weekly: number, lastReset: { weekly: number, monthly: number } }> = {};
+
+/**
+ * Check if user has exceeded their search limits based on subscription tier
+ * @param userId User ID
+ * @param isPro Whether the user has a Pro subscription
+ * @returns Object with isAllowed and message
+ */
+async function checkSearchLimits(userId: string, isPro: boolean): Promise<{ isAllowed: boolean, message: string }> {
+  // Initialize user search counts if not present
+  if (!userSearchCounts[userId]) {
+    userSearchCounts[userId] = {
+      monthly: 0,
+      weekly: 0,
+      lastReset: {
+        weekly: Date.now(),
+        monthly: Date.now()
+      }
+    };
+  }
+
+  const now = Date.now();
+  const oneWeek = 7 * 24 * 60 * 60 * 1000;
+  const oneMonth = 30 * 24 * 60 * 60 * 1000;
+  const user = userSearchCounts[userId];
+
+  // Check if we need to reset weekly count
+  if (now - user.lastReset.weekly > oneWeek) {
+    user.weekly = 0;
+    user.lastReset.weekly = now;
+  }
+
+  // Check if we need to reset monthly count
+  if (now - user.lastReset.monthly > oneMonth) {
+    user.monthly = 0;
+    user.lastReset.monthly = now;
+  }
+
+  // Check limits based on subscription tier
+  if (isPro) {
+    // Pro user checks
+    if (user.weekly >= SEARCH_LIMITS.PRO.WEEKLY) {
+      return { 
+        isAllowed: false, 
+        message: `You've reached your weekly search limit (${SEARCH_LIMITS.PRO.WEEKLY} searches). Weekly limit resets in ${formatTimeRemaining(user.lastReset.weekly + oneWeek - now)}.`
+      };
+    }
+    
+    if (user.monthly >= SEARCH_LIMITS.PRO.MONTHLY) {
+      return { 
+        isAllowed: false, 
+        message: `You've reached your monthly search limit (${SEARCH_LIMITS.PRO.MONTHLY} searches). Monthly limit resets in ${formatTimeRemaining(user.lastReset.monthly + oneMonth - now)}.`
+      };
+    }
+  } else {
+    // Basic user checks
+    if (user.monthly >= SEARCH_LIMITS.BASIC) {
+      return { 
+        isAllowed: false, 
+        message: `You've reached your monthly search limit (${SEARCH_LIMITS.BASIC} searches). Monthly limit resets in ${formatTimeRemaining(user.lastReset.monthly + oneMonth - now)}.`
+      };
+    }
+  }
+
+  return { isAllowed: true, message: "" };
+}
+
+/**
+ * Format time remaining in a human-readable format
+ */
+function formatTimeRemaining(timeMs: number): string {
+  const days = Math.floor(timeMs / (24 * 60 * 60 * 1000));
+  const hours = Math.floor((timeMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  
+  if (days > 0) {
+    return `${days} day${days !== 1 ? 's' : ''}`;
+  }
+  return `${hours} hour${hours !== 1 ? 's' : ''}`;
+}
+
+/**
+ * Increment user search count
+ */
+function incrementSearchCount(userId: string): void {
+  if (!userSearchCounts[userId]) {
+    userSearchCounts[userId] = {
+      monthly: 0,
+      weekly: 0,
+      lastReset: {
+        weekly: Date.now(),
+        monthly: Date.now()
+      }
+    };
+  }
+  
+  userSearchCounts[userId].monthly += 1;
+  userSearchCounts[userId].weekly += 1;
+}
+
 // Handles text-based searches (name or hashtag) with enhanced parameters
 export async function handleTextSearch(
   query: string, 
@@ -38,11 +140,28 @@ export async function handleTextSearch(
   user: User | null,
   searchParams?: Partial<TextSearchParams>
 ): Promise<string> {
+  // Check if user is authenticated
+  if (!user) {
+    throw new Error("You must be signed in to perform searches");
+  }
+
   // Validate and sanitize input
   const sanitizedQuery = sanitizeSearchQuery(query);
   if (!sanitizedQuery) {
     throw new Error("Search query cannot be empty");
   }
+
+  // Check search limits for this user (simplified check - in production would query DB)
+  const isPro = true; // Mock function - in production should check subscription status
+  const limitCheck = await checkSearchLimits(user.id, isPro);
+  if (!limitCheck.isAllowed) {
+    throw new Error(limitCheck.message);
+  }
+
+  // Check cache first for this query
+  const formattedQuery = queryType === 'hashtag' && !sanitizedQuery.startsWith('#') 
+    ? `#${sanitizedQuery}` 
+    : sanitizedQuery;
 
   // Merge default parameters with user-provided parameters
   const mergedParams: TextSearchParams = {
@@ -50,21 +169,36 @@ export async function handleTextSearch(
     ...searchParams
   };
 
-  // If it's a hashtag search, ensure the query has a # prefix
-  const formattedQuery = queryType === 'hashtag' && !sanitizedQuery.startsWith('#') 
-    ? `#${sanitizedQuery}` 
-    : sanitizedQuery;
+  // Generate cache key
+  const cacheKey = getCacheKey(queryType, formattedQuery, mergedParams);
+  const cachedResults = getCachedResults(cacheKey);
+  
+  if (cachedResults) {
+    console.log(`Using cached results for ${queryType} search: ${formattedQuery}`);
+    return cachedResults.id || `cache_${crypto.randomUUID()}`;
+  }
 
   console.log(`Performing ${queryType} search with enhanced parameters:`, mergedParams);
   
   const searchData: SearchQuery = {
-    user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Anonymous user ID
+    user_id: user.id,
     query_type: queryType,
     query_text: formattedQuery,
     search_params_json: JSON.stringify(mergedParams)
   };
 
-  return await processSearch(searchData, user);
+  // Increment the user's search count
+  incrementSearchCount(user.id);
+
+  // Process the search
+  const searchId = await processSearch(searchData, user);
+  
+  // Cache the results
+  // Note: In a real implementation, we would fetch the results and cache them here
+  // For this mock implementation, we're just caching the search ID
+  cacheResults(cacheKey, { id: searchId });
+  
+  return searchId;
 }
 
 // Handles image-based searches with enhanced parameters
@@ -74,11 +208,18 @@ export async function handleImageSearch(
   searchParams?: Partial<ImageSearchParams>
 ): Promise<string> {
   if (!user) {
-    throw new Error("User must be signed in for image search");
+    throw new Error("You must be signed in to perform image searches");
   }
 
   // Validate file type and size
   validateImageFile(file);
+
+  // Check search limits for this user
+  const isPro = true; // Mock function - in production should check subscription status
+  const limitCheck = await checkSearchLimits(user.id, isPro);
+  if (!limitCheck.isAllowed) {
+    throw new Error(limitCheck.message);
+  }
 
   // Merge default parameters with user-provided parameters
   const mergedParams: ImageSearchParams = {
@@ -92,6 +233,17 @@ export async function handleImageSearch(
     // Upload the image and get its URL
     const imageUrl = await uploadSearchImage(file, user.id);
     
+    // Check cache for this image
+    // Note: For image search, we'd ideally use perceptual hashing to check for similar images
+    // For this implementation, we'll use the image URL as cache key
+    const cacheKey = getCacheKey("image", imageUrl, mergedParams);
+    const cachedResults = getCachedResults(cacheKey);
+    
+    if (cachedResults) {
+      console.log(`Using cached results for image search: ${imageUrl}`);
+      return cachedResults.id || `cache_${crypto.randomUUID()}`;
+    }
+    
     const searchData: SearchQuery = {
       user_id: user.id,
       query_type: "image",
@@ -99,7 +251,16 @@ export async function handleImageSearch(
       search_params_json: JSON.stringify(mergedParams)
     };
 
-    return await processSearch(searchData, user);
+    // Increment the user's search count
+    incrementSearchCount(user.id);
+
+    // Process the search
+    const searchId = await processSearch(searchData, user);
+    
+    // Cache the results
+    cacheResults(cacheKey, { id: searchId });
+    
+    return searchId;
   } catch (error) {
     console.error("Error during image search:", error);
     throw new Error(`Image search failed: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -137,21 +298,15 @@ async function processSearch(
   searchData: SearchQuery, 
   user: User | null
 ): Promise<string> {
-  let searchId: string;
-  
-  if (user) {
-    // For registered users, create a permanent search query
-    const newSearch = await createSearchQuery(searchData);
-    if (!newSearch || !newSearch.id) {
-      throw new Error("Failed to create search");
-    }
-    searchId = newSearch.id;
-  } else {
-    // For anonymous users, create a temporary search ID
-    searchId = `temp_${crypto.randomUUID()}`;
-    // Store search data in session storage for anonymous users
-    sessionStorage.setItem(`temp_search_${searchId}`, JSON.stringify(searchData));
+  if (!user) {
+    throw new Error("User must be signed in to perform searches");
   }
   
-  return searchId;
+  // For registered users, create a permanent search query
+  const newSearch = await createSearchQuery(searchData);
+  if (!newSearch || !newSearch.id) {
+    throw new Error("Failed to create search");
+  }
+  
+  return newSearch.id;
 }

@@ -41,6 +41,16 @@ export const MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 export const SUPPORTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/webp"];
 export const MAX_SEARCH_HISTORY = 10;
 
+// Search limits by plan
+export const SEARCH_LIMITS = {
+  ANONYMOUS: 0, // No searches for unregistered users
+  BASIC: 3, // 3 searches per month for free plan
+  PRO: {
+    WEEKLY: 10, // 10 searches per week for professional accounts
+    MONTHLY: 40, // 40 searches per calendar month for professional accounts
+  }
+};
+
 // Pricing constants - use real Stripe Test mode product IDs
 export const PRICING_PLANS = [
   {
@@ -49,7 +59,7 @@ export const PRICING_PLANS = [
     description: "Essential monitoring for individuals",
     price: 0,
     features: [
-      "5 searches per month",
+      "3 searches per month",
       "Basic content alerts",
       "Email support",
     ],
@@ -64,11 +74,12 @@ export const PRICING_PLANS = [
     price: 49,
     interval: "month",
     features: [
-      "Unlimited searches",
+      "10 searches per week (40 per month)",
       "Real-time monitoring",
       "Automated takedown notices",
       "Priority support",
       "Monthly reports",
+      "5 scheduled automated searches",
     ],
     stripePriceId: "price_1O2uq8Dt5zFTAXjQ3rkszxTy", // Replace with your real test mode Stripe Price ID
     popular: true,
@@ -87,6 +98,7 @@ export const PRICING_PLANS = [
       "Legal assistance",
       "Custom integrations",
       "Advanced analytics",
+      "20 scheduled automated searches",
     ],
     stripePriceId: "price_1O2urADt5zFTAXjQSKD8S5n4", // Replace with your real test mode Stripe Price ID
     popular: false,
@@ -109,3 +121,6 @@ export const PROTECTED_ROUTES = [
 
 // API constants
 export const API_TIMEOUT = 30000; // 30 seconds
+
+// Cache constants
+export const SEARCH_CACHE_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
