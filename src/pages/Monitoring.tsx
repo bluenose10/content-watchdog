@@ -35,7 +35,7 @@ export default function Monitoring() {
     return (
       <Layout>
         <div className="container py-8 max-w-7xl">
-          <h1 className="text-3xl font-bold mb-6">System Monitoring</h1>
+          <h1 className="text-2xl font-bold mb-8 text-gradient">System Monitoring</h1>
           <div className="flex justify-center py-12">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
@@ -51,7 +51,7 @@ export default function Monitoring() {
   
   return (
     <Layout>
-      <div className="container py-8 max-w-7xl">
+      <div className="container pt-24 pb-12 px-4 sm:px-6 max-w-7xl">
         <h1 className="text-2xl font-bold mb-8 text-gradient">System Monitoring</h1>
         
         <Tabs defaultValue="rate-limits">
