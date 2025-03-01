@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleSignUp = (email: string, password: string, options?: { data: any }) => {
-    return signUp(email, password, options, setIsAdmin);
+    return signUp(email, password, setIsAdmin, options);
   };
 
   const handleSignOut = () => {

@@ -28,8 +28,8 @@ export const signIn = async (
 export const signUp = async (
   email: string, 
   password: string, 
-  options?: { data: any },
-  setIsAdmin: (value: boolean) => void
+  setIsAdmin: (value: boolean) => void,
+  options?: { data: any }
 ) => {
   try {
     const { data, error } = await supabase.auth.signUp({ 
