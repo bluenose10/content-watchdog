@@ -2,10 +2,18 @@
 import { createSearchQuery } from "@/lib/db-service";
 import { TextSearchParams, SearchQuery } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
-import { getCacheKey, getCachedResults, cacheResults } from "@/lib/search-cache";
 import { optimizedSearch, getAvailableSearchEngines } from "@/lib/search";
 import { checkSearchLimits, incrementSearchCount } from "./quota-manager";
 import { processSearch } from "./search-utils";
+import { 
+  validateTextSearch, 
+  formatHashtagQuery, 
+  validateTextSearchParams 
+} from "./validation";
+import { 
+  getCachedSearchId, 
+  storeInCache 
+} from "./cache-manager";
 
 // Enhanced search parameters for text-based searches
 export const DEFAULT_TEXT_PARAMS: TextSearchParams = {
@@ -34,36 +42,27 @@ export async function handleTextSearch(
   }
 
   // Validate and sanitize input
-  const sanitizedQuery = sanitizeSearchQuery(query);
-  if (!sanitizedQuery) {
-    throw new Error("Search query cannot be empty");
-  }
-
-  // Check search limits for this user (simplified check - in production would query DB)
+  const sanitizedQuery = validateTextSearch(query);
+  
+  // Check search limits for this user
   const isPro = true; // Mock function - in production should check subscription status
   const limitCheck = await checkSearchLimits(user.id, isPro, user.email);
   if (!limitCheck.isAllowed) {
     throw new Error(limitCheck.message);
   }
 
-  // Check cache first for this query
-  const formattedQuery = queryType === 'hashtag' && !sanitizedQuery.startsWith('#') 
-    ? `#${sanitizedQuery}` 
+  // Format query appropriately (for hashtags)
+  const formattedQuery = queryType === 'hashtag' 
+    ? formatHashtagQuery(sanitizedQuery) 
     : sanitizedQuery;
 
   // Merge default parameters with user-provided parameters
-  const mergedParams: TextSearchParams = {
-    ...DEFAULT_TEXT_PARAMS,
-    ...searchParams
-  };
+  const mergedParams = validateTextSearchParams(searchParams, DEFAULT_TEXT_PARAMS);
 
-  // Generate cache key
-  const cacheKey = getCacheKey(queryType, formattedQuery, mergedParams);
-  const cachedResults = getCachedResults(cacheKey);
-  
-  if (cachedResults) {
-    console.log(`Using cached results for ${queryType} search: ${formattedQuery}`);
-    return cachedResults.id || `cache_${crypto.randomUUID()}`;
+  // Check cache first
+  const cachedSearchId = getCachedSearchId(queryType, formattedQuery, mergedParams);
+  if (cachedSearchId) {
+    return cachedSearchId;
   }
 
   console.log(`Performing ${queryType} search with enhanced parameters:`, mergedParams);
@@ -87,9 +86,7 @@ export async function handleTextSearch(
     const searchId = await processSearch(searchData, user);
     
     // Cache the results
-    // Note: In a real implementation, we would fetch the results and cache them here
-    // For this mock implementation, we're just caching the search ID
-    cacheResults(cacheKey, { id: searchId });
+    storeInCache(queryType, formattedQuery, mergedParams, { id: searchId });
     
     return searchId;
   } catch (error: any) {
@@ -99,22 +96,11 @@ export async function handleTextSearch(
       // Generate a temporary ID for this session
       const tempId = `temp_${Date.now()}`;
       // Still cache the temporary ID
-      cacheResults(cacheKey, { id: tempId });
+      storeInCache(queryType, formattedQuery, mergedParams, { id: tempId });
       return tempId;
     }
     
     // For other errors, rethrow
     throw error;
   }
-}
-
-// Helper function to sanitize search queries
-export function sanitizeSearchQuery(query: string): string {
-  // Remove excessive whitespace
-  let sanitized = query.trim().replace(/\s+/g, ' ');
-  
-  // Remove potentially harmful characters
-  sanitized = sanitized.replace(/[<>]/g, '');
-  
-  return sanitized;
 }
