@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserRound, Mail, Shield, Settings, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { useProtectedRoute, AccessLevel } from "@/hooks/useProtectedRoute";
 
 export function ProfileTab() {
   const { user } = useAuth();
@@ -28,6 +30,7 @@ export function ProfileTab() {
   const [isUploading, setIsUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>(user?.user_metadata?.avatar_url || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { accessLevel, isAdmin } = useProtectedRoute(true);
 
   const getUserInitials = () => {
     if (name) {
@@ -131,6 +134,44 @@ export function ProfileTab() {
     navigate('/#pricing');
   };
 
+  // Determine account type display based on admin status and access level
+  const renderAccountType = () => {
+    if (isAdmin) {
+      return (
+        <div className="flex items-center">
+          <div className="py-2 px-3 rounded-md border bg-muted/50 text-sm">
+            Admin Account
+          </div>
+          <Badge variant="destructive" className="ml-2">
+            Admin
+          </Badge>
+        </div>
+      );
+    } else if (accessLevel === AccessLevel.PREMIUM) {
+      return (
+        <div className="py-2 px-3 rounded-md border bg-muted/50 text-sm">
+          Premium Plan
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center">
+          <div className="py-2 px-3 rounded-md border bg-muted/50 text-sm">
+            Free Plan
+          </div>
+          <Button 
+            variant="link" 
+            size="sm" 
+            className="ml-2"
+            onClick={handleUpgradeClick}
+          >
+            Upgrade
+          </Button>
+        </div>
+      );
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -213,19 +254,7 @@ export function ProfileTab() {
                 <Shield size={16} className="text-muted-foreground" />
                 <Label>Account Type</Label>
               </div>
-              <div className="flex items-center">
-                <div className="py-2 px-3 rounded-md border bg-muted/50 text-sm">
-                  Free Plan
-                </div>
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="ml-2"
-                  onClick={handleUpgradeClick}
-                >
-                  Upgrade
-                </Button>
-              </div>
+              {renderAccountType()}
             </div>
           </div>
         </div>
