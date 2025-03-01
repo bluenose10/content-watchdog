@@ -10,7 +10,7 @@ export const HeroSection = () => {
         <Copyright className="h-5 w-5 text-purple-600 dark:text-purple-400" />
       </div>
       <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter mb-4">
-        Understanding Piracy & Copyright Infringement
+        Piracy & Copyright Infringement
       </h1>
       <p className="text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto mb-8">
         Learn the differences between plagiarism, content theft, and copyright infringement to better protect your intellectual property.
