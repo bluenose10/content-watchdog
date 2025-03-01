@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   server: {
-    // Add historyApiFallback configuration for development
-    historyApiFallback: true,
+    port: 8080,
+    // Instead of using historyApiFallback directly, we'll configure the server correctly
   },
 });
