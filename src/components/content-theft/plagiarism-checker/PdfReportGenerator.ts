@@ -2,12 +2,13 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PlagiarismResult } from "./PlagiarismChecker";
-import { useToast } from "@/hooks/use-toast";
+import { type Toast } from "@/hooks/use-toast";
 
+// Change parameter type to accept the toast function rather than the entire useToast return value
 export const generatePlagiarismPdfReport = async (
   results: PlagiarismResult, 
   fileName: string,
-  toast: ReturnType<typeof useToast>
+  toast: (props: Toast) => void
 ): Promise<void> => {
   try {
     const doc = new jsPDF();

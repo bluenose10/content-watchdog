@@ -2,13 +2,13 @@
 import { supabase } from "@/lib/supabase";
 import { extractTextFromFile } from "./TextExtractor";
 import { checkPlagiarism, PlagiarismResult } from "./PlagiarismChecker";
-import { useToast } from "@/hooks/use-toast";
+import { type Toast } from "@/hooks/use-toast";
 import { savePlagiarismResultsToDatabase } from "./PlagiarismDbService";
 
 export const uploadAndCheckPlagiarism = async (
   file: File,
   userId: string | undefined,
-  toast: ReturnType<typeof useToast>
+  toast: (props: Toast) => void
 ): Promise<PlagiarismResult> => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
