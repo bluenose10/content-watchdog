@@ -26,7 +26,7 @@ import Monitoring from "@/pages/Monitoring";
 import Protection from "@/pages/Protection";
 import SearchHistory from "@/pages/SearchHistory";
 import Contact from "@/pages/Contact";
-import ContentTheft from "@/pages/ContentTheft";
+import Piracy from "@/pages/Piracy";
 
 import "./App.css";
 
@@ -56,7 +56,7 @@ function App() {
               <Route path="/monitoring" element={<Monitoring />} />
               <Route path="/protection" element={<Protection />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/content-theft" element={<ContentTheft />} />
+              <Route path="/piracy" element={<Piracy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>

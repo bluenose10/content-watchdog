@@ -39,10 +39,10 @@ export function MobileMenu({
             Pricing
           </button>
           <Link
-            to="/content-theft"
+            to="/piracy"
             className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
           >
-            Content Theft
+            Piracy
           </Link>
           <Link
             to="/contact"

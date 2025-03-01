@@ -7,7 +7,7 @@ import { ContentTheftMainContent } from "@/components/content-theft/ContentTheft
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-const ContentTheft = () => {
+const Piracy = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -29,4 +29,4 @@ const ContentTheft = () => {
   );
 };
 
-export default ContentTheft;
+export default Piracy;

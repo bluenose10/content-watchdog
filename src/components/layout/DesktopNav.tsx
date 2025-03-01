@@ -40,10 +40,10 @@ export function DesktopNav({
           Pricing
         </button>
         <Link 
-          to="/content-theft" 
+          to="/piracy" 
           className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
         >
-          Content Theft
+          Piracy
         </Link>
         <Link 
           to="/contact" 

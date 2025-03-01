@@ -1,4 +1,3 @@
-
 import { HeroSection } from "@/components/home/hero-section";
 import { FeaturesSection } from "@/components/home/features-section";
 import { PricingSection } from "@/components/home/pricing-section";
@@ -60,7 +59,7 @@ export default function Index() {
                   Understand the legal framework for protecting your original content and intellectual property.
                 </p>
                 <Button asChild variant="outline" className="w-full mt-auto">
-                  <Link to="/content-theft" className="flex items-center justify-center">
+                  <Link to="/piracy" className="flex items-center justify-center">
                     Learn About Content Theft
                   </Link>
                 </Button>
