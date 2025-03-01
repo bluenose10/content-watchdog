@@ -2,7 +2,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PlagiarismResult } from "./PlagiarismChecker";
-import { type ToasterToast } from "@/hooks/use-toast";
 
 // Function to generate a PDF report of plagiarism results
 export const generatePlagiarismPdfReport = async (
