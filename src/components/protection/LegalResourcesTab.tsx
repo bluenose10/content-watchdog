@@ -2,13 +2,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { HelpCircle, ExternalLink } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export const LegalResourcesTab = () => {
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleRedirectToSignup = () => {
-    navigate('/signup');
+  const handleBookService = (service: string) => {
+    toast({
+      title: "Service requested",
+      description: `Your request for ${service} has been received. A team member will contact you shortly.`,
+      variant: "default"
+    });
   };
 
   return (
@@ -100,7 +104,7 @@ export const LegalResourcesTab = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handleRedirectToSignup}
+                    onClick={() => handleBookService("IP Attorney Consultation")}
                   >Book</Button>
                 </div>
                 
@@ -112,7 +116,7 @@ export const LegalResourcesTab = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handleRedirectToSignup}
+                    onClick={() => handleBookService("Document Review")}
                   >Request</Button>
                 </div>
                 
@@ -124,7 +128,7 @@ export const LegalResourcesTab = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handleRedirectToSignup}
+                    onClick={() => handleBookService("Custom Legal Strategy")}
                   >Inquire</Button>
                 </div>
               </div>

@@ -1,12 +1,17 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserRound, Lock, BellRing, CreditCard } from "lucide-react";
+import { UserRound, Lock, BellRing, CreditCard, Shield } from "lucide-react";
 import { ProfileTab } from "./ProfileTab";
 import { SecurityTab } from "./SecurityTab";
 import { NotificationsTab } from "./NotificationsTab";
 import { BillingTab } from "./BillingTab";
+import { ProtectionTab } from "./ProtectionTab";
+import { useProtectedRoute, AccessLevel, PremiumFeature } from "@/hooks/useProtectedRoute";
 
 export function AccountTabs() {
+  const { accessLevel, hasPremiumFeature } = useProtectedRoute();
+  const isPremium = accessLevel === AccessLevel.PREMIUM || accessLevel === AccessLevel.ADMIN;
+
   return (
     <Tabs defaultValue="profile" className="w-full">
       <TabsList className="mb-8">
@@ -26,6 +31,12 @@ export function AccountTabs() {
           <CreditCard size={16} />
           Billing
         </TabsTrigger>
+        {isPremium && (
+          <TabsTrigger value="protection" className="flex items-center gap-2">
+            <Shield size={16} />
+            Protection
+          </TabsTrigger>
+        )}
       </TabsList>
       
       <TabsContent value="profile">
@@ -43,6 +54,12 @@ export function AccountTabs() {
       <TabsContent value="billing">
         <BillingTab />
       </TabsContent>
+
+      {isPremium && (
+        <TabsContent value="protection">
+          <ProtectionTab />
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

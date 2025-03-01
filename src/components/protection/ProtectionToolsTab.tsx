@@ -4,13 +4,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Shield, FileCheck, AlertTriangle, RefreshCw, Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export const ProtectionToolsTab = () => {
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleRedirectToSignup = () => {
-    navigate('/signup');
+  const handleAction = (action: string) => {
+    toast({
+      title: "Action requested",
+      description: `Your request to ${action} has been received. This feature will be available soon.`,
+      variant: "default"
+    });
   };
 
   return (
@@ -57,7 +61,7 @@ export const ProtectionToolsTab = () => {
                   variant="secondary" 
                   size="sm" 
                   className="w-full"
-                  onClick={handleRedirectToSignup}
+                  onClick={() => handleAction("adjust monitoring settings")}
                 >
                   <Settings className="h-4 w-4 mr-2" />
                   Adjust Monitoring Settings
@@ -79,7 +83,7 @@ export const ProtectionToolsTab = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handleRedirectToSignup}
+                    onClick={() => handleAction("view matches")}
                   >
                     View
                   </Button>
@@ -92,7 +96,7 @@ export const ProtectionToolsTab = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handleRedirectToSignup}
+                    onClick={() => handleAction("view takedowns")}
                   >
                     View
                   </Button>
@@ -103,7 +107,7 @@ export const ProtectionToolsTab = () => {
                   variant="secondary" 
                   size="sm" 
                   className="w-full"
-                  onClick={handleRedirectToSignup}
+                  onClick={() => handleAction("run manual scan")}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Run Manual Scan
@@ -142,7 +146,7 @@ export const ProtectionToolsTab = () => {
                 </div>
                 <Button 
                   size="sm"
-                  onClick={handleRedirectToSignup}
+                  onClick={() => handleAction("register copyright")}
                 >
                   Register
                 </Button>
@@ -155,7 +159,7 @@ export const ProtectionToolsTab = () => {
                 </div>
                 <Button 
                   size="sm"
-                  onClick={handleRedirectToSignup}
+                  onClick={() => handleAction("setup watermarks")}
                 >
                   Setup
                 </Button>
@@ -168,7 +172,7 @@ export const ProtectionToolsTab = () => {
                 </div>
                 <Button 
                   size="sm"
-                  onClick={handleRedirectToSignup}
+                  onClick={() => handleAction("enable automatic takedowns")}
                 >
                   Enable
                 </Button>
