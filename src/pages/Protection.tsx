@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -6,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Shield, FileCheck, AlertTriangle, Mail, RefreshCw, Settings, HelpCircle } from "lucide-react";
+import { Shield, FileCheck, AlertTriangle, Mail, RefreshCw, Settings, HelpCircle, ExternalLink } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { LoadingState } from "@/components/dashboard/LoadingState";
@@ -342,7 +343,11 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Learn the fundamentals of copyright law and how it protects your creative work.
                       </p>
-                      <Button variant="outline" size="sm">Read Guide</Button>
+                      <a href="https://en.wikipedia.org/wiki/Copyright" target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="flex items-center gap-1">
+                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                        </Button>
+                      </a>
                     </div>
                     
                     <div className="p-4 border rounded-md">
@@ -350,7 +355,11 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Understand how to protect your brand names, logos, and other identifying marks.
                       </p>
-                      <Button variant="outline" size="sm">Read Guide</Button>
+                      <a href="https://www.uspto.gov/trademarks/basics/what-trademark" target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="flex items-center gap-1">
+                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                        </Button>
+                      </a>
                     </div>
                     
                     <div className="p-4 border rounded-md">
@@ -358,7 +367,11 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Learn about protecting your content across different countries and jurisdictions.
                       </p>
-                      <Button variant="outline" size="sm">Read Guide</Button>
+                      <a href="https://en.wikipedia.org/wiki/International_copyright_treaties" target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="flex items-center gap-1">
+                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                        </Button>
+                      </a>
                     </div>
                     
                     <div className="p-4 border rounded-md">
@@ -366,7 +379,11 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Understanding when others may legally use portions of your content.
                       </p>
-                      <Button variant="outline" size="sm">Read Guide</Button>
+                      <a href="https://en.wikipedia.org/wiki/Fair_use" target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="flex items-center gap-1">
+                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                        </Button>
+                      </a>
                     </div>
                   </div>
                   
