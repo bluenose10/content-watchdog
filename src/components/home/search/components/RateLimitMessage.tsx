@@ -1,5 +1,5 @@
 
-import { formatTimeRemainingFromMs } from "../searchService";
+import { formatTimeRemaining } from "../searchService";
 
 interface RateLimitResultType {
   allowed: boolean;
@@ -17,12 +17,12 @@ export function getLimitExceededMessage(rateLimitResult: RateLimitResultType): s
   
   // Check which limit was exceeded
   if (rateLimitResult.weeklyRemaining === 0) {
-    const timeRemaining = formatTimeRemainingFromMs(
+    const timeRemaining = formatTimeRemaining(
       rateLimitResult.weeklyResetTime! - now
     );
     return `You've reached your weekly search limit. New search available in ${timeRemaining}.`;
   } else if (rateLimitResult.monthlyRemaining === 0) {
-    const timeRemaining = formatTimeRemainingFromMs(
+    const timeRemaining = formatTimeRemaining(
       rateLimitResult.monthlyResetTime! - now
     );
     return `You've reached your monthly search limit. Next month starts in ${timeRemaining}.`;
