@@ -26,6 +26,7 @@ export const useProtectedRoute = (
   const [subscription, setSubscription] = useState<any>(null);
   const [premiumFeaturesLoading, setPremiumFeaturesLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Add debug logs
   console.log("useProtectedRoute - Auth state:", { 
@@ -41,6 +42,28 @@ export const useProtectedRoute = (
     return checkFeatureAccess(feature, isAdmin, subscription);
   };
 
+  // Handle redirection to login for protected routes
+  const redirectToLogin = (reason: string) => {
+    if (isRedirecting) return;
+    setIsRedirecting(true);
+    
+    console.log(`Redirecting to login: ${reason}`);
+    toast({
+      title: "Authentication required",
+      description: reason,
+      variant: "destructive",
+    });
+    
+    // Navigate with replace to avoid back-button issues
+    navigate('/login', { 
+      state: { from: location.pathname },
+      replace: true
+    });
+    
+    // Reset flag after navigation
+    setTimeout(() => setIsRedirecting(false), 500);
+  };
+
   // Force check authentication status periodically for protected routes
   useEffect(() => {
     if (!requiresAuth) return;
@@ -50,7 +73,7 @@ export const useProtectedRoute = (
       if (!user && PROTECTED_ROUTES.some(route => 
         location.pathname === route || location.pathname.startsWith(route + '/'))) {
         console.log("Periodic auth check - user not authenticated for protected route");
-        navigate('/login', { state: { from: location.pathname } });
+        redirectToLogin("Session expired. Please log in again.");
       }
     }, 5000);
     
@@ -71,12 +94,7 @@ export const useProtectedRoute = (
         if (requiresAuth && PROTECTED_ROUTES.some(route => 
           location.pathname === route || location.pathname.startsWith(route + '/'))) {
           console.log("Protected route detected - redirecting to login");
-          toast({
-            title: "Authentication required",
-            description: "Please log in to access this page",
-            variant: "destructive",
-          });
-          navigate('/login', { state: { from: location.pathname } });
+          redirectToLogin("Please log in to access this page");
           return;
         }
         

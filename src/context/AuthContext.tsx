@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
@@ -132,51 +133,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Completely revamped signOut function with multiple cleanup mechanisms
+  // Completely revamped signOut function with a cleaner approach
   const signOut = async () => {
     try {
-      console.log("Executing forceful sign out...");
+      console.log("Executing clean logout process...");
       
-      // 1. Clear React state immediately
+      // 1. Clear React state first to update UI immediately
       setUser(null);
       setSession(null);
       setIsAdmin(false);
       
-      // 2. Clear ALL local storage (not just Supabase related)
-      // This is more aggressive but ensures nothing persists
-      localStorage.clear();
-      
-      // 3. Clear session cookies
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+      // 2. Clear local storage and cookies - done in a controlled, targeted manner
+      // Clear all Supabase-related items from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('supabase') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
       });
       
-      // 4. Try Supabase native signout (but don't wait for it)
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (e) {
-        console.error("Supabase signOut failed, but continuing with forced logout:", e);
-      }
+      // 3. Try Supabase signOut with options to maximize success
+      await supabase.auth.signOut({ 
+        scope: 'global', // Sign out from all tabs/windows
+      });
       
-      // 5. For complete security, invalidate the JWT by removing the fallback auth method
-      try {
-        const key = Object.keys(localStorage).find(k => k.includes('supabase.auth.token'));
-        if (key) localStorage.removeItem(key);
-      } catch (e) {
-        console.error("JWT cleanup failed, but continuing with forced logout:", e);
-      }
-      
-      console.log("Forceful sign out completed");
+      console.log("Logout completed successfully");
       return Promise.resolve();
     } catch (error) {
-      console.error("Critical error during sign out:", error);
-      // If all else fails, force a state reset anyway
-      setUser(null);
-      setSession(null);
-      setIsAdmin(false);
-      return Promise.resolve(); // Resolve anyway to not block UI flow
+      console.error("Error during sign out:", error);
+      // Still resolve the promise to not block UI
+      return Promise.resolve();
     }
   };
 
