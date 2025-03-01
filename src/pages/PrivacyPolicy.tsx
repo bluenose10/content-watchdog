@@ -1,5 +1,4 @@
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Check, FileText, Shield } from "lucide-react";
@@ -33,6 +32,12 @@ export default function PrivacyPolicy() {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 mb-6">
               <div className="prose dark:prose-invert max-w-none">
                 <p className="lead">This Privacy Policy describes how your personal information is collected, used, and shared when you visit or use ContentShield.</p>
+                
+                {/* Alert about Plagiarism Checker Service */}
+                <div className="my-8 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                  <h3 className="text-lg font-medium mt-0 mb-2 text-purple-700 dark:text-purple-300">Plagiarism Checker Access Policy</h3>
+                  <p className="mb-0">Please note that our Plagiarism Checker service is available exclusively to registered users. Free accounts are limited to 1 plagiarism check per week, while premium accounts have higher usage limits. You must be logged in to access this feature.</p>
+                </div>
                 
                 <h2 className="text-xl font-semibold mt-8 mb-4">1. Information We Collect</h2>
                 <p>When you use our platform, we collect several types of information:</p>
