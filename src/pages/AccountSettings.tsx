@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -21,11 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserRound, Mail, Shield, Settings, BellRing, Lock, CreditCard, Upload } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function AccountSettings() {
   const { user } = useAuth();
   const { isReady } = useProtectedRoute(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState<string>(user?.user_metadata?.name || "");
   const [email, setEmail] = useState<string>(user?.email || "");
@@ -134,6 +135,10 @@ export default function AccountSettings() {
         fileInputRef.current.value = "";
       }
     }
+  };
+
+  const handleUpgradeClick = () => {
+    navigate('/#pricing');
   };
 
   return (
@@ -248,7 +253,12 @@ export default function AccountSettings() {
                         <div className="py-2 px-3 rounded-md border bg-muted/50 text-sm">
                           Free Plan
                         </div>
-                        <Button variant="link" size="sm" className="ml-2">
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="ml-2"
+                          onClick={handleUpgradeClick}
+                        >
                           Upgrade
                         </Button>
                       </div>
