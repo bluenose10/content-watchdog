@@ -2,8 +2,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { HelpCircle, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const LegalResourcesTab = () => {
+  const navigate = useNavigate();
+
+  const handleRedirectToSignup = () => {
+    navigate('/signup');
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -90,7 +97,11 @@ export const LegalResourcesTab = () => {
                     <p className="font-medium">IP Attorney Consultation</p>
                     <p className="text-sm text-muted-foreground">30-minute consultation with a specialized attorney</p>
                   </div>
-                  <Button variant="outline" size="sm">Book</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRedirectToSignup}
+                  >Book</Button>
                 </div>
                 
                 <div className="flex justify-between items-center">
@@ -98,7 +109,11 @@ export const LegalResourcesTab = () => {
                     <p className="font-medium">Document Review</p>
                     <p className="text-sm text-muted-foreground">Have legal documents reviewed by professionals</p>
                   </div>
-                  <Button variant="outline" size="sm">Request</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRedirectToSignup}
+                  >Request</Button>
                 </div>
                 
                 <div className="flex justify-between items-center">
@@ -106,7 +121,11 @@ export const LegalResourcesTab = () => {
                     <p className="font-medium">Custom Legal Strategy</p>
                     <p className="text-sm text-muted-foreground">Develop a comprehensive strategy for your content</p>
                   </div>
-                  <Button variant="outline" size="sm">Inquire</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRedirectToSignup}
+                  >Inquire</Button>
                 </div>
               </div>
             </div>
