@@ -13,18 +13,11 @@ export const PlagiarismSection = () => {
       </p>
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-2">Scope:</h3>
-        <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-          <li>More about ethics and academic integrity than legal rights.</li>
-          <li>Can occur even if the work is not copyright-protected (e.g., copying public domain content without credit).</li>
-        </ul>
+        <p className="mb-2 text-muted-foreground">Plagiarism is primarily about ethics and academic integrity rather than legal rights. It can occur even if the work is not copyright-protected, such as when copying public domain content without giving proper credit.</p>
       </div>
       <div>
         <h3 className="text-lg font-medium mb-2">Examples:</h3>
-        <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-          <li>Submitting someone else's essay as your own.</li>
-          <li>Using a quote without citing the source.</li>
-          <li>Repurposing ideas without acknowledging the original creator.</li>
-        </ul>
+        <p className="text-muted-foreground">Submitting someone else's essay as your own, using quotes without citing the source, or repurposing ideas without acknowledging the original creator are all examples of plagiarism that can have serious consequences in academic and professional settings.</p>
       </div>
     </section>
   );
