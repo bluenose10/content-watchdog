@@ -1,5 +1,5 @@
 
-import { formatTimeRemaining } from "../searchService";
+import { formatTimeRemaining } from "../services/searchLimits";
 
 interface RateLimitResultType {
   allowed: boolean;
