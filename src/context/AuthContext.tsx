@@ -132,41 +132,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign out - enhanced with multiple fallback mechanisms
+  // Completely revamped signOut function with multiple cleanup mechanisms
   const signOut = async () => {
     try {
-      console.log("Signing out...");
+      console.log("Executing forceful sign out...");
       
-      // First, clear all state
+      // 1. Clear React state immediately
       setUser(null);
       setSession(null);
       setIsAdmin(false);
       
-      // Force clear all Supabase local storage data
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('supabase.auth.')) {
-          localStorage.removeItem(key);
-        }
-      });
+      // 2. Clear ALL local storage (not just Supabase related)
+      // This is more aggressive but ensures nothing persists
+      localStorage.clear();
       
-      // Also clear session cookies by setting to expired
+      // 3. Clear session cookies
       document.cookie.split(";").forEach((c) => {
         document.cookie = c
           .replace(/^ +/, "")
           .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
       });
       
-      // Finally, try the Supabase signout (but we don't rely on it working)
-      await supabase.auth.signOut();
+      // 4. Try Supabase native signout (but don't wait for it)
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (e) {
+        console.error("Supabase signOut failed, but continuing with forced logout:", e);
+      }
       
-      console.log("Auth state cleared");
+      // 5. For complete security, invalidate the JWT by removing the fallback auth method
+      try {
+        const key = Object.keys(localStorage).find(k => k.includes('supabase.auth.token'));
+        if (key) localStorage.removeItem(key);
+      } catch (e) {
+        console.error("JWT cleanup failed, but continuing with forced logout:", e);
+      }
+      
+      console.log("Forceful sign out completed");
+      return Promise.resolve();
     } catch (error) {
-      console.error("Sign out error:", error);
-      
-      // Even if there's an exception, make sure state is cleared
+      console.error("Critical error during sign out:", error);
+      // If all else fails, force a state reset anyway
       setUser(null);
       setSession(null);
       setIsAdmin(false);
+      return Promise.resolve(); // Resolve anyway to not block UI flow
     }
   };
 

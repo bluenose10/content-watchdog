@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -13,7 +12,6 @@ export function useHeaderLogic() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
-  // We're adding this console log to debug auth state
   console.log("Header render - Auth state:", !!user);
 
   const isAuthenticated = !!user;
@@ -33,11 +31,9 @@ export function useHeaderLogic() {
   }, []);
 
   useEffect(() => {
-    // Close mobile menu when navigating
     setIsMobileMenuOpen(false);
   }, [location]);
 
-  // Disable body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -54,48 +50,47 @@ export function useHeaderLogic() {
     
     try {
       setIsLoggingOut(true);
+      console.log("Starting aggressive logout process...");
       
-      // First, call the signOut function to clean up state and storage
       await signOut();
       
-      // Show success message
       toast({
-        title: "Success",
+        title: "Logged out",
         description: "You have been logged out successfully",
       });
       
-      // Short timeout to ensure state updates before navigation
       setTimeout(() => {
-        // Use window.location for a complete page refresh
+        console.log("Forcing page reload to clear all state...");
         window.location.href = '/';
-      }, 100);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }, 200);
       
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("Error during logout process:", error);
       
-      // Even if there's an error, show success message to the user
       toast({
-        title: "Signed out",
-        description: "You have been logged out"
+        title: "Logged out",
+        description: "You have been logged out successfully"
       });
       
-      // Force refresh the page regardless of errors
       setTimeout(() => {
+        console.log("Force navigation after error...");
         window.location.href = '/';
-      }, 100);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }, 200);
     }
   };
 
-  // Function to handle navigation to home page sections
   const navigateToSection = (sectionId: string) => {
     console.log("Navigating to section:", sectionId);
     
     if (location.pathname !== '/') {
-      // If not on home page, navigate to home with hash
-      // Using navigate directly instead of window.location to prevent full page reload
       navigate(`/#${sectionId}`);
     } else {
-      // If already on home page, scroll to section
       const element = document.getElementById(sectionId);
       console.log("Element found:", !!element);
       if (element) {

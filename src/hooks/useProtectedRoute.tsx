@@ -41,6 +41,22 @@ export const useProtectedRoute = (
     return checkFeatureAccess(feature, isAdmin, subscription);
   };
 
+  // Force check authentication status periodically for protected routes
+  useEffect(() => {
+    if (!requiresAuth) return;
+    
+    // Check every 5 seconds if user auth state is valid
+    const authCheckInterval = setInterval(() => {
+      if (!user && PROTECTED_ROUTES.some(route => 
+        location.pathname === route || location.pathname.startsWith(route + '/'))) {
+        console.log("Periodic auth check - user not authenticated for protected route");
+        navigate('/login', { state: { from: location.pathname } });
+      }
+    }, 5000);
+    
+    return () => clearInterval(authCheckInterval);
+  }, [user, location.pathname, navigate, requiresAuth]);
+
   useEffect(() => {
     const determineAccessLevel = async () => {
       if (loading) return;
