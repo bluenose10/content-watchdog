@@ -13,8 +13,10 @@ import { useProtectedRoute, PremiumFeature } from "@/hooks/useProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { AuthenticityDisplay } from "@/components/content-theft/plagiarism-checker/AuthenticityDisplay";
 import { verifyContentAuthenticity } from "@/components/content-theft/plagiarism-checker/PlagiarismChecker";
-import { Fingerprint, Upload, Link as LinkIcon, AlertCircle, Info } from "lucide-react";
+import { Fingerprint, Upload, Link as LinkIcon, AlertCircle, Info, Download } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { generateAuthenticityPdfReport } from "@/components/content-theft/plagiarism-checker/AuthenticityReportGenerator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function ContentAuthenticity() {
   const { toast } = useToast();
@@ -22,6 +24,7 @@ export default function ContentAuthenticity() {
   const { hasPremiumFeature } = useProtectedRoute(true, true);
   const [activeTab, setActiveTab] = useState("file");
   const [file, setFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState("");
   const [url, setUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<any>(undefined);
@@ -31,6 +34,9 @@ export default function ContentAuthenticity() {
     
     setIsProcessing(true);
     try {
+      // Store only the file name for reference, not the file content
+      setFileName(file.name);
+      
       const authenticityResult = await verifyContentAuthenticity(
         file,
         file.type.startsWith('image/') ? 'image' : 
@@ -45,6 +51,8 @@ export default function ContentAuthenticity() {
         description: "The content has been analyzed for authenticity",
         variant: "success"
       });
+      
+      // File is not stored in database, only processed transiently
     } catch (error) {
       console.error('Verification error:', error);
       toast({
@@ -62,6 +70,10 @@ export default function ContentAuthenticity() {
     
     setIsProcessing(true);
     try {
+      // Extract just the filename from URL for reference
+      const urlFileName = url.split('/').pop() || "url-content";
+      setFileName(urlFileName);
+      
       let contentType: 'text' | 'image' | 'video' | 'audio' = 'text';
       
       if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp)($|\?)/i)) {
@@ -90,6 +102,16 @@ export default function ContentAuthenticity() {
       });
     } finally {
       setIsProcessing(false);
+    }
+  };
+  
+  const handleDownloadReport = async () => {
+    if (!result) return;
+    
+    try {
+      await generateAuthenticityPdfReport(result, fileName || "content", toast);
+    } catch (error) {
+      console.error('Failed to generate report:', error);
     }
   };
 
@@ -138,6 +160,7 @@ export default function ContentAuthenticity() {
                         file={file}
                         setFile={(newFile) => {
                           setFile(newFile);
+                          if (newFile) setFileName(newFile.name);
                           setResult(undefined);
                         }}
                         isUploading={isProcessing}
@@ -183,7 +206,22 @@ export default function ContentAuthenticity() {
                     </TabsContent>
                   </Tabs>
 
-                  {result && <AuthenticityDisplay authenticityCheck={result} />}
+                  {result && (
+                    <div className="mt-6">
+                      <AuthenticityDisplay authenticityCheck={result} />
+                      
+                      <div className="flex justify-end mt-4">
+                        <Button 
+                          onClick={handleDownloadReport} 
+                          variant="secondary"
+                          className="gap-2"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download PDF Report
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -220,6 +258,13 @@ export default function ContentAuthenticity() {
                       While our system is highly accurate, no verification tool is perfect. Results should be used as guidance, not definitive proof.
                     </AlertDescription>
                   </Alert>
+                  
+                  <div className="border rounded-md p-3 bg-muted/30 mt-4">
+                    <h3 className="text-sm font-medium mb-2">Privacy Information</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Your files are analyzed but never stored in our database. All processing is done transiently to maintain privacy and reduce storage costs.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
