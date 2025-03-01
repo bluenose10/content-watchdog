@@ -1,4 +1,5 @@
-import { optimizedSearch } from "@/lib/google-api-manager";
+
+import { optimizedSearch } from "@/lib/search";
 import { supabase } from "@/lib/supabase";
 
 export interface PlagiarismMatch {

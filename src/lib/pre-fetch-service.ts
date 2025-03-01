@@ -1,7 +1,6 @@
-
 import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/search-cache';
 import { getRecentSearches } from '@/lib/db-service';
-import { searchApiManager, optimizedSearch } from '@/lib/google-api-manager';
+import { searchApiManager, optimizedSearch } from '@/lib/search';
 
 // Popular search types and terms that we want to pre-fetch
 interface PreFetchQuery {

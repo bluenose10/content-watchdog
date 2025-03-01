@@ -1,10 +1,9 @@
-
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
 import { SEARCH_LIMITS } from "@/lib/constants";
 import { getCacheKey, getCachedResults, cacheResults } from "@/lib/search-cache";
-import { optimizedSearch, getAvailableSearchEngines, getSearchEngineStats } from "@/lib/google-api-manager";
+import { optimizedSearch, getAvailableSearchEngines, getSearchEngineStats } from "@/lib/search";
 
 // Enhanced search parameters for text-based searches
 const DEFAULT_TEXT_PARAMS: TextSearchParams = {
