@@ -23,28 +23,39 @@ export const PlagiarismCheckerSection = () => {
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `plagiarism-checks/${fileName}`;
       
+      console.log('Attempting to upload file to temp-uploads bucket...');
+      
       // Upload file to temporary storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('temp-uploads')
         .upload(filePath, file);
         
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw new Error(`Upload failed: ${uploadError.message}`);
       }
+      
+      console.log('File uploaded successfully:', uploadData);
       
       // Extract text from the file
       let fileText;
       try {
+        console.log('Extracting text from file...');
         fileText = await extractTextFromFile(file);
+        console.log('Text extracted successfully');
       } catch (error) {
+        console.error('Text extraction error:', error);
         throw new Error(`Failed to extract text: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
       
       // Check for plagiarism using Google Search
+      console.log('Checking for plagiarism...');
       const plagiarismResults = await checkPlagiarism(fileText);
       setResults(plagiarismResults);
+      console.log('Plagiarism check completed');
       
       // Clean up the file after results are shown
+      console.log('Cleaning up temporary file...');
       await supabase.storage
         .from('temp-uploads')
         .remove([filePath]);
