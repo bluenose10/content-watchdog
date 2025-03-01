@@ -13,7 +13,8 @@ import {
   Home, 
   Bell,
   Shield,
-  FileCheck
+  FileCheck,
+  Fingerprint
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/context/AuthContext";
@@ -65,6 +66,11 @@ export function Sidebar({ className }: SidebarProps) {
       title: "Plagiarism Checker",
       icon: <FileCheck className="mr-2 h-4 w-4" />,
       path: "/plagiarism-checker",
+    },
+    {
+      title: "Content Authenticity",
+      icon: <Fingerprint className="mr-2 h-4 w-4" />,
+      path: "/content-authenticity",
     },
     {
       title: "Analytics",

@@ -28,6 +28,7 @@ import SearchHistory from "@/pages/SearchHistory";
 import Contact from "@/pages/Contact";
 import Piracy from "@/pages/Piracy";
 import PlagiarismChecker from "@/pages/PlagiarismChecker";
+import ContentAuthenticity from "@/pages/ContentAuthenticity";
 
 import "./App.css";
 
@@ -59,6 +60,7 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/piracy" element={<Piracy />} />
               <Route path="/plagiarism-checker" element={<PlagiarismChecker />} />
+              <Route path="/content-authenticity" element={<ContentAuthenticity />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
