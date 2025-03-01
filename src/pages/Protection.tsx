@@ -59,7 +59,7 @@ export default function Protection() {
         </div>
         
         <Tabs defaultValue="protection" className="mb-8">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex flex-col sm:flex-row w-full sm:w-auto gap-1 sm:gap-0">
             <TabsTrigger value="protection">Protection Tools</TabsTrigger>
             <TabsTrigger value="takedowns">Takedown Process</TabsTrigger>
             <TabsTrigger value="resources">Legal Resources</TabsTrigger>
