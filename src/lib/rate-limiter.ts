@@ -1,4 +1,3 @@
-
 // Rate limiter for API requests - A simple in-memory implementation
 // In production, use Redis or a similar distributed store
 
@@ -48,15 +47,15 @@ export function getUserRateLimits(
       return { 
         maxRequests: 20, 
         timeWindow: 60 * 1000, // 1 minute
-        maxWeeklyRequests: SEARCH_LIMITS.BASIC.WEEKLY,  // 1 search per week
-        maxMonthlyRequests: SEARCH_LIMITS.BASIC.MONTHLY // 4 searches per month
+        maxWeeklyRequests: SEARCH_LIMITS.BASIC.WEEKLY,  // Usually 4-5 searches per week
+        maxMonthlyRequests: SEARCH_LIMITS.BASIC.MONTHLY // 20 searches per month
       };
     case 'premium':
       return { 
         maxRequests: 50, 
         timeWindow: 60 * 1000, // 1 minute
-        maxWeeklyRequests: SEARCH_LIMITS.PRO.WEEKLY,   // 10 searches per week 
-        maxMonthlyRequests: SEARCH_LIMITS.PRO.MONTHLY  // 40 searches per month
+        maxWeeklyRequests: SEARCH_LIMITS.PRO.WEEKLY,   // 50 searches per week 
+        maxMonthlyRequests: SEARCH_LIMITS.PRO.MONTHLY  // 200 searches per month
       };
     default:
       return { 

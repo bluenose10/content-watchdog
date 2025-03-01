@@ -11,6 +11,7 @@ import { useProtectedRoute, AccessLevel, PremiumFeature } from "@/hooks/useProte
 export function AccountTabs() {
   const { accessLevel, hasPremiumFeature } = useProtectedRoute();
   const isPremium = accessLevel === AccessLevel.PREMIUM || accessLevel === AccessLevel.ADMIN;
+  const hasContentProtection = hasPremiumFeature(PremiumFeature.CONTENT_PROTECTION);
 
   return (
     <Tabs defaultValue="profile" className="w-full">
@@ -31,7 +32,7 @@ export function AccountTabs() {
           <CreditCard size={16} />
           Billing
         </TabsTrigger>
-        {isPremium && (
+        {(isPremium && hasContentProtection) && (
           <TabsTrigger value="protection" className="flex items-center gap-2">
             <Shield size={16} />
             Protection
@@ -55,7 +56,7 @@ export function AccountTabs() {
         <BillingTab />
       </TabsContent>
 
-      {isPremium && (
+      {(isPremium && hasContentProtection) && (
         <TabsContent value="protection">
           <ProtectionTab />
         </TabsContent>

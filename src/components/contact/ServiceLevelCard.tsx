@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function ServiceLevelCard() {
   return (
@@ -19,9 +20,19 @@ export function ServiceLevelCard() {
               </div>
               <div>
                 <h4 className="font-medium mb-1">Self-Service Platform</h4>
-                <p className="text-sm text-muted-foreground">
-                  Perfect for bloggers, photographers, and small businesses. Use our powerful tools to search and monitor your content yourself with our affordable subscription plans.
+                <p className="text-sm text-muted-foreground mb-3">
+                  Choose between three feature-rich plans:
                 </p>
+                <ul className="text-sm space-y-1.5 list-disc ml-4">
+                  <li><span className="font-medium">Basic</span>: Free with limited searches</li>
+                  <li><span className="font-medium">Professional</span>: 50 searches/month, 10 scheduled searches</li>
+                  <li><span className="font-medium">Business</span>: Unlimited searches, advanced protection tools</li>
+                </ul>
+                <div className="mt-4">
+                  <Button size="sm" asChild>
+                    <Link to="/#pricing">View Plans</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

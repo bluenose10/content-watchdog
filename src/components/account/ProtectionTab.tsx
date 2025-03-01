@@ -6,10 +6,13 @@ import { LegalResourcesTab } from "../protection/LegalResourcesTab";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useProtectedRoute, PremiumFeature } from "@/hooks/useProtectedRoute";
 
 export function ProtectionTab() {
   const { user } = useAuth();
+  const { hasPremiumFeature } = useProtectedRoute();
   const fullName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  const hasLegalResources = hasPremiumFeature(PremiumFeature.LEGAL_RESOURCES);
 
   return (
     <Card>
@@ -35,7 +38,9 @@ export function ProtectionTab() {
           <TabsList className="mb-4 flex flex-col sm:flex-row w-full sm:w-auto gap-1 sm:gap-0">
             <TabsTrigger value="protection">Protection Tools</TabsTrigger>
             <TabsTrigger value="takedowns">Takedown Process</TabsTrigger>
-            <TabsTrigger value="resources">Legal Resources</TabsTrigger>
+            {hasLegalResources && (
+              <TabsTrigger value="resources">Legal Resources</TabsTrigger>
+            )}
           </TabsList>
           
           <TabsContent value="protection">
@@ -46,9 +51,11 @@ export function ProtectionTab() {
             <TakedownProcessTab />
           </TabsContent>
           
-          <TabsContent value="resources">
-            <LegalResourcesTab />
-          </TabsContent>
+          {hasLegalResources && (
+            <TabsContent value="resources">
+              <LegalResourcesTab />
+            </TabsContent>
+          )}
         </Tabs>
       </CardContent>
     </Card>
