@@ -103,27 +103,27 @@ export default function MockCheckout() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-sidebar-background to-background/90 flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 card-gradient p-8 rounded-lg shadow-lg purple-glow">
         <div className="space-y-2 text-center">
           <div className="flex justify-center">
-            <div className="bg-primary/10 p-2 rounded-full">
+            <div className="bg-primary/20 p-3 rounded-full">
               <CreditCard className="h-6 w-6 text-primary" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold">Complete your payment</h1>
-          <p className="text-sm text-gray-500">This is a simulated checkout page for development.</p>
+          <h1 className="text-2xl font-bold text-gradient">Complete your payment</h1>
+          <p className="text-sm text-muted-foreground">This is a simulated checkout page for development.</p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-md">
+        <div className="bg-background/50 backdrop-blur-sm p-4 rounded-md border border-accent/20 shimmer-effect">
           <div className="flex justify-between items-center">
             <span className="font-medium">{selectedPlan.name}</span>
-            <span className="font-bold">${selectedPlan.price}/{selectedPlan.interval || "month"}</span>
+            <span className="font-bold text-primary">${selectedPlan.price}/{selectedPlan.interval || "month"}</span>
           </div>
           {selectedPlan.features && selectedPlan.features.length > 0 && (
             <div className="mt-2 space-y-1">
-              <Separator className="my-2" />
-              <ul className="text-xs text-gray-500 list-disc ml-4 space-y-1">
+              <Separator className="my-2 bg-accent/30" />
+              <ul className="text-xs text-muted-foreground list-disc ml-4 space-y-1">
                 {selectedPlan.features.map((feature, index) => (
                   <li key={index}>{feature}</li>
                 ))}
@@ -135,18 +135,19 @@ export default function MockCheckout() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="card-name">Name on card</Label>
+              <Label htmlFor="card-name" className="text-foreground">Name on card</Label>
               <Input 
                 id="card-name" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Smith"
                 required
+                className="bg-background/50 border-accent/30 focus:border-primary"
               />
             </div>
             
             <div>
-              <Label htmlFor="card-number">Card number</Label>
+              <Label htmlFor="card-number" className="text-foreground">Card number</Label>
               <Input 
                 id="card-number" 
                 value={cardNumber}
@@ -154,12 +155,13 @@ export default function MockCheckout() {
                 placeholder="4242 4242 4242 4242"
                 required
                 maxLength={19}
+                className="bg-background/50 border-accent/30 focus:border-primary"
               />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="expiry">Expiry date</Label>
+                <Label htmlFor="expiry" className="text-foreground">Expiry date</Label>
                 <Input 
                   id="expiry" 
                   value={expiry}
@@ -167,10 +169,11 @@ export default function MockCheckout() {
                   placeholder="MM/YY"
                   required
                   maxLength={5}
+                  className="bg-background/50 border-accent/30 focus:border-primary"
                 />
               </div>
               <div>
-                <Label htmlFor="cvc">CVC</Label>
+                <Label htmlFor="cvc" className="text-foreground">CVC</Label>
                 <Input 
                   id="cvc" 
                   value={cvc}
@@ -178,12 +181,13 @@ export default function MockCheckout() {
                   placeholder="123"
                   required
                   maxLength={3}
+                  className="bg-background/50 border-accent/30 focus:border-primary"
                 />
               </div>
             </div>
           </div>
           
-          <div className="flex items-center justify-center text-xs text-gray-500 gap-1">
+          <div className="flex items-center justify-center text-xs text-muted-foreground gap-1 bg-accent/10 p-2 rounded-md">
             <Lock className="h-3 w-3" />
             <span>Your payment information is secure</span>
           </div>
@@ -191,7 +195,7 @@ export default function MockCheckout() {
           <div className="space-y-2">
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-primary hover:bg-primary/90" 
               disabled={isProcessing}
             >
               {isProcessing ? "Processing payment..." : `Pay $${selectedPlan.price}`}
@@ -199,7 +203,7 @@ export default function MockCheckout() {
             <Button 
               type="button" 
               variant="outline" 
-              className="w-full" 
+              className="w-full border-accent/40 hover:bg-accent/10" 
               onClick={handleCancel}
               disabled={isProcessing}
             >
@@ -209,7 +213,7 @@ export default function MockCheckout() {
         </form>
       </div>
       
-      <div className="mt-4 text-xs text-gray-500 flex items-center gap-1">
+      <div className="mt-4 text-xs text-accent-foreground flex items-center gap-1 bg-accent/10 p-2 rounded-md">
         <Lock className="h-3 w-3" />
         <span>Test mode - no actual payments will be processed</span>
       </div>
