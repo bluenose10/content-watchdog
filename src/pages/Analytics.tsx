@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
-// Sample data for charts - in a real app this would come from an API
 const searchData = [
   { name: "Jan", searches: 20 },
   { name: "Feb", searches: 35 },
@@ -50,7 +48,6 @@ const Analytics = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Calculate sample growth percentages
     setSearchesGrowth(15.3);
     setResultsGrowth(22.7);
     
@@ -73,15 +70,8 @@ const Analytics = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      {/* Changed from pt-24 to match PlagiarismChecker's style */}
-      <main className="flex-grow container max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8 pt-6">
-          {/* Updated title styling to match PlagiarismChecker */}
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Analytics Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            View detailed analytics about your content searches and results.
-          </p>
-        </div>
+      <main className="flex-grow container max-w-7xl mx-auto pt-24 pb-12 px-4 sm:px-6">
+        <h1 className="text-2xl font-bold mb-8 text-gradient">Analytics Dashboard</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatsCard 

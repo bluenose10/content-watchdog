@@ -21,13 +21,8 @@ export default function PlagiarismChecker() {
       </div>
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="flex-1 container px-4 py-8">
-          <div className="mb-8 pt-6">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Plagiarism Checker</h1>
-            <p className="text-muted-foreground mt-2">
-              Check your content for potential plagiarism and protect your intellectual property.
-            </p>
-          </div>
+        <main className="flex-grow container max-w-7xl mx-auto pt-24 pb-12 px-4 sm:px-6">
+          <h1 className="text-2xl font-bold mb-8 text-gradient">Plagiarism Checker</h1>
           <PlagiarismCheckerSection />
         </main>
         <Footer />
