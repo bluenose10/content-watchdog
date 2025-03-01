@@ -1,11 +1,10 @@
 
 import { supabase } from './supabase';
 import { 
-  searchApiManager,
-  quotaManager
+  getAvailableSearchEngines,
+  optimizedSearch
 } from './search';
-
-import { db } from './db-service';
+import { quotaManager } from './search/quota-manager';
 import { SearchQuery } from './db-types';
 
 export interface PreFetchConfig {
@@ -61,7 +60,7 @@ class PreFetchService {
       }
       
       // Get available engines to decide which to use
-      const engines = searchApiManager.getAvailableSearchEngines();
+      const engines = getAvailableSearchEngines();
       
       // Get the most common searches
       const { data: queries, error } = await supabase
@@ -78,7 +77,7 @@ class PreFetchService {
       for (const query of queries) {
         // Pre-fetch results for popular queries for caching
         if (query.query_type === 'name' || query.query_type === 'hashtag') {
-          await searchApiManager.search('web', query.query_text);
+          await optimizedSearch('web', query.query_text);
           console.log(`Pre-fetched results for: ${query.query_text}`);
         }
       }
@@ -144,3 +143,18 @@ class PreFetchService {
 
 // Export singleton instance
 export const preFetchService = new PreFetchService();
+
+// Export convenience methods for PreFetchInitializer and PreFetchManager
+export const schedulePreFetching = (intervalMinutes: number) => {
+  preFetchService.updateConfig({ 
+    enabled: true,
+    interval: intervalMinutes / 60 // Convert minutes to hours
+  });
+  preFetchService.startScheduledPrefetch();
+  
+  return () => preFetchService.stopScheduledPrefetch();
+};
+
+export const startPreFetching = async () => {
+  return preFetchService.runPrefetch();
+};
