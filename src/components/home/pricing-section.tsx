@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 export function PricingSection() {
   const { toast } = useToast();

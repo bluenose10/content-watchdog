@@ -18,6 +18,12 @@ interface SearchEngineConfig {
   quotaConfig: QuotaConfig;
 }
 
+// Request interface with userId
+interface QueuedRequest {
+  execute: () => Promise<any>;
+  userId?: string;
+}
+
 // Bing API response interfaces
 interface BingWebResult {
   id?: string;
@@ -87,8 +93,9 @@ class SearchApiManager {
   private static instance: SearchApiManager;
   private searchEngines: Record<string, SearchEngineConfig> = {};
   private quotas: Record<string, QuotaConfig> = {};
-  private requestQueue: Array<() => Promise<any>> = [];
+  private requestQueue: Array<QueuedRequest> = [];
   private isProcessing = false;
+  private userPriorities: Map<string, boolean> = new Map<string, boolean>();
   
   // Default quota values - adjust based on your actual API limits
   private DEFAULT_QUOTA: QuotaConfig = {
@@ -176,16 +183,29 @@ class SearchApiManager {
     });
   }
   
+  // Process the queue with priority consideration
   private async processQueue(): Promise<void> {
     if (this.isProcessing || this.requestQueue.length === 0) return;
     
     this.isProcessing = true;
     
     try {
+      // Sort the queue to prioritize premium users if we have any priority requests
+      if (this.userPriorities.size > 0) {
+        this.requestQueue.sort((a, b) => {
+          const aHasPriority = a.userId && this.hasUserPriority(a.userId);
+          const bHasPriority = b.userId && this.hasUserPriority(b.userId);
+          
+          if (aHasPriority && !bHasPriority) return -1;
+          if (!aHasPriority && bHasPriority) return 1;
+          return 0;
+        });
+      }
+      
       // Process the next request in the queue
       const nextRequest = this.requestQueue.shift();
       if (nextRequest) {
-        await nextRequest();
+        await nextRequest.execute();
       }
     } catch (error) {
       console.error('Error processing Search API request:', error);
@@ -239,6 +259,7 @@ class SearchApiManager {
   public async executeWithThrottling<T>(
     apiType: string,
     executeFunc: () => Promise<T>,
+    userId?: string,
     cacheKey?: string
   ): Promise<T> {
     // Try cache first if a key is provided
@@ -252,19 +273,22 @@ class SearchApiManager {
     // If can't make request directly, add to queue
     if (!this.canMakeRequest(apiType)) {
       return new Promise((resolve, reject) => {
-        this.requestQueue.push(async () => {
-          try {
-            const result = await this.executeRequest(apiType, executeFunc);
-            
-            // Cache result if needed
-            if (cacheKey) {
-              cacheResults(cacheKey, result, apiType, 0.01); // Estimated cost per request
+        this.requestQueue.push({
+          execute: async () => {
+            try {
+              const result = await this.executeRequest(apiType, executeFunc);
+              
+              // Cache result if needed
+              if (cacheKey) {
+                cacheResults(cacheKey, result, apiType, 0.01); // Estimated cost per request
+              }
+              
+              resolve(result);
+            } catch (error) {
+              reject(error);
             }
-            
-            resolve(result);
-          } catch (error) {
-            reject(error);
-          }
+          },
+          userId
         });
         
         // Start processing the queue if not already
@@ -658,16 +682,9 @@ class SearchApiManager {
     
     return stats;
   }
-
-  private userPriorities: Map<string, boolean> | undefined;
-
+  
   // Set user priority based on subscription tier
   public setPriorityMode(userId: string, isPriority: boolean): void {
-    // Create a map of user priorities if it doesn't exist yet
-    if (!this.userPriorities) {
-      this.userPriorities = new Map<string, boolean>();
-    }
-    
     // Set this user's priority status
     this.userPriorities.set(userId, isPriority);
     
@@ -676,44 +693,7 @@ class SearchApiManager {
   
   // Check if a user has priority
   public hasUserPriority(userId: string): boolean {
-    return this.userPriorities?.get(userId) || false;
-  }
-  
-  // Process the queue with priority consideration
-  private async processQueue(): Promise<void> {
-    if (this.isProcessing || this.requestQueue.length === 0) return;
-    
-    this.isProcessing = true;
-    
-    try {
-      // Sort the queue to prioritize premium users if we have any priority requests
-      if (this.userPriorities && this.userPriorities.size > 0) {
-        this.requestQueue.sort((a, b) => {
-          const aHasPriority = a.userId && this.hasUserPriority(a.userId);
-          const bHasPriority = b.userId && this.hasUserPriority(b.userId);
-          
-          if (aHasPriority && !bHasPriority) return -1;
-          if (!aHasPriority && bHasPriority) return 1;
-          return 0;
-        });
-      }
-      
-      // Process the next request in the queue
-      const nextRequest = this.requestQueue.shift();
-      if (nextRequest) {
-        await nextRequest();
-      }
-    } catch (error) {
-      console.error('Error processing Search API request:', error);
-    } finally {
-      this.isProcessing = false;
-      
-      // Continue processing if there are more requests
-      if (this.requestQueue.length > 0) {
-        // Small delay between requests to avoid rate limiting
-        setTimeout(() => this.processQueue(), 100);
-      }
-    }
+    return this.userPriorities.get(userId) || false;
   }
 }
 
