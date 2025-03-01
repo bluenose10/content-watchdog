@@ -8,7 +8,7 @@ import { BusinessImpactSection } from "./BusinessImpactSection";
 
 export const ContentTheftMainContent = () => {
   return (
-    <div className="lg:col-span-2 space-y-12">
+    <div className="lg:col-span-2 space-y-6">
       <CopyrightSection />
       <PlagiarismSection />
       <ContentTheftSection />
