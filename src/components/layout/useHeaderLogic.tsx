@@ -50,29 +50,39 @@ export function useHeaderLogic() {
   }, [isMobileMenuOpen]);
 
   const handleSignOut = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
     try {
       setIsLoggingOut(true);
+      
+      // First, call the signOut function to clean up state and storage
       await signOut();
+      
+      // Show success message
       toast({
         title: "Success",
         description: "You have been logged out successfully",
       });
       
-      // Force a hard navigation to home page to clear all state
-      window.location.href = '/';
+      // Short timeout to ensure state updates before navigation
+      setTimeout(() => {
+        // Use window.location for a complete page refresh
+        window.location.href = '/';
+      }, 100);
+      
     } catch (error) {
       console.error("Error signing out:", error);
       
-      // Even if there's an error, force logout by clearing state and redirecting
+      // Even if there's an error, show success message to the user
       toast({
         title: "Signed out",
         description: "You have been logged out"
       });
       
-      // Force a hard navigation to home page
-      window.location.href = '/';
-    } finally {
-      setIsLoggingOut(false);
+      // Force refresh the page regardless of errors
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     }
   };
 

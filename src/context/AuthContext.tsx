@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
@@ -133,32 +132,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign out - improved to handle session errors better
+  // Sign out - enhanced with multiple fallback mechanisms
   const signOut = async () => {
     try {
       console.log("Signing out...");
       
-      // Try Supabase signout
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Sign out error:", error);
-        // Even if Supabase signout fails, we'll manually clear the state
-      }
-      
-      // Regardless of Supabase error, manually clear state
+      // First, clear all state
       setUser(null);
       setSession(null);
       setIsAdmin(false);
       
-      // Force clear local storage auth data
-      localStorage.removeItem('supabase.auth.token');
+      // Force clear all Supabase local storage data
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Also clear session cookies by setting to expired
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+      });
+      
+      // Finally, try the Supabase signout (but we don't rely on it working)
+      await supabase.auth.signOut();
       
       console.log("Auth state cleared");
     } catch (error) {
       console.error("Sign out error:", error);
       
-      // Even if there's an exception, clear state
+      // Even if there's an exception, make sure state is cleared
       setUser(null);
       setSession(null);
       setIsAdmin(false);
