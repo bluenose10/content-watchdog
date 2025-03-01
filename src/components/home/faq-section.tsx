@@ -10,7 +10,7 @@ export function FAQSection() {
           <div className="inline-flex items-center justify-center p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg mb-4">
             <HelpCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-2 text-gradient">Frequently Asked Questions</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Get answers to the most common questions about our content protection platform
           </p>
