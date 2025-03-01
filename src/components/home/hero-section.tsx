@@ -122,19 +122,19 @@ export const HeroSection = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-purple-700 dark:text-purple-400">98%</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Detection Accuracy</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.detectionAccuracy')}</p>
               </div>
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400">50+</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Platforms Monitored</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.platformsMonitored')}</p>
               </div>
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-indigo-600 dark:text-indigo-400">1.5M+</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Content Items Protected</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.contentProtected')}</p>
               </div>
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-purple-600 dark:text-purple-300">92%</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Successful Takedowns</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.successfulTakedowns')}</p>
               </div>
             </div>
           </div>
