@@ -1,9 +1,8 @@
-
 export type SearchQuery = {
   id?: string;
   user_id: string;
   query_text?: string;
-  query_type: 'name' | 'hashtag' | 'image';
+  query_type: 'name' | 'hashtag' | 'image' | 'plagiarism';
   image_url?: string;
   created_at?: string;
   search_params_json?: string | null; // Stores advanced search parameters
