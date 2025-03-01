@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaginatedResults } from "@/components/ui/paginated-results";
 import { AccessLevel } from "@/hooks/useProtectedRoute";
+import { TabContent } from "./TabContent";
 
 interface ResultsTabsProps {
   results: any[];
@@ -20,36 +20,35 @@ export function ResultsTabs({ results, accessLevel, onUpgrade }: ResultsTabsProp
       </TabsList>
       
       <TabsContent value="all" className="mt-4">
-        <PaginatedResults
+        <TabContent 
           results={results}
-          itemsPerPage={8}
           accessLevel={accessLevel}
           onUpgrade={onUpgrade}
         />
       </TabsContent>
       
       <TabsContent value="images" className="mt-4">
-        <PaginatedResults
-          results={results.filter(r => r.type === 'image')}
-          itemsPerPage={8}
+        <TabContent 
+          results={results}
+          filterType="image"
           accessLevel={accessLevel}
           onUpgrade={onUpgrade}
         />
       </TabsContent>
       
       <TabsContent value="websites" className="mt-4">
-        <PaginatedResults
-          results={results.filter(r => r.type === 'website')}
-          itemsPerPage={8}
+        <TabContent 
+          results={results}
+          filterType="website"
           accessLevel={accessLevel}
           onUpgrade={onUpgrade}
         />
       </TabsContent>
       
       <TabsContent value="social" className="mt-4">
-        <PaginatedResults
-          results={results.filter(r => r.type === 'social')}
-          itemsPerPage={8}
+        <TabContent 
+          results={results}
+          filterType="social"
           accessLevel={accessLevel}
           onUpgrade={onUpgrade}
         />

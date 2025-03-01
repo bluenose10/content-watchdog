@@ -7,13 +7,16 @@ import { AccessLevel, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { Sidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 
-// Import new component modules
-import { ResultsHeader } from "@/components/results/ResultsHeader";
-import { GuestBanner } from "@/components/results/GuestBanner";
-import { EmptyResults } from "@/components/results/EmptyResults";
-import { ResultsTabs } from "@/components/results/ResultsTabs";
-import { ResultsLoadingState } from "@/components/results/LoadingState";
-import { useSearchResults } from "@/components/results/useSearchResults";
+// Import from the newly created index file
+import {
+  ResultsHeader,
+  GuestBanner,
+  EmptyResults,
+  ResultsTabs,
+  ResultsLoadingState
+} from "@/components/results";
+
+import { useSearchResults } from "@/components/results/hooks";
 
 export default function Results() {
   // Use search params to get the ID instead of URL parameters
