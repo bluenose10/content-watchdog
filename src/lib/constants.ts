@@ -85,6 +85,7 @@ export const PRICING_PLANS = [
       "Priority support",
       "Monthly reports",
       "5 scheduled searches",
+      "Automated DMCA filing"
     ],
     stripePriceId: "price_1O2uq8Dt5zFTAXjQ3rkszxTy", // Replace with your real test mode Stripe Price ID
     popular: true,
@@ -104,6 +105,7 @@ export const PRICING_PLANS = [
       "Custom integrations",
       "Advanced analytics",
       "20 scheduled searches",
+      "Automated DMCA filing"
     ],
     stripePriceId: "price_1O2urADt5zFTAXjQSKD8S5n4", // Replace with your real test mode Stripe Price ID
     popular: false,
