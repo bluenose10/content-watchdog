@@ -52,7 +52,7 @@ export default function Monitoring() {
   return (
     <Layout>
       <div className="container py-8 max-w-7xl">
-        <h1 className="text-3xl font-bold mb-6">System Monitoring</h1>
+        <h1 className="text-2xl font-bold mb-8 text-gradient">System Monitoring</h1>
         
         <Tabs defaultValue="rate-limits">
           <TabsList className="mb-4">
