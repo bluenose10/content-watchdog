@@ -11,9 +11,9 @@ import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Shield } from "lucide-react";
+import { Shield, FileText, Copyright } from "lucide-react";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 export default function Index() {
   const location = useLocation();
@@ -42,7 +42,71 @@ export default function Index() {
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
           
-          {/* First section with Call to Action only (ContentSearch removed) */}
+          {/* Educational Resources Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 md:mb-16">
+            <div className="col-span-1 md:col-span-3">
+              <h3 className="text-xl font-bold mb-4 text-center">Educational Resources</h3>
+            </div>
+            
+            <div className="col-span-1 p-6 bg-card rounded-lg border border-border hover:shadow-md transition-all">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center mb-4">
+                  <div className="rounded-full bg-purple-100 dark:bg-purple-900/20 p-2 mr-3">
+                    <Copyright className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold">Copyright Protection</h4>
+                </div>
+                <p className="text-muted-foreground mb-4 flex-grow">
+                  Understand the legal framework for protecting your original content and intellectual property.
+                </p>
+                <Button asChild variant="outline" className="w-full mt-auto">
+                  <Link to="/content-theft" className="flex items-center justify-center">
+                    Learn About Content Theft
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="col-span-1 p-6 bg-card rounded-lg border border-border hover:shadow-md transition-all">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center mb-4">
+                  <div className="rounded-full bg-amber-100 dark:bg-amber-900/20 p-2 mr-3">
+                    <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold">Plagiarism Detection</h4>
+                </div>
+                <p className="text-muted-foreground mb-4 flex-grow">
+                  Discover how our tools can help you identify when your content has been used without proper attribution.
+                </p>
+                <Button asChild variant="outline" className="w-full mt-auto">
+                  <Link to="/search" className="flex items-center justify-center">
+                    Try Our Detection Tools
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="col-span-1 p-6 bg-card rounded-lg border border-border hover:shadow-md transition-all">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center mb-4">
+                  <div className="rounded-full bg-blue-100 dark:bg-blue-900/20 p-2 mr-3">
+                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold">DMCA Protection</h4>
+                </div>
+                <p className="text-muted-foreground mb-4 flex-grow">
+                  Learn how to use legal frameworks like DMCA to enforce your rights and protect your digital content.
+                </p>
+                <Button asChild variant="outline" className="w-full mt-auto">
+                  <Link to="/protection" className="flex items-center justify-center">
+                    Explore Protection Options
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          {/* First section with Call to Action only */}
           <div className="grid grid-cols-1 gap-8 mb-10 md:mb-24">
             <div className="col-span-1">
               <CallToAction />

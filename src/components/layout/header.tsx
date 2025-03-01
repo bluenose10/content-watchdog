@@ -142,6 +142,12 @@ export function Header() {
             Pricing
           </button>
           <Link 
+            to="/content-theft" 
+            className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
+          >
+            Content Theft
+          </Link>
+          <Link 
             to="/contact" 
             className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
           >
@@ -220,6 +226,12 @@ export function Header() {
               >
                 Pricing
               </button>
+              <Link
+                to="/content-theft"
+                className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
+              >
+                Content Theft
+              </Link>
               <Link
                 to="/contact"
                 className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
