@@ -98,25 +98,29 @@ export const useProtectedRoute = (
         const userIsAdmin = authIsAdmin;
         setIsAdmin(userIsAdmin);
         
-        // Check if the user has a premium subscription (if not admin)
+        // If user is admin, set admin access level immediately
+        if (userIsAdmin) {
+          console.log("Admin user detected - setting ADMIN access level");
+          setAccessLevel(AccessLevel.ADMIN);
+          setIsReady(true);
+          return;
+        }
+        
+        // For non-admin users, check subscription
         setPremiumFeaturesLoading(true);
         
-        if (!userIsAdmin) {
-          const userSubscription = await getUserSubscription(user.id);
-          setSubscription(userSubscription);
-          
-          // Determine access level based on subscription
-          const isPremium = userSubscription?.plans?.price > 0 && 
+        const userSubscription = await getUserSubscription(user.id);
+        console.log("User subscription data:", userSubscription);
+        setSubscription(userSubscription);
+        
+        // Determine access level based on subscription
+        const isPremium = userSubscription?.plans?.price > 0 && 
                           userSubscription?.status === 'active';
-          
-          if (isPremium) {
-            setAccessLevel(AccessLevel.PREMIUM);
-          } else {
-            setAccessLevel(AccessLevel.BASIC);
-          }
+        
+        if (isPremium) {
+          setAccessLevel(AccessLevel.PREMIUM);
         } else {
-          // Admin users get the ADMIN access level
-          setAccessLevel(AccessLevel.ADMIN);
+          setAccessLevel(AccessLevel.BASIC);
         }
         
         // If route requires admin and user is not admin

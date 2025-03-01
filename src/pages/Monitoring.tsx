@@ -10,28 +10,45 @@ import { PreFetchManager } from '@/components/monitoring/PreFetchManager';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useProtectedRoute, AccessLevel } from '@/hooks/useProtectedRoute';
 
 export default function Monitoring() {
   // Get cache statistics
   const cacheStats = getCacheStats();
-  const { user, loading } = useAuth();
+  const { user, isAdmin: authIsAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Check authentication
+  // Use the protected route hook with admin requirement
+  const { isReady, accessLevel, isAdmin } = useProtectedRoute(true, false, undefined, true);
+  
+  // Debug admin status
+  console.log("Monitoring page - Admin status:", { authIsAdmin, isAdmin, accessLevel });
+  
+  // Check if access should be allowed - require admin or premium accounts only
   useEffect(() => {
-    if (!loading && !user) {
+    if (isReady && !user) {
       toast({
         title: "Authentication required",
         description: "Please log in to access System Monitoring",
         variant: "destructive",
       });
       navigate('/login');
+      return;
     }
-  }, [user, loading, navigate, toast]);
+    
+    if (isReady && user && accessLevel !== AccessLevel.ADMIN) {
+      toast({
+        title: "Admin access required",
+        description: "You don't have permission to access this page",
+        variant: "destructive",
+      });
+      navigate('/dashboard');
+    }
+  }, [isReady, user, accessLevel, navigate, toast]);
   
   // Show loading state while checking auth
-  if (loading) {
+  if (!isReady) {
     return (
       <Layout>
         <div className="container py-8 max-w-7xl">
@@ -44,8 +61,8 @@ export default function Monitoring() {
     );
   }
   
-  // Don't render anything if user is not authenticated
-  if (!user) {
+  // Don't render anything if user is not authenticated or not admin
+  if (!user || accessLevel !== AccessLevel.ADMIN) {
     return null;
   }
   

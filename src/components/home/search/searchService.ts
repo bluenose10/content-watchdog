@@ -1,4 +1,3 @@
-
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
@@ -33,8 +32,8 @@ const DEFAULT_IMAGE_PARAMS: ImageSearchParams = {
   dominantColor: undefined
 };
 
-// Admin emails with no search limits
-const ADMIN_EMAILS = ['admin@influenceguard.com', 'test@example.com'];
+// Admin emails with no search limits - adding your email explicitly
+const ADMIN_EMAILS = ['admin@influenceguard.com', 'test@example.com', 'mark.moran4@btinternet.com'];
 
 // Track user search counts (in-memory for demo purposes, should be persisted in production)
 const userSearchCounts: Record<string, { 
@@ -54,9 +53,9 @@ const userSearchCounts: Record<string, {
  * @returns Object with isAllowed and message
  */
 async function checkSearchLimits(userId: string, isPro: boolean, userEmail?: string): Promise<{ isAllowed: boolean, message: string }> {
-  // Admin users have unlimited searches
+  // Admin users have unlimited searches - explicitly logging this check
   if (userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
-    console.log("Admin user detected - bypassing search limits");
+    console.log("Admin user detected - bypassing search limits:", userEmail);
     return { isAllowed: true, message: "" };
   }
 
@@ -142,9 +141,9 @@ function formatTimeRemaining(timeMs: number): string {
  * Increment user search count
  */
 function incrementSearchCount(userId: string, userEmail?: string): void {
-  // Admin users don't have their counts incremented
+  // Admin users don't have their counts incremented - explicitly logging this check
   if (userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
-    console.log("Admin user - not incrementing search count");
+    console.log("Admin user detected - not incrementing search count:", userEmail);
     return;
   }
 
