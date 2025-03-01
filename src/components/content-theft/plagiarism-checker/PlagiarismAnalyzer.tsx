@@ -13,6 +13,7 @@ interface PlagiarismAnalyzerProps {
   setIsUploading: (isUploading: boolean) => void;
   isUploading: boolean;
   setSaveError?: (error: string | null) => void;
+  setLastCheckTime?: (time: Date | null) => void;
 }
 
 export const usePlagiarismAnalyzer = ({ 
@@ -20,7 +21,8 @@ export const usePlagiarismAnalyzer = ({
   setResults, 
   setIsUploading, 
   isUploading,
-  setSaveError 
+  setSaveError,
+  setLastCheckTime
 }: PlagiarismAnalyzerProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -31,6 +33,10 @@ export const usePlagiarismAnalyzer = ({
     
     setIsUploading(true);
     if (setSaveError) setSaveError(null);
+    
+    // Record the start time
+    const startTime = new Date();
+    if (setLastCheckTime) setLastCheckTime(startTime);
     
     try {
       // Generate a unique filename to prevent collisions
