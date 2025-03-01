@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -12,18 +11,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute, PremiumFeature } from "@/hooks/useProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { AuthenticityDisplay } from "@/components/content-theft/plagiarism-checker/AuthenticityDisplay";
+import { verifyContentAuthenticity } from "@/components/content-theft/plagiarism-checker/PlagiarismChecker";
 import { Fingerprint, Upload, Link as LinkIcon, AlertCircle, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-// Basic temporary interface for demonstration - will be replaced with real implementation
-interface ContentAuthenticationResult {
-  isAuthentic: boolean;
-  aiGeneratedProbability: number;
-  manipulationProbability: number;
-  originalityScore: number;
-  detailsText: string;
-  verificationMethod: string;
-}
 
 export default function ContentAuthenticity() {
   const { toast } = useToast();
@@ -33,25 +23,21 @@ export default function ContentAuthenticity() {
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<ContentAuthenticationResult | undefined>(undefined);
+  const [result, setResult] = useState<any>(undefined);
 
   const handleFileSubmit = async () => {
     if (!file) return;
     
     setIsProcessing(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const authenticityResult = await verifyContentAuthenticity(
+        file,
+        file.type.startsWith('image/') ? 'image' : 
+        file.type.startsWith('video/') ? 'video' : 
+        file.type.startsWith('audio/') ? 'audio' : 'text'
+      );
       
-      // Mock result - this would be replaced with actual API call to the content-authenticity-verification function
-      setResult({
-        isAuthentic: Math.random() > 0.5,
-        aiGeneratedProbability: Math.random(),
-        manipulationProbability: Math.random() * 0.3,
-        originalityScore: Math.random() * 0.8,
-        detailsText: "Content analysis complete. This content appears to be created using a combination of AI and human editing.",
-        verificationMethod: "combined"
-      });
+      setResult(authenticityResult);
       
       toast({
         title: "Verification complete",
@@ -59,6 +45,7 @@ export default function ContentAuthenticity() {
         variant: "success"
       });
     } catch (error) {
+      console.error('Verification error:', error);
       toast({
         title: "Verification failed",
         description: error instanceof Error ? error.message : "An error occurred during verification",
@@ -69,36 +56,38 @@ export default function ContentAuthenticity() {
     }
   };
 
-  const handleUrlSubmit = () => {
+  const handleUrlSubmit = async () => {
     if (!url) return;
     
     setIsProcessing(true);
     try {
-      // Simulate API call
-      setTimeout(() => {
-        // Mock result
-        setResult({
-          isAuthentic: Math.random() > 0.5,
-          aiGeneratedProbability: Math.random(),
-          manipulationProbability: Math.random() * 0.7,
-          originalityScore: Math.random() * 0.5,
-          detailsText: "This content has signs of AI generation and possible manipulation. Review details carefully.",
-          verificationMethod: "model_analysis"
-        });
-        
-        toast({
-          title: "Verification complete",
-          description: "The URL content has been analyzed for authenticity",
-          variant: "success"
-        });
-        setIsProcessing(false);
-      }, 2000);
+      let contentType: 'text' | 'image' | 'video' | 'audio' = 'text';
+      
+      if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp)($|\?)/i)) {
+        contentType = 'image';
+      } else if (url.match(/\.(mp4|webm|mov|avi|wmv)($|\?)/i)) {
+        contentType = 'video';
+      } else if (url.match(/\.(mp3|wav|ogg|m4a)($|\?)/i)) {
+        contentType = 'audio';
+      }
+      
+      const authenticityResult = await verifyContentAuthenticity(url, contentType);
+      
+      setResult(authenticityResult);
+      
+      toast({
+        title: "Verification complete",
+        description: "The URL content has been analyzed for authenticity",
+        variant: "success"
+      });
     } catch (error) {
+      console.error('URL verification error:', error);
       toast({
         title: "Verification failed",
         description: error instanceof Error ? error.message : "An error occurred during verification",
         variant: "destructive"
       });
+    } finally {
       setIsProcessing(false);
     }
   };
