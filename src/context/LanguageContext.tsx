@@ -1,4 +1,4 @@
-<lov-code>
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define available languages
@@ -442,4 +442,244 @@ const translations: Record<Language, Record<string, string>> = {
     'piracy.copyright.examples': 'Häufige Beispiele sind das Kopieren und erneute Veröffentlichen eines Artikels ohne Erlaubnis, die Verwendung einer Fotografie in einem kommerziellen Projekt ohne Lizenz und das Teilen digitaler Produkte ohne ordnungsgemäße Genehmigung des Erstellers.',
     
     // Plagiarism section
-    'piracy.
+    'piracy.plagiarism.title': 'Plagiat',
+    'piracy.plagiarism.definition': 'Die Präsentation des Werks oder der Ideen einer anderen Person als eigene ohne angemessene Zuschreibung.',
+    'piracy.plagiarism.scope': 'Plagiat betrifft hauptsächlich Ethik und akademische Integrität und weniger rechtliche Ansprüche. Es kann auch bei nicht urheberrechtlich geschützten Werken vorkommen, beispielsweise wenn Inhalte aus der Public Domain ohne entsprechende Quellenangabe kopiert werden.',
+    'piracy.plagiarism.examples': 'Den Aufsatz einer anderen Person als eigenen einreichen, Zitate ohne Quellenangabe verwenden oder Ideen weiterverwenden, ohne den ursprünglichen Urheber anzuerkennen, sind Beispiele für Plagiat, die in akademischen und beruflichen Umgebungen schwerwiegende Folgen haben können.',
+    
+    // Content theft section
+    'piracy.contentTheft.title': 'Inhaltsdiebstahl',
+    'piracy.contentTheft.definition': 'Das unbefugte Kopieren oder Verwenden digitaler Inhalte (z.B. Blogbeiträge, Bilder, Videos).',
+    'piracy.contentTheft.scope': 'Inhaltsdiebstahl überschneidet sich oft mit Urheberrechtsverletzungen, kann aber auch nicht urheberrechtlich geschützte Inhalte umfassen. Der Fokus liegt auf dem Akt des Stehlens und nicht auf den spezifischen rechtlichen Implikationen.',
+    'piracy.contentTheft.examples': 'Häufige Beispiele sind das Scraping von Websites und die Wiederveröffentlichung ihrer Inhalte, das Herunterladen und Weiterverbreiten kostenpflichtiger digitaler Produkte oder das Anfertigen von Screenshots von Mitgliederinhalten und deren Weitergabe ohne Erlaubnis.',
+    
+    // Key differences section
+    'piracy.differences.title': 'Wesentliche Unterschiede',
+    'piracy.differences.aspect': 'Aspekt',
+    'piracy.differences.plagiarism': 'Plagiat',
+    'piracy.differences.contentTheft': 'Inhaltsdiebstahl',
+    'piracy.differences.copyright': 'Urheberrechtsverletzung',
+    'piracy.differences.focus': 'Fokus',
+    'piracy.differences.focus.plagiarism': 'Ethisch (Zuschreibung)',
+    'piracy.differences.focus.contentTheft': 'Akt des Stehlens',
+    'piracy.differences.focus.copyright': 'Rechtlich (Rechteverletzung)',
+    'piracy.differences.applies': 'Gilt für',
+    'piracy.differences.applies.plagiarism': 'Jedes Werk (auch nicht urheberrechtlich geschützte)',
+    'piracy.differences.applies.contentTheft': 'Digitale Inhalte',
+    'piracy.differences.applies.copyright': 'Urheberrechtlich geschützte Werke',
+    'piracy.differences.consequences': 'Konsequenzen',
+    'piracy.differences.consequences.plagiarism': 'Akademisch oder beruflich',
+    'piracy.differences.consequences.contentTheft': 'Einnahmeverlust, Rufschädigung',
+    'piracy.differences.consequences.copyright': 'Rechtliche Schritte, Geldstrafen, DMCA-Takedowns',
+    
+    // Overlaps section
+    'piracy.overlaps.title': 'Wie sie sich überschneiden',
+    'piracy.overlaps.plagiarism.title': 'Plagiat kann zur Urheberrechtsverletzung führen',
+    'piracy.overlaps.plagiarism.description': 'Wenn das plagiierte Werk urheberrechtlich geschützt ist, kann es auch eine rechtliche Verletzung darstellen.',
+    'piracy.overlaps.contentTheft.title': 'Inhaltsdiebstahl beinhaltet oft Urheberrechtsverletzung',
+    'piracy.overlaps.contentTheft.description': 'Die meisten gestohlenen Inhalte sind urheberrechtlich geschützt, was sie sowohl zu Diebstahl als auch zu einer Verletzung macht.',
+    'piracy.overlaps.notAll.title': 'Nicht jedes Plagiat ist eine Urheberrechtsverletzung',
+    'piracy.overlaps.notAll.description': 'Wenn das Werk gemeinfrei oder nicht urheberrechtlich geschützt ist, handelt es sich um Plagiat, aber nicht um eine Verletzung.',
+    
+    // Business impact section
+    'piracy.business.title': 'Warum das für Ihr Unternehmen wichtig ist',
+    'piracy.business.copyright': 'Unsere Dienste adressieren dieses rechtliche Problem direkt durch DMCA-Takedowns und Urheberrechtsschutztools.',
+    'piracy.business.plagiarism': 'Wir bieten Tools zur Erkennung kopierter Inhalte und zur Sicherstellung der korrekten Zuschreibung Ihrer Arbeit.',
+    'piracy.business.contentTheft': 'Unsere Plattform hilft bei der Überwachung, Erkennung und Unterbindung der unbefugten Nutzung Ihrer digitalen Inhalte.',
+    'piracy.business.protection': 'Wie Influence Guard Ihre Arbeit schützt',
+    'piracy.business.monitoring': 'Fortschrittliche Inhaltsüberwachung zur Erkennung unbefugter Nutzung',
+    'piracy.business.dmca': 'Automatisierte DMCA-Takedown-Tools für schnelles Handeln',
+    'piracy.business.detection': 'Plagiatserkennung auf Websites und sozialen Medien',
+    'piracy.business.fingerprinting': 'Digitale Fingerabdrücke zur Verfolgung Ihres geistigen Eigentums',
+    'piracy.business.startProtecting': 'Beginnen Sie, Ihre Inhalte zu schützen',
+    
+    // Key concepts sidebar
+    'piracy.keyConcepts.title': 'Schlüsselkonzepte',
+    'piracy.keyConcepts.copyright': 'Rechtsverletzung exklusiver Rechte',
+    'piracy.keyConcepts.plagiarism': 'Verwendung von Arbeit ohne Zuschreibung',
+    'piracy.keyConcepts.contentTheft': 'Unbefugte Nutzung digitaler Inhalte',
+    'piracy.keyConcepts.dmca.title': 'DMCA-Schutz',
+    'piracy.keyConcepts.dmca.description': 'Rechtlicher Rahmen für digitale Rechte',
+    'piracy.keyConcepts.protect.title': 'Schützen Sie Ihre Arbeit jetzt',
+    'piracy.keyConcepts.protect.description': 'Warten Sie nicht, bis Ihre Inhalte gestohlen werden. Beginnen Sie noch heute mit der Überwachung und dem Schutz Ihres geistigen Eigentums.',
+    'piracy.keyConcepts.getStarted': 'Jetzt starten',
+  },
+  zh: {
+    'header.home': '首页',
+    'header.features': '功能',
+    'header.pricing': '价格',
+    'header.piracy': '侵权',
+    'header.about': '关于我们',
+    'header.login': '登录',
+    'header.signup': '注册',
+    'header.dashboard': '控制台',
+    'header.logout': '登出',
+    'hero.title': '阻止内容盗窃 - 保护您的知识产权',
+    'hero.subtitle': '为需要数字版权管理和DMCA保护的内容创作者提供服务。我们定位您的照片、视频、文章和设计在哪里被未经许可使用，为版权侵权案件提供详细证据。',
+    'language.en': 'English',
+    'language.es': 'Español',
+    'language.fr': 'Français',
+    'language.de': 'Deutsch',
+    'language.zh': '中文',
+    // Footer and other components
+    'footer.copyright': '版权所有',
+    'footer.privacyPolicy': '隐私政策',
+    'footer.terms': '服务条款',
+    'footer.cookiePolicy': 'Cookie政策',
+    // Content theft page
+    'piracy.title': '盗版和版权侵权',
+    'piracy.subtitle': '了解抄袭、内容盗窃和版权侵权之间的区别，以更好地保护您的知识产权。',
+    'piracy.protectButton': '保护您的内容',
+    'piracy.learnMore': '了解更多',
+    // Buttons and common elements
+    'button.learnMore': '了解更多',
+    'button.getStarted': '开始使用',
+    'button.viewPlans': '查看计划',
+    'button.upgradeNow': '立即升级',
+    // Search page
+    'search.title': '内容搜索',
+    'search.description': '使用我们强大的数字版权管理系统，找出您的知识产权在网络上的未授权使用。我们先进的版权侵权检测有助于保护您的创意资产。',
+    'search.signup.required': '需要注册',
+    'search.signup.description': '您需要创建一个账户来使用我们的内容盗窃检测功能。注册一个免费账户，每月可获得3次搜索，并确保DMCA合规。',
+    'search.signup.button': '立即注册',
+    // Stats and metrics
+    'stats.detectionAccuracy': '检测准确率',
+    'stats.platformsMonitored': '监控平台数',
+    'stats.contentProtected': '受保护内容项目',
+    'stats.successfulTakedowns': '成功下架数',
+    
+    // Auth related messages
+    'auth.logoutSuccess': '您已成功登出',
+    'auth.logoutError': '登出时出现问题',
+    
+    // Definition sections
+    'piracy.definition': '定义：',
+    'piracy.scope': '范围：',
+    'piracy.examples': '示例：',
+    
+    // Copyright section
+    'piracy.copyright.title': '版权侵权',
+    'piracy.copyright.definition': '未经授权使用他人受版权保护的作品（如文本、图像、视频、音乐），方式侵犯了所有者的专有权利。',
+    'piracy.copyright.scope': '版权侵权适用于固定在有形媒介中的原创作品，如书面、录制或数字保存的内容。这些作品受版权法保护，包括美国的数字千年版权法（DMCA）。',
+    'piracy.copyright.examples': '常见例子包括未经许可复制和重新发布文章，在商业项目中未经许可使用照片，以及未经创作者适当授权分享数字产品。',
+    
+    // Plagiarism section
+    'piracy.plagiarism.title': '抄袭',
+    'piracy.plagiarism.definition': '将他人的作品或想法作为自己的呈现，而没有适当归属。',
+    'piracy.plagiarism.scope': '抄袭主要关乎伦理和学术诚信，而非法律权利。即使作品没有版权保护，也可能发生抄袭，例如在复制公共领域内容而不给予适当引用时。',
+    'piracy.plagiarism.examples': '将他人的论文作为自己的提交，使用引用但不引用来源，或者重新利用想法而不承认原创者，都是可能在学术和专业环境中造成严重后果的抄袭例子。',
+    
+    // Content theft section
+    'piracy.contentTheft.title': '内容盗窃',
+    'piracy.contentTheft.definition': '未经授权复制或使用数字内容（如博客文章、图像、视频）。',
+    'piracy.contentTheft.scope': '内容盗窃常与版权侵权重叠，但也可能包括非版权保护内容。重点在于盗取行为，而非涉及的具体法律含义。',
+    'piracy.contentTheft.examples': '常见例子包括抓取网站并重新发布其内容，下载和重新分发付费数字产品，或者截取会员内容的屏幕截图并未经许可分享。',
+    
+    // Key differences section
+    'piracy.differences.title': '关键差异',
+    'piracy.differences.aspect': '方面',
+    'piracy.differences.plagiarism': '抄袭',
+    'piracy.differences.contentTheft': '内容盗窃',
+    'piracy.differences.copyright': '版权侵权',
+    'piracy.differences.focus': '焦点',
+    'piracy.differences.focus.plagiarism': '伦理（归属）',
+    'piracy.differences.focus.contentTheft': '盗窃行为',
+    'piracy.differences.focus.copyright': '法律（权利侵犯）',
+    'piracy.differences.applies': '适用于',
+    'piracy.differences.applies.plagiarism': '任何作品（即使未受版权保护）',
+    'piracy.differences.applies.contentTheft': '数字内容',
+    'piracy.differences.applies.copyright': '受版权保护的作品',
+    'piracy.differences.consequences': '后果',
+    'piracy.differences.consequences.plagiarism': '学术或专业',
+    'piracy.differences.consequences.contentTheft': '收入损失，声誉损害',
+    'piracy.differences.consequences.copyright': '法律诉讼，罚款，DMCA下架',
+    
+    // Overlaps section
+    'piracy.overlaps.title': '它们如何重叠',
+    'piracy.overlaps.plagiarism.title': '抄袭可能导致版权侵权',
+    'piracy.overlaps.plagiarism.description': '如果被抄袭的作品受版权保护，它也可能构成法律侵权。',
+    'piracy.overlaps.contentTheft.title': '内容盗窃通常涉及版权侵权',
+    'piracy.overlaps.contentTheft.description': '大多数被盗内容受版权保护，使其同时构成盗窃和侵权。',
+    'piracy.overlaps.notAll.title': '并非所有抄袭都是版权侵权',
+    'piracy.overlaps.notAll.description': '如果作品属于公共领域或未受版权保护，则构成抄袭但不构成侵权。',
+    
+    // Business impact section
+    'piracy.business.title': '为什么这对您的业务很重要',
+    'piracy.business.copyright': '我们的服务通过DMCA下架和版权执行工具直接解决这一法律问题。',
+    'piracy.business.plagiarism': '我们提供工具来检测复制的内容并确保您的工作得到适当归属。',
+    'piracy.business.contentTheft': '我们的平台帮助监控、检测和阻止对您数字内容的未授权使用。',
+    'piracy.business.protection': 'Influence Guard如何保护您的工作',
+    'piracy.business.monitoring': '先进的内容监控，检测未授权使用',
+    'piracy.business.dmca': '自动化DMCA下架工具，快速行动',
+    'piracy.business.detection': '跨网站和社交媒体的抄袭检测',
+    'piracy.business.fingerprinting': '数字指纹追踪您的知识产权',
+    'piracy.business.startProtecting': '开始保护您的内容',
+    
+    // Key concepts sidebar
+    'piracy.keyConcepts.title': '关键概念',
+    'piracy.keyConcepts.copyright': '专有权利的法律侵犯',
+    'piracy.keyConcepts.plagiarism': '使用作品但不归属',
+    'piracy.keyConcepts.contentTheft': '未授权使用数字内容',
+    'piracy.keyConcepts.dmca.title': 'DMCA保护',
+    'piracy.keyConcepts.dmca.description': '数字权利的法律框架',
+    'piracy.keyConcepts.protect.title': '立即保护您的工作',
+    'piracy.keyConcepts.protect.description': '不要等到您的内容被盗。今天就开始监控和保护您的知识产权。',
+    'piracy.keyConcepts.getStarted': '开始使用',
+  }
+};
+
+// Create the language provider component
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Get the preferred language from localStorage or default to English
+  const getInitialLanguage = (): Language => {
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('app-language') as Language;
+      if (savedLanguage && Object.keys(translations).includes(savedLanguage)) {
+        return savedLanguage;
+      }
+      
+      // Try to detect browser language
+      const browserLang = navigator.language.split('-')[0];
+      if (browserLang && Object.keys(translations).includes(browserLang as Language)) {
+        return browserLang as Language;
+      }
+    }
+    return 'en'; // Default to English
+  };
+
+  const [language, setLanguage] = useState<Language>(getInitialLanguage);
+
+  // Update localStorage when language changes
+  useEffect(() => {
+    localStorage.setItem('app-language', language);
+  }, [language]);
+
+  // Translation function
+  const t = (key: string): string => {
+    if (!key) return '';
+    
+    // Return the translation or the key itself if not found
+    return translations[language][key] || key;
+  };
+
+  const contextValue = {
+    language,
+    setLanguage,
+    t,
+  };
+
+  return (
+    <LanguageContext.Provider value={contextValue}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+// Custom hook to use the language context
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
