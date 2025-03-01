@@ -58,15 +58,19 @@ export function useHeaderLogic() {
         description: "You have been logged out successfully",
       });
       
-      // Force a re-render by navigating to home page
-      navigate('/', { replace: true });
+      // Force a hard navigation to home page to clear all state
+      window.location.href = '/';
     } catch (error) {
       console.error("Error signing out:", error);
+      
+      // Even if there's an error, force logout by clearing state and redirecting
       toast({
-        title: "Error",
-        description: "There was a problem signing out",
-        variant: "destructive",
+        title: "Signed out",
+        description: "You have been logged out"
       });
+      
+      // Force a hard navigation to home page
+      window.location.href = '/';
     } finally {
       setIsLoggingOut(false);
     }

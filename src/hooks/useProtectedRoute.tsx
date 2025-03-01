@@ -50,6 +50,20 @@ export const useProtectedRoute = (
         console.log("useProtectedRoute - Setting anonymous access level");
         setAccessLevel(AccessLevel.ANONYMOUS);
         setIsAdmin(false);
+        
+        // If this is a protected route, redirect to login
+        if (requiresAuth && PROTECTED_ROUTES.some(route => 
+          location.pathname === route || location.pathname.startsWith(route + '/'))) {
+          console.log("Protected route detected - redirecting to login");
+          toast({
+            title: "Authentication required",
+            description: "Please log in to access this page",
+            variant: "destructive",
+          });
+          navigate('/login', { state: { from: location.pathname } });
+          return;
+        }
+        
         setIsReady(true);
         return;
       } 

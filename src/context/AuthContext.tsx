@@ -133,25 +133,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign out
+  // Sign out - improved to handle session errors better
   const signOut = async () => {
     try {
       console.log("Signing out...");
+      
+      // Try Supabase signout
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
         console.error("Sign out error:", error);
-      } else {
-        console.log("Successfully signed out");
-        // Explicitly clear user and session state
-        setUser(null);
-        setSession(null);
-        setIsAdmin(false);
-        
-        // Force a reload of the page to ensure all auth state is fresh
-        window.location.href = '/';
+        // Even if Supabase signout fails, we'll manually clear the state
       }
+      
+      // Regardless of Supabase error, manually clear state
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      
+      // Force clear local storage auth data
+      localStorage.removeItem('supabase.auth.token');
+      
+      console.log("Auth state cleared");
     } catch (error) {
       console.error("Sign out error:", error);
+      
+      // Even if there's an exception, clear state
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
     }
   };
 
