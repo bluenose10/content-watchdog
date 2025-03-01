@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -23,12 +22,10 @@ export default function Protection() {
   const [showTakedownForm, setShowTakedownForm] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<"standard" | "social" | "hosting" | null>(null);
   
-  // Show loading state while auth is being checked
   if (!isReady || isLoading) {
     return <LoadingState />;
   }
 
-  // Get user information for the header
   const fullName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
   const firstName = fullName.split(' ')[0];
   const avatarUrl = user?.user_metadata?.avatar_url;
@@ -343,11 +340,13 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Learn the fundamentals of copyright law and how it protects your creative work.
                       </p>
-                      <a href="https://en.wikipedia.org/wiki/Copyright" target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm" className="flex items-center gap-1">
-                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
-                        </Button>
-                      </a>
+                      <div className="flex justify-center">
+                        <a href="https://en.wikipedia.org/wiki/Copyright" target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                          </Button>
+                        </a>
+                      </div>
                     </div>
                     
                     <div className="p-4 border rounded-md">
@@ -355,11 +354,13 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Understand how to protect your brand names, logos, and other identifying marks.
                       </p>
-                      <a href="https://www.uspto.gov/trademarks/basics/what-trademark" target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm" className="flex items-center gap-1">
-                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
-                        </Button>
-                      </a>
+                      <div className="flex justify-center">
+                        <a href="https://www.uspto.gov/trademarks/basics/what-trademark" target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                          </Button>
+                        </a>
+                      </div>
                     </div>
                     
                     <div className="p-4 border rounded-md">
@@ -367,11 +368,13 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Learn about protecting your content across different countries and jurisdictions.
                       </p>
-                      <a href="https://en.wikipedia.org/wiki/International_copyright_treaties" target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm" className="flex items-center gap-1">
-                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
-                        </Button>
-                      </a>
+                      <div className="flex justify-center">
+                        <a href="https://en.wikipedia.org/wiki/International_copyright_treaties" target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                          </Button>
+                        </a>
+                      </div>
                     </div>
                     
                     <div className="p-4 border rounded-md">
@@ -379,11 +382,13 @@ export default function Protection() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Understanding when others may legally use portions of your content.
                       </p>
-                      <a href="https://en.wikipedia.org/wiki/Fair_use" target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm" className="flex items-center gap-1">
-                          Read Guide <ExternalLink className="h-3 w-3 ml-1" />
-                        </Button>
-                      </a>
+                      <div className="flex justify-center">
+                        <a href="https://en.wikipedia.org/wiki/Fair_use" target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            Read Guide <ExternalLink className="h-3 w-3 ml-1" />
+                          </Button>
+                        </a>
+                      </div>
                     </div>
                   </div>
                   
