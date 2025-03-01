@@ -1,4 +1,4 @@
-
+<lov-code>
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define available languages
@@ -59,6 +59,84 @@ const translations: Record<Language, Record<string, string>> = {
     'stats.platformsMonitored': 'Platforms Monitored',
     'stats.contentProtected': 'Content Items Protected',
     'stats.successfulTakedowns': 'Successful Takedowns',
+    
+    // Auth related messages
+    'auth.logoutSuccess': 'You have been logged out successfully',
+    'auth.logoutError': 'There was a problem signing out',
+    
+    // Definition sections
+    'piracy.definition': 'Definition:',
+    'piracy.scope': 'Scope:',
+    'piracy.examples': 'Examples:',
+    
+    // Copyright section
+    'piracy.copyright.title': 'Copyright Infringement',
+    'piracy.copyright.definition': 'The unauthorized use of someone else\'s copyright-protected work (e.g., text, images, videos, music) in a way that violates the owner\'s exclusive rights.',
+    'piracy.copyright.scope': 'Copyright infringement applies to original works fixed in a tangible medium, such as written, recorded, or digitally saved content. These works are protected under copyright law, including the Digital Millennium Copyright Act (DMCA) in the United States.',
+    'piracy.copyright.examples': 'Common examples include copying and republishing an article without permission, using a photograph in a commercial project without a license, and sharing digital products without proper authorization from the creator.',
+    
+    // Plagiarism section
+    'piracy.plagiarism.title': 'Plagiarism',
+    'piracy.plagiarism.definition': 'Presenting someone else\'s work or ideas as your own without proper attribution.',
+    'piracy.plagiarism.scope': 'Plagiarism is primarily about ethics and academic integrity rather than legal rights. It can occur even if the work is not copyright-protected, such as when copying public domain content without giving proper credit.',
+    'piracy.plagiarism.examples': 'Submitting someone else\'s essay as your own, using quotes without citing the source, or repurposing ideas without acknowledging the original creator are all examples of plagiarism that can have serious consequences in academic and professional settings.',
+    
+    // Content theft section
+    'piracy.contentTheft.title': 'Content Theft',
+    'piracy.contentTheft.definition': 'The unauthorized copying or use of digital content (e.g., blog posts, images, videos).',
+    'piracy.contentTheft.scope': 'Content theft often overlaps with copyright infringement but can also include non-copyrighted content. The focus is on the act of stealing rather than the specific legal implications involved.',
+    'piracy.contentTheft.examples': 'Common examples include scraping websites and republishing their content, downloading and redistributing paid digital products, or taking screenshots of membership content and sharing them without permission.',
+    
+    // Key differences section
+    'piracy.differences.title': 'Key Differences',
+    'piracy.differences.aspect': 'Aspect',
+    'piracy.differences.plagiarism': 'Plagiarism',
+    'piracy.differences.contentTheft': 'Content Theft',
+    'piracy.differences.copyright': 'Copyright Infringement',
+    'piracy.differences.focus': 'Focus',
+    'piracy.differences.focus.plagiarism': 'Ethical (attribution)',
+    'piracy.differences.focus.contentTheft': 'Act of stealing',
+    'piracy.differences.focus.copyright': 'Legal (rights violation)',
+    'piracy.differences.applies': 'Applies To',
+    'piracy.differences.applies.plagiarism': 'Any work (even non-copyrighted)',
+    'piracy.differences.applies.contentTheft': 'Digital content',
+    'piracy.differences.applies.copyright': 'Copyright-protected works',
+    'piracy.differences.consequences': 'Consequences',
+    'piracy.differences.consequences.plagiarism': 'Academic or professional',
+    'piracy.differences.consequences.contentTheft': 'Loss of revenue, reputation',
+    'piracy.differences.consequences.copyright': 'Legal action, fines, DMCA takedowns',
+    
+    // Overlaps section
+    'piracy.overlaps.title': 'How They Overlap',
+    'piracy.overlaps.plagiarism.title': 'Plagiarism Can Lead to Copyright Infringement',
+    'piracy.overlaps.plagiarism.description': 'If the plagiarized work is copyright-protected, it may also be a legal violation.',
+    'piracy.overlaps.contentTheft.title': 'Content Theft Often Involves Copyright Infringement',
+    'piracy.overlaps.contentTheft.description': 'Most stolen content is protected by copyright, making it both theft and infringement.',
+    'piracy.overlaps.notAll.title': 'Not All Plagiarism is Copyright Infringement',
+    'piracy.overlaps.notAll.description': 'If the work is in the public domain or not copyright-protected, it\'s plagiarism but not infringement.',
+    
+    // Business impact section
+    'piracy.business.title': 'Why This Matters For Your Business',
+    'piracy.business.copyright': 'Our services directly address this legal issue through DMCA takedowns and copyright enforcement tools.',
+    'piracy.business.plagiarism': 'We offer tools for detecting copied content and ensuring proper attribution for your work.',
+    'piracy.business.contentTheft': 'Our platform helps monitor, detect, and stop unauthorized use of your digital content.',
+    'piracy.business.protection': 'How Influence Guard Protects Your Work',
+    'piracy.business.monitoring': 'Advanced content monitoring to detect unauthorized use',
+    'piracy.business.dmca': 'Automated DMCA takedown tools for swift action',
+    'piracy.business.detection': 'Plagiarism detection across websites and social media',
+    'piracy.business.fingerprinting': 'Digital fingerprinting to track your intellectual property',
+    'piracy.business.startProtecting': 'Start Protecting Your Content',
+    
+    // Key concepts sidebar
+    'piracy.keyConcepts.title': 'Key Concepts',
+    'piracy.keyConcepts.copyright': 'Legal violation of exclusive rights',
+    'piracy.keyConcepts.plagiarism': 'Using work without attribution',
+    'piracy.keyConcepts.contentTheft': 'Unauthorized use of digital content',
+    'piracy.keyConcepts.dmca.title': 'DMCA Protection',
+    'piracy.keyConcepts.dmca.description': 'Legal framework for digital rights',
+    'piracy.keyConcepts.protect.title': 'Protect Your Work Now',
+    'piracy.keyConcepts.protect.description': 'Don\'t wait until your content is stolen. Start monitoring and protecting your intellectual property today.',
+    'piracy.keyConcepts.getStarted': 'Get Started',
   },
   es: {
     'header.home': 'Inicio',
@@ -103,6 +181,84 @@ const translations: Record<Language, Record<string, string>> = {
     'stats.platformsMonitored': 'Plataformas Monitoreadas',
     'stats.contentProtected': 'Elementos de Contenido Protegidos',
     'stats.successfulTakedowns': 'Eliminaciones Exitosas',
+    
+    // Auth related messages
+    'auth.logoutSuccess': 'Has cerrado sesión correctamente',
+    'auth.logoutError': 'Hubo un problema al cerrar sesión',
+    
+    // Definition sections
+    'piracy.definition': 'Definición:',
+    'piracy.scope': 'Alcance:',
+    'piracy.examples': 'Ejemplos:',
+    
+    // Copyright section
+    'piracy.copyright.title': 'Infracción de Derechos de Autor',
+    'piracy.copyright.definition': 'El uso no autorizado del trabajo protegido por derechos de autor de otra persona (por ejemplo, texto, imágenes, videos, música) de una manera que viola los derechos exclusivos del propietario.',
+    'piracy.copyright.scope': 'La infracción de derechos de autor se aplica a obras originales fijadas en un medio tangible, como contenido escrito, grabado o guardado digitalmente. Estas obras están protegidas por la ley de derechos de autor, incluyendo la Ley de Derechos de Autor del Milenio Digital (DMCA) en los Estados Unidos.',
+    'piracy.copyright.examples': 'Los ejemplos comunes incluyen copiar y volver a publicar un artículo sin permiso, usar una fotografía en un proyecto comercial sin una licencia y compartir productos digitales sin la autorización adecuada del creador.',
+    
+    // Plagiarism section
+    'piracy.plagiarism.title': 'Plagio',
+    'piracy.plagiarism.definition': 'Presentar el trabajo o las ideas de otra persona como propias sin la atribución adecuada.',
+    'piracy.plagiarism.scope': 'El plagio se trata principalmente de ética e integridad académica más que de derechos legales. Puede ocurrir incluso si el trabajo no está protegido por derechos de autor, como cuando se copia contenido de dominio público sin dar el crédito adecuado.',
+    'piracy.plagiarism.examples': 'Presentar el ensayo de otra persona como propio, usar citas sin citar la fuente o reutilizar ideas sin reconocer al creador original son ejemplos de plagio que pueden tener graves consecuencias en entornos académicos y profesionales.',
+    
+    // Content theft section
+    'piracy.contentTheft.title': 'Robo de Contenido',
+    'piracy.contentTheft.definition': 'La copia o el uso no autorizados de contenido digital (por ejemplo, publicaciones de blog, imágenes, videos).',
+    'piracy.contentTheft.scope': 'El robo de contenido a menudo se superpone con la infracción de derechos de autor, pero también puede incluir contenido no protegido por derechos de autor. La atención se centra en el acto de robar en lugar de las implicaciones legales específicas involucradas.',
+    'piracy.contentTheft.examples': 'Los ejemplos comunes incluyen el scraping de sitios web y la republicación de su contenido, la descarga y redistribución de productos digitales pagados o la toma de capturas de pantalla de contenido de membresía y el compartirlas sin permiso.',
+    
+    // Key differences section
+    'piracy.differences.title': 'Diferencias Clave',
+    'piracy.differences.aspect': 'Aspecto',
+    'piracy.differences.plagiarism': 'Plagio',
+    'piracy.differences.contentTheft': 'Robo de Contenido',
+    'piracy.differences.copyright': 'Infracción de Derechos de Autor',
+    'piracy.differences.focus': 'Enfoque',
+    'piracy.differences.focus.plagiarism': 'Ético (atribución)',
+    'piracy.differences.focus.contentTheft': 'Acto de robar',
+    'piracy.differences.focus.copyright': 'Legal (violación de derechos)',
+    'piracy.differences.applies': 'Se Aplica A',
+    'piracy.differences.applies.plagiarism': 'Cualquier trabajo (incluso sin derechos de autor)',
+    'piracy.differences.applies.contentTheft': 'Contenido digital',
+    'piracy.differences.applies.copyright': 'Obras protegidas por derechos de autor',
+    'piracy.differences.consequences': 'Consecuencias',
+    'piracy.differences.consequences.plagiarism': 'Académico o profesional',
+    'piracy.differences.consequences.contentTheft': 'Pérdida de ingresos, reputación',
+    'piracy.differences.consequences.copyright': 'Acciones legales, multas, eliminaciones de DMCA',
+    
+    // Overlaps section
+    'piracy.overlaps.title': 'Cómo Se Superponen',
+    'piracy.overlaps.plagiarism.title': 'El Plagio Puede Conducir a la Infracción de Derechos de Autor',
+    'piracy.overlaps.plagiarism.description': 'Si el trabajo plagiado está protegido por derechos de autor, también puede ser una violación legal.',
+    'piracy.overlaps.contentTheft.title': 'El Robo de Contenido a Menudo Implica la Infracción de Derechos de Autor',
+    'piracy.overlaps.contentTheft.description': 'La mayoría del contenido robado está protegido por derechos de autor, lo que lo convierte tanto en robo como en infracción.',
+    'piracy.overlaps.notAll.title': 'No Todo el Plagio es Infracción de Derechos de Autor',
+    'piracy.overlaps.notAll.description': 'Si el trabajo es de dominio público o no está protegido por derechos de autor, es plagio pero no infracción.',
+    
+    // Business impact section
+    'piracy.business.title': 'Por Qué Esto Importa Para Su Negocio',
+    'piracy.business.copyright': 'Nuestros servicios abordan directamente este problema legal a través de eliminaciones de DMCA y herramientas de cumplimiento de derechos de autor.',
+    'piracy.business.plagiarism': 'Ofrecemos herramientas para detectar contenido copiado y garantizar la atribución adecuada para su trabajo.',
+    'piracy.business.contentTheft': 'Nuestra plataforma ayuda a monitorear, detectar y detener el uso no autorizado de su contenido digital.',
+    'piracy.business.protection': 'Cómo Influence Guard Protege Su Trabajo',
+    'piracy.business.monitoring': 'Monitoreo avanzado de contenido para detectar el uso no autorizado',
+    'piracy.business.dmca': 'Herramientas automatizadas de eliminación de DMCA para una acción rápida',
+    'piracy.business.detection': 'Detección de plagio en sitios web y redes sociales',
+    'piracy.business.fingerprinting': 'Huella digital para rastrear su propiedad intelectual',
+    'piracy.business.startProtecting': 'Comience a Proteger Su Contenido',
+    
+    // Key concepts sidebar
+    'piracy.keyConcepts.title': 'Conceptos Clave',
+    'piracy.keyConcepts.copyright': 'Violación legal de derechos exclusivos',
+    'piracy.keyConcepts.plagiarism': 'Usar el trabajo sin atribución',
+    'piracy.keyConcepts.contentTheft': 'Uso no autorizado de contenido digital',
+    'piracy.keyConcepts.dmca.title': 'Protección DMCA',
+    'piracy.keyConcepts.dmca.description': 'Marco legal para los derechos digitales',
+    'piracy.keyConcepts.protect.title': 'Proteja Su Trabajo Ahora',
+    'piracy.keyConcepts.protect.description': 'No espere hasta que le roben su contenido. Comience a monitorear y proteger su propiedad intelectual hoy mismo.',
+    'piracy.keyConcepts.getStarted': 'Comenzar',
   },
   fr: {
     'header.home': 'Accueil',
@@ -147,6 +303,84 @@ const translations: Record<Language, Record<string, string>> = {
     'stats.platformsMonitored': 'Plateformes Surveillées',
     'stats.contentProtected': 'Éléments de Contenu Protégés',
     'stats.successfulTakedowns': 'Suppressions Réussies',
+    
+    // Auth related messages
+    'auth.logoutSuccess': 'Vous avez été déconnecté avec succès',
+    'auth.logoutError': 'Un problème est survenu lors de la déconnexion',
+    
+    // Definition sections
+    'piracy.definition': 'Définition:',
+    'piracy.scope': 'Portée:',
+    'piracy.examples': 'Exemples:',
+    
+    // Copyright section
+    'piracy.copyright.title': 'Violation des Droits d\'Auteur',
+    'piracy.copyright.definition': 'L\'utilisation non autorisée de l\'œuvre protégée par le droit d\'auteur d\'une autre personne (par exemple, texte, images, vidéos, musique) d\'une manière qui viole les droits exclusifs du propriétaire.',
+    'piracy.copyright.scope': 'La violation du droit d\'auteur s\'applique aux œuvres originales fixées sur un support tangible, comme le contenu écrit, enregistré ou sauvegardé numériquement. Ces œuvres sont protégées par la loi sur le droit d\'auteur, y compris la loi sur le droit d\'auteur du millénaire numérique (DMCA) aux États-Unis.',
+    'piracy.copyright.examples': 'Les exemples courants incluent la copie et la republication d\'un article sans autorisation, l\'utilisation d\'une photographie dans un projet commercial sans licence et le partage de produits numériques sans l\'autorisation appropriée du créateur.',
+    
+    // Plagiarism section
+    'piracy.plagiarism.title': 'Plagiat',
+    'piracy.plagiarism.definition': 'Présenter le travail ou les idées de quelqu\'un d\'autre comme les vôtres sans attribution appropriée.',
+    'piracy.plagiarism.scope': 'Le plagiat concerne principalement l\'éthique et l\'intégrité académique plutôt que les droits légaux. Il peut se produire même si l\'œuvre n\'est pas protégée par le droit d\'auteur, par exemple lors de la copie de contenu du domaine public sans donner le crédit approprié.',
+    'piracy.plagiarism.examples': 'Soumettre le devoir de quelqu\'un d\'autre comme le vôtre, utiliser des citations sans citer la source ou réutiliser des idées sans reconnaître le créateur original sont tous des exemples de plagiat qui peuvent avoir de graves conséquences dans les milieux universitaires et professionnels.',
+    
+    // Content theft section
+    'piracy.contentTheft.title': 'Vol de Contenu',
+    'piracy.contentTheft.definition': 'La copie ou l\'utilisation non autorisée de contenu numérique (par exemple, articles de blog, images, vidéos).',
+    'piracy.contentTheft.scope': 'Le vol de contenu chevauche souvent la violation du droit d\'auteur, mais peut également inclure du contenu non protégé par le droit d\'auteur. L\'attention est portée sur l\'acte de voler plutôt que sur les implications juridiques spécifiques impliquées.',
+    'piracy.contentTheft.examples': 'Les exemples courants incluent le scraping de sites Web et la republication de leur contenu, le téléchargement et la redistribution de produits numériques payants ou la prise de captures d\'écran de contenu d\'adhésion et leur partage sans autorisation.',
+    
+    // Key differences section
+    'piracy.differences.title': 'Différences Clés',
+    'piracy.differences.aspect': 'Aspect',
+    'piracy.differences.plagiarism': 'Plagiat',
+    'piracy.differences.contentTheft': 'Vol de Contenu',
+    'piracy.differences.copyright': 'Violation des Droits d\'Auteur',
+    'piracy.differences.focus': 'Concentration',
+    'piracy.differences.focus.plagiarism': 'Éthique (attribution)',
+    'piracy.differences.focus.contentTheft': 'Acte de voler',
+    'piracy.differences.focus.copyright': 'Juridique (violation des droits)',
+    'piracy.differences.applies': 'S\'applique À',
+    'piracy.differences.applies.plagiarism': 'Tout travail (même non protégé par le droit d\'auteur)',
+    'piracy.differences.applies.contentTheft': 'Contenu numérique',
+    'piracy.differences.applies.copyright': 'Œuvres protégées par le droit d\'auteur',
+    'piracy.differences.consequences': 'Conséquences',
+    'piracy.differences.consequences.plagiarism': 'Académique ou professionnel',
+    'piracy.differences.consequences.contentTheft': 'Perte de revenus, réputation',
+    'piracy.differences.consequences.copyright': 'Actions en justice, amendes, suppressions DMCA',
+    
+    // Overlaps section
+    'piracy.overlaps.title': 'Comment Ils Se Chevauchent',
+    'piracy.overlaps.plagiarism.title': 'Le Plagiat Peut Entraîner une Violation des Droits d\'Auteur',
+    'piracy.overlaps.plagiarism.description': 'Si l\'œuvre plagiée est protégée par le droit d\'auteur, elle peut également constituer une violation légale.',
+    'piracy.overlaps.contentTheft.title': 'Le Vol de Contenu Implique Souvent une Violation des Droits d\'Auteur',
+    'piracy.overlaps.contentTheft.description': 'La plupart des contenus volés sont protégés par le droit d\'auteur, ce qui en fait à la fois un vol et une violation.',
+    'piracy.overlaps.notAll.title': 'Tout Plagiat N\'est Pas une Violation des Droits d\'Auteur',
+    'piracy.overlaps.notAll.description': 'Si l\'œuvre est dans le domaine public ou n\'est pas protégée par le droit d\'auteur, il s\'agit de plagiat mais pas de violation.',
+    
+    // Business impact section
+    'piracy.business.title': 'Pourquoi C\'est Important Pour Votre Entreprise',
+    'piracy.business.copyright': 'Nos services traitent directement de ce problème juridique grâce aux suppressions DMCA et aux outils d\'application des droits d\'auteur.',
+    'piracy.business.plagiarism': 'Nous offrons des outils pour détecter le contenu copié et garantir une attribution appropriée à votre travail.',
+    'piracy.business.contentTheft': 'Notre plateforme aide à surveiller, détecter et arrêter l\'utilisation non autorisée de votre contenu numérique.',
+    'piracy.business.protection': 'Comment Influence Guard Protège Votre Travail',
+    'piracy.business.monitoring': 'Surveillance avancée du contenu pour détecter toute utilisation non autorisée',
+    'piracy.business.dmca': 'Outils automatisés de suppression DMCA pour une action rapide',
+    'piracy.business.detection': 'Détection du plagiat sur les sites Web et les médias sociaux',
+    'piracy.business.fingerprinting': 'Empreinte digitale pour suivre votre propriété intellectuelle',
+    'piracy.business.startProtecting': 'Commencez à Protéger Votre Contenu',
+    
+    // Key concepts sidebar
+    'piracy.keyConcepts.title': 'Concepts Clés',
+    'piracy.keyConcepts.copyright': 'Violation légale des droits exclusifs',
+    'piracy.keyConcepts.plagiarism': 'Utilisation du travail sans attribution',
+    'piracy.keyConcepts.contentTheft': 'Utilisation non autorisée de contenu numérique',
+    'piracy.keyConcepts.dmca.title': 'Protection DMCA',
+    'piracy.keyConcepts.dmca.description': 'Cadre juridique pour les droits numériques',
+    'piracy.keyConcepts.protect.title': 'Protégez Votre Travail Maintenant',
+    'piracy.keyConcepts.protect.description': 'N\'attendez pas que votre contenu soit volé. Commencez à surveiller et à protéger votre propriété intellectuelle dès aujourd\'hui.',
+    'piracy.keyConcepts.getStarted': 'Commencer',
   },
   de: {
     'header.home': 'Startseite',
@@ -191,90 +425,21 @@ const translations: Record<Language, Record<string, string>> = {
     'stats.platformsMonitored': 'Überwachte Plattformen',
     'stats.contentProtected': 'Geschützte Inhaltselemente',
     'stats.successfulTakedowns': 'Erfolgreiche Entfernungen',
-  },
-  zh: {
-    'header.home': '首页',
-    'header.features': '功能',
-    'header.pricing': '价格',
-    'header.piracy': '盗版',
-    'header.about': '关于我们',
-    'header.login': '登录',
-    'header.signup': '注册',
-    'header.dashboard': '控制面板',
-    'header.logout': '登出',
-    'hero.title': '阻止内容盗窃 - 保护您的知识产权',
-    'hero.subtitle': '为需要数字版权管理和DMCA保护的内容创作者服务。我们定位您的照片、视频、文章和设计在哪里未经许可使用，为版权侵权案件提供详细证据。',
-    'language.en': 'English',
-    'language.es': 'Español',
-    'language.fr': 'Français',
-    'language.de': 'Deutsch',
-    'language.zh': '中文',
-    // Footer and other components
-    'footer.copyright': '版权所有',
-    'footer.privacyPolicy': '隐私政策',
-    'footer.terms': '服务条款',
-    'footer.cookiePolicy': 'Cookie政策',
-    // Content theft page
-    'piracy.title': '盗版和版权侵权',
-    'piracy.subtitle': '了解抄袭、内容盗窃和版权侵权之间的差异，以更好地保护您的知识产权。',
-    'piracy.protectButton': '保护您的内容',
-    'piracy.learnMore': '了解更多',
-    // Buttons and common elements
-    'button.learnMore': '了解更多',
-    'button.getStarted': '开始使用',
-    'button.viewPlans': '查看方案',
-    'button.upgradeNow': '立即升级',
-    // Search page
-    'search.title': '内容搜索',
-    'search.description': '使用我们强大的数字版权管理系统，在网络上查找未经授权使用您的知识产权的情况。我们先进的版权侵权检测有助于保护您的创意资产。',
-    'search.signup.required': '需要注册',
-    'search.signup.description': '您需要创建一个账户才能使用我们的内容盗窃检测功能。注册一个免费账户，开始每月3次搜索并确保DMCA合规。',
-    'search.signup.button': '立即注册',
-    // Stats and metrics
-    'stats.detectionAccuracy': '检测准确率',
-    'stats.platformsMonitored': '监控平台数量',
-    'stats.contentProtected': '受保护内容项目',
-    'stats.successfulTakedowns': '成功移除数量',
-  }
-};
-
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Get browser language or default to English
-  const getBrowserLanguage = (): Language => {
-    const browserLang = navigator.language.split('-')[0];
-    return (browserLang as Language) in translations ? (browserLang as Language) : 'en';
-  };
-
-  const [language, setLanguage] = useState<Language>(() => {
-    // Check localStorage first, then browser language
-    const savedLanguage = localStorage.getItem('language') as Language;
-    return savedLanguage && translations[savedLanguage] ? savedLanguage : getBrowserLanguage();
-  });
-
-  useEffect(() => {
-    // Save to localStorage when language changes
-    localStorage.setItem('language', language);
-    // Update html lang attribute
-    document.documentElement.lang = language;
-  }, [language]);
-
-  // Translation function
-  const t = (key: string): string => {
-    return translations[language][key] || translations['en'][key] || key;
-  };
-
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-// Custom hook to use the language context
-export const useLanguage = (): LanguageContextType => {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
-};
+    
+    // Auth related messages
+    'auth.logoutSuccess': 'Sie wurden erfolgreich abgemeldet',
+    'auth.logoutError': 'Beim Abmelden ist ein Problem aufgetreten',
+    
+    // Definition sections
+    'piracy.definition': 'Definition:',
+    'piracy.scope': 'Umfang:',
+    'piracy.examples': 'Beispiele:',
+    
+    // Copyright section
+    'piracy.copyright.title': 'Urheberrechtsverletzung',
+    'piracy.copyright.definition': 'Die unbefugte Nutzung des urheberrechtlich geschützten Werks einer anderen Person (z.B. Text, Bilder, Videos, Musik) in einer Weise, die die ausschließlichen Rechte des Eigentümers verletzt.',
+    'piracy.copyright.scope': 'Urheberrechtsverletzungen beziehen sich auf originale Werke, die in einem greifbaren Medium fixiert sind, wie geschriebene, aufgezeichnete oder digital gespeicherte Inhalte. Diese Werke sind durch das Urheberrecht geschützt, einschließlich des Digital Millennium Copyright Act (DMCA) in den Vereinigten Staaten.',
+    'piracy.copyright.examples': 'Häufige Beispiele sind das Kopieren und erneute Veröffentlichen eines Artikels ohne Erlaubnis, die Verwendung einer Fotografie in einem kommerziellen Projekt ohne Lizenz und das Teilen digitaler Produkte ohne ordnungsgemäße Genehmigung des Erstellers.',
+    
+    // Plagiarism section
+    'piracy.

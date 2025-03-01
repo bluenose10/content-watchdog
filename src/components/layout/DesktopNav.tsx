@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LanguageSelector } from "./LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface DesktopNavProps {
@@ -58,7 +57,6 @@ export function DesktopNav({
       </nav>
 
       <div className="hidden md:flex items-center gap-4">
-        <LanguageSelector />
         <ThemeToggle />
         
         {isAuthenticated ? (
