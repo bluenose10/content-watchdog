@@ -1,8 +1,7 @@
 
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0';
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,45 +15,60 @@ serve(async (req) => {
   }
 
   try {
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key is not configured');
-    }
-
     const { text, existingMatches } = await req.json();
     
-    if (!text) {
-      throw new Error('No text provided for analysis');
+    // If no text is provided, return an error
+    if (!text || text.length < 50) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Text is too short for analysis'
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
-
-    console.log(`Analyzing text (${text.length} characters) with OpenAI`);
     
-    // Create a system prompt that instructs the model on plagiarism detection
-    const systemPrompt = `
-You are an advanced plagiarism detection assistant. Your task is to analyze the given text for potential plagiarism.
-Focus on:
-1. Identifying text that appears to be directly copied from common sources
-2. Detecting paraphrased content that maintains the same meaning but uses different words
-3. Recognizing content that has distinctive style or terminology specific to known authors or sources
-4. Finding any academic or technical phrases that are likely taken from scholarly works
-
-If I provide information about existing matches found through search engines, incorporate this information in your analysis.
-`;
-
-    // Create a user prompt with the text to analyze and existing matches
-    let userPrompt = `Analyze the following text for potential plagiarism:\n\n${text}\n\n`;
+    // Get the OpenAI API key from environment variables
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    // Include information about existing matches if available
+    if (!openAIApiKey) {
+      console.log('OpenAI API key not found in environment variables');
+      throw new Error('OpenAI API key is required for AI analysis');
+    }
+    
+    // Prepare the prompt for GPT
+    // We'll include existing matches if available
+    let prompt = "Analyze the following text for potential plagiarism. ";
+    
     if (existingMatches && existingMatches.length > 0) {
-      userPrompt += "Here are matches already found through search engines:\n";
-      existingMatches.forEach((match, index) => {
-        userPrompt += `Match ${index + 1}: "${match.text}" (similarity: ${Math.round(match.similarity * 100)}%) from source: ${match.source}\n`;
+      prompt += "We've found these potential matches through web searches:\n\n";
+      
+      existingMatches.forEach((match: any, index: number) => {
+        prompt += `Match ${index + 1}: "${match.text}" (${Math.round(match.similarity * 100)}% similar, source: ${match.source})\n\n`;
       });
-      userPrompt += "\nGiven these existing matches, provide deeper analysis on potential plagiarism in the text.";
-    } else {
-      userPrompt += "No existing matches were found through search engines. Please provide your independent analysis on potential plagiarism.";
+      
+      prompt += "Based on these matches and your own analysis, ";
     }
+    
+    prompt += `Please analyze this text:
+    
+"${text.substring(0, 3000)}"${text.length > 3000 ? '...(text truncated for length)' : ''}
 
-    // Make request to OpenAI API
+Provide a detailed analysis including:
+1. Is this text likely original or plagiarized? Why?
+2. Are there any distinctive writing patterns that suggest plagiarism?
+3. If it appears plagiarized, what type of plagiarism might it be (direct copying, paraphrasing, etc.)?
+4. Provide a confidence score from 0-100% on your assessment.
+
+Format your response like this:
+Confidence Score: [0-100]%
+
+[Your detailed analysis here]
+`;
+    
+    console.log('Sending request to OpenAI API');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -62,70 +76,55 @@ If I provide information about existing matches found through search engines, in
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Using a smaller model for cost efficiency
+        model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: 'system', content: 'You are an expert academic integrity analyst specializing in detecting plagiarism. You provide detailed, objective analyses of text to determine if it contains plagiarized content.' },
+          { role: 'user', content: prompt }
         ],
-        temperature: 0.3, // Lower temperature for more focused analysis
-        max_tokens: 1000, // Limit response length
+        temperature: 0.7,
+        max_tokens: 1000,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
       console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      throw new Error(`OpenAI API error: ${errorData.error?.message || JSON.stringify(errorData)}`);
     }
-
-    const data = await response.json();
-    const aiAnalysis = data.choices[0].message.content;
     
-    // Calculate an AI confidence score (0-100) based on the analysis content
-    // This is a simplified approach - in a real system this would be more sophisticated
+    const completion = await response.json();
+    const aiAnalysis = completion.choices[0].message.content;
+    
+    // Extract confidence score from AI analysis
     let aiConfidenceScore = 0;
-    
-    if (aiAnalysis.toLowerCase().includes('highly likely') || 
-        aiAnalysis.toLowerCase().includes('clear evidence') ||
-        aiAnalysis.toLowerCase().includes('definitely plagiarized')) {
-      aiConfidenceScore = 85;
-    } else if (aiAnalysis.toLowerCase().includes('likely') || 
-               aiAnalysis.toLowerCase().includes('strong indication') ||
-               aiAnalysis.toLowerCase().includes('probable plagiarism')) {
-      aiConfidenceScore = 65;
-    } else if (aiAnalysis.toLowerCase().includes('possibly') || 
-               aiAnalysis.toLowerCase().includes('some indication') ||
-               aiAnalysis.toLowerCase().includes('potential plagiarism')) {
-      aiConfidenceScore = 40;
-    } else if (aiAnalysis.toLowerCase().includes('unlikely') || 
-               aiAnalysis.toLowerCase().includes('no clear evidence') ||
-               aiAnalysis.toLowerCase().includes('appears to be original')) {
-      aiConfidenceScore = 10;
-    } else {
-      aiConfidenceScore = 30; // Default moderate score
+    const confidenceMatch = aiAnalysis.match(/Confidence Score: (\d+)%/i);
+    if (confidenceMatch && confidenceMatch[1]) {
+      aiConfidenceScore = parseInt(confidenceMatch[1], 10);
     }
-
-    console.log('AI analysis completed successfully');
     
-    // Return the AI analysis and confidence score
-    return new Response(
-      JSON.stringify({
-        aiAnalysis,
-        aiConfidenceScore
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
-  } catch (error) {
-    console.error('Error in ai-plagiarism-analysis function:', error);
+    // Clean up the analysis text by removing the confidence score line
+    const cleanedAnalysis = aiAnalysis.replace(/Confidence Score: \d+%\s*/i, '').trim();
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred during AI plagiarism analysis' 
+        aiAnalysis: cleanedAnalysis, 
+        aiConfidenceScore 
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+    
+  } catch (error) {
+    console.error('Error in AI plagiarism analysis:', error);
+    
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || 'Internal server error during AI analysis' 
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
   }

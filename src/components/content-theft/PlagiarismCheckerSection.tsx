@@ -281,7 +281,7 @@ export const PlagiarismCheckerSection = () => {
         toast({
           title: "API Key Required",
           description: "An OpenAI API key is required for enhanced AI analysis. The check was completed with basic analysis only.",
-          variant: "warning"
+          variant: "default"
         });
       } else {
         toast({
