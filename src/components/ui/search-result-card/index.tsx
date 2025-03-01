@@ -28,10 +28,10 @@ export function SearchResultCard({
           {isPremium && !isFreePreview && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
               <div className="text-center p-4">
-                <Badge variant="premium" className="mb-2">Premium</Badge>
+                <Badge variant="secondary" className="mb-2">Premium</Badge>
                 <p className="text-xs text-white mb-2">Upgrade to view this result</p>
                 {onUpgrade && (
-                  <Button size="sm" onClick={onUpgrade} variant="premium">
+                  <Button size="sm" onClick={onUpgrade} variant="secondary">
                     Upgrade
                   </Button>
                 )}
@@ -51,7 +51,7 @@ export function SearchResultCard({
               {result.matchLevel && (
                 <Badge variant={
                   result.matchLevel === 'high' ? 'destructive' : 
-                  result.matchLevel === 'medium' ? 'warning' : 'outline'
+                  result.matchLevel === 'medium' ? 'secondary' : 'outline'
                 } className="ml-2">
                   {result.matchLevel} match
                 </Badge>

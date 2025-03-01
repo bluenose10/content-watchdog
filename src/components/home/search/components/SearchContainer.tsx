@@ -37,8 +37,6 @@ export function SearchContainer({
           onImageSearch={onImageSearch}
           isLoading={isLoading}
           isAuthenticated={isAuthenticated}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
         />
       </CardContent>
     </Card>
