@@ -4,8 +4,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Shield, FileCheck, AlertTriangle, RefreshCw, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const ProtectionToolsTab = () => {
+  const navigate = useNavigate();
+
+  const handleRedirectToSignup = () => {
+    navigate('/signup');
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
@@ -46,7 +53,12 @@ export const ProtectionToolsTab = () => {
                 </div>
               </div>
               <div className="mt-4">
-                <Button variant="secondary" size="sm" className="w-full">
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={handleRedirectToSignup}
+                >
                   <Settings className="h-4 w-4 mr-2" />
                   Adjust Monitoring Settings
                 </Button>
@@ -64,18 +76,35 @@ export const ProtectionToolsTab = () => {
                     <AlertTriangle className="h-4 w-4 text-yellow-600" />
                     <span className="text-sm font-medium">3 new matches found</span>
                   </div>
-                  <Button variant="outline" size="sm">View</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRedirectToSignup}
+                  >
+                    View
+                  </Button>
                 </div>
                 <div className="flex justify-between items-center p-2 bg-green-50 border border-green-100 rounded-md">
                   <div className="flex items-center gap-2">
                     <FileCheck className="h-4 w-4 text-green-600" />
                     <span className="text-sm font-medium">2 successful takedowns</span>
                   </div>
-                  <Button variant="outline" size="sm">View</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRedirectToSignup}
+                  >
+                    View
+                  </Button>
                 </div>
               </div>
               <div className="mt-4">
-                <Button variant="secondary" size="sm" className="w-full">
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={handleRedirectToSignup}
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Run Manual Scan
                 </Button>
@@ -111,7 +140,12 @@ export const ProtectionToolsTab = () => {
                   <p className="font-medium">Register Copyright</p>
                   <p className="text-sm text-muted-foreground">Formally register your work for legal protection</p>
                 </div>
-                <Button size="sm">Register</Button>
+                <Button 
+                  size="sm"
+                  onClick={handleRedirectToSignup}
+                >
+                  Register
+                </Button>
               </div>
               
               <div className="flex justify-between items-center p-3 border rounded-md">
@@ -119,7 +153,12 @@ export const ProtectionToolsTab = () => {
                   <p className="font-medium">Add Watermarks</p>
                   <p className="text-sm text-muted-foreground">Add watermarks to your content for easy identification</p>
                 </div>
-                <Button size="sm">Setup</Button>
+                <Button 
+                  size="sm"
+                  onClick={handleRedirectToSignup}
+                >
+                  Setup
+                </Button>
               </div>
               
               <div className="flex justify-between items-center p-3 border rounded-md">
@@ -127,7 +166,12 @@ export const ProtectionToolsTab = () => {
                   <p className="font-medium">Setup Automatic Takedowns</p>
                   <p className="text-sm text-muted-foreground">Enable automatic DMCA notices for detected content</p>
                 </div>
-                <Button size="sm">Enable</Button>
+                <Button 
+                  size="sm"
+                  onClick={handleRedirectToSignup}
+                >
+                  Enable
+                </Button>
               </div>
               
               <div className="flex justify-between items-center p-3 border rounded-md bg-muted/10">
