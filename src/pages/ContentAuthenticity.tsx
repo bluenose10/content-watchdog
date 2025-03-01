@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -100,8 +101,8 @@ export default function ContentAuthenticity() {
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 container max-w-6xl py-8 px-4 md:px-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold flex items-center gap-2">
+          <div className="mb-8 section-padding border-b border-border/40 pb-4">
+            <h1 className="text-3xl font-bold flex items-center gap-2 text-gradient">
               <Fingerprint className="h-8 w-8 text-primary" />
               Content Authenticity Verification
             </h1>
