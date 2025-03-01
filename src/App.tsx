@@ -37,7 +37,7 @@ function App() {
   const queryClient = new QueryClient()
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <LanguageProvider>
