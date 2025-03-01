@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -19,11 +18,8 @@ export const TakedownProcessTab = () => {
   };
 
   const handleNewRequest = () => {
-    toast({
-      title: "Feature coming soon",
-      description: "The ability to create custom takedown requests will be available soon.",
-      variant: "default"
-    });
+    setSelectedTemplate("standard");
+    setShowTakedownForm(true);
   };
 
   return (
