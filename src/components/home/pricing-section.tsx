@@ -2,7 +2,6 @@
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { PricingFeatureGrid } from "./pricing/PricingFeatureGrid";
 import { PricingCards } from "./pricing/PricingCards";
 
 export function PricingSection() {
@@ -44,8 +43,6 @@ export function PricingSection() {
             Choose the plan that fits your needs
           </p>
         </div>
-
-        <PricingFeatureGrid />
 
         <PricingCards onPlanClick={handlePlanClick} />
 
