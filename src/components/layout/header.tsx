@@ -5,6 +5,7 @@ import { DesktopNav } from "./DesktopNav";
 import { MobileMenuButton } from "./MobileMenuButton";
 import { MobileMenu } from "./MobileMenu";
 import { useHeaderLogic } from "./useHeaderLogic";
+import { LanguageSelector } from "./LanguageSelector";
 
 export function Header() {
   const {
@@ -29,12 +30,16 @@ export function Header() {
       <div className="container flex items-center justify-between">
         <Logo />
 
-        <DesktopNav 
-          isAuthenticated={isAuthenticated}
-          isLoggingOut={isLoggingOut}
-          navigateToSection={navigateToSection}
-          handleSignOut={handleSignOut}
-        />
+        <div className="flex items-center gap-2">
+          <LanguageSelector />
+          
+          <DesktopNav 
+            isAuthenticated={isAuthenticated}
+            isLoggingOut={isLoggingOut}
+            navigateToSection={navigateToSection}
+            handleSignOut={handleSignOut}
+          />
+        </div>
 
         <MobileMenuButton 
           isMobileMenuOpen={isMobileMenuOpen}

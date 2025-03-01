@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function useHeaderLogic() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,6 +12,7 @@ export function useHeaderLogic() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
 
   // We're adding this console log to debug auth state
@@ -55,7 +57,7 @@ export function useHeaderLogic() {
       await signOut();
       toast({
         title: "Success",
-        description: "You have been logged out successfully",
+        description: t('auth.logoutSuccess') || "You have been logged out successfully",
       });
       
       // Force a re-render by navigating to home page
@@ -64,7 +66,7 @@ export function useHeaderLogic() {
       console.error("Error signing out:", error);
       toast({
         title: "Error",
-        description: "There was a problem signing out",
+        description: t('auth.logoutError') || "There was a problem signing out",
         variant: "destructive",
       });
     } finally {
