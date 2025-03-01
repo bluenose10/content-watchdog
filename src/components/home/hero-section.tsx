@@ -12,25 +12,25 @@ export const HeroSection = () => {
       <div className="container px-4 md:px-6 flex flex-col items-center text-center space-y-6 md:space-y-8">
         <div className="space-y-3 md:space-y-4">
           <div className="inline-block animate-fade-in bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full px-3 py-1 text-xs md:text-sm font-medium text-purple-800 dark:text-purple-300 mb-2 mt-4 md:mt-0">
-            Content Protection for Creators
+            Advanced Plagiarism Detection & Content Protection
           </div>
           
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-tighter text-gradient max-w-3xl mx-auto animate-scale-in" style={{ animationDelay: "0.2s" }}>
-            Stop Content Theft in Its Tracks - Protect What's Yours.
+            Stop Content Theft in Its Tracks - Protect Your Intellectual Property.
           </h1>
         </div>
         
         <p className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto animate-scale-in" style={{ animationDelay: "0.4s" }}>
-          For Content Creators Needing DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, providing detailed evidence for your legal team to issue takedowns.
+          For Content Creators Needing Digital Rights Management and DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, providing detailed evidence for copyright infringement cases.
         </p>
         
         <p className="text-xs md:text-sm text-purple-600 dark:text-purple-400 max-w-2xl mx-auto animate-scale-in font-medium" style={{ animationDelay: "0.5s" }}>
-          Sign up for a free basic account to start searching - our free plan includes 4 searches per month so you can see what's out there.
+          Sign up for a free basic account to start our plagiarism detection service - our free plan includes 4 searches per month so you can see what's out there.
         </p>
         
         {/* Enhanced content protection section with workflow included */}
         <div className="w-full max-w-4xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl px-4 md:px-8 py-6 md:py-8 pt-10 md:pt-14 border border-purple-100 dark:border-purple-900/40 mt-8 md:mt-12 shadow-md hover:shadow-lg transition-shadow duration-300 purple-glow">
-          <h2 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-purple-800 dark:text-purple-400">Duplicate Content Detection & DMCA Services</h2>
+          <h2 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-purple-800 dark:text-purple-400">Duplicate Content Detection & DMCA Compliance Services</h2>
           
           {/* Core Services - Updated with specific examples */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left mb-12 md:mb-16">
@@ -42,7 +42,7 @@ export const HeroSection = () => {
                 <h3 className="font-medium text-sm md:text-base">DMCA Evidence</h3>
               </div>
               <p className="text-xs md:text-sm text-muted-foreground pl-12">
-                We provide comprehensive findings for your legal team to use when issuing DMCA takedowns, with detailed proof of infringement
+                We provide comprehensive findings for your legal team to use when issuing DMCA takedowns, with detailed proof of copyright infringement
               </p>
             </div>
             <div className="flex flex-col space-y-2 md:space-y-3">
@@ -50,10 +50,10 @@ export const HeroSection = () => {
                 <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full mr-3">
                   <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600 dark:text-blue-500" />
                 </div>
-                <h3 className="font-medium text-sm md:text-base">Stolen Content Finder</h3>
+                <h3 className="font-medium text-sm md:text-base">Plagiarism Detection</h3>
               </div>
               <p className="text-xs md:text-sm text-muted-foreground pl-12">
-                Our specialized search finds where others have duplicated your content, even when they've slightly modified it
+                Our specialized search technology finds where others have duplicated your content, even when they've slightly modified it
               </p>
             </div>
             <div className="flex flex-col space-y-2 md:space-y-3">
@@ -61,10 +61,10 @@ export const HeroSection = () => {
                 <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-full mr-3">
                   <FileCheck className="h-4 w-4 md:h-5 md:w-5 text-indigo-700 dark:text-indigo-500" />
                 </div>
-                <h3 className="font-medium text-sm md:text-base">Creator Protection</h3>
+                <h3 className="font-medium text-sm md:text-base">IP Protection</h3>
               </div>
               <p className="text-xs md:text-sm text-muted-foreground pl-12">
-                Made specifically for content creators who need comprehensive evidence to support their legal team's DMCA actions
+                Made specifically for creators who need comprehensive intellectual property monitoring and evidence to support DMCA actions
               </p>
             </div>
           </div>
@@ -72,7 +72,7 @@ export const HeroSection = () => {
           {/* How It Works Section - Restyled for better visual hierarchy */}
           <div>
             <div className="mb-6 md:mb-8 py-2 relative">
-              <h3 className="text-base md:text-lg font-medium text-center">How Our DMCA Protection Works</h3>
+              <h3 className="text-base md:text-lg font-medium text-center">How Our Copyright Protection Works</h3>
               <div className="absolute left-0 right-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-purple-300 dark:via-purple-700 to-transparent"></div>
             </div>
             
@@ -82,10 +82,10 @@ export const HeroSection = () => {
                   <div className="flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 mr-3 shadow-sm">
                     <Search className="h-5 w-5 md:h-6 md:w-6 text-purple-700 dark:text-purple-400" />
                   </div>
-                  <h4 className="font-medium text-sm md:text-base text-purple-800 dark:text-purple-400">1. Find Duplicates</h4>
+                  <h4 className="font-medium text-sm md:text-base text-purple-800 dark:text-purple-400">1. Detect Content Theft</h4>
                 </div>
                 <p className="text-xs md:text-sm text-muted-foreground pl-[55px] md:pl-[60px]">
-                  Our search technology locates where your content has been duplicated across websites and social platforms, identifying unauthorized copies of your work.
+                  Our plagiarism detection technology locates where your content has been duplicated across websites and social platforms, identifying unauthorized copies of your intellectual property.
                 </p>
               </div>
               
@@ -94,7 +94,7 @@ export const HeroSection = () => {
                   <div className="flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mr-3 shadow-sm">
                     <Bell className="h-5 w-5 md:h-6 md:w-6 text-blue-700 dark:text-blue-400" />
                   </div>
-                  <h4 className="font-medium text-sm md:text-base text-blue-700 dark:text-blue-400">2. Verify Usage</h4>
+                  <h4 className="font-medium text-sm md:text-base text-blue-700 dark:text-blue-400">2. Verify Copyright Infringement</h4>
                 </div>
                 <p className="text-xs md:text-sm text-muted-foreground pl-[55px] md:pl-[60px]">
                   Review our detailed reports showing where your content appears without permission, with screenshots and links to where each unauthorized duplicate was found.
@@ -106,10 +106,10 @@ export const HeroSection = () => {
                   <div className="flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mr-3 shadow-sm">
                     <UserCheck className="h-5 w-5 md:h-6 md:w-6 text-indigo-700 dark:text-indigo-400" />
                   </div>
-                  <h4 className="font-medium text-sm md:text-base text-indigo-700 dark:text-indigo-400">3. Prepare Evidence</h4>
+                  <h4 className="font-medium text-sm md:text-base text-indigo-700 dark:text-indigo-400">3. Enforce Digital Rights</h4>
                 </div>
                 <p className="text-xs md:text-sm text-muted-foreground pl-[55px] md:pl-[60px]">
-                  We compile comprehensive documentation for your legal team to use when issuing DMCA takedowns, saving your solicitors time in preparing strong cases.
+                  We compile comprehensive documentation for your legal team to use when issuing DMCA takedowns, ensuring proper copyright enforcement and compliance.
                 </p>
               </div>
             </div>
