@@ -56,6 +56,9 @@ export const Header = () => {
         <div className="flex items-center gap-3">
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-2">
+            {/* Theme Toggle moved before auth buttons */}
+            <ThemeToggle />
+            
             {isLoggedIn ? (
               <>
                 <Button variant="ghost" size="icon" onClick={logout} title="Log out">
@@ -77,65 +80,68 @@ export const Header = () => {
             )}
           </div>
           
-          <ThemeToggle />
-          
-          {/* Mobile Menu Button */}
-          <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0">
-              <div className="py-6 px-4">
-                <nav className="flex flex-col space-y-3">
-                  <Link to="/" className="text-lg font-medium py-2 border-b border-border">
-                    Home
-                  </Link>
-                  <Link to="/#features" className="text-lg font-medium py-2 border-b border-border">
-                    Features
-                  </Link>
-                  <Link to="/#pricing" className="text-lg font-medium py-2 border-b border-border">
-                    Pricing
-                  </Link>
-                  <Link to="/piracy" className="text-lg font-medium py-2 border-b border-border">
-                    Piracy
-                  </Link>
-                  <Link to="/contact" className="text-lg font-medium py-2 border-b border-border">
-                    About
-                  </Link>
-                </nav>
-                
-                <div className="mt-6 space-y-3">
-                  {isLoggedIn ? (
-                    <>
-                      <Button asChild className="w-full">
-                        <Link to="/dashboard">Dashboard</Link>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="w-full flex items-center justify-center gap-2"
-                        onClick={logout}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Log out
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to="/login">Log in</Link>
-                      </Button>
-                      <Button asChild className="w-full">
-                        <Link to="/signup">Sign up</Link>
-                      </Button>
-                    </>
-                  )}
+          {/* Mobile Theme Toggle and Menu Button */}
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
+            
+            {/* Mobile Menu Button */}
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0">
+                <div className="py-6 px-4">
+                  <nav className="flex flex-col space-y-3">
+                    <Link to="/" className="text-lg font-medium py-2 border-b border-border">
+                      Home
+                    </Link>
+                    <Link to="/#features" className="text-lg font-medium py-2 border-b border-border">
+                      Features
+                    </Link>
+                    <Link to="/#pricing" className="text-lg font-medium py-2 border-b border-border">
+                      Pricing
+                    </Link>
+                    <Link to="/piracy" className="text-lg font-medium py-2 border-b border-border">
+                      Piracy
+                    </Link>
+                    <Link to="/contact" className="text-lg font-medium py-2 border-b border-border">
+                      About
+                    </Link>
+                  </nav>
+                  
+                  <div className="mt-6 space-y-3">
+                    {isLoggedIn ? (
+                      <>
+                        <Button asChild className="w-full">
+                          <Link to="/dashboard">Dashboard</Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="w-full flex items-center justify-center gap-2"
+                          onClick={logout}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Log out
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button asChild variant="outline" className="w-full">
+                          <Link to="/login">Log in</Link>
+                        </Button>
+                        <Button asChild className="w-full">
+                          <Link to="/signup">Sign up</Link>
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>
