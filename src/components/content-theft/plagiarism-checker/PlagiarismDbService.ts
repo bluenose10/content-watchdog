@@ -1,13 +1,12 @@
 
 import { supabase } from "@/lib/supabase";
 import { PlagiarismResult } from "./PlagiarismChecker";
-import { type Toast } from "@/hooks/use-toast";
 
 export const savePlagiarismResultsToDatabase = async (
   results: PlagiarismResult, 
   fileName: string,
   userId: string,
-  toast: (props: Toast) => void
+  toast: (props: { title: string; description: string; variant?: "default" | "destructive" | "success" }) => void
 ): Promise<void> => {
   try {
     const { data: searchQuery, error: searchQueryError } = await supabase

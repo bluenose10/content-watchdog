@@ -34,7 +34,7 @@ export const PlagiarismCheckerSection = () => {
     
     setIsDownloading(true);
     try {
-      await generatePlagiarismPdfReport(results, file.name, toast.toast);
+      await generatePlagiarismPdfReport(results, file.name, toast);
     } catch (error) {
       // Error handling is done inside the generatePlagiarismPdfReport function
       console.error("Error in downloadPdf:", error);
@@ -48,7 +48,7 @@ export const PlagiarismCheckerSection = () => {
     
     setIsUploading(true);
     try {
-      const plagiarismResults = await uploadAndCheckPlagiarism(file, user?.id, toast.toast);
+      const plagiarismResults = await uploadAndCheckPlagiarism(file, user?.id, toast);
       setResults(plagiarismResults);
     } catch (error) {
       // Error handling is done inside the uploadAndCheckPlagiarism function
