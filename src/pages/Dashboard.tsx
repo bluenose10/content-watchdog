@@ -63,8 +63,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container px-4 py-12">
-        <div className="flex items-center gap-4 mb-8 pt-8">
+      <main className="flex-grow container px-4 py-16">
+        <div className="flex items-center gap-4 mb-8 pt-12">
           <Avatar className="h-16 w-16 border-2 border-primary/10">
             <AvatarImage src={avatarUrl} alt={fullName} />
             <AvatarFallback className="bg-primary text-primary-foreground">

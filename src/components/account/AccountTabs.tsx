@@ -14,7 +14,7 @@ export function AccountTabs() {
 
   return (
     <Tabs defaultValue="profile" className="w-full">
-      <TabsList className="mb-8">
+      <TabsList className="mb-8 mt-6">
         <TabsTrigger value="profile" className="flex items-center gap-2">
           <UserRound size={16} />
           Profile
