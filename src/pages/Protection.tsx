@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -6,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Shield, FileCheck, AlertTriangle, Mail, RefreshCw, Settings, HelpCircle, ExternalLink } from "lucide-react";
+import { Shield, FileCheck, AlertTriangle, Mail, RefreshCw, Settings, HelpCircle, ExternalLink, Zap } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { LoadingState } from "@/components/dashboard/LoadingState";
@@ -206,13 +207,21 @@ export default function Protection() {
           <TabsContent value="takedowns">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-primary" />
-                  <span>DMCA Takedown Process</span>
-                </CardTitle>
-                <CardDescription>
-                  How to get unauthorized copies of your content removed
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-primary" />
+                      <span>DMCA Takedown Process</span>
+                    </CardTitle>
+                    <CardDescription>
+                      How to get unauthorized copies of your content removed
+                    </CardDescription>
+                  </div>
+                  <Badge variant="outline" className="flex items-center gap-1 bg-purple-50 text-purple-700 border-purple-200">
+                    <Zap className="h-3 w-3" />
+                    Automated Filing Available
+                  </Badge>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
@@ -243,9 +252,20 @@ export default function Protection() {
                       </div>
                       <h3 className="font-medium mb-2">Submit & Track</h3>
                       <p className="text-sm text-muted-foreground">
-                        We submit the notice and track the removal process for you.
+                        We'll automatically submit the notice and track the removal process for you.
                       </p>
                     </div>
+                  </div>
+                  
+                  <div className="flex gap-4 justify-center">
+                    <Button 
+                      variant="default" 
+                      className="flex items-center gap-2"
+                      onClick={handleNewTakedownRequest}
+                    >
+                      <Zap className="h-4 w-4" />
+                      Start Automated DMCA Filing
+                    </Button>
                   </div>
                   
                   <Alert className="bg-amber-50 border-amber-200">
@@ -303,16 +323,6 @@ export default function Protection() {
                             Use Template
                           </Button>
                         </div>
-                      </div>
-                      
-                      <div className="mt-4">
-                        <Button 
-                          className="w-full"
-                          onClick={handleNewTakedownRequest}
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          Start New Takedown Request
-                        </Button>
                       </div>
                     </div>
                   </div>

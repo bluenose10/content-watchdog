@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, FileClock, FileCheck, Search, User, Shield, Fingerprint } from "lucide-react";
+import { BarChart3, FileClock, FileCheck, Search, User, Shield, Fingerprint, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function QuickActions() {
@@ -57,6 +57,15 @@ export function QuickActions() {
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium">Plagiarism</span>
                 <span className="text-xs text-muted-foreground">Check content</span>
+              </div>
+            </Link>
+          </Button>
+          <Button variant="secondary" className="justify-start h-auto py-3 px-4 bg-gradient-to-r from-red-500/5 to-amber-500/5 hover:from-red-500/10 hover:to-amber-500/10" asChild>
+            <Link to="/protection?tab=takedowns">
+              <AlertTriangle className="mr-2 h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium">DMCA Filing</span>
+                <span className="text-xs text-muted-foreground">Submit takedowns</span>
               </div>
             </Link>
           </Button>
