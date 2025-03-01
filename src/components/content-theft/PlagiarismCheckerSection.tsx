@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { FileUploader } from "./plagiarism-checker/FileUploader";
@@ -11,7 +11,46 @@ export const PlagiarismCheckerSection = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [results, setResults] = useState<PlagiarismResult | null>(null);
+  const [isBucketChecked, setIsBucketChecked] = useState(false);
   const { toast } = useToast();
+
+  // Check if the required bucket exists on component mount
+  useEffect(() => {
+    const checkAndCreateBucket = async () => {
+      try {
+        const { data: buckets, error } = await supabase.storage.listBuckets();
+        
+        if (error) {
+          console.error("Error checking buckets:", error);
+          setIsBucketChecked(true);
+          return;
+        }
+        
+        const tempUploadsBucketExists = buckets.some(bucket => bucket.name === 'temp-uploads');
+        
+        if (!tempUploadsBucketExists) {
+          console.log("temp-uploads bucket doesn't exist, attempting to create it...");
+          
+          // Call the edge function to create the bucket
+          const { data, error: createError } = await supabase.functions.invoke('create_bucket', {
+            body: { bucketName: 'temp-uploads' }
+          });
+          
+          if (createError) {
+            console.error("Failed to create temp-uploads bucket:", createError);
+          } else {
+            console.log("Bucket creation response:", data);
+          }
+        }
+      } catch (error) {
+        console.error("Error in bucket check:", error);
+      } finally {
+        setIsBucketChecked(true);
+      }
+    };
+    
+    checkAndCreateBucket();
+  }, []);
 
   const uploadAndCheckPlagiarism = async () => {
     if (!file) return;
@@ -32,10 +71,42 @@ export const PlagiarismCheckerSection = () => {
         
       if (uploadError) {
         console.error('Upload error:', uploadError);
-        throw new Error(`Upload failed: ${uploadError.message}`);
+        
+        // If bucket not found, attempt to create it and retry once
+        if (uploadError.message.includes('bucket') && uploadError.message.includes('not found')) {
+          console.log("Bucket not found, attempting to create it and retry...");
+          
+          // Call the edge function to create the bucket
+          const { error: createError } = await supabase.functions.invoke('create_bucket', {
+            body: { bucketName: 'temp-uploads' }
+          });
+          
+          if (createError) {
+            console.error("Failed to create bucket:", createError);
+            toast({
+              title: "Storage setup failed",
+              description: "Could not set up the required storage. Please try again later or contact support.",
+              variant: "destructive"
+            });
+            return;
+          }
+          
+          // Retry the upload after creating the bucket
+          console.log("Retrying upload after bucket creation...");
+          const { error: retryError } = await supabase.storage
+            .from('temp-uploads')
+            .upload(filePath, file);
+            
+          if (retryError) {
+            console.error("Retry upload error:", retryError);
+            throw new Error(`Upload failed after bucket creation: ${retryError.message}`);
+          }
+        } else {
+          throw new Error(`Upload failed: ${uploadError.message}`);
+        }
       }
       
-      console.log('File uploaded successfully:', uploadData);
+      console.log('File uploaded successfully');
       
       // Extract text from the file
       let fileText;
