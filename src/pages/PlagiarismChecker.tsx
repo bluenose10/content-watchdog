@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/ui/sidebar";
 import { PlagiarismCheckerSection } from "@/components/content-theft/PlagiarismCheckerSection";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { LoadingState } from "@/components/dashboard/LoadingState";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, BrainCircuit } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -60,7 +60,13 @@ export default function PlagiarismChecker() {
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-grow container max-w-7xl mx-auto pt-24 pb-12 px-4 sm:px-6">
-          <h1 className="text-2xl font-bold mb-8 text-gradient">Plagiarism Checker</h1>
+          <div className="flex items-center gap-2 mb-8">
+            <h1 className="text-2xl font-bold text-gradient">Plagiarism Checker</h1>
+            <div className="flex items-center bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-xs px-2.5 py-1 rounded-full">
+              <BrainCircuit className="w-3.5 h-3.5 mr-1" />
+              <span>AI-powered</span>
+            </div>
+          </div>
           
           {accessLevel === 'basic' && (
             <Alert className="mb-8 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
