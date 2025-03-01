@@ -1,4 +1,3 @@
-
 import { QueuedRequest, SearchEngineConfig } from './search-types';
 import { quotaManager } from './quota-manager';
 import { requestQueue } from './request-queue';
@@ -63,6 +62,10 @@ export class SearchApiManager {
     }
   }
   
+  public canMakeRequest(engine: string): boolean {
+    return quotaManager.canMakeRequest(engine);
+  }
+  
   public async executeWithThrottling<T>(
     apiType: string,
     executeFunc: () => Promise<T>,
@@ -122,9 +125,6 @@ export class SearchApiManager {
     return executeFunc();
   }
   
-  /**
-   * Execute a search with all optimizations applied across multiple engines
-   */
   public async optimizedSearch(
     type: string,
     query: string,
@@ -232,9 +232,6 @@ export class SearchApiManager {
     return this.executeWithThrottling(engine, executeSearch);
   }
   
-  /**
-   * Get stats about available search engines
-   */
   public getSearchEngineStats(): any {
     const stats: Record<string, any> = {};
     
@@ -253,12 +250,10 @@ export class SearchApiManager {
     return stats;
   }
   
-  // Set user priority based on subscription tier
   public setPriorityMode(userId: string, isPriority: boolean): void {
     requestQueue.setPriorityMode(userId, isPriority);
   }
   
-  // Check if a user has priority
   public hasUserPriority(userId: string): boolean {
     return requestQueue.hasUserPriority(userId);
   }
