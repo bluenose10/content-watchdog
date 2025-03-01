@@ -1,6 +1,6 @@
 
 import { searchApiManager } from './search/search-api-manager';
-import { getCacheKey, getCachedResults, cacheResults } from './search-cache';
+import { getCacheKey, getCachedResults, cacheResults } from './cache/index';
 
 // Export convenience methods
 export const optimizedSearch = (

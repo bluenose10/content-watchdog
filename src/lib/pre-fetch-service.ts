@@ -1,5 +1,5 @@
 
-import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/search-cache';
+import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/cache/index';
 import { getRecentSearches } from '@/lib/db-service';
 import { searchApiManager, optimizedSearch } from '@/lib/google-api-manager';
 
@@ -45,7 +45,9 @@ const isLowSystemLoad = (): boolean => {
  * We check both Google and Bing search availability
  */
 const hasAvailableQuota = (): boolean => {
-  return searchApiManager.canMakeRequest('google') || searchApiManager.canMakeRequest('bing');
+  // Fix: Use quota manager directly to check if requests can be made
+  const stats = searchApiManager.getSearchEngineStats();
+  return stats.google?.canMakeRequests || stats.bing?.canMakeRequests;
 };
 
 /**
