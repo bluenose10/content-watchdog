@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Layout } from '@/components/layout/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { PreFetchManager } from '@/components/monitoring/PreFetchManager';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useProtectedRoute, AccessLevel } from '@/hooks/useProtectedRoute';
+import { AccessLevel, useProtectedRoute } from '@/hooks/useProtectedRoute';
 
 export default function Monitoring() {
   // Get cache statistics

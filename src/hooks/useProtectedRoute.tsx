@@ -5,31 +5,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { getUserSubscription } from '@/lib/db-service';
 import { PROTECTED_ROUTES } from '@/lib/constants';
+import { AccessLevel, PremiumFeature, ProtectedRouteResult } from './types/authTypes';
+import { checkFeatureAccess } from './utils/featureUtils';
 
-// Define an enum for access levels
-export enum AccessLevel {
-  ANONYMOUS = 'anonymous',  // Not logged in
-  BASIC = 'basic',         // Logged in with free account
-  PREMIUM = 'premium',     // Paid account
-  ADMIN = 'admin'          // Admin user
-}
-
-export enum PremiumFeature {
-  UNLIMITED_RESULTS = 'unlimited_results',
-  SCHEDULED_SEARCHES = 'scheduled_searches',
-  ADVANCED_MONITORING = 'advanced_monitoring',
-  EXPORT_RESULTS = 'export_results'
-}
-
-export interface ProtectedRouteResult {
-  user: any;
-  loading: boolean;
-  accessLevel: AccessLevel;
-  isReady: boolean;
-  hasPremiumFeature: (feature: PremiumFeature) => boolean;
-  premiumFeaturesLoading: boolean;
-  isAdmin: boolean;
-}
+export { AccessLevel, PremiumFeature };
+export type { ProtectedRouteResult };
 
 export const useProtectedRoute = (
   requiresAuth: boolean = true,
@@ -58,23 +38,7 @@ export const useProtectedRoute = (
 
   // Function to check if user has a specific premium feature
   const hasPremiumFeature = (feature: PremiumFeature): boolean => {
-    // Admin users have access to all premium features
-    if (isAdmin) return true;
-    
-    if (accessLevel !== AccessLevel.PREMIUM && accessLevel !== AccessLevel.ADMIN) return false;
-
-    switch (feature) {
-      case PremiumFeature.UNLIMITED_RESULTS:
-        return subscription?.plans?.result_limit === -1;
-      case PremiumFeature.SCHEDULED_SEARCHES:
-        return (subscription?.plans?.scheduled_search_limit || 0) > 0;
-      case PremiumFeature.ADVANCED_MONITORING:
-        return subscription?.plans?.monitoring_limit > 0;
-      case PremiumFeature.EXPORT_RESULTS:
-        return true; // Assuming all premium plans have export capability
-      default:
-        return false;
-    }
+    return checkFeatureAccess(feature, isAdmin, subscription);
   };
 
   useEffect(() => {
