@@ -6,15 +6,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeft, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export interface TakedownFormProps {
   templateType?: "standard" | "social" | "hosting";
   onBack: () => void;
+  redirectToSignup?: boolean;
 }
 
-export const TakedownForm = ({ templateType = "standard", onBack }: TakedownFormProps) => {
+export const TakedownForm = ({ 
+  templateType = "standard", 
+  onBack,
+  redirectToSignup = false
+}: TakedownFormProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Handle redirect if needed
+  if (redirectToSignup) {
+    navigate('/signup');
+    return null;
+  }
   
   // Pre-filled content based on template type
   const getTemplateContent = () => {

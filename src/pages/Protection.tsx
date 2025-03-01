@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TakedownForm } from "@/components/protection/TakedownForm";
+import { useNavigate } from "react-router-dom";
 
 export default function Protection() {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ export default function Protection() {
   const [isLoading, setIsLoading] = useState(false);
   const [showTakedownForm, setShowTakedownForm] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<"standard" | "social" | "hosting" | null>(null);
+  const navigate = useNavigate();
   
   if (!isReady || isLoading) {
     return <LoadingState />;
@@ -31,14 +33,9 @@ export default function Protection() {
   const avatarUrl = user?.user_metadata?.avatar_url;
   const userInitials = getInitials(fullName);
 
-  const handleTemplateSelect = (type: "standard" | "social" | "hosting") => {
-    setSelectedTemplate(type);
-    setShowTakedownForm(true);
-  };
-
-  const handleNewTakedownRequest = () => {
-    setSelectedTemplate("standard");
-    setShowTakedownForm(true);
+  // Instead of showing the form, redirect to signup
+  const handleRedirectToSignup = () => {
+    navigate('/signup');
   };
 
   return (
@@ -270,7 +267,7 @@ export default function Protection() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleTemplateSelect("standard")}
+                            onClick={handleRedirectToSignup}
                           >
                             Use Template
                           </Button>
@@ -284,7 +281,7 @@ export default function Protection() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleTemplateSelect("social")}
+                            onClick={handleRedirectToSignup}
                           >
                             Use Template
                           </Button>
@@ -298,7 +295,7 @@ export default function Protection() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleTemplateSelect("hosting")}
+                            onClick={handleRedirectToSignup}
                           >
                             Use Template
                           </Button>
@@ -308,7 +305,7 @@ export default function Protection() {
                       <div className="mt-4">
                         <Button 
                           className="w-full"
-                          onClick={handleNewTakedownRequest}
+                          onClick={handleRedirectToSignup}
                         >
                           <Mail className="h-4 w-4 mr-2" />
                           Start New Takedown Request
@@ -436,6 +433,7 @@ export default function Protection() {
       </main>
       <Footer />
 
+      {/* We'll keep this dialog but use it only for educational purposes if needed */}
       <Dialog open={showTakedownForm} onOpenChange={setShowTakedownForm}>
         <DialogContent className="max-w-2xl">
           {selectedTemplate && (
