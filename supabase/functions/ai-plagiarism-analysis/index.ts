@@ -1,12 +1,13 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0';
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -15,115 +16,158 @@ serve(async (req) => {
   }
 
   try {
-    const { text, existingMatches } = await req.json();
-    
-    // If no text is provided, return an error
-    if (!text || text.length < 50) {
+    if (!OPENAI_API_KEY) {
       return new Response(
-        JSON.stringify({ 
-          error: 'Text is too short for analysis'
+        JSON.stringify({
+          aiAnalysis: "AI analysis is currently unavailable (API key not configured).",
+          aiConfidenceScore: 0,
         }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { text, existingMatches, performAuthenticityCheck } = await req.json();
+    
+    if (!text || text.length < 10) {
+      return new Response(
+        JSON.stringify({ error: "Text is too short for analysis" }),
         { 
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
     }
+
+    console.log(`Analyzing text of length ${text.length} chars with ${existingMatches?.length || 0} existing matches`);
+    console.log(`Authenticity check requested: ${performAuthenticityCheck ? 'Yes' : 'No'}`);
     
-    // Get the OpenAI API key from environment variables
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    
-    if (!openAIApiKey) {
-      console.log('OpenAI API key not found in environment variables');
-      throw new Error('OpenAI API key is required for AI analysis');
-    }
-    
-    // Prepare the prompt for GPT
-    // We'll include existing matches if available
-    let prompt = "Analyze the following text for potential plagiarism. ";
-    
-    if (existingMatches && existingMatches.length > 0) {
-      prompt += "We've found these potential matches through web searches:\n\n";
+    // We'll run plagiarism analysis first
+    const plagiarismAnalysisPrompt = `
+      As an expert in plagiarism detection, analyze the following text and the potential matches that were found through automated searching.
       
-      existingMatches.forEach((match: any, index: number) => {
-        prompt += `Match ${index + 1}: "${match.text}" (${Math.round(match.similarity * 100)}% similar, source: ${match.source})\n\n`;
-      });
+      Text to analyze:
+      "${text.substring(0, 3000)}${text.length > 3000 ? '... (truncated)' : ''}"
       
-      prompt += "Based on these matches and your own analysis, ";
-    }
-    
-    prompt += `Please analyze this text:
-    
-"${text.substring(0, 3000)}"${text.length > 3000 ? '...(text truncated for length)' : ''}
+      ${existingMatches && existingMatches.length > 0 ? `
+      Potential matches found:
+      ${existingMatches.map((match, i) => 
+        `Match ${i+1}: "${match.text}" (Source: ${match.source}, Similarity: ${Math.round(match.similarity * 100)}%)`
+      ).join('\n')}
+      ` : 'No significant matches were found through automated searching.'}
+      
+      Analyze the probability that this text contains plagiarized content. Consider:
+      1. The specificity and uniqueness of phrases
+      2. Writing style consistency
+      3. Technical terminology usage
+      4. The relevance and quality of the matches found
+      5. The overall context and subject matter
+      
+      Provide:
+      1. A detailed analysis of potential plagiarism
+      2. A confidence score from 0-100 representing how likely the text contains plagiarized content
+      
+      Format your response as JSON with keys 'aiAnalysis' (string) and 'aiConfidenceScore' (number).
+    `;
 
-Provide a detailed analysis including:
-1. Is this text likely original or plagiarized? Why?
-2. Are there any distinctive writing patterns that suggest plagiarism?
-3. If it appears plagiarized, what type of plagiarism might it be (direct copying, paraphrasing, etc.)?
-4. Provide a confidence score from 0-100% on your assessment.
-
-Format your response like this:
-Confidence Score: [0-100]%
-
-[Your detailed analysis here]
-`;
-    
-    console.log('Sending request to OpenAI API');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call OpenAI for plagiarism analysis
+    const plagiarismResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an expert academic integrity analyst specializing in detecting plagiarism. You provide detailed, objective analyses of text to determine if it contains plagiarized content.' },
-          { role: 'user', content: prompt }
+          { role: 'system', content: 'You are an expert in plagiarism detection and content analysis.' },
+          { role: 'user', content: plagiarismAnalysisPrompt }
         ],
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
+        temperature: 0.3,
+        response_format: { type: 'json_object' }
+      })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || JSON.stringify(errorData)}`);
+    if (!plagiarismResponse.ok) {
+      const errorText = await plagiarismResponse.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error(`OpenAI API error: ${plagiarismResponse.status} ${errorText}`);
+    }
+
+    const plagiarismData = await plagiarismResponse.json();
+    const plagiarismResults = JSON.parse(plagiarismData.choices[0].message.content);
+    
+    let authenticityCheck = null;
+    
+    // If authenticity verification is requested, perform it
+    if (performAuthenticityCheck) {
+      console.log("Performing additional authenticity verification");
+      
+      const authenticityPrompt = `
+        As a content authenticity expert, please analyze the following text to determine:
+        1. Whether it was likely written by a human or generated by AI
+        2. Its originality score
+        3. Any indications of manipulation or plagiarism
+        
+        Text to analyze:
+        "${text.substring(0, 2000)}${text.length > 2000 ? '... (truncated)' : ''}"
+        
+        Provide the following information:
+        - Is the content likely authentic human-created content?
+        - What is the probability it was AI-generated (0.0 to 1.0)?
+        - What is the probability it has been manipulated or plagiarized (0.0 to 1.0)?
+        - What is the originality score (0.0 to 1.0)?
+        - A detailed explanation of your findings
+        
+        Format your analysis as JSON with keys: isAuthentic (boolean), aiGeneratedProbability (float), manipulationProbability (float), originalityScore (float), detailsText (string), verificationMethod (string).
+      `;
+      
+      // Call OpenAI for authenticity verification
+      const authenticityResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: 'You are an expert in content authenticity verification.' },
+            { role: 'user', content: authenticityPrompt }
+          ],
+          temperature: 0.2,
+          response_format: { type: 'json_object' }
+        })
+      });
+      
+      if (authenticityResponse.ok) {
+        const authenticityData = await authenticityResponse.json();
+        authenticityCheck = JSON.parse(authenticityData.choices[0].message.content);
+        console.log("Authenticity verification completed successfully");
+      } else {
+        console.error("Authenticity verification failed:", await authenticityResponse.text());
+      }
     }
     
-    const completion = await response.json();
-    const aiAnalysis = completion.choices[0].message.content;
-    
-    // Extract confidence score from AI analysis
-    let aiConfidenceScore = 0;
-    const confidenceMatch = aiAnalysis.match(/Confidence Score: (\d+)%/i);
-    if (confidenceMatch && confidenceMatch[1]) {
-      aiConfidenceScore = parseInt(confidenceMatch[1], 10);
-    }
-    
-    // Clean up the analysis text by removing the confidence score line
-    const cleanedAnalysis = aiAnalysis.replace(/Confidence Score: \d+%\s*/i, '').trim();
+    // Combine the results and return
+    const finalResponse = {
+      ...plagiarismResults,
+      authenticityCheck
+    };
     
     return new Response(
-      JSON.stringify({ 
-        aiAnalysis: cleanedAnalysis, 
-        aiConfidenceScore 
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify(finalResponse),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
     
   } catch (error) {
-    console.error('Error in AI plagiarism analysis:', error);
-    
+    console.error('AI analysis error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Internal server error during AI analysis' 
+        error: 'An error occurred during analysis',
+        message: error.message
       }),
       { 
-        status: 500, 
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );

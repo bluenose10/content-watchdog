@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { PlagiarismResult } from "./PlagiarismChecker";
 import { Clipboard, ExternalLink } from "lucide-react";
+import { AuthenticityDisplay } from "./AuthenticityDisplay";
 
 interface PlagiarismResultsProps {
   results: PlagiarismResult | null;
@@ -51,6 +52,11 @@ export const PlagiarismResults: React.FC<PlagiarismResultsProps> = ({ results })
           </div>
         </div>
       </div>
+
+      {/* Add the new authenticity verification display */}
+      {results.authenticityCheck && (
+        <AuthenticityDisplay authenticityCheck={results.authenticityCheck} />
+      )}
 
       {results.aiAnalysis && (
         <div className="bg-card rounded-lg p-6 shadow-sm border border-blue-200">

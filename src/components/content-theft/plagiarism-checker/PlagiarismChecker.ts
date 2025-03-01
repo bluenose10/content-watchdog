@@ -13,6 +13,16 @@ export interface PlagiarismResult {
   matches: PlagiarismMatch[];
   aiAnalysis?: string;
   aiConfidenceScore?: number;
+  authenticityCheck?: AuthenticityCheck;
+}
+
+export interface AuthenticityCheck {
+  isAuthentic: boolean;
+  aiGeneratedProbability: number;
+  manipulationProbability: number;
+  originalityScore: number;
+  detailsText: string;
+  verificationMethod: string;
 }
 
 // Function to check for plagiarism using Google Search
@@ -96,6 +106,7 @@ export const checkPlagiarism = async (text: string): Promise<PlagiarismResult> =
   // Get AI analysis if we have enough text to analyze
   let aiAnalysis = undefined;
   let aiConfidenceScore = undefined;
+  let authenticityCheck = undefined;
   
   // Only perform AI analysis if the text is substantial enough
   if (text.length > 100) {
@@ -104,7 +115,8 @@ export const checkPlagiarism = async (text: string): Promise<PlagiarismResult> =
       const { data, error } = await supabase.functions.invoke('ai-plagiarism-analysis', {
         body: { 
           text, 
-          existingMatches: matches.slice(0, 10) // Pass top 10 matches to the AI
+          existingMatches: matches.slice(0, 10), // Pass top 10 matches to the AI
+          performAuthenticityCheck: true // New flag to request authenticity check
         }
       });
       
@@ -113,6 +125,19 @@ export const checkPlagiarism = async (text: string): Promise<PlagiarismResult> =
       } else if (data) {
         aiAnalysis = data.aiAnalysis;
         aiConfidenceScore = data.aiConfidenceScore;
+        
+        // Add the new authenticity check data
+        if (data.authenticityCheck) {
+          authenticityCheck = {
+            isAuthentic: data.authenticityCheck.isAuthentic,
+            aiGeneratedProbability: data.authenticityCheck.aiGeneratedProbability,
+            manipulationProbability: data.authenticityCheck.manipulationProbability,
+            originalityScore: data.authenticityCheck.originalityScore || 0,
+            detailsText: data.authenticityCheck.detailsText || '',
+            verificationMethod: data.authenticityCheck.verificationMethod || 'combined'
+          };
+        }
+        
         console.log('AI analysis completed with confidence score:', aiConfidenceScore);
         
         // Adjust the overall score based on AI confidence
@@ -131,6 +156,64 @@ export const checkPlagiarism = async (text: string): Promise<PlagiarismResult> =
     score: overallScore,
     matches: matches.slice(0, 10), // Limit to top 10 matches
     aiAnalysis,
-    aiConfidenceScore
+    aiConfidenceScore,
+    authenticityCheck
   };
+};
+
+// New function to verify content authenticity
+export const verifyContentAuthenticity = async (
+  content: string | File, 
+  contentType: 'text' | 'image' | 'video' | 'audio'
+): Promise<AuthenticityCheck> => {
+  try {
+    console.log(`Requesting authenticity verification for ${contentType} content`);
+    
+    // For file-based content, we need to handle uploading it first
+    let contentData;
+    if (typeof content !== 'string' && content instanceof File) {
+      // Convert file to base64 for transmission
+      const buffer = await content.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+      contentData = {
+        fileName: content.name,
+        fileType: content.type,
+        fileSize: content.size,
+        fileData: `data:${content.type};base64,${base64}`
+      };
+    } else {
+      contentData = content;
+    }
+    
+    // Call the AI authenticity verification function
+    const { data, error } = await supabase.functions.invoke('content-authenticity-verification', {
+      body: {
+        content: contentData,
+        contentType,
+      }
+    });
+    
+    if (error) {
+      console.error('Error invoking authenticity verification:', error);
+      throw new Error(`Authenticity verification failed: ${error.message}`);
+    }
+    
+    if (!data) {
+      throw new Error('No data returned from authenticity verification');
+    }
+    
+    return {
+      isAuthentic: data.isAuthentic,
+      aiGeneratedProbability: data.aiGeneratedProbability,
+      manipulationProbability: data.manipulationProbability,
+      originalityScore: data.originalityScore || 0,
+      detailsText: data.detailsText || '',
+      verificationMethod: data.verificationMethod || 'combined'
+    };
+  } catch (error) {
+    console.error('Error during authenticity verification:', error);
+    throw error;
+  }
 };
