@@ -12,7 +12,8 @@ import {
   Menu, 
   Home, 
   Bell,
-  Shield
+  Shield,
+  FileCheck
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/context/AuthContext";
@@ -59,6 +60,11 @@ export function Sidebar({ className }: SidebarProps) {
       title: "Protection",
       icon: <Shield className="mr-2 h-4 w-4" />,
       path: "/protection",
+    },
+    {
+      title: "Plagiarism Checker",
+      icon: <FileCheck className="mr-2 h-4 w-4" />,
+      path: "/plagiarism-checker",
     },
     {
       title: "Analytics",
