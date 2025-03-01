@@ -66,8 +66,21 @@ export function SecurityTab() {
     
     try {
       // First verify the current password by attempting to sign in
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userEmail = sessionData.session?.user.email;
+
+      if (!userEmail) {
+        toast({
+          title: "Error",
+          description: "Could not determine your email address",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: supabase.auth.getSession().then(({ data }) => data.session?.user.email || ""),
+        email: userEmail,
         password: currentPassword,
       });
       
