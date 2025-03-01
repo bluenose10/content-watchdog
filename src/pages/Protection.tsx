@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -13,12 +12,16 @@ import { useAuth } from "@/context/AuthContext";
 import { LoadingState } from "@/components/dashboard/LoadingState";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { TakedownForm } from "@/components/protection/TakedownForm";
 
 export default function Protection() {
   const { user } = useAuth();
   const { isReady } = useProtectedRoute(true);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [showTakedownForm, setShowTakedownForm] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<"standard" | "social" | "hosting" | null>(null);
+  
   // Show loading state while auth is being checked
   if (!isReady || isLoading) {
     return <LoadingState />;
@@ -29,6 +32,16 @@ export default function Protection() {
   const firstName = fullName.split(' ')[0];
   const avatarUrl = user?.user_metadata?.avatar_url;
   const userInitials = getInitials(fullName);
+
+  const handleTemplateSelect = (type: "standard" | "social" | "hosting") => {
+    setSelectedTemplate(type);
+    setShowTakedownForm(true);
+  };
+
+  const handleNewTakedownRequest = () => {
+    setSelectedTemplate("standard");
+    setShowTakedownForm(true);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -256,7 +269,13 @@ export default function Protection() {
                             <p className="font-medium">Standard DMCA Notice</p>
                             <p className="text-sm text-muted-foreground">For most websites and platforms</p>
                           </div>
-                          <Button variant="outline" size="sm">Use Template</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleTemplateSelect("standard")}
+                          >
+                            Use Template
+                          </Button>
                         </div>
                         
                         <div className="flex justify-between items-center">
@@ -264,7 +283,13 @@ export default function Protection() {
                             <p className="font-medium">Social Media Takedown</p>
                             <p className="text-sm text-muted-foreground">Optimized for social platforms</p>
                           </div>
-                          <Button variant="outline" size="sm">Use Template</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleTemplateSelect("social")}
+                          >
+                            Use Template
+                          </Button>
                         </div>
                         
                         <div className="flex justify-between items-center">
@@ -272,12 +297,21 @@ export default function Protection() {
                             <p className="font-medium">Hosting Provider Notice</p>
                             <p className="text-sm text-muted-foreground">For content hosted on servers</p>
                           </div>
-                          <Button variant="outline" size="sm">Use Template</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleTemplateSelect("hosting")}
+                          >
+                            Use Template
+                          </Button>
                         </div>
                       </div>
                       
                       <div className="mt-4">
-                        <Button className="w-full">
+                        <Button 
+                          className="w-full"
+                          onClick={handleNewTakedownRequest}
+                        >
                           <Mail className="h-4 w-4 mr-2" />
                           Start New Takedown Request
                         </Button>
@@ -379,6 +413,17 @@ export default function Protection() {
         </Tabs>
       </main>
       <Footer />
+
+      <Dialog open={showTakedownForm} onOpenChange={setShowTakedownForm}>
+        <DialogContent className="max-w-2xl">
+          {selectedTemplate && (
+            <TakedownForm
+              templateType={selectedTemplate}
+              onBack={() => setShowTakedownForm(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
