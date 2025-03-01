@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { FileUploader } from "./plagiarism-checker/FileUploader";
 import { PlagiarismResults } from "./plagiarism-checker/PlagiarismResults";
@@ -15,6 +15,7 @@ export const PlagiarismCheckerSection = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [results, setResults] = useState<PlagiarismResult | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const { user } = useAuth();
   
   // Use the bucket manager hook
@@ -25,7 +26,8 @@ export const PlagiarismCheckerSection = () => {
     file,
     setResults,
     setIsUploading,
-    isUploading
+    isUploading,
+    setSaveError
   });
   
   // Use the report generator hook
@@ -57,10 +59,18 @@ export const PlagiarismCheckerSection = () => {
         setFile={(newFile) => {
           setFile(newFile);
           setResults(null); // Clear previous results when a new file is selected
+          setSaveError(null); // Clear any previous errors
         }}
         isUploading={isUploading}
         onSubmit={uploadAndCheckPlagiarism}
       />
+
+      {saveError && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded flex items-center gap-2">
+          <AlertCircle size={16} className="flex-shrink-0" />
+          <span className="text-sm">{saveError}</span>
+        </div>
+      )}
 
       {results && (
         <div className="flex justify-end">

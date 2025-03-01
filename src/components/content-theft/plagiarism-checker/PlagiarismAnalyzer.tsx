@@ -12,13 +12,15 @@ interface PlagiarismAnalyzerProps {
   setResults: (results: PlagiarismResult | null) => void;
   setIsUploading: (isUploading: boolean) => void;
   isUploading: boolean;
+  setSaveError?: (error: string | null) => void;
 }
 
 export const usePlagiarismAnalyzer = ({ 
   file, 
   setResults, 
   setIsUploading, 
-  isUploading 
+  isUploading,
+  setSaveError 
 }: PlagiarismAnalyzerProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -28,6 +30,8 @@ export const usePlagiarismAnalyzer = ({
     if (!file) return;
     
     setIsUploading(true);
+    if (setSaveError) setSaveError(null);
+    
     try {
       // Generate a unique filename to prevent collisions
       const fileExt = file.name.split('.').pop();
@@ -99,7 +103,17 @@ export const usePlagiarismAnalyzer = ({
       
       // Save results to database
       if (user) {
-        await saveResultsToDatabase(plagiarismResults, file.name, user.id);
+        try {
+          const saveSuccess = await saveResultsToDatabase(plagiarismResults, file.name, user.id);
+          if (!saveSuccess && setSaveError) {
+            setSaveError("Results available on this device only due to a database permission issue.");
+          }
+        } catch (saveError) {
+          console.error("Error saving results to database:", saveError);
+          if (setSaveError) {
+            setSaveError("Results available on this device only. Database save failed.");
+          }
+        }
       }
       
       // Clean up the file after results are shown
