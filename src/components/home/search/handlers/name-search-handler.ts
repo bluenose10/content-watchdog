@@ -2,8 +2,8 @@
 import { User } from "@supabase/supabase-js";
 import { AccessLevel } from "@/hooks/useProtectedRoute";
 import { TextSearchParams } from "@/lib/db-types";
-import { createTextSearchQuery, saveSearch } from "../search-utils";
-import { checkRateLimit } from "../quota-manager";
+import { processSearch } from "../search-utils";
+import { checkSearchLimits } from "../quota-manager";
 import { optimizedSearch } from "@/lib/search/search-api-manager";
 
 type NameSearchProps = {
@@ -38,22 +38,29 @@ export const executeNameSearch = async ({
 
     // Check rate limits for non-admin users only
     if (accessLevel !== AccessLevel.ADMIN) {
-      const rateLimitCheck = await checkRateLimit(user?.id);
-      if (!rateLimitCheck.allowed) {
+      const rateLimitCheck = await checkSearchLimits(user?.id || 'anonymous', false, user?.email);
+      if (!rateLimitCheck.isAllowed) {
         setError(rateLimitCheck.message || "Rate limit exceeded. Please try again later.");
         return;
       }
     }
 
     // Create search query with all necessary parameters
-    const searchId = await createTextSearchQuery({
-      query,
-      type: "name",
-      user,
-      params,
-    });
+    const searchData = {
+      user_id: user?.id,
+      query_type: "name",
+      query_text: query,
+      search_params_json: JSON.stringify(params || {})
+    };
 
     // For anonymous users or when searchId couldn't be created
+    if (!user) {
+      setError("You must be signed in to perform searches");
+      return;
+    }
+
+    const searchId = await processSearch(searchData, user);
+
     if (!searchId) {
       setError("Failed to create search. Please try again.");
       return;

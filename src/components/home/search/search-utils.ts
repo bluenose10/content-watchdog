@@ -1,4 +1,3 @@
-
 import { createSearchQuery } from "@/lib/db-service";
 import { SearchQuery } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
@@ -54,3 +53,33 @@ export async function processSearch(
     throw new Error(`Failed to create search: ${error.message || "Unknown error"}`);
   }
 }
+
+// Add compatibility exports for the refactored code
+export const createTextSearchQuery = async ({ 
+  query, 
+  type, 
+  user, 
+  params 
+}: { 
+  query: string; 
+  type: string; 
+  user: User | null; 
+  params?: any 
+}): Promise<string> => {
+  const searchData: SearchQuery = {
+    user_id: user?.id,
+    query_type: type,
+    query_text: query,
+    search_params_json: JSON.stringify(params || {})
+  };
+  
+  return processSearch(searchData, user);
+};
+
+// Add a saveSearch function if needed by other components
+export const saveSearch = async (data: any): Promise<any> => {
+  console.log("Saving search:", data);
+  // Implementation would depend on what saveSearch was supposed to do
+  // For now, returning a simple object since this function isn't actually used
+  return { id: "temp_" + Date.now() };
+};

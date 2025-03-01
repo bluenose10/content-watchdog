@@ -93,3 +93,23 @@ export async function handleImageSearch(
     throw new Error(`Image search failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
+
+// Add compatibility export for the refactored code
+export const uploadImageAndCreateQuery = async (
+  file: File,
+  user: User | null,
+  params?: any
+): Promise<{ searchId: string; imageUrl: string }> => {
+  try {
+    // Upload the image and get its URL
+    const imageUrl = await uploadSearchImage(file, user?.id || '');
+    
+    // Create a search using the image URL
+    const searchId = await handleImageSearch(file, user, params);
+    
+    return { searchId, imageUrl };
+  } catch (error) {
+    console.error("Error in uploadImageAndCreateQuery:", error);
+    throw error;
+  }
+};
