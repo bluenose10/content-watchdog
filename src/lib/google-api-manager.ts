@@ -26,7 +26,7 @@ export const setBingPriority = (priority: number) =>
   searchApiManager.setPriority('bing', priority);
 
 // Re-export types for backward compatibility
-export { 
+export type { 
   SearchEngineConfig, 
   QueuedRequest,
   BingWebResult,
@@ -35,7 +35,10 @@ export {
   BingNewsResult
 } from './search/search-types';
 
-export { QuotaConfig } from './search/quota-manager';
+export type { QuotaConfig } from './search/quota-manager';
+
+// Export searchApiManager for direct usage by other modules
+export { searchApiManager };
 
 // Set priority for a user
 export const setPriorityMode = (userId: string, isPriority: boolean) => 
