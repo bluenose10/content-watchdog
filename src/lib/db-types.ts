@@ -73,20 +73,3 @@ export type ImageSearchParams = {
   imageColorType?: 'color' | 'gray' | 'mono' | 'trans' | string; // Color type of images
   dominantColor?: string; // Dominant color in the image
 }
-
-// New type for content authenticity verification
-export type AuthenticityVerification = {
-  id?: string;
-  user_id: string;
-  content_id?: string; // Reference to the content being verified
-  content_type: 'text' | 'image' | 'video' | 'audio';
-  content_url?: string; // URL to the content if available
-  content_hash?: string; // Content fingerprint/hash
-  verification_date: string;
-  is_authentic: boolean;
-  ai_generated_probability: number; // 0.0 - 1.0
-  manipulation_probability: number; // 0.0 - 1.0
-  verification_details?: string; // JSON string with detailed analysis
-  verification_method: 'fingerprint' | 'model_analysis' | 'metadata' | 'combined';
-  created_at?: string;
-}

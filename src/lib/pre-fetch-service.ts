@@ -1,160 +1,249 @@
 
-import { supabase } from './supabase';
-import { 
-  getAvailableSearchEngines,
-  optimizedSearch
-} from './search';
-import { quotaManager } from './search/quota-manager';
-import { SearchQuery } from './db-types';
+import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/search-cache';
+import { getRecentSearches } from '@/lib/db-service';
+import { searchApiManager, optimizedSearch } from '@/lib/google-api-manager';
 
-export interface PreFetchConfig {
-  enabled: boolean;
-  interval: number;
-  maxQueries: number;
-  lastRun: Date | null;
+// Popular search types and terms that we want to pre-fetch
+interface PreFetchQuery {
+  queryType: 'name' | 'hashtag' | 'image';
+  query: string;
+  params?: any;
 }
 
-class PreFetchService {
-  private config: PreFetchConfig = {
-    enabled: false,
-    interval: 6, // hours
-    maxQueries: 10,
-    lastRun: null
-  };
-  
-  private isRunning: boolean = false;
-  private timer: NodeJS.Timeout | null = null;
-  
-  constructor() {
-    // Initialize prefetch service
-    this.loadConfig();
-  }
-  
-  private async loadConfig(): Promise<void> {
-    const { data, error } = await supabase
-      .from('system_config')
-      .select('*')
-      .eq('key', 'prefetch_config')
-      .single();
-      
-    if (!error && data) {
-      this.config = { ...this.config, ...JSON.parse(data.value) };
-      console.log('PreFetch config loaded:', this.config);
-    }
-  }
-  
-  public async runPrefetch(): Promise<void> {
-    if (this.isRunning) return;
-    
-    this.isRunning = true;
-    
-    try {
-      console.log('Running scheduled pre-fetch...');
-      
-      // Check if we can make API requests
-      const hasQuota = quotaManager.canMakeRequest('google') && quotaManager.canMakeRequest('bing');
-      
-      if (!hasQuota) {
-        console.log('Pre-fetch skipped: API quota depleted');
-        return;
-      }
-      
-      // Get available engines to decide which to use
-      const engines = getAvailableSearchEngines();
-      
-      // Get the most common searches
-      const { data: queries, error } = await supabase
-        .from('popular_searches')
-        .select('*')
-        .order('search_count', { ascending: false })
-        .limit(this.config.maxQueries);
-      
-      if (error) {
-        console.error('Error fetching popular searches:', error);
-        return;
-      }
-      
-      for (const query of queries) {
-        // Pre-fetch results for popular queries for caching
-        if (query.query_type === 'name' || query.query_type === 'hashtag') {
-          await optimizedSearch('web', query.query_text);
-          console.log(`Pre-fetched results for: ${query.query_text}`);
-        }
-      }
-      
-      this.config.lastRun = new Date();
-      await this.saveConfig();
-      
-    } catch (error) {
-      console.error('Error in pre-fetch process:', error);
-    } finally {
-      this.isRunning = false;
-    }
-  }
-  
-  private async saveConfig(): Promise<void> {
-    const { error } = await supabase
-      .from('system_config')
-      .upsert({
-        key: 'prefetch_config',
-        value: JSON.stringify(this.config)
-      });
-      
-    if (error) {
-      console.error('Error saving pre-fetch config:', error);
-    }
-  }
-  
-  public startScheduledPrefetch(): void {
-    if (this.timer) clearInterval(this.timer);
-    
-    if (!this.config.enabled) return;
-    
-    // Convert hours to milliseconds
-    const intervalMs = this.config.interval * 60 * 60 * 1000;
-    
-    this.timer = setInterval(() => this.runPrefetch(), intervalMs);
-    console.log(`Scheduled pre-fetch enabled, running every ${this.config.interval} hours`);
-  }
-  
-  public stopScheduledPrefetch(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-      console.log('Scheduled pre-fetch disabled');
-    }
-  }
-  
-  public getConfig(): PreFetchConfig {
-    return { ...this.config };
-  }
-  
-  public async updateConfig(newConfig: Partial<PreFetchConfig>): Promise<void> {
-    this.config = { ...this.config, ...newConfig };
-    await this.saveConfig();
-    
-    // Restart the timer with new config
-    this.stopScheduledPrefetch();
-    if (this.config.enabled) {
-      this.startScheduledPrefetch();
-    }
-  }
-}
+// Default list of queries to pre-fetch (can be expanded based on analytics)
+const DEFAULT_PREFETCH_QUERIES: PreFetchQuery[] = [
+  { queryType: 'name', query: 'digital art' },
+  { queryType: 'name', query: 'photography' },
+  { queryType: 'hashtag', query: '#naturebeauty' },
+  { queryType: 'hashtag', query: '#digitalart' },
+  // Add more common searches based on analytics
+];
 
-// Export singleton instance
-export const preFetchService = new PreFetchService();
-
-// Export convenience methods for PreFetchInitializer and PreFetchManager
-export const schedulePreFetching = (intervalMinutes: number) => {
-  preFetchService.updateConfig({ 
-    enabled: true,
-    interval: intervalMinutes / 60 // Convert minutes to hours
-  });
-  preFetchService.startScheduledPrefetch();
+/**
+ * Check if we're in an "off-peak" period where pre-fetching won't impact performance
+ */
+const isOffPeakHours = (): boolean => {
+  const now = new Date();
+  const hour = now.getHours();
   
-  return () => preFetchService.stopScheduledPrefetch();
+  // Consider early morning and late night as off-peak hours
+  // This can be tuned based on your actual traffic patterns
+  return (hour >= 0 && hour < 7) || (hour >= 22);
 };
 
-export const startPreFetching = async () => {
-  return preFetchService.runPrefetch();
+/**
+ * Determines if the system is under low load and suitable for pre-fetching
+ */
+const isLowSystemLoad = (): boolean => {
+  // In a real implementation, this would check system metrics
+  // For demo purposes, we'll assume it's always OK to prefetch during off-peak hours
+  return true;
+};
+
+/**
+ * Check API quota availability before pre-fetching
+ * We check both Google and Bing search availability
+ */
+const hasAvailableQuota = (): boolean => {
+  return searchApiManager.canMakeRequest('google') || searchApiManager.canMakeRequest('bing');
+};
+
+/**
+ * Get the list of engines to use for pre-fetching
+ * This allows us to pre-fetch using available engines
+ */
+const getPreFetchEngines = (): string[] => {
+  return searchApiManager.getAvailableSearchEngines().filter(engine => 
+    engine === 'google' || engine === 'bing'
+  );
+};
+
+/**
+ * Pre-fetch a specific search query and cache the results
+ */
+export const preFetchQuery = async (
+  queryType: 'name' | 'hashtag' | 'image',
+  query: string, 
+  params: any = {}
+): Promise<boolean> => {
+  try {
+    // Generate cache key for this query
+    const cacheKey = getCacheKey(queryType, query, params);
+    
+    // Check if already cached
+    if (getCachedResults(cacheKey)) {
+      console.log(`[Pre-fetch] Query already cached: ${queryType} - ${query}`);
+      return false;
+    }
+    
+    // Skip if we don't have quota available
+    if (!hasAvailableQuota()) {
+      console.log(`[Pre-fetch] Skipping due to quota limits: ${queryType} - ${query}`);
+      return false;
+    }
+    
+    console.log(`[Pre-fetch] Fetching: ${queryType} - ${query}`);
+    
+    // Use optimizedSearch which will automatically use available engines
+    const results = await optimizedSearch(queryType, query, params);
+    
+    // Cache the results
+    cacheResults(cacheKey, results, 'multi-engine', 0.01); // Tracking cost per request
+    
+    console.log(`[Pre-fetch] Successfully cached: ${queryType} - ${query}`);
+    return true;
+  } catch (error) {
+    console.error(`[Pre-fetch] Error pre-fetching ${queryType} - ${query}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Batch pre-fetch multiple queries at once for efficiency
+ */
+export const batchPreFetch = async (queries: PreFetchQuery[]): Promise<number> => {
+  // Skip if we don't have sufficient quota
+  if (!hasAvailableQuota()) {
+    console.log(`[Pre-fetch] Skipping batch pre-fetch due to quota limits`);
+    return 0;
+  }
+  
+  // Filter out queries that are already cached
+  const queriesToFetch = queries.filter(q => {
+    const cacheKey = getCacheKey(q.queryType, q.query, q.params);
+    return !getCachedResults(cacheKey);
+  });
+  
+  if (queriesToFetch.length === 0) {
+    console.log(`[Pre-fetch] All queries already cached`);
+    return 0;
+  }
+  
+  try {
+    // Create search IDs for each query
+    const searchIds = queriesToFetch.map(q => 
+      `${q.queryType}_${q.query.replace(/\W+/g, '_')}`
+    );
+    
+    // Batch fetch the results
+    const batchResults = await batchGetSearchResults(searchIds);
+    
+    // Cache each result
+    let cachedCount = 0;
+    
+    queriesToFetch.forEach((query, index) => {
+      const searchId = searchIds[index];
+      const result = batchResults[searchId];
+      
+      if (result) {
+        const cacheKey = getCacheKey(query.queryType, query.query, query.params);
+        cacheResults(cacheKey, result, 'multi-engine', 0.01);
+        cachedCount++;
+      }
+    });
+    
+    console.log(`[Pre-fetch] Batch cached ${cachedCount} of ${queriesToFetch.length} queries`);
+    return cachedCount;
+  } catch (error) {
+    console.error(`[Pre-fetch] Error batch pre-fetching:`, error);
+    return 0;
+  }
+};
+
+/**
+ * Start pre-fetching process for common queries
+ */
+export const startPreFetching = async (customQueries?: PreFetchQuery[]): Promise<void> => {
+  // Only run during off-peak hours
+  if (!isOffPeakHours() || !isLowSystemLoad()) {
+    console.log('[Pre-fetch] Not pre-fetching: Peak hours or high system load');
+    return;
+  }
+  
+  // Check if any search engines are available
+  const availableEngines = getPreFetchEngines();
+  if (availableEngines.length === 0) {
+    console.log('[Pre-fetch] No search engines available for pre-fetching');
+    return;
+  }
+  
+  console.log(`[Pre-fetch] Starting pre-fetch process using engines: ${availableEngines.join(', ')}`);
+  
+  // Combine default and custom queries
+  const queriesToFetch = [...DEFAULT_PREFETCH_QUERIES, ...(customQueries || [])];
+  
+  // Try to get popular searches from recent user activity
+  try {
+    const recentSearches = await getRecentSearches(10);
+    
+    if (recentSearches && recentSearches.length > 0) {
+      // Transform recent searches into pre-fetch queries
+      const recentQueries = recentSearches.map(search => ({
+        queryType: search.query_type as 'name' | 'hashtag' | 'image',
+        query: search.query_text || '',
+        params: search.search_params_json ? JSON.parse(search.search_params_json) : {}
+      }));
+      
+      // Add unique recent searches to our pre-fetch list
+      recentQueries.forEach(query => {
+        if (!queriesToFetch.some(q => 
+          q.queryType === query.queryType && 
+          q.query.toLowerCase() === query.query.toLowerCase()
+        )) {
+          queriesToFetch.push(query);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('[Pre-fetch] Error fetching recent searches:', error);
+    // Continue with default queries if we can't get recent searches
+  }
+  
+  // Use batch pre-fetching for efficiency
+  const batchSize = 5;
+  let totalFetched = 0;
+  
+  for (let i = 0; i < queriesToFetch.length; i += batchSize) {
+    const batch = queriesToFetch.slice(i, i + batchSize);
+    
+    // Process in batches for better performance
+    const fetched = await batchPreFetch(batch);
+    totalFetched += fetched;
+    
+    // If we've hit quota limits, stop
+    if (!hasAvailableQuota()) {
+      console.log(`[Pre-fetch] Stopping due to quota limits after ${totalFetched} fetches`);
+      break;
+    }
+    
+    // Small delay between batches
+    if (i + batchSize < queriesToFetch.length) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+  
+  console.log(`[Pre-fetch] Completed pre-fetching. Cached ${totalFetched} queries.`);
+};
+
+/**
+ * Schedule regular pre-fetching to run at specified intervals
+ */
+export const schedulePreFetching = (intervalMinutes = 60): (() => void) => {
+  console.log(`[Pre-fetch] Scheduled pre-fetching every ${intervalMinutes} minutes`);
+  
+  // Initial pre-fetch after a short delay
+  const initialTimeout = setTimeout(() => {
+    startPreFetching();
+  }, 30000); // 30 seconds after app starts
+  
+  // Regular interval pre-fetching
+  const intervalId = setInterval(() => {
+    startPreFetching();
+  }, intervalMinutes * 60 * 1000);
+  
+  // Return a cleanup function
+  return () => {
+    clearTimeout(initialTimeout);
+    clearInterval(intervalId);
+  };
 };

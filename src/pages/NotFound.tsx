@@ -15,14 +15,7 @@ const NotFound = () => {
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
-    
-    // Additional debug info for search result issues
-    const queryParams = new URLSearchParams(location.search);
-    const searchId = queryParams.get('id');
-    if (searchId && location.pathname === '/results') {
-      console.error("Search ID causing 404:", searchId);
-    }
-  }, [location.pathname, location.search]);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col">

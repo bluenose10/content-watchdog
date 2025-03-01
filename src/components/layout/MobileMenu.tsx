@@ -2,8 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
-import { LanguageSelector } from "./LanguageSelector";
-import { useLanguage } from "@/context/LanguageContext";
 
 interface MobileMenuProps {
   isAuthenticated: boolean;
@@ -18,45 +16,39 @@ export function MobileMenu({
   navigateToSection,
   handleSignOut
 }: MobileMenuProps) {
-  const { t } = useLanguage();
-
   return (
     <div className="fixed inset-0 top-[57px] z-50 bg-background/95 backdrop-blur-sm animate-fade-in md:hidden">
       <div className="container py-6 flex flex-col gap-6">
-        <div className="flex justify-end mb-2">
-          <LanguageSelector />
-        </div>
-        
         <nav className="flex flex-col gap-4">
           <Link
             to="/"
             className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
           >
-            {t('header.home')}
+            Home
           </Link>
           <Link
             to="/#features"
             className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
           >
-            {t('header.features')}
+            Features
           </Link>
           <button
             onClick={() => navigateToSection('pricing')}
             className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
           >
-            {t('header.pricing')}
+            Pricing
           </button>
           <Link
             to="/piracy"
             className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
           >
-            {t('header.piracy')}
+            Piracy
           </Link>
           <Link
             to="/contact"
             className="text-lg font-medium px-2 py-2 border-b border-border cursor-pointer text-left"
           >
-            {t('header.about')}
+            About
           </Link>
         </nav>
 
@@ -64,7 +56,7 @@ export function MobileMenu({
           {isAuthenticated ? (
             <>
               <Button asChild size="lg">
-                <Link to="/dashboard">{t('header.dashboard')}</Link>
+                <Link to="/dashboard">Dashboard</Link>
               </Button>
               <Button 
                 variant="outline" 
@@ -74,16 +66,16 @@ export function MobileMenu({
                 className="flex items-center justify-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                {isLoggingOut ? "Logging out..." : t('header.logout')}
+                {isLoggingOut ? "Logging out..." : "Log out"}
               </Button>
             </>
           ) : (
             <>
               <Button asChild variant="outline" size="lg">
-                <Link to="/login">{t('header.login')}</Link>
+                <Link to="/login">Log in</Link>
               </Button>
               <Button asChild size="lg" className="button-animation">
-                <Link to="/signup">{t('header.signup')}</Link>
+                <Link to="/signup">Sign up</Link>
               </Button>
             </>
           )}

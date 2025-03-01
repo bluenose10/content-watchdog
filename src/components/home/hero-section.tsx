@@ -3,11 +3,9 @@ import { ArrowRight, Shield, Zap, FileCheck, Bell, Search, UserCheck } from "luc
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/context/LanguageContext";
 
 export const HeroSection = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
   
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-48 pb-16 md:pb-20 lg:pb-32 hero-background">
@@ -18,12 +16,12 @@ export const HeroSection = () => {
           </div>
           
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-tighter text-gradient max-w-3xl mx-auto animate-scale-in" style={{ animationDelay: "0.2s" }}>
-            {t('hero.title')}
+            Stop Content Theft in Its Tracks - Protect Your Intellectual Property.
           </h1>
         </div>
         
         <p className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto animate-scale-in" style={{ animationDelay: "0.4s" }}>
-          {t('hero.subtitle')}
+          For Content Creators Needing Digital Rights Management and DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, providing detailed evidence for copyright infringement cases.
         </p>
         
         <p className="text-xs md:text-sm text-purple-600 dark:text-purple-400 max-w-2xl mx-auto animate-scale-in font-medium" style={{ animationDelay: "0.5s" }}>
@@ -122,19 +120,19 @@ export const HeroSection = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-purple-700 dark:text-purple-400">98%</p>
-                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.detectionAccuracy')}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Detection Accuracy</p>
               </div>
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400">50+</p>
-                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.platformsMonitored')}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Platforms Monitored</p>
               </div>
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-indigo-600 dark:text-indigo-400">1.5M+</p>
-                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.contentProtected')}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Content Items Protected</p>
               </div>
               <div className="p-3 md:p-4">
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-purple-600 dark:text-purple-300">92%</p>
-                <p className="text-xs md:text-sm text-muted-foreground">{t('stats.successfulTakedowns')}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Successful Takedowns</p>
               </div>
             </div>
           </div>

@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeft, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
 
 export interface TakedownFormProps {
   templateType?: "standard" | "social" | "hosting";
@@ -16,7 +15,6 @@ export interface TakedownFormProps {
 export const TakedownForm = ({ templateType = "standard", onBack }: TakedownFormProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [useAutomatedFiling, setUseAutomatedFiling] = useState(true);
   
   // Pre-filled content based on template type
   const getTemplateContent = () => {
@@ -52,10 +50,8 @@ export const TakedownForm = ({ templateType = "standard", onBack }: TakedownForm
     setTimeout(() => {
       setIsSubmitting(false);
       toast({
-        title: useAutomatedFiling ? "Automated takedown initiated" : "Takedown request submitted",
-        description: useAutomatedFiling 
-          ? "Your DMCA takedown will be automatically processed and filed on your behalf." 
-          : "Your DMCA takedown request has been sent successfully.",
+        title: "Takedown request submitted",
+        description: "Your DMCA takedown request has been sent successfully.",
       });
       onBack();
     }, 1500);
@@ -135,31 +131,17 @@ export const TakedownForm = ({ templateType = "standard", onBack }: TakedownForm
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 pt-2 border-t">
-          <Switch
-            id="automated-filing"
-            checked={useAutomatedFiling}
-            onCheckedChange={setUseAutomatedFiling}
-          />
-          <Label htmlFor="automated-filing" className="cursor-pointer">
-            <span className="font-medium">Use automated DMCA filing</span>
-            <p className="text-xs text-muted-foreground">
-              We'll automatically submit this takedown notice to the platform or hosting provider
-            </p>
-          </Label>
-        </div>
-
         <div className="pt-4">
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? (
               <span className="flex items-center">
                 <span className="animate-spin mr-2">⏳</span>
-                {useAutomatedFiling ? "Processing automated filing..." : "Submitting..."}
+                Submitting...
               </span>
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
-                {useAutomatedFiling ? "File Automated Takedown" : "Submit Takedown Request"}
+                Submit Takedown Request
               </>
             )}
           </Button>

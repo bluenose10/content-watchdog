@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useLanguage } from "@/context/LanguageContext";
 
 interface DesktopNavProps {
   isAuthenticated: boolean;
@@ -18,8 +17,6 @@ export function DesktopNav({
   navigateToSection,
   handleSignOut
 }: DesktopNavProps) {
-  const { t } = useLanguage();
-  
   return (
     <>
       {/* Desktop navigation */}
@@ -28,31 +25,31 @@ export function DesktopNav({
           to="/" 
           className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
         >
-          {t('header.home')}
+          Home
         </Link>
         <Link 
           to="/#features" 
           className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
         >
-          {t('header.features')}
+          Features
         </Link>
         <button 
           onClick={() => navigateToSection('pricing')} 
           className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
         >
-          {t('header.pricing')}
+          Pricing
         </button>
         <Link 
           to="/piracy" 
           className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
         >
-          {t('header.piracy')}
+          Piracy
         </Link>
         <Link 
           to="/contact" 
           className="text-sm font-medium transition-colors hover:text-primary smooth-transition cursor-pointer"
         >
-          {t('header.about')}
+          About
         </Link>
       </nav>
 
@@ -62,7 +59,7 @@ export function DesktopNav({
         {isAuthenticated ? (
           <>
             <Button asChild variant="default">
-              <Link to="/dashboard">{t('header.dashboard')}</Link>
+              <Link to="/dashboard">Dashboard</Link>
             </Button>
             <Button 
               variant="outline" 
@@ -71,16 +68,16 @@ export function DesktopNav({
               className="flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
-              {isLoggingOut ? "Logging out..." : t('header.logout')}
+              {isLoggingOut ? "Logging out..." : "Log out"}
             </Button>
           </>
         ) : (
           <>
             <Button asChild variant="ghost">
-              <Link to="/login">{t('header.login')}</Link>
+              <Link to="/login">Log in</Link>
             </Button>
             <Button asChild className="button-animation">
-              <Link to="/signup">{t('header.signup')}</Link>
+              <Link to="/signup">Sign up</Link>
             </Button>
           </>
         )}

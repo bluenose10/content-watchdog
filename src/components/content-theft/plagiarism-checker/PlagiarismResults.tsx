@@ -1,127 +1,70 @@
 
-import React from "react";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { PlagiarismResult } from "./PlagiarismChecker";
-import { Clipboard, ExternalLink } from "lucide-react";
-import { AuthenticityDisplay } from "./AuthenticityDisplay";
+import { Badge } from "@/components/ui/badge";
 
 interface PlagiarismResultsProps {
   results: PlagiarismResult | null;
 }
 
-export const PlagiarismResults: React.FC<PlagiarismResultsProps> = ({ results }) => {
+export const PlagiarismResults = ({ results }: PlagiarismResultsProps) => {
   if (!results) return null;
 
-  const getScoreColorClass = (score: number) => {
+  const getSeverityColor = (score: number) => {
     if (score < 20) return "bg-green-500";
-    if (score < 40) return "bg-yellow-500";
-    if (score < 60) return "bg-orange-500";
+    if (score < 50) return "bg-yellow-500";
     return "bg-red-500";
   };
 
-  const getScoreLabel = (score: number) => {
-    if (score < 20) return "Original";
-    if (score < 40) return "Minor Similarities";
-    if (score < 60) return "Moderate Similarities";
-    return "Significant Plagiarism";
-  };
-
-  const copyTextToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const getSeverityText = (score: number) => {
+    if (score < 20) return "Low";
+    if (score < 50) return "Medium";
+    return "High";
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-card rounded-lg p-6 shadow-sm border">
-        <h3 className="text-xl font-semibold mb-4">Plagiarism Score</h3>
-        <div className="space-y-4">
-          <div className="flex justify-between mb-2">
-            <span>{getScoreLabel(results.score)}:</span>
-            <span className="font-bold">{results.score}%</span>
-          </div>
-          
-          <Progress 
-            value={results.score} 
-            className="h-2 w-full" 
-          />
-          
-          <div className="flex justify-between">
-            <span className="text-xs text-green-500">Original</span>
-            <span className="text-xs text-red-500">Plagiarized</span>
-          </div>
+    <div className="mt-6 p-4 border rounded-md bg-background">
+      <h4 className="text-lg font-medium mb-2">Results</h4>
+      <div className="flex items-center space-x-2 mb-4">
+        <div className="text-sm font-medium">Similarity Score:</div>
+        <div className="text-sm font-bold">
+          {results.score.toFixed(1)}%
         </div>
+        <Badge variant={results.score < 20 ? "outline" : "default"} className={`px-2 py-0.5 ${
+          results.score < 20 
+            ? "bg-green-100 text-green-800 border-green-300" 
+            : results.score < 50 
+              ? "bg-yellow-100 text-yellow-800 border-yellow-300" 
+              : "bg-red-100 text-red-800 border-red-300"
+        }`}>
+          {getSeverityText(results.score)}
+        </Badge>
       </div>
-
-      {/* Add the new authenticity verification display */}
-      {results.authenticityCheck && (
-        <AuthenticityDisplay authenticityCheck={results.authenticityCheck} />
-      )}
-
-      {results.aiAnalysis && (
-        <div className="bg-card rounded-lg p-6 shadow-sm border border-blue-200">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
-            <span>AI Analysis</span>
-            {results.aiConfidenceScore !== undefined && (
-              <span className="text-sm ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
-                {Math.round(results.aiConfidenceScore)}% Confidence
-              </span>
-            )}
-          </h3>
-          <p className="text-muted-foreground whitespace-pre-line">{results.aiAnalysis}</p>
-        </div>
-      )}
-
+      
       {results.matches.length > 0 ? (
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Potential Matches ({results.matches.length})</h3>
+          <h5 className="text-sm font-medium">Potential Matches:</h5>
           {results.matches.map((match, index) => (
-            <div key={index} className="bg-card rounded-lg p-4 shadow-sm border">
-              <div className="flex justify-between items-start">
-                <h4 className="font-medium text-lg">Match #{index + 1}</h4>
-                <span className="text-sm px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
-                  {Math.round(match.similarity * 100)}% Similar
-                </span>
-              </div>
-              
-              <div className="mt-2 relative group">
-                <p className="text-sm my-2 p-3 bg-muted rounded-md">
-                  "{match.text}"
-                </p>
-                <button 
-                  onClick={() => copyTextToClipboard(match.text)}
-                  className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Copy text"
-                >
-                  <Clipboard size={16} />
-                </button>
-              </div>
-              
-              <div className="flex items-center mt-2 text-sm">
-                <span className="text-muted-foreground mr-2">Source:</span>
+            <div key={index} className="p-3 bg-accent/40 rounded-md">
+              <div className="text-sm italic mb-1">"{match.text}"</div>
+              <div className="flex justify-between text-xs">
                 <a 
                   href={match.source} 
                   target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-blue-500 hover:text-blue-700 flex items-center truncate"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline"
                 >
-                  {new URL(match.source).hostname}
-                  <ExternalLink size={14} className="ml-1" />
+                  {match.source}
                 </a>
+                <span className="font-medium">
+                  <span className={`inline-block w-2 h-2 rounded-full mr-1 ${getSeverityColor(match.similarity * 100)}`}></span>
+                  {(match.similarity * 100).toFixed(1)}% similar
+                </span>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        results && (
-          <Alert>
-            <AlertTitle>No significant matches found</AlertTitle>
-            <AlertDescription>
-              Our search didn't find any significant matches to existing online content. This suggests the text is likely original.
-              {results.aiAnalysis ? " However, you should still review the AI analysis above." : ""}
-            </AlertDescription>
-          </Alert>
-        )
+        <p className="text-sm text-muted-foreground">No significant matches found.</p>
       )}
     </div>
   );

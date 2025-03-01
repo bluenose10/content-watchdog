@@ -3,15 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Copyright, FileText, Shield, CheckCircle } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
 
 export const KeyConcepts = () => {
-  const { t } = useLanguage();
-  
   return (
     <div className="lg:col-span-1">
       <div className="sticky top-24">
-        <h2 className="text-xl font-semibold mb-4">{t('piracy.keyConcepts.title') || "Key Concepts"}</h2>
+        <h2 className="text-xl font-semibold mb-4">Key Concepts</h2>
         <div className="space-y-4">
           <Card className="hover:shadow-md transition-all">
             <CardContent className="p-4">
@@ -20,8 +17,8 @@ export const KeyConcepts = () => {
                   <Copyright className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">{t('piracy.copyright.title') || "Copyright Infringement"}</h3>
-                  <p className="text-sm text-muted-foreground">{t('piracy.keyConcepts.copyright') || "Legal violation of exclusive rights"}</p>
+                  <h3 className="font-medium">Copyright Infringement</h3>
+                  <p className="text-sm text-muted-foreground">Legal violation of exclusive rights</p>
                 </div>
               </div>
             </CardContent>
@@ -34,8 +31,8 @@ export const KeyConcepts = () => {
                   <FileText className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">{t('piracy.plagiarism.title') || "Plagiarism"}</h3>
-                  <p className="text-sm text-muted-foreground">{t('piracy.keyConcepts.plagiarism') || "Using work without attribution"}</p>
+                  <h3 className="font-medium">Plagiarism</h3>
+                  <p className="text-sm text-muted-foreground">Using work without attribution</p>
                 </div>
               </div>
             </CardContent>
@@ -48,8 +45,8 @@ export const KeyConcepts = () => {
                   <Shield className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">{t('piracy.contentTheft.title') || "Content Theft"}</h3>
-                  <p className="text-sm text-muted-foreground">{t('piracy.keyConcepts.contentTheft') || "Unauthorized use of digital content"}</p>
+                  <h3 className="font-medium">Content Theft</h3>
+                  <p className="text-sm text-muted-foreground">Unauthorized use of digital content</p>
                 </div>
               </div>
             </CardContent>
@@ -62,8 +59,8 @@ export const KeyConcepts = () => {
                   <CheckCircle className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium">{t('piracy.keyConcepts.dmca.title') || "DMCA Protection"}</h3>
-                  <p className="text-sm text-muted-foreground">{t('piracy.keyConcepts.dmca.description') || "Legal framework for digital rights"}</p>
+                  <h3 className="font-medium">DMCA Protection</h3>
+                  <p className="text-sm text-muted-foreground">Legal framework for digital rights</p>
                 </div>
               </div>
             </CardContent>
@@ -71,12 +68,12 @@ export const KeyConcepts = () => {
         </div>
         
         <div className="mt-8 p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-          <h3 className="text-lg font-medium text-purple-800 dark:text-purple-300 mb-2">{t('piracy.keyConcepts.protect.title') || "Protect Your Work Now"}</h3>
+          <h3 className="text-lg font-medium text-purple-800 dark:text-purple-300 mb-2">Protect Your Work Now</h3>
           <p className="text-sm text-purple-600 dark:text-purple-400 mb-4">
-            {t('piracy.keyConcepts.protect.description') || "Don't wait until your content is stolen. Start monitoring and protecting your intellectual property today."}
+            Don't wait until your content is stolen. Start monitoring and protecting your intellectual property today.
           </p>
           <Button asChild className="w-full bg-purple-600 hover:bg-purple-700">
-            <Link to="/signup">{t('piracy.keyConcepts.getStarted') || "Get Started"}</Link>
+            <Link to="/signup">Get Started</Link>
           </Button>
         </div>
       </div>
