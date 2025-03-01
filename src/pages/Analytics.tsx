@@ -73,10 +73,15 @@ const Analytics = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      {/* Added pt-24 to increase space between navbar and content */}
-      <main className="flex-grow container max-w-7xl mx-auto pt-24 pb-12 px-4 sm:px-6">
-        {/* Reduced text size from text-3xl to text-2xl */}
-        <h1 className="text-2xl font-bold mb-8 text-gradient">Analytics Dashboard</h1>
+      {/* Changed from pt-24 to match PlagiarismChecker's style */}
+      <main className="flex-grow container max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8 pt-6">
+          {/* Updated title styling to match PlagiarismChecker */}
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Analytics Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            View detailed analytics about your content searches and results.
+          </p>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatsCard 
