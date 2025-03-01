@@ -1,5 +1,6 @@
 
 import { optimizedSearch } from "@/lib/google-api-manager";
+import { supabase } from "@/lib/supabase";
 
 export interface PlagiarismMatch {
   text: string;
@@ -10,6 +11,8 @@ export interface PlagiarismMatch {
 export interface PlagiarismResult {
   score: number;
   matches: PlagiarismMatch[];
+  aiAnalysis?: string;
+  aiConfidenceScore?: number;
 }
 
 // Function to check for plagiarism using Google Search
@@ -90,8 +93,44 @@ export const checkPlagiarism = async (text: string): Promise<PlagiarismResult> =
     overallScore = Math.round(matchedChunksRatio * avgSimilarity * 100);
   }
   
+  // Get AI analysis if we have enough text to analyze
+  let aiAnalysis = undefined;
+  let aiConfidenceScore = undefined;
+  
+  // Only perform AI analysis if the text is substantial enough
+  if (text.length > 100) {
+    try {
+      console.log('Requesting AI analysis for plagiarism check');
+      const { data, error } = await supabase.functions.invoke('ai-plagiarism-analysis', {
+        body: { 
+          text, 
+          existingMatches: matches.slice(0, 10) // Pass top 10 matches to the AI
+        }
+      });
+      
+      if (error) {
+        console.error('Error invoking AI analysis:', error);
+      } else if (data) {
+        aiAnalysis = data.aiAnalysis;
+        aiConfidenceScore = data.aiConfidenceScore;
+        console.log('AI analysis completed with confidence score:', aiConfidenceScore);
+        
+        // Adjust the overall score based on AI confidence
+        if (aiConfidenceScore !== undefined) {
+          // Blend the search-based score with the AI confidence score
+          // Weight: 70% search results, 30% AI analysis
+          overallScore = Math.round((overallScore * 0.7) + (aiConfidenceScore * 0.3));
+        }
+      }
+    } catch (error) {
+      console.error('Error during AI analysis:', error);
+    }
+  }
+  
   return {
     score: overallScore,
-    matches: matches.slice(0, 10) // Limit to top 10 matches
+    matches: matches.slice(0, 10), // Limit to top 10 matches
+    aiAnalysis,
+    aiConfidenceScore
   };
 };

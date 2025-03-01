@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -21,7 +20,6 @@ export const PlagiarismCheckerSection = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Check if the required bucket exists on component mount
   useEffect(() => {
     const checkAndCreateBucket = async () => {
       try {
@@ -38,7 +36,6 @@ export const PlagiarismCheckerSection = () => {
         if (!tempUploadsBucketExists) {
           console.log("temp-uploads bucket doesn't exist, attempting to create it...");
           
-          // Call the edge function to create the bucket
           const { data, error: createError } = await supabase.functions.invoke('create_bucket', {
             body: { bucketName: 'temp-uploads' }
           });
@@ -66,7 +63,6 @@ export const PlagiarismCheckerSection = () => {
     }
 
     try {
-      // Create a search query record in the search_queries table
       const { data: searchQuery, error: searchQueryError } = await supabase
         .from('search_queries')
         .insert({
@@ -76,7 +72,9 @@ export const PlagiarismCheckerSection = () => {
           search_params_json: JSON.stringify({ 
             fileName,
             score: results.score,
-            checkedAt: new Date().toISOString()
+            checkedAt: new Date().toISOString(),
+            aiEnhanced: !!results.aiAnalysis,
+            aiConfidenceScore: results.aiConfidenceScore
           })
         })
         .select()
@@ -87,13 +85,12 @@ export const PlagiarismCheckerSection = () => {
         throw new Error(`Failed to save search query: ${searchQueryError.message}`);
       }
 
-      // Save each match as a search result
       if (results.matches.length > 0 && searchQuery?.id) {
         const searchResults = results.matches.map(match => ({
           search_id: searchQuery.id,
           title: match.text.substring(0, 50) + (match.text.length > 50 ? '...' : ''),
           url: match.source,
-          thumbnail: '', // No thumbnail for plagiarism matches
+          thumbnail: '',
           source: new URL(match.source).hostname,
           match_level: match.similarity > 0.7 ? 'High' : match.similarity > 0.4 ? 'Medium' : 'Low',
           found_at: new Date().toISOString(),
@@ -133,26 +130,20 @@ export const PlagiarismCheckerSection = () => {
     try {
       const doc = new jsPDF();
       
-      // Add title
       doc.setFontSize(18);
       doc.text("Plagiarism Check Report", 14, 22);
       
-      // Add file name
       doc.setFontSize(12);
       doc.text(`File: ${file.name}`, 14, 32);
       
-      // Add date
       doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 39);
       
-      // Add overall score
       doc.setFontSize(14);
       doc.text(`Similarity Score: ${results.score.toFixed(1)}%`, 14, 49);
       
-      // Add match details header
       doc.setFontSize(14);
       doc.text("Potential Matches:", 14, 59);
       
-      // Add matches table
       if (results.matches.length > 0) {
         const tableData = results.matches.map((match, index) => [
           index + 1,
@@ -178,7 +169,6 @@ export const PlagiarismCheckerSection = () => {
         doc.text("No significant matches found.", 14, 65);
       }
       
-      // Save the PDF
       doc.save(`plagiarism-report-${file.name.split('.')[0]}.pdf`);
       
       toast({
@@ -203,14 +193,12 @@ export const PlagiarismCheckerSection = () => {
     
     setIsUploading(true);
     try {
-      // Generate a unique filename to prevent collisions
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `plagiarism-checks/${fileName}`;
       
       console.log('Attempting to upload file to temp-uploads bucket...');
       
-      // Upload file to temporary storage
       const { error: uploadError, data: uploadData } = await supabase.storage
         .from('temp-uploads')
         .upload(filePath, file);
@@ -218,11 +206,9 @@ export const PlagiarismCheckerSection = () => {
       if (uploadError) {
         console.error('Upload error:', uploadError);
         
-        // If bucket not found, attempt to create it and retry once
         if (uploadError.message.includes('bucket') && uploadError.message.includes('not found')) {
           console.log("Bucket not found, attempting to create it and retry...");
           
-          // Call the edge function to create the bucket
           const { error: createError } = await supabase.functions.invoke('create_bucket', {
             body: { bucketName: 'temp-uploads' }
           });
@@ -237,7 +223,6 @@ export const PlagiarismCheckerSection = () => {
             return;
           }
           
-          // Retry the upload after creating the bucket
           console.log("Retrying upload after bucket creation...");
           const { error: retryError } = await supabase.storage
             .from('temp-uploads')
@@ -254,7 +239,6 @@ export const PlagiarismCheckerSection = () => {
       
       console.log('File uploaded successfully');
       
-      // Extract text from the file
       let fileText;
       try {
         console.log('Extracting text from file...');
@@ -265,18 +249,19 @@ export const PlagiarismCheckerSection = () => {
         throw new Error(`Failed to extract text: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
       
-      // Check for plagiarism using Google Search
       console.log('Checking for plagiarism...');
       const plagiarismResults = await checkPlagiarism(fileText);
       setResults(plagiarismResults);
       console.log('Plagiarism check completed');
       
-      // Save results to database
+      if (plagiarismResults.aiAnalysis) {
+        console.log('AI analysis included in results');
+      }
+      
       if (user) {
         await saveResultsToDatabase(plagiarismResults, file.name);
       }
       
-      // Clean up the file after results are shown
       console.log('Cleaning up temporary file...');
       await supabase.storage
         .from('temp-uploads')
@@ -289,11 +274,22 @@ export const PlagiarismCheckerSection = () => {
       });
     } catch (error) {
       console.error("Error during plagiarism check:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to check for plagiarism",
-        variant: "destructive"
-      });
+      
+      if (error instanceof Error && 
+          (error.message.includes('OpenAI API key') || 
+           error.message.includes('OpenAI API error'))) {
+        toast({
+          title: "API Key Required",
+          description: "An OpenAI API key is required for enhanced AI analysis. The check was completed with basic analysis only.",
+          variant: "warning"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to check for plagiarism",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUploading(false);
     }
@@ -313,7 +309,7 @@ export const PlagiarismCheckerSection = () => {
         file={file}
         setFile={(newFile) => {
           setFile(newFile);
-          setResults(null); // Clear previous results when a new file is selected
+          setResults(null);
         }}
         isUploading={isUploading}
         onSubmit={uploadAndCheckPlagiarism}
