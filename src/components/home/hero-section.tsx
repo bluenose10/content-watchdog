@@ -1,3 +1,4 @@
+
 import { ArrowRight, Shield, Zap, FileCheck, Bell, Search, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ export const HeroSection = () => {
           </div>
           
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-tighter text-gradient max-w-3xl mx-auto animate-scale-in" style={{ animationDelay: "0.2s" }}>
-            Stop Content Theft in Its Tracks—Protect What's Yours.
+            Stop Content Theft in Its Tracks - Protect What's Yours.
           </h1>
         </div>
         
