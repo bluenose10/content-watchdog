@@ -14,7 +14,7 @@ export function ContentSearchSection() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { accessLevel } = useProtectedRoute(false);
+  const { accessLevel, isAdmin } = useProtectedRoute(false);
 
   // Use our custom hook to get the search handlers
   const {
@@ -28,6 +28,8 @@ export function ContentSearchSection() {
     setError,
     navigate
   });
+
+  console.log("ContentSearchSection render - access level:", accessLevel, "isAdmin:", isAdmin);
 
   return (
     <section id="content-search-section" className="h-full">

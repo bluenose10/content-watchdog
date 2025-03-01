@@ -2,7 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { SocialMediaInfo } from "./social-media-info";
+import { SocialMediaInfo, getSocialMediaInfo } from "./social-media-info";
 import { truncateText } from "@/lib/utils";
 
 interface CardContentProps {
@@ -21,7 +21,8 @@ interface CardContentProps {
   snippet?: string;
   isPremium: boolean;
   isFreePreview: boolean;
-  socialMedia: SocialMediaInfo;
+  socialMedia?: SocialMediaInfo;
+  type?: string;
 }
 
 export function CardContent({
@@ -34,7 +35,8 @@ export function CardContent({
   snippet,
   isPremium,
   isFreePreview,
-  socialMedia
+  socialMedia,
+  type = 'website'
 }: CardContentProps) {
   const truncatedTitle = cleanTitle.length > 60 ? cleanTitle.substring(0, 60) + '...' : cleanTitle;
   
@@ -47,11 +49,14 @@ export function CardContent({
     }
   })();
 
+  // If socialMedia is not provided, generate it from the source and type
+  const mediaInfo = socialMedia || getSocialMediaInfo(cleanSource, type);
+
   return (
     <div className="flex items-center p-4">
       <div className="mr-3">
-        <div className={`rounded-full p-2 ${socialMedia.color} bg-gray-100 dark:bg-gray-800`}>
-          <socialMedia.Icon size={20} />
+        <div className={`rounded-full p-2 ${mediaInfo.color} bg-gray-100 dark:bg-gray-800`}>
+          <mediaInfo.Icon size={20} />
         </div>
       </div>
       

@@ -1,14 +1,15 @@
 
 import { User } from "@supabase/supabase-js";
-import { toast } from "@/hooks/use-toast";
+import { AccessLevel } from "@/hooks/useProtectedRoute";
 import { TextSearchParams } from "@/lib/db-types";
-import { handleTextSearch } from "../searchService";
-import { handlePreSearchChecks, handlePermissionError } from "./common-handlers";
+import { createTextSearchQuery } from "../search-utils";
+import { checkRateLimit } from "../quota-manager";
+import { optimizedSearch } from "@/lib/search/search-api-manager";
 
 type HashtagSearchProps = {
   query: string;
   user: User | null;
-  accessLevel: any;
+  accessLevel: AccessLevel;
   setIsLoading: (value: boolean) => void;
   setError: (value: string | null) => void;
   navigate: (path: string) => void;
@@ -22,34 +23,68 @@ export const executeHashtagSearch = async ({
   setIsLoading,
   setError,
   navigate,
-  params
-}: HashtagSearchProps): Promise<void> => {
-  return handlePreSearchChecks(
-    { user, accessLevel, setIsLoading, setError, navigate },
-    async () => {
-      console.log("Hashtag search with query:", query, "and params:", params);
-      
-      try {
-        const searchId = await handleTextSearch(query, "hashtag", user, params);
-        // Use the searchId directly in the URL for results
-        navigate(`/results?id=${searchId}`);
-      } catch (error: any) {
-        console.error("Hashtag search error:", error);
-        
-        // Handle permission errors more gracefully
-        if (handlePermissionError(error, query, "hashtag", navigate)) {
-          return;
-        }
-        
-        // For other errors, show the error message
-        setError("There was a problem with your hashtag search. Please try again.");
-        
-        toast({
-          title: "Search failed",
-          description: error instanceof Error ? error.message : "There was a problem with your search. Please try again.",
-          variant: "destructive",
-        });
+  params,
+}: HashtagSearchProps) => {
+  // Validate the hashtag format
+  if (!query.trim()) {
+    setError("Please enter a hashtag to search");
+    return;
+  }
+
+  // Add hashtag symbol if not present
+  let formattedQuery = query.trim();
+  if (!formattedQuery.startsWith('#')) {
+    formattedQuery = '#' + formattedQuery;
+  }
+
+  try {
+    setIsLoading(true);
+    setError(null);
+
+    console.log(`Executing hashtag search for "${formattedQuery}" with access level: ${accessLevel}`);
+
+    // Check rate limits for non-admin users only
+    if (accessLevel !== AccessLevel.ADMIN) {
+      const rateLimitCheck = await checkRateLimit(user?.id);
+      if (!rateLimitCheck.allowed) {
+        setError(rateLimitCheck.message || "Rate limit exceeded. Please try again later.");
+        return;
       }
     }
-  );
+
+    // Create search query
+    const searchId = await createTextSearchQuery({
+      query: formattedQuery,
+      type: "hashtag",
+      user,
+      params,
+    });
+
+    if (!searchId) {
+      setError("Failed to create search. Please try again.");
+      return;
+    }
+
+    console.log(`Search created with ID: ${searchId}`);
+
+    // For admin users, make sure to pre-fetch results
+    if (accessLevel === AccessLevel.ADMIN) {
+      try {
+        // Attempt to pre-fetch results to prevent 404s
+        console.log("Admin user detected, pre-fetching results");
+        await optimizedSearch("hashtag", formattedQuery, params || {});
+      } catch (prefetchError) {
+        console.error("Admin pre-fetch error:", prefetchError);
+        // Continue even if pre-fetch fails, as results page will handle this
+      }
+    }
+
+    // Navigate to results page
+    navigate(`/results?id=${searchId}`);
+  } catch (error) {
+    console.error("Hashtag search error:", error);
+    setError("An unexpected error occurred. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
 };
