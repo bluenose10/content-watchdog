@@ -9,7 +9,7 @@ export function AboutSection() {
     <section id="about" className="py-6 md:py-4 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold mb-2">About Influence Guard</h2>
+          <h2 className="text-3xl font-bold mb-2 text-gradient">About Influence Guard</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Trusted by over 5,000+ content creators to protect their digital assets
           </p>

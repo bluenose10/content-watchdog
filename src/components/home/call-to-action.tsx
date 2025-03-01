@@ -8,7 +8,7 @@ export function CallToAction() {
     <section className="h-full">
       <div className="h-full">
         <div className="text-center mb-4 md:mb-6">
-          <h2 className="text-xl md:text-2xl font-bold mb-2">Ready to Protect Your Content?</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-2 text-gradient">Ready to Protect Your Content?</h2>
           <p className="text-xs md:text-sm text-muted-foreground">Join thousands of creators who trust us</p>
         </div>
         

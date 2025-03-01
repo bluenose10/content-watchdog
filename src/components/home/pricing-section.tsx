@@ -39,7 +39,7 @@ export function PricingSection() {
     <section id="pricing" className="relative overflow-hidden py-6 md:py-4">
       <div className="container mx-auto">
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold mb-3">Pricing Plans</h2>
+          <h2 className="text-3xl font-bold mb-3 text-gradient">Pricing Plans</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Choose the plan that fits your needs
           </p>

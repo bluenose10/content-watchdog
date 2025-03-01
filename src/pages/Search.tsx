@@ -26,7 +26,7 @@ const Search = () => {
       <Header />
       <main className="flex-grow pt-16 pb-16">
         <div className="container px-4 md:px-6 pt-8">
-          <h1 className="text-2xl font-bold text-primary mb-4">Content Search</h1>
+          <h1 className="text-2xl font-bold text-gradient mb-4">Content Search</h1>
           <p className="text-muted-foreground mb-8">
             Use our powerful digital rights management system to find unauthorized uses of your intellectual property across the web. Our advanced copyright infringement detection helps secure your creative assets.
             {!user && (

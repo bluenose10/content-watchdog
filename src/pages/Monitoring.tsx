@@ -70,7 +70,7 @@ export default function Monitoring() {
           <TabsContent value="cache">
             <Card>
               <CardHeader>
-                <CardTitle>Cache Statistics</CardTitle>
+                <CardTitle className="text-gradient">Cache Statistics</CardTitle>
                 <CardDescription>Performance metrics for the search cache</CardDescription>
               </CardHeader>
               <CardContent>
@@ -115,7 +115,7 @@ export default function Monitoring() {
           <TabsContent value="api">
             <Card>
               <CardHeader>
-                <CardTitle>API Usage Statistics</CardTitle>
+                <CardTitle className="text-gradient">API Usage Statistics</CardTitle>
                 <CardDescription>Track external API consumption</CardDescription>
               </CardHeader>
               <CardContent>
@@ -132,7 +132,7 @@ export default function Monitoring() {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>How Pre-Fetching Works</CardTitle>
+                  <CardTitle className="text-gradient">How Pre-Fetching Works</CardTitle>
                   <CardDescription>Understanding the pre-caching system</CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -36,7 +36,7 @@ export default function Index() {
         <HeroSection />
         
         <div className="container px-4 md:px-8 lg:px-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center pt-6 md:py-4">Comprehensive Content Protection</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center pt-6 md:py-4 text-gradient">Comprehensive Content Protection</h2>
           <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-8 text-center">
             Our platform provides you with all the tools you need to find, monitor, and protect your content across the web.
           </p>
@@ -44,7 +44,7 @@ export default function Index() {
           {/* Educational Resources Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 md:mb-16">
             <div className="col-span-1 md:col-span-3">
-              <h3 className="text-xl font-bold mb-4 text-center">Educational Resources</h3>
+              <h3 className="text-xl font-bold mb-4 text-center text-gradient">Educational Resources</h3>
             </div>
             
             <div className="col-span-1 p-6 bg-card rounded-lg border border-border hover:shadow-md transition-all">
@@ -131,14 +131,14 @@ export default function Index() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8 mb-10 md:mb-24" id="features">
             <div className="col-span-1">
               <div className="mb-4 md:mb-0 text-center md:text-left">
-                <h3 className="text-xl md:text-2xl font-bold mb-2">Key Features</h3>
+                <h3 className="text-xl md:text-2xl font-bold mb-2 text-gradient">Key Features</h3>
                 <p className="text-sm text-muted-foreground mb-4">Tools trusted by photographers, writers, and brands</p>
               </div>
               <FeaturesSection />
             </div>
             <div className="col-span-1">
               <div className="mb-4 md:mb-0 text-center md:text-left">
-                <h3 className="text-xl md:text-2xl font-bold mb-2">What Users Say</h3>
+                <h3 className="text-xl md:text-2xl font-bold mb-2 text-gradient">What Users Say</h3>
                 <p className="text-sm text-muted-foreground mb-4">Read experiences from our customers</p>
               </div>
               <TestimonialsSection />
