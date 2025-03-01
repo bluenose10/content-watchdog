@@ -3,9 +3,11 @@ import { ArrowRight, Shield, Zap, FileCheck, Bell, Search, UserCheck } from "luc
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const HeroSection = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   
   return (
     <section className="w-full pt-24 md:pt-32 lg:pt-48 pb-16 md:pb-20 lg:pb-32 hero-background">
@@ -16,12 +18,12 @@ export const HeroSection = () => {
           </div>
           
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-tighter text-gradient max-w-3xl mx-auto animate-scale-in" style={{ animationDelay: "0.2s" }}>
-            Stop Content Theft in Its Tracks - Protect Your Intellectual Property.
+            {t('hero.title')}
           </h1>
         </div>
         
         <p className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto animate-scale-in" style={{ animationDelay: "0.4s" }}>
-          For Content Creators Needing Digital Rights Management and DMCA Protection. We locate where your photos, videos, articles, and designs are being used without permission, providing detailed evidence for copyright infringement cases.
+          {t('hero.subtitle')}
         </p>
         
         <p className="text-xs md:text-sm text-purple-600 dark:text-purple-400 max-w-2xl mx-auto animate-scale-in font-medium" style={{ animationDelay: "0.5s" }}>
