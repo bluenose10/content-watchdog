@@ -6,8 +6,14 @@ import { KeyConcepts } from "@/components/content-theft/KeyConcepts";
 import { ContentTheftMainContent } from "@/components/content-theft/ContentTheftMainContent";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 const Piracy = () => {
+  // Add useEffect to scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
