@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, FileClock, FileCheck, Home, Search, User, Shield, Fingerprint } from "lucide-react";
+import { BarChart3, FileClock, FileCheck, Search, User, Shield, Fingerprint } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function QuickActions() {
