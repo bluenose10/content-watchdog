@@ -1,16 +1,14 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { APP_NAME } from "@/lib/constants";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft, Shield, Info } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { InfoCircle } from "lucide-react";
 
 interface SignUpFormProps {
   onSignUpSuccess: (email: string) => void;
@@ -74,7 +72,6 @@ const SignUpForm = ({ onSignUpSuccess }: SignUpFormProps) => {
           variant: "destructive",
         });
       } else {
-        // Check if email confirmation is needed
         if (data?.user && !data.user.email_confirmed_at) {
           console.log("Email confirmation required, informing user to check their inbox");
           toast({
@@ -176,7 +173,7 @@ const SignUpForm = ({ onSignUpSuccess }: SignUpFormProps) => {
               </div>
               
               <Alert variant="success" className="mt-4">
-                <InfoCircle className="h-4 w-4" />
+                <Info className="h-4 w-4" />
                 <AlertTitle>Important!</AlertTitle>
                 <AlertDescription>
                   After signing up, you'll need to confirm your email address. 
