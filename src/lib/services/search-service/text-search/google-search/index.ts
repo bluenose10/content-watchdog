@@ -35,8 +35,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         
         if (!apiKey || !searchEngineId) {
           console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
-          reject(new Error('Google API configuration missing. Please configure API keys.'));
-          return;
+          throw new Error('Google API configuration missing. Please configure API keys.');
         }
         
         // Build the URL parameters with enhanced configuration

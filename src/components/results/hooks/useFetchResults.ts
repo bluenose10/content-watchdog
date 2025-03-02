@@ -5,7 +5,6 @@ import { useResultProcessing } from "./useResultProcessing";
 import { useTemporarySearch } from "./useTemporarySearch";
 import { usePermanentSearch } from "./usePermanentSearch";
 import { SearchStateActions } from "./useSearchState";
-import { FALLBACK_RESULTS } from "./useFallbackResults";
 
 interface FetchResultsProps {
   id: string | null;
@@ -66,43 +65,26 @@ export function useFetchResults({ id, isReady, stateActions }: FetchResultsProps
       } catch (error) {
         console.error("Search API error:", error);
         
-        // For new users or when API keys aren't set up, provide a more helpful message
-        // and use fallback results
-        let errorMessage = "An unexpected error occurred while fetching your results.";
-        let useFallbackResults = false;
+        // For API errors, provide a more helpful message without automatically using fallback results
+        let errorMessage = "An error occurred while fetching your results.";
         
         if (error instanceof Error) {
           if (error.message.includes("API key") || error.message.includes("configuration missing")) {
-            errorMessage = "API keys not configured. Using demonstration results instead.";
-            useFallbackResults = true;
+            errorMessage = "Search API configuration error. Please contact support.";
           } else if (error.message.includes("quota") || error.message.includes("rate limit")) {
-            errorMessage = "Search API quota exceeded. Using demonstration results instead.";
-            useFallbackResults = true;
+            errorMessage = "Search API quota exceeded. Please try again later.";
           } else if (error.message.includes("No search") || error.message.includes("not found")) {
             errorMessage = "Your search could not be found. Please try a new search.";
           }
         }
         
         toast({
-          title: "Search Information",
+          title: "Search Error",
           description: errorMessage,
-          variant: useFallbackResults ? "default" : "destructive",
+          variant: "destructive",
         });
         
-        if (useFallbackResults) {
-          console.log("Using fallback results due to API error");
-          // Use fallback results for a better user experience
-          setResults(FALLBACK_RESULTS);
-          setTotalResults(FALLBACK_RESULTS.length);
-          setQuery("Sample Search");
-          
-          // Set search date for fallback results
-          const now = new Date();
-          setSearchDate(now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
-          return;
-        }
-        
-        // Only navigate back to search page if we're not using fallback results
+        // Set empty results instead of fallback
         setResults([]);
         setTotalResults(0);
         setQuery("Search error");
