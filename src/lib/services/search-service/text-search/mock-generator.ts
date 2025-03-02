@@ -113,3 +113,6 @@ export function generateEnhancedMockSearchResults(query: string, searchParams: T
   console.log('Generated enhanced mock results:', mockResults.items.length);
   return mockResults;
 }
+
+// Export the function with the name the other modules are looking for
+export const generateMockResults = generateEnhancedMockSearchResults;
