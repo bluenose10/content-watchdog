@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { googleApiManager } from "@/lib/google-api-manager";
 import { loadGoogleApiCredentials } from "@/lib/pre-fetch-service";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 
 interface GoogleApiSetupProps {
   onComplete?: () => void;
@@ -20,6 +20,7 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
   const [isLoading, setIsLoading] = useState(false);
   const [checkingSupabase, setCheckingSupabase] = useState(!skipSupabaseCheck);
   const [supbaseCheckFailed, setSupabaseCheckFailed] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Try to load credentials from Supabase on mount
   useEffect(() => {
@@ -64,7 +65,7 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
     };
 
     loadCredentials();
-  }, [onComplete, skipSupabaseCheck]);
+  }, [onComplete, skipSupabaseCheck, retryCount]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +101,17 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
     }
   };
 
+  const handleRetrySupabaseCheck = () => {
+    // Clear any cached credentials
+    sessionStorage.removeItem("GOOGLE_API_KEY");
+    sessionStorage.removeItem("GOOGLE_CSE_ID");
+    
+    // Increment retry count to trigger the useEffect
+    setRetryCount(prev => prev + 1);
+    
+    toast.info("Retrying to fetch credentials from Supabase...");
+  };
+
   if (checkingSupabase) {
     return (
       <Card className="w-full max-w-xl mx-auto">
@@ -124,11 +136,20 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
         <CardContent className="pb-0">
           <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex items-start gap-3 mb-4">
             <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-            <div>
+            <div className="flex-1">
               <p className="text-sm text-amber-800 font-medium">Failed to load Google API credentials from Supabase</p>
               <p className="text-xs text-amber-700 mt-1">
                 Make sure your Supabase project has the GOOGLE_API_KEY and GOOGLE_CSE_ID secrets correctly set.
               </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200"
+                onClick={handleRetrySupabaseCheck}
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                Retry Supabase Check
+              </Button>
             </div>
           </div>
         </CardContent>

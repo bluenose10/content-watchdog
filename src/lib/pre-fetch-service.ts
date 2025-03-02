@@ -1,4 +1,3 @@
-
 import { googleApiManager } from './google-api-manager';
 import { supabase } from './supabase';
 
@@ -44,18 +43,23 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
       return false;
     }
     
-    // Additional logging to understand what's in the response
-    console.log("Edge Function response received:", data);
+    // Additional detailed logging to understand what we're getting from the edge function
+    console.log("Edge Function response received:", JSON.stringify(data, null, 2));
     
-    if (data && data.apiKey && data.cseId) {
+    if (data && typeof data.apiKey === 'string' && typeof data.cseId === 'string') {
       // Store the credentials in memory and session storage
-      console.log("Successfully received Google API credentials from Supabase");
+      console.log("Successfully received valid Google API credentials from Supabase");
       googleApiManager.setCredentials(data.apiKey, data.cseId);
       sessionStorage.setItem("GOOGLE_API_KEY", data.apiKey);
       sessionStorage.setItem("GOOGLE_CSE_ID", data.cseId);
       return true;
     } else {
-      console.warn("No valid Google API credentials returned from Supabase:", data);
+      console.warn("Invalid Google API credentials returned from Supabase:", data);
+      
+      // Check if there's a message in the response that might explain the issue
+      if (data && data.message) {
+        console.error("Edge Function error message:", data.message);
+      }
       
       // Try to use local storage or environment variables as a fallback
       const localApiKey = localStorage.getItem("GOOGLE_API_KEY") || import.meta.env.VITE_GOOGLE_API_KEY;

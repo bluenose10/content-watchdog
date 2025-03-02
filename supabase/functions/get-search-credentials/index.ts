@@ -1,58 +1,73 @@
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { corsHeaders } from '../_shared/cors.ts'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-console.log('get-search-credentials function initialization')
+// CORS headers for browser requests
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Content-Type': 'application/json',
+}
+
+console.log("Loading get-search-credentials Edge Function")
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('Fetching Google API credentials from Supabase secrets')
+    // Log incoming request
+    console.log("Received request for Google API credentials")
     
-    // Get secrets from environment
+    // Get the API key and CSE ID from environment variables
     const apiKey = Deno.env.get('GOOGLE_API_KEY')
     const cseId = Deno.env.get('GOOGLE_CSE_ID')
     
-    // Log status (without revealing the full key for security)
-    console.log(`API Key status: ${apiKey ? 'Found (starts with ' + apiKey.substring(0, 4) + '...)' : 'Not found'}`)
-    console.log(`CSE ID status: ${cseId ? 'Found (starts with ' + cseId.substring(0, 4) + '...)' : 'Not found'}`)
+    // Log status of found credentials (without revealing the actual values)
+    console.log(`API Key found: ${apiKey ? 'Yes' : 'No'}`)
+    console.log(`CSE ID found: ${apiKey ? 'Yes' : 'No'}`)
     
+    // Check if both credentials are available
     if (!apiKey || !cseId) {
-      console.error('Missing required Google API credentials in Supabase secrets')
+      console.error("Missing Google API credentials in environment variables")
       return new Response(
         JSON.stringify({
-          error: 'Missing required Google API credentials in Supabase secrets'
+          error: 'Missing credentials',
+          message: 'Google API Key or CSE ID not found in environment variables',
+          apiKeyFound: !!apiKey,
+          cseIdFound: !!cseId
         }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        { 
           status: 400,
+          headers: corsHeaders
         }
       )
     }
     
     // Return the credentials
-    console.log('Successfully retrieved Google API credentials')
+    console.log("Successfully returning Google API credentials")
     return new Response(
       JSON.stringify({
         apiKey,
-        cseId
+        cseId,
       }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      { 
         status: 200,
+        headers: corsHeaders
       }
     )
   } catch (error) {
-    console.error(`Error in get-search-credentials function: ${error.message}`)
+    // Log and return any errors
+    console.error("Error in get-search-credentials function:", error)
     return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      JSON.stringify({
+        error: error.message || 'Unknown error',
+        message: 'Failed to retrieve Google API credentials'
+      }),
+      { 
         status: 500,
+        headers: corsHeaders
       }
     )
   }
