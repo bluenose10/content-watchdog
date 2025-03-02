@@ -29,8 +29,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     
     if (useMockResults) {
       console.log('Using mock results due to missing or invalid API configuration');
-      const mockResults = generateMockResults(query, searchParams.maxResults || 30);
-      mockResults._source = 'mock';
+      const mockResults = generateMockResults(query, searchParams);
       return mockResults;
     }
     
@@ -79,8 +78,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
           
           // Fall back to mock results on API errors
           console.log('Falling back to mock results due to API error');
-          const mockResults = generateMockResults(query, searchParams.maxResults || 30);
-          mockResults._source = 'mock';
+          const mockResults = generateMockResults(query, searchParams);
           resolve(mockResults);
         }
       } catch (error) {
@@ -88,8 +86,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         
         // Fall back to mock results on any error
         console.log('Falling back to mock results due to error');
-        const mockResults = generateMockResults(query, searchParams.maxResults || 30);
-        mockResults._source = 'mock';
+        const mockResults = generateMockResults(query, searchParams);
         resolve(mockResults);
       }
     });
@@ -102,8 +99,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     
     // Fall back to mock results on any error
     console.log('Falling back to mock results due to error');
-    const mockResults = generateMockResults(query, searchParams.maxResults || 30);
-    mockResults._source = 'mock';
+    const mockResults = generateMockResults(query, searchParams);
     return mockResults;
   }
 };

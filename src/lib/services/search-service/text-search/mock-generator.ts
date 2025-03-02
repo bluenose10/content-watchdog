@@ -4,11 +4,19 @@ import { TextSearchParams } from '../../../db-types';
 /**
  * Generates enhanced mock search results (only used for testing when API is unavailable)
  * @param query The search query
- * @param searchParams Additional search parameters
+ * @param maxResults Max number of results to generate or object with search params
  * @returns Mock search results in Google API format
  */
-export function generateEnhancedMockSearchResults(query: string, searchParams: TextSearchParams = {}) {
+export function generateEnhancedMockSearchResults(
+  query: string, 
+  maxResultsOrParams: number | TextSearchParams = {}
+): any {
   console.warn('FALLBACK: Using mock data for search - this should only happen during development');
+  
+  // Handle both number and TextSearchParams
+  const searchParams: TextSearchParams = typeof maxResultsOrParams === 'number' 
+    ? { maxResults: maxResultsOrParams } 
+    : maxResultsOrParams;
   
   const exactMatch = searchParams?.exactMatch;
   const dateRestrict = searchParams?.dateRestrict;
@@ -107,7 +115,8 @@ export function generateEnhancedMockSearchResults(query: string, searchParams: T
       searchTime: 0.5,
       formattedSearchTime: "0.5"
     },
-    items: mockItems
+    items: mockItems,
+    _source: 'mock' // Add this to identify mock results
   };
   
   console.log('Generated enhanced mock results:', mockResults.items.length);
