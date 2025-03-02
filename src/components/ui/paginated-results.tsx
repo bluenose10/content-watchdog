@@ -15,7 +15,7 @@ interface PaginatedResultsProps {
 export function PaginatedResults({
   results,
   accessLevel,
-  itemsPerPage = 10, // Changed from 6 to 10 to accommodate more list items
+  itemsPerPage = 10,
   onUpgrade,
 }: PaginatedResultsProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +31,7 @@ export function PaginatedResults({
   // Calculate pagination values
   const totalPages = Math.ceil(results.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, results.length);
   const currentResults = results.slice(startIndex, endIndex);
 
   // Get result limit based on access level
@@ -73,6 +73,8 @@ export function PaginatedResults({
               source: result.source,
               matchLevel: result.match_level,
               date: result.found_at,
+              type: result.type,
+              snippet: result.snippet,
             }}
             isPremium={isPremium(index)}
             isFreePreview={isFreePreview(index)}

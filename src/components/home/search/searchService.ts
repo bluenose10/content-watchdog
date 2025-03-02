@@ -1,3 +1,4 @@
+
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
@@ -45,6 +46,15 @@ const userSearchCounts: Record<string, {
     weekly: number
   } 
 }> = {};
+
+// Cache search parameters for retrieval in results page
+function cacheSearchParams(searchId: string, params: any): void {
+  try {
+    sessionStorage.setItem(`search_params_${searchId}`, JSON.stringify(params));
+  } catch (error) {
+    console.error("Error caching search parameters:", error);
+  }
+}
 
 /**
  * Check if user has exceeded their search limits based on subscription tier
@@ -222,6 +232,14 @@ export async function handleTextSearch(
       search_params_json: JSON.stringify(mergedParams)
     }, user);
     
+    // Cache the search parameters for the results page
+    cacheSearchParams(searchId, {
+      user_id: user.id,
+      query_type: queryType,
+      query_text: formattedQuery,
+      search_params_json: JSON.stringify(mergedParams) 
+    });
+    
     // Cache the results
     cacheResults(cacheKey, { id: searchId });
     
@@ -233,6 +251,15 @@ export async function handleTextSearch(
     
     // Create a fallback search ID
     const fallbackId = `fallback_${crypto.randomUUID()}`;
+    
+    // Cache search parameters for fallback ID
+    cacheSearchParams(fallbackId, {
+      user_id: user.id,
+      query_type: queryType,
+      query_text: formattedQuery,
+      search_params_json: JSON.stringify(mergedParams)
+    });
+    
     cacheResults(cacheKey, { id: fallbackId });
     
     return fallbackId;
@@ -292,6 +319,14 @@ export async function handleImageSearch(
         search_params_json: JSON.stringify(mergedParams)
       }, user);
       
+      // Cache search parameters for the results page
+      cacheSearchParams(searchId, {
+        user_id: user.id,
+        query_type: "image",
+        image_url: imageUrl,
+        search_params_json: JSON.stringify(mergedParams)
+      });
+      
       // Cache the results
       cacheResults(cacheKey, { id: searchId });
       
@@ -300,6 +335,15 @@ export async function handleImageSearch(
       // If there's an error with the database operation, use a fallback ID
       console.error("Image search database error:", dbError);
       const fallbackId = `fallback_${crypto.randomUUID()}`;
+      
+      // Cache search parameters for fallback ID
+      cacheSearchParams(fallbackId, {
+        user_id: user.id,
+        query_type: "image",
+        image_url: imageUrl,
+        search_params_json: JSON.stringify(mergedParams)
+      });
+      
       cacheResults(cacheKey, { id: fallbackId });
       return fallbackId;
     }

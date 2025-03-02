@@ -16,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getSearchQueryById, performGoogleSearch, performImageSearch } from "@/lib/db-service";
 import { googleApiManager } from "@/lib/google-api-manager";
 
-// Extended fallback results to guarantee more results are shown
 const FALLBACK_RESULTS = [
   {
     id: 'fallback-1',
@@ -141,13 +140,11 @@ const FALLBACK_RESULTS = [
 ];
 
 export default function Results() {
-  // Use search params to get the ID instead of URL parameters
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   
   const navigate = useNavigate();
   const { user } = useAuth();
-  // Allow anonymous users to view results
   const { isReady, accessLevel } = useProtectedRoute(false);
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<any[]>([]);
@@ -156,7 +153,6 @@ export default function Results() {
   const [totalResults, setTotalResults] = useState<number>(0);
   const { toast } = useToast();
 
-  // Handler for upgrade button click
   const handleUpgrade = () => {
     toast({
       title: "Premium Feature",
@@ -182,12 +178,10 @@ export default function Results() {
         setIsLoading(true);
         console.log("Fetching results for search ID:", id);
         
-        // Check if it's a temporary search ID (for anonymous users)
         const isTemporarySearch = id.startsWith('temp_');
         const isFallbackSearch = id.startsWith('fallback_') || id.startsWith('generated_') || id.startsWith('recovery_');
         
         if (isTemporarySearch) {
-          // For temporary searches, try to get stored search data from session storage
           const tempSearchData = sessionStorage.getItem(`temp_search_${id}`);
           
           if (tempSearchData) {
@@ -198,11 +192,9 @@ export default function Results() {
             console.log("Processing temporary search:", queryText, "of type", queryType);
             setQuery(queryText);
             
-            // Get search parameters if available
             const searchParams = searchData.search_params_json ? 
                                  JSON.parse(searchData.search_params_json) : {};
             
-            // Perform Google search directly for temporary searches
             try {
               let searchResponse;
               if (queryType === 'image') {
@@ -218,16 +210,13 @@ export default function Results() {
               if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
                 setTotalResults(searchResponse.searchInformation?.totalResults || searchResponse.items.length);
                 
-                // Transform Google API response to our format
                 const formattedResults = searchResponse.items.map((item: any, index: number) => {
-                  // Extract thumbnail with fallbacks
                   const thumbnailUrl = 
                     item.pagemap?.cse_thumbnail?.[0]?.src || 
                     item.pagemap?.cse_image?.[0]?.src || 
                     item.image?.thumbnailLink ||
                     `https://picsum.photos/200/300?random=${index+1}`;
                   
-                  // Determine result type based on URL, pagemap, or other factors
                   const source = item.displayLink || "unknown";
                   let type = 'website';
                   
@@ -258,34 +247,26 @@ export default function Results() {
                     type = 'social';
                   }
                   
-                  // Determine match level based on ranking factors
-                  // Consider: position in results, title match, metatags match
                   let matchScore = 0;
                   
-                  // Position in results matters (earlier = better)
                   matchScore += Math.max(0, 1 - (index / searchResponse.items.length));
                   
-                  // Exact title match is a strong signal
                   if (item.title && item.title.toLowerCase().includes(queryText.toLowerCase())) {
                     matchScore += 0.4;
                   }
                   
-                  // Snippet/description match is also important
                   if (item.snippet && item.snippet.toLowerCase().includes(queryText.toLowerCase())) {
                     matchScore += 0.2;
                   }
                   
-                  // Metatags match
                   if (item.pagemap?.metatags?.[0]?.['og:title']?.toLowerCase().includes(queryText.toLowerCase())) {
                     matchScore += 0.2;
                   }
                   
-                  // URL match
                   if (item.link?.toLowerCase().includes(queryText.toLowerCase().replace(/\s+/g, ''))) {
                     matchScore += 0.2;
                   }
-
-                  // Final normalization of score to 0-1 range
+                  
                   matchScore = Math.min(1, matchScore);
                   
                   let matchLevel = 'Medium';
@@ -308,11 +289,9 @@ export default function Results() {
                 setResults(formattedResults);
                 console.log("Formatted results:", formattedResults);
               } else if (searchResponse && searchResponse.error) {
-                // Handle API-reported errors
                 console.error("API error:", searchResponse.error);
                 throw new Error(searchResponse.error.message || "API error");
               } else {
-                // Handle empty results
                 setResults([]);
                 setTotalResults(0);
                 toast({
@@ -323,13 +302,70 @@ export default function Results() {
               }
             } catch (error) {
               console.error("Error performing direct search:", error);
-              setResults(FALLBACK_RESULTS);
-              setTotalResults(FALLBACK_RESULTS.length);
-              toast({
-                title: "API Error",
-                description: "Could not fetch search results from Google API. Showing sample results instead.",
-                variant: "destructive",
-              });
+              
+              try {
+                console.log("Attempting fallback using Google API Manager");
+                const managerResponse = await googleApiManager.optimizedSearch(
+                  queryType, 
+                  queryText, 
+                  searchParams
+                );
+                
+                if (managerResponse && managerResponse.results && managerResponse.results.length > 0) {
+                  setResults(managerResponse.results);
+                  setTotalResults(managerResponse.results.length);
+                  console.log("Using results from Google API Manager:", managerResponse.results);
+                } else {
+                  throw new Error("No results from API Manager");
+                }
+              } catch (managerError) {
+                console.error("API Manager fallback failed:", managerError);
+                
+                try {
+                  const googleApiKey = process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
+                  const googleCseId = process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
+                  
+                  if (googleApiKey && googleCseId) {
+                    console.log("Attempting direct Google API call");
+                    const directApiUrl = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCseId}&q=${encodeURIComponent(queryText)}`;
+                    
+                    const directResponse = await fetch(directApiUrl);
+                    const directData = await directResponse.json();
+                    
+                    if (directData.items && directData.items.length > 0) {
+                      const directResults = directData.items.map((item: any, index: number) => ({
+                        id: `direct-${index}`,
+                        title: item.title,
+                        url: item.link,
+                        thumbnail: item.pagemap?.cse_image?.[0]?.src || `https://picsum.photos/200/300?random=${index+1}`,
+                        source: item.displayLink,
+                        match_level: index < 3 ? 'High' : index < 7 ? 'Medium' : 'Low',
+                        found_at: new Date().toISOString(),
+                        type: item.pagemap?.cse_image ? 'image' : 'website',
+                        snippet: item.snippet
+                      }));
+                      
+                      setResults(directResults);
+                      setTotalResults(directResults.length);
+                      console.log("Using results from direct Google API call:", directResults);
+                    } else {
+                      throw new Error("No results from direct API call");
+                    }
+                  } else {
+                    throw new Error("Missing Google API credentials");
+                  }
+                } catch (directError) {
+                  console.error("All Google API methods failed:", directError);
+                  toast({
+                    title: "Search API Error",
+                    description: "Unable to connect to Google Search API. Using sample results instead.",
+                    variant: "destructive",
+                  });
+                  
+                  setResults(FALLBACK_RESULTS);
+                  setTotalResults(FALLBACK_RESULTS.length);
+                }
+              }
             }
           } else {
             console.error("No temporary search data found");
@@ -338,9 +374,7 @@ export default function Results() {
             setQuery("Unknown search");
           }
         } else {
-          // For permanent searches (logged in users)
           try {
-            // Try to get cached results first
             const cachedData = await getSearchResults(id);
             
             if (cachedData && cachedData.results && cachedData.results.length > 0) {
@@ -349,7 +383,6 @@ export default function Results() {
               setQuery(cachedData.query);
               setTotalResults(cachedData.results.length);
             } else {
-              // If no cached results or it's a fallback search ID, fetch the search query from the database
               let searchQuery;
               
               try {
@@ -359,8 +392,6 @@ export default function Results() {
                 console.error("Error fetching search query:", error);
                 
                 if (isFallbackSearch) {
-                  // If it's a fallback ID and we can't get the search query, 
-                  // we need to perform a direct search using any cached parameters
                   const cachedParams = sessionStorage.getItem(`search_params_${id}`);
                   if (cachedParams) {
                     searchQuery = JSON.parse(cachedParams);
@@ -374,11 +405,9 @@ export default function Results() {
                 const queryType = searchQuery.query_type;
                 setQuery(queryText);
                 
-                // Get search parameters if available
                 const searchParams = searchQuery.search_params_json ? 
                                     JSON.parse(searchQuery.search_params_json) : {};
                 
-                // Perform Google search - IMPORTANT: Always attempt Google search, never default to fallbacks
                 try {
                   console.log("Attempting direct Google API search for", queryType, queryText);
                   let searchResponse;
@@ -397,22 +426,19 @@ export default function Results() {
                     searchResponse = await performGoogleSearch(queryText, searchQuery.user_id, searchParams);
                   }
                   
-                  console.log("Google API response:", searchResponse);
+                  console.log("Google API search response:", searchResponse);
                   
                   if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
                     setTotalResults(searchResponse.searchInformation?.totalResults || searchResponse.items.length);
                     
-                    // Transform Google API response to our format
                     const formattedResults = searchResponse.items.map((item: any, index: number) => {
                       
-                      // Extract thumbnail with fallbacks
                       const thumbnailUrl = 
                         item.pagemap?.cse_thumbnail?.[0]?.src || 
                         item.pagemap?.cse_image?.[0]?.src || 
                         item.image?.thumbnailLink ||
                         `https://picsum.photos/200/300?random=${index+1}`;
                       
-                      // Determine result type based on URL, pagemap, or other factors
                       const source = item.displayLink || "unknown";
                       let type = 'website';
                       
@@ -443,34 +469,26 @@ export default function Results() {
                         type = 'social';
                       }
                       
-                      // Determine match level based on ranking factors
-                      // Consider: position in results, title match, metatags match
                       let matchScore = 0;
                       
-                      // Position in results matters (earlier = better)
                       matchScore += Math.max(0, 1 - (index / searchResponse.items.length));
                       
-                      // Exact title match is a strong signal
                       if (item.title && item.title.toLowerCase().includes(queryText.toLowerCase())) {
                         matchScore += 0.4;
                       }
                       
-                      // Snippet/description match is also important
                       if (item.snippet && item.snippet.toLowerCase().includes(queryText.toLowerCase())) {
                         matchScore += 0.2;
                       }
                       
-                      // Metatags match
                       if (item.pagemap?.metatags?.[0]?.['og:title']?.toLowerCase().includes(queryText.toLowerCase())) {
                         matchScore += 0.2;
                       }
                       
-                      // URL match
                       if (item.link?.toLowerCase().includes(queryText.toLowerCase().replace(/\s+/g, ''))) {
                         matchScore += 0.2;
                       }
-
-                      // Final normalization of score to 0-1 range
+                      
                       matchScore = Math.min(1, matchScore);
                       
                       let matchLevel = 'Medium';
@@ -491,25 +509,17 @@ export default function Results() {
                     });
                     
                     setResults(formattedResults);
-                    console.log("Formatted results:", formattedResults);
+                    console.log("Formatted Google API results:", formattedResults);
                   } else if (searchResponse && searchResponse.error) {
-                    // Handle API-reported errors
                     console.error("API error:", searchResponse.error);
                     throw new Error(searchResponse.error.message || "API error");
                   } else {
-                    // Handle empty results
-                    setResults([]);
-                    setTotalResults(0);
-                    toast({
-                      title: "No Results Found",
-                      description: "Your search didn't return any results. Try different keywords or parameters.",
-                      variant: "default",
-                    });
+                    console.warn("Google API returned empty results");
+                    throw new Error("Empty results from Google API");
                   }
                 } catch (error) {
-                  console.error("Error performing search:", error);
+                  console.error("Error performing Google search:", error);
                   
-                  // Attempt using Google API Manager as a fallback
                   try {
                     console.log("Attempting fallback using Google API Manager");
                     const managerResponse = await googleApiManager.optimizedSearch(
@@ -528,7 +538,6 @@ export default function Results() {
                   } catch (managerError) {
                     console.error("Fallback search also failed:", managerError);
                     
-                    // Last resort - try direct Google API call without Supabase
                     try {
                       const googleApiKey = process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
                       const googleCseId = process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
@@ -543,14 +552,14 @@ export default function Results() {
                         if (directData.items && directData.items.length > 0) {
                           const directResults = directData.items.map((item: any, index: number) => ({
                             id: `direct-${index}`,
-                            title: item.title,
-                            url: item.link,
+                            title: item.title || "Untitled",
+                            url: item.link || "#",
                             thumbnail: item.pagemap?.cse_image?.[0]?.src || `https://picsum.photos/200/300?random=${index+1}`,
-                            source: item.displayLink,
+                            source: item.displayLink || "unknown",
                             match_level: index < 3 ? 'High' : index < 7 ? 'Medium' : 'Low',
                             found_at: new Date().toISOString(),
                             type: item.pagemap?.cse_image ? 'image' : 'website',
-                            snippet: item.snippet
+                            snippet: item.snippet || null
                           }));
                           
                           setResults(directResults);
@@ -565,12 +574,11 @@ export default function Results() {
                     } catch (directError) {
                       console.error("All Google API methods failed:", directError);
                       toast({
-                        title: "Google Search Error",
-                        description: "Unable to fetch results from Google. Please try again later.",
+                        title: "Search Error",
+                        description: "Unable to fetch results from Google. Please check your API configuration.",
                         variant: "destructive",
                       });
                       
-                      // Only now do we fall back to sample results as a last resort
                       setResults(FALLBACK_RESULTS);
                       setTotalResults(FALLBACK_RESULTS.length);
                     }
@@ -597,12 +605,10 @@ export default function Results() {
           }
         }
         
-        // Set a realistic search date
         const now = new Date();
         setSearchDate(now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
       } catch (error) {
         console.error("Error in fetchResults:", error);
-        // Even if everything fails, show something to the user
         toast({
           title: "Search Error",
           description: "Something went wrong with your search. Please try again.",
@@ -610,7 +616,6 @@ export default function Results() {
         });
         navigate("/search");
       } finally {
-        // Reduced loading time
         setTimeout(() => {
           setIsLoading(false);
         }, 300);
@@ -622,7 +627,6 @@ export default function Results() {
     }
   }, [isReady, id, toast, navigate]);
 
-  // Show loading state while fetching results
   if (!isReady || isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
