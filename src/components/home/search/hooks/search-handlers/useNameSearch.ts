@@ -45,33 +45,20 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
       console.log("Name search with query:", query, "params:", params, "user:", user.id);
       
       try {
-        // Enhanced credential validation with fallback
+        // Enhanced credential validation
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
         
         console.log("Google Search API - API Key configured:", apiKey ? `Yes (length: ${apiKey?.length})` : "No");
         console.log("Google Search API - Search Engine ID configured:", searchEngineId ? "Yes" : "No");
         
-        let needsMockWarning = false;
-        
-        // Check API credentials but continue with warning instead of error
+        // Validate API credentials strictly
         if (!apiKey || apiKey.length < 10) {
-          console.warn("Invalid Google API Key - will use mock data");
-          needsMockWarning = true;
+          throw new Error("Invalid Google API Key. Please configure a valid API key in your environment.");
         }
         
         if (!searchEngineId) {
-          console.warn("Missing Search Engine ID - will use mock data");
-          needsMockWarning = true;
-        }
-        
-        // Show warning toast if using mock data
-        if (needsMockWarning) {
-          toast({
-            title: "Using Demo Mode",
-            description: "Search API is not properly configured. Using sample results instead of real search data.",
-            variant: "default",
-          });
+          throw new Error("Missing Search Engine ID. Please configure a valid Search Engine ID in your environment.");
         }
         
         // Pass user authentication details with the request
@@ -123,114 +110,26 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
           return;
         }
         
-        // Enhanced error handling for API key issues
+        // Enhanced error handling with clear messages
         const errorMsg = error.message || "";
         
         // For authentication errors, provide clearer guidance
         if (errorMsg.includes('unregistered callers') || 
             errorMsg.includes('without established identity')) {
-          
-          setError("API authentication error: Please check your Google API configuration and ensure it has the proper permissions.");
-          
-          toast({
-            title: "API Configuration Issue",
-            description: "Search will continue with sample data instead of real results. For actual search results, please configure valid Google API credentials.",
-            variant: "default",
-          });
-          
-          // Generate a temporary search ID for demo mode
-          const tempSearchId = `temp_demo_${Date.now()}`;
-          sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify({
-            query_text: query,
-            query_type: "name",
-            user_id: user.id,
-            search_params_json: params ? JSON.stringify(params) : null,
-            _demo: true
-          }));
-          
-          navigate(`/results?id=${tempSearchId}&q=${encodeURIComponent(query)}&demo=true`);
-          return;
-        }
-        
-        // For invalid API key errors
-        if (errorMsg.includes('API key not valid') || 
+          setError("API authentication error: Please ensure your Google API is properly configured with the correct permissions.");
+        } else if (errorMsg.includes('API key not valid') || 
             errorMsg.includes('invalid key')) {
-          
-          setError("Invalid API Key: The Google API key appears to be invalid. Using demo mode with sample data.");
-          
-          toast({
-            title: "Using Demo Mode",
-            description: "The search API is not properly configured. Using sample results instead of real search data.",
-            variant: "default",
-          });
-          
-          // Generate a temporary search ID for demo mode
-          const tempSearchId = `temp_demo_${Date.now()}`;
-          sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify({
-            query_text: query,
-            query_type: "name",
-            user_id: user.id,
-            search_params_json: params ? JSON.stringify(params) : null,
-            _demo: true
-          }));
-          
-          navigate(`/results?id=${tempSearchId}&q=${encodeURIComponent(query)}&demo=true`);
-          return;
-        }
-        
-        // For network errors, proceed with demo mode
-        if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
-          setError("Network connection error. Using demo mode with sample data.");
-          
-          toast({
-            title: "Network Issue",
-            description: "Can't connect to the search API. Using sample results instead of real search data.",
-            variant: "default",
-          });
-          
-          // Generate a temporary search ID for demo mode
-          const tempSearchId = `temp_demo_${Date.now()}`;
-          sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify({
-            query_text: query,
-            query_type: "name",
-            user_id: user.id,
-            search_params_json: params ? JSON.stringify(params) : null,
-            _demo: true
-          }));
-          
-          navigate(`/results?id=${tempSearchId}&q=${encodeURIComponent(query)}&demo=true`);
-          return;
-        }
-        
-        // For API configuration errors, be more informative but still continue
-        if (errorMsg.includes('API key') || 
+          setError("Invalid API Key: The Google API key is invalid. Please check your API key configuration.");
+        } else if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
+          setError("Network connection error. Please check your internet connection.");
+        } else if (errorMsg.includes('API key') || 
             errorMsg.includes('configuration') || 
             errorMsg.includes('Search Engine ID')) {
-          
-          setError("Search API configuration issue. Using demo mode with sample data.");
-          
-          toast({
-            title: "Using Demo Mode",
-            description: "The search API is not properly configured. Using sample results instead of real search data.",
-            variant: "default",
-          });
-          
-          // Generate a temporary search ID for demo mode
-          const tempSearchId = `temp_demo_${Date.now()}`;
-          sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify({
-            query_text: query,
-            query_type: "name",
-            user_id: user.id,
-            search_params_json: params ? JSON.stringify(params) : null,
-            _demo: true
-          }));
-          
-          navigate(`/results?id=${tempSearchId}&q=${encodeURIComponent(query)}&demo=true`);
-          return;
+          setError("Search API configuration issue. Please check your API settings.");
+        } else {
+          // For other errors, show the error message
+          setError("There was a problem with your search. Please try again.");
         }
-        
-        // For other errors, show the error message
-        setError("There was a problem with your search. Please try again.");
         
         toast({
           title: "Search failed",

@@ -2,6 +2,7 @@
 import { getSearchResults } from "@/lib/search-cache";
 import { getSearchQueryById, performGoogleSearch, performImageSearch } from "@/lib/db-service";
 import { FALLBACK_RESULTS } from "./useFallbackResults";
+import { generateMockResults } from "@/lib/services/search-service/text-search/mock-generator";
 
 type PermanentSearchProps = {
   setQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -63,14 +64,10 @@ export function usePermanentSearch({
         let searchResponse;
         
         // Check if we're in demo mode (using mock results)
-        const useDemo = !import.meta.env.VITE_GOOGLE_API_KEY || 
-                        import.meta.env.VITE_GOOGLE_API_KEY.length < 10 ||
-                        !import.meta.env.VITE_GOOGLE_CSE_ID;
+        const useDemo = false; // Force real search results, not demo mode
         
         if (useDemo) {
           console.log("Using demo mode with mock results due to missing API configuration");
-          // Import mock generator dynamically
-          const { generateMockResults } = await import('@/lib/services/search-service/text-search/mock-generator');
           searchResponse = generateMockResults(queryText, searchParams.maxResults || 20);
           searchResponse._source = 'mock';
         } else {

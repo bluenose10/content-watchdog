@@ -1,6 +1,7 @@
 
 import { GoogleSearchResponse } from '../types';
 import { enhanceResultsWithScores } from './results-enhancer';
+import { generateMockResults } from '../mock-generator';
 
 /**
  * Fetch multiple pages of search results from Google API
@@ -64,8 +65,7 @@ export async function fetchMultiplePages(
           method: 'GET',
           headers: headers,
           signal: controller.signal,
-          mode: 'cors', // Explicitly set CORS mode for cross-origin requests
-          credentials: 'same-origin' // Include credentials for authenticated requests
+          mode: 'cors' // Explicitly set CORS mode for cross-origin requests
         });
         
         // Clear the timeout
@@ -120,18 +120,9 @@ export async function fetchMultiplePages(
         if (data.items && data.items.length > 0) {
           allResults.items = [...allResults.items, ...data.items];
         } else if (page === 0) {
-          // Generate mock results if first page has no results (for testing)
-          console.log('No real search results found, falling back to mock data for testing');
-          try {
-            const mockData = await import('../mock-generator');
-            const mockResults = mockData.generateMockResults(params.get('q') || 'query', 10);
-            allResults.items = mockResults.items || [];
-            allResults.searchInformation = mockResults.searchInformation;
-            allResults._source = 'mock';
-            break;
-          } catch (mockErr) {
-            console.error('Failed to load mock data:', mockErr);
-          }
+          // If first page has no results, we need to return an empty result set
+          console.log('No search results found on first page');
+          return { items: [], searchInformation: data.searchInformation || null };
         }
         
         // If no more results, break
@@ -154,22 +145,7 @@ export async function fetchMultiplePages(
         // Handle network errors more gracefully
         if (error instanceof TypeError && error.message.includes('fetch')) {
           console.error('Network error when contacting Google API:', error);
-          if (page === 0) {
-            try {
-              // Fall back to mock data for network errors
-              console.log('Network error, falling back to mock data for testing');
-              const mockData = await import('../mock-generator');
-              const mockResults = mockData.generateMockResults(params.get('q') || 'query', 10);
-              allResults.items = mockResults.items || [];
-              allResults.searchInformation = mockResults.searchInformation;
-              allResults._source = 'mock';
-              return allResults;
-            } catch (mockErr) {
-              console.error('Failed to load mock data:', mockErr);
-              throw new Error('Network connection error when contacting the Google API. Please check your internet connection and try again.');
-            }
-          }
-          break;
+          throw new Error('Network connection error when contacting the Google API. Please check your internet connection and try again.');
         }
         
         // Log and rethrow
@@ -187,21 +163,6 @@ export async function fetchMultiplePages(
       }
     } catch (error) {
       console.error(`Google Search API request error on page ${page}:`, error);
-      
-      // Try fallback to mock data for critical errors
-      if (page === 0 && allResults.items.length === 0) {
-        try {
-          console.log('Critical error, falling back to mock data for testing');
-          const mockData = await import('../mock-generator');
-          const mockResults = mockData.generateMockResults(params.get('q') || 'query', 10);
-          allResults.items = mockResults.items || [];
-          allResults.searchInformation = mockResults.searchInformation;
-          allResults._source = 'mock';
-          return allResults;
-        } catch (mockErr) {
-          console.error('Failed to load mock data:', mockErr);
-        }
-      }
       
       // If this is the first page and no fallback data, throw the error
       if (page === 0 && allResults.items.length === 0) throw error; 

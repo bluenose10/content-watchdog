@@ -23,4 +23,5 @@ export interface GoogleSearchResponse {
     searchTime?: number;
     formattedSearchTime?: string;
   };
+  _source?: string; // Adding this field to fix TypeScript errors
 }
