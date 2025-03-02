@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleSignUp = (email: string, password: string, options?: { data: any }) => {
     console.log("SignUp attempt for:", email, "with options:", options);
-    return signUp(email, password, setIsAdmin, options);
+    return signUp(email, password, options);
   };
 
   const handleSignOut = () => {
