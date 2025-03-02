@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,7 +34,6 @@ const SignUp = () => {
     setIsLoading(true);
     console.log("Starting sign up process...");
 
-    // Simple validation
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
@@ -46,7 +44,6 @@ const SignUp = () => {
       return;
     }
 
-    // Additional validation - password length
     if (formData.password.length < 6) {
       toast({
         title: "Error",
@@ -59,7 +56,6 @@ const SignUp = () => {
 
     try {
       console.log("Calling Supabase signUp...");
-      // Pass name as user metadata
       const { data, error } = await signUp(
         formData.email, 
         formData.password, 
@@ -79,8 +75,7 @@ const SignUp = () => {
         toast({
           title: "Success",
           description: "Your account has been created. Please check your email for verification.",
-          // Change from "success" to "default" as that's an allowed variant
-          variant: "default", 
+          variant: "default",
         });
       }
     } catch (error: any) {
