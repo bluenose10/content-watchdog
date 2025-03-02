@@ -64,13 +64,13 @@ export const loadGoogleApiCredentials = async (): Promise<boolean> => {
       return true;
     }
 
-    // Check for credentials in process.env first (already loaded from environment)
-    if (process.env.GOOGLE_API_KEY && process.env.GOOGLE_CSE_ID) {
-      sessionStorage.setItem('GOOGLE_API_KEY', process.env.GOOGLE_API_KEY);
-      sessionStorage.setItem('GOOGLE_CSE_ID', process.env.GOOGLE_CSE_ID);
+    // Check for credentials in Vite environment variables
+    if (import.meta.env.VITE_GOOGLE_API_KEY && import.meta.env.VITE_GOOGLE_CSE_ID) {
+      sessionStorage.setItem('GOOGLE_API_KEY', import.meta.env.VITE_GOOGLE_API_KEY);
+      sessionStorage.setItem('GOOGLE_CSE_ID', import.meta.env.VITE_GOOGLE_CSE_ID);
       console.log("Google API credentials loaded from environment");
-      console.log("API Key starts with:", process.env.GOOGLE_API_KEY.substring(0, 4) + '...');
-      console.log("CSE ID starts with:", process.env.GOOGLE_CSE_ID.substring(0, 4) + '...');
+      console.log("API Key starts with:", import.meta.env.VITE_GOOGLE_API_KEY.substring(0, 4) + '...');
+      console.log("CSE ID starts with:", import.meta.env.VITE_GOOGLE_CSE_ID.substring(0, 4) + '...');
       return true;
     }
 
