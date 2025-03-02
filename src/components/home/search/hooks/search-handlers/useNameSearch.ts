@@ -40,24 +40,16 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
       console.log("Name search with query:", query, "and params:", params);
       
       try {
-        // Check if API keys are configured
+        // Check if API keys are configured but be more lenient in validation
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
         
-        console.log("API Key configured:", apiKey ? "Yes (length: " + apiKey.length + ")" : "No");
-        console.log("Search Engine ID configured:", searchEngineId ? "Yes (format correct: " + searchEngineId.includes(':') + ")" : "No");
+        console.log("Google Search API - API Key configured:", apiKey ? "Yes (length: " + apiKey?.length + ")" : "No");
+        console.log("Google Search API - Search Engine ID configured:", searchEngineId ? "Yes" : "No");
         
+        // Basic check for existence only, not format
         if (!apiKey || !searchEngineId) {
-          throw new Error("Google Search API configuration missing. Please set up your VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID environment variables.");
-        }
-        
-        // Additional validation for API key and Search Engine ID
-        if (apiKey.length < 10) {
-          throw new Error("Google API key appears to be invalid (too short). Please check your configuration.");
-        }
-        
-        if (!searchEngineId.includes(':')) {
-          throw new Error("Google Search Engine ID format appears to be invalid (missing colon). Please check your configuration.");
+          console.warn("Google Search API configuration missing. Proceeding anyway with possible failures.");
         }
         
         const searchId = await handleTextSearch(query, "name", user, params);
@@ -75,31 +67,6 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
         navigate(`/results?id=${searchId}`);
       } catch (error: any) {
         console.error("Name search error:", error);
-        
-        // Handle API configuration errors specifically
-        if (error.message?.includes('API key') || 
-            error.message?.includes('configuration') || 
-            error.message?.includes('Search Engine ID')) {
-          
-          let errorMessage = "Search API configuration error. ";
-          
-          if (error.message?.includes('too short')) {
-            errorMessage += "Your Google API key appears to be invalid or too short.";
-          } else if (error.message?.includes('missing colon')) {
-            errorMessage += "Your Google Search Engine ID format is incorrect. It should contain a colon (:).";
-          } else {
-            errorMessage += "Please ensure your Google API key and Custom Search Engine ID are correctly set up.";
-          }
-          
-          setError(errorMessage);
-          
-          toast({
-            title: "Configuration Error",
-            description: errorMessage,
-            variant: "destructive",
-          });
-          return;
-        }
         
         // Handle permission errors more gracefully
         if (error.code === "42501" && error.message?.includes("popular_searches")) {
@@ -123,6 +90,21 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
           sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify(tempSearchData));
           
           navigate(`/results?id=${tempSearchId}&q=${encodeURIComponent(query)}`);
+          return;
+        }
+        
+        // For API configuration errors, be more informative
+        if (error.message?.includes('API key') || 
+            error.message?.includes('configuration') || 
+            error.message?.includes('Search Engine ID')) {
+          
+          setError("Search API configuration issue. Please check your environment variables and try again.");
+          
+          toast({
+            title: "API Configuration Issue",
+            description: "There's a problem with the Google Search API configuration. Please ensure your environment variables are set correctly.",
+            variant: "destructive",
+          });
           return;
         }
         

@@ -14,13 +14,12 @@ export function useRateLimit() {
     monthlyRemaining?: number;
     monthlyResetTime?: number;
   } => {
-    // Only skip rate limiting for explicit DEV environments with VITE_ENABLE_RATE_LIMIT_IN_DEV explicitly set to false
-    const isDev = import.meta.env.DEV === true;
-    const rateLimit = import.meta.env.VITE_ENABLE_RATE_LIMIT_IN_DEV !== undefined 
-      ? import.meta.env.VITE_ENABLE_RATE_LIMIT_IN_DEV !== "false" 
-      : true;
-      
-    if (isDev && !rateLimit) {
+    // Treat all environments as production by default
+    const rateLimit = true;
+    
+    // Only skip rate limiting in explicit development mode with the flag set to false
+    if (import.meta.env.DEV === true && import.meta.env.VITE_ENABLE_RATE_LIMIT_IN_DEV === "false") {
+      console.log("Rate limiting disabled in development mode");
       return { 
         allowed: true, 
         remaining: 1000, 

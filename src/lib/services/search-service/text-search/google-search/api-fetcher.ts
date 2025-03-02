@@ -16,35 +16,17 @@ export async function fetchMultiplePages(
 ): Promise<GoogleSearchResponse> {
   const allResults: GoogleSearchResponse = { items: [], searchInformation: null };
   
-  // Validate required API parameters before making requests
-  if (!params.has('key') || !params.has('cx')) {
-    console.error('Missing required Google API parameters - key or cx missing');
-    throw new Error('Google Search configuration error: API key or Search Engine ID missing.');
-  }
+  // Extract API key and Search Engine ID for logging
+  const apiKey = params.get('key') || '';
+  const engineId = params.get('cx') || '';
   
-  // Get API key and Search Engine ID for detailed logging
-  const apiKey = params.get('key');
-  const engineId = params.get('cx');
+  // Log configuration details for debugging
+  console.log('Google Search API - Using API key:', apiKey ? 'Present (length: ' + apiKey.length + ')' : 'None');
+  console.log('Google Search API - Using Search Engine ID:', engineId ? 'Present' : 'None');
   
-  // Log configuration details to help with debugging
-  console.log('Using Google API key pattern:', apiKey ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : 'None');
-  console.log('Using Google Search Engine ID pattern:', engineId ? (engineId.includes(':') ? engineId.split(':')[0] + ':...' : engineId.substring(0, 4) + '...') : 'None');
-  
-  // Less strict validation in production environments
-  if (!apiKey || apiKey.length < 10) {
-    if (import.meta.env.DEV) {
-      console.error('Google API key appears to be invalid or too short');
-      throw new Error('Google API key appears to be invalid. Please check your API key configuration.');
-    } else {
-      console.warn('Google API key appears short but continuing in production environment');
-    }
-  }
-  
-  if (!engineId || (!engineId.includes(':') && import.meta.env.DEV)) {
-    console.warn('Google Search Engine ID has unusual format (missing colon)');
-    if (import.meta.env.DEV) {
-      throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
-    }
+  // Proceed even with potentially invalid credentials in production
+  if (!apiKey || !engineId) {
+    console.warn('Google Search API - Missing required parameters but continuing anyway');
   }
   
   for (let page = 0; page < numPages; page++) {
@@ -56,36 +38,30 @@ export async function fetchMultiplePages(
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
       const requestUrl = `https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`;
-      console.log(`Request URL pattern: ${requestUrl.replace(apiKey || '', '***API_KEY***').replace(engineId || '', '***CSE_ID***')}`);
+      console.log(`Request URL: ${requestUrl.replace(apiKey, '***API_KEY***').replace(engineId, '***CSE_ID***')}`);
       
       const response = await fetch(requestUrl);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Google API error response:', errorData);
-        
-        // Extract meaningful error message
-        let errorMessage = 'Unknown Google API error';
-        if (errorData?.error?.message) {
-          errorMessage = errorData.error.message;
-        } else if (errorData?.error?.errors?.length > 0) {
-          errorMessage = errorData.error.errors[0].message;
-        }
-        
-        // Check for specific error types
-        if (errorMessage.includes('keyInvalid') || errorMessage.includes('invalid key')) {
-          errorMessage = 'Invalid Google API key. Please check your configuration.';
-        } else if (errorMessage.includes('dailyLimitExceeded') || errorMessage.includes('quota')) {
-          errorMessage = 'Daily API quota exceeded. Please try again tomorrow.';
-        } else if (errorMessage.includes('accessNotConfigured') || errorMessage.includes('not enabled')) {
-          errorMessage = 'Google Custom Search API is not enabled for this project.';
-        } else if (errorMessage.includes('invalid cx')) {
-          errorMessage = 'Invalid Search Engine ID. Please check your configuration.';
+        let errorMessage = `Google API error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          console.error('Google API error response:', errorData);
+          
+          // Extract meaningful error message
+          if (errorData?.error?.message) {
+            errorMessage = errorData.error.message;
+          } else if (errorData?.error?.errors?.length > 0) {
+            errorMessage = errorData.error.errors[0].message;
+          }
+        } catch (e) {
+          // If we can't parse the error, just use the status
+          console.error('Could not parse error response:', e);
         }
         
         // If this is not the first page, we don't throw the error but continue with what we have
         if (page === 0) {
-          throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorMessage}`);
+          throw new Error(errorMessage);
         } else {
           console.warn(`Stopping pagination due to error on page ${page+1}. Using results collected so far.`);
           break;

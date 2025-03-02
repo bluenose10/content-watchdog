@@ -21,22 +21,16 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
     
     // Log API credentials status for debugging
-    console.log('API Key available:', apiKey ? 'Yes (valid format: ' + (apiKey.length >= 10) + ')' : 'No');
-    console.log('Search Engine ID available:', searchEngineId ? 'Yes (valid format: ' + searchEngineId.includes(':') + ')' : 'No');
+    console.log('Google Search API - API Key available:', apiKey ? 'Yes (length: ' + apiKey.length + ')' : 'No');
+    console.log('Google Search API - Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
     
+    // Less strict validation - we'll let the API handle errors if there are issues
     if (!apiKey || !searchEngineId) {
-      console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
-      throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
-    }
-
-    // More lenient validation for API keys in production environments
-    if (apiKey.length < 10 && !import.meta.env.DEV) {
-      console.warn('WARNING: Google API key appears to be short, but continuing anyway');
-    }
-    
-    // More lenient validation for Search Engine ID in production
-    if (!searchEngineId.includes(':') && !import.meta.env.DEV) {
-      console.warn('WARNING: Google Search Engine ID format is unusual (missing colon), but continuing anyway');
+      console.error('WARNING: Google Search API configuration missing. Will attempt to continue anyway.');
+      // In production environments, we'll try to continue even with potentially invalid credentials
+      if (import.meta.env.DEV) {
+        throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
+      }
     }
     
     // Check cache and pending requests
