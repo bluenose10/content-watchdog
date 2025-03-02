@@ -1,3 +1,4 @@
+
 import { GoogleSearchResponse } from '../types';
 import { enhanceResultsWithScores } from './results-enhancer';
 import { generateMockResults } from '../mock-generator';
@@ -24,17 +25,11 @@ export async function fetchMultiplePages(
   console.log('Google Search API - Using API key:', apiKey ? `Present (length: ${apiKey.length})` : 'None');
   console.log('Google Search API - Using Search Engine ID:', engineId ? 'Present' : 'None');
   
-  // Enhanced validation for API credentials
-  if (!apiKey || apiKey.length < 10) {
-    const errorMsg = 'Google Search API configuration error: Invalid or missing API key. Please configure a valid VITE_GOOGLE_API_KEY in your environment.';
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  }
-  
-  if (!engineId) {
-    const errorMsg = 'Google Search API configuration error: Missing Search Engine ID. Please configure a valid VITE_GOOGLE_CSE_ID in your environment.';
-    console.error(errorMsg);
-    throw new Error(errorMsg);
+  // Check if we have valid credentials - if not, return mock results
+  if (!apiKey || apiKey.length < 10 || !engineId) {
+    console.log('Missing API configuration, returning mock results');
+    const query = params.get('q') || 'unknown query';
+    return generateMockResults(query, 20);
   }
   
   for (let page = 0; page < numPages; page++) {
@@ -81,17 +76,6 @@ export async function fetchMultiplePages(
             // Enhanced error message extraction
             if (errorData?.error?.message) {
               errorMessage = errorData.error.message;
-              
-              // Add more helpful context for specific errors
-              if (errorMessage.includes('API key not valid')) {
-                errorMessage = 'The provided Google API key is not valid or has been revoked. Please check your key and ensure it has access to the Custom Search API.';
-              } else if (errorMessage.includes('API key expired')) {
-                errorMessage = 'Your Google API key has expired. Please renew or replace it.';
-              } else if (errorMessage.includes('limit')) {
-                errorMessage = 'Google API quota exceeded. Please try again later or increase your quota.';
-              } else if (errorMessage.includes('callers')) {
-                errorMessage = 'Google API authentication error: The search requires a valid API key with proper authentication. Please check your Google API key settings.';
-              }
             } else if (errorData?.error?.errors?.length > 0) {
               errorMessage = errorData.error.errors[0].message;
             }
@@ -100,13 +84,7 @@ export async function fetchMultiplePages(
             console.error('Could not parse error response:', e);
           }
           
-          // If this is not the first page, we don't throw the error but continue with what we have
-          if (page === 0) {
-            throw new Error(errorMessage);
-          } else {
-            console.warn(`Stopping pagination due to error on page ${page+1}. Using results collected so far.`);
-            break;
-          }
+          throw new Error(errorMessage);
         }
         
         const data = await response.json();
@@ -137,10 +115,7 @@ export async function fetchMultiplePages(
         // Enhanced error handling
         if (error.name === 'AbortError') {
           console.error(`Google Search API request timeout on page ${page}`);
-          if (page === 0) {
-            throw new Error('Search request timed out. The Google API did not respond in time. Please try again later.');
-          } 
-          break;
+          throw new Error('Search request timed out. The Google API did not respond in time. Please try again later.');
         }
         
         // Handle network errors more gracefully
@@ -151,16 +126,7 @@ export async function fetchMultiplePages(
         
         // Log and rethrow
         console.error(`Google Search API request error on page ${page}:`, error);
-        
-        // Add helpful context for common errors
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('API key') && page === 0) {
-          throw new Error('Google API key error: ' + errorMessage + '. Please verify your API key configuration in the environment variables.');
-        }
-        
-        // If this is the first page, throw the error, otherwise continue with what we have
-        if (page === 0) throw error;
-        break;
+        throw error;
       }
     } catch (error) {
       console.error(`Google Search API request error on page ${page}:`, error);

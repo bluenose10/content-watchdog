@@ -24,23 +24,14 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     console.log('Google Search API - API Key available:', apiKey ? `Yes (length: ${apiKey.length})` : 'No');
     console.log('Google Search API - Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
     
-    // More explicit API key validation with clearer error messages
-    if (!apiKey) {
-      const errorMsg = 'Google Search API configuration error: API key is missing. Please configure VITE_GOOGLE_API_KEY in your environment variables.';
-      console.error(errorMsg);
-      throw new Error(errorMsg);
-    }
+    // Check if we should use mock results instead of real API
+    const useMockResults = !apiKey || !searchEngineId || apiKey.length < 10;
     
-    if (!searchEngineId) {
-      const errorMsg = 'Google Search API configuration error: Custom Search Engine ID is missing. Please configure VITE_GOOGLE_CSE_ID in your environment variables.';
-      console.error(errorMsg);
-      throw new Error(errorMsg);
-    }
-    
-    if (apiKey.length < 10) {
-      const errorMsg = 'Google Search API configuration error: API key appears to be invalid (too short). Please check your VITE_GOOGLE_API_KEY value.';
-      console.error(errorMsg);
-      throw new Error(errorMsg);
+    if (useMockResults) {
+      console.log('Using mock results due to missing or invalid API configuration');
+      const mockResults = generateMockResults(query, searchParams.maxResults || 30);
+      mockResults._source = 'mock';
+      return mockResults;
     }
     
     // Check cache and pending requests
@@ -86,22 +77,20 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         } catch (error) {
           console.error('Google API request error:', error);
           
-          // Improved error messages for API configuration issues
-          const errorMsg = error instanceof Error ? error.message : String(error);
-          
-          if (errorMsg.includes('API key') || errorMsg.includes('configuration')) {
-            reject(new Error('Google Search API configuration error: Please configure valid VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID in your environment variables.'));
-          } else if (errorMsg.includes('unregistered callers') || errorMsg.includes('without established identity')) {
-            reject(new Error('Google API authentication error: The Google API requires valid credentials with proper permissions for Custom Search API.'));
-          } else if (errorMsg.includes('API key not valid') || errorMsg.includes('invalid key')) {
-            reject(new Error('Invalid API key: The Google API key you provided is not valid. Please check that you have entered the correct key and that it has the Custom Search API enabled in the Google Cloud Console.'));
-          } else {
-            reject(error);
-          }
+          // Fall back to mock results on API errors
+          console.log('Falling back to mock results due to API error');
+          const mockResults = generateMockResults(query, searchParams.maxResults || 30);
+          mockResults._source = 'mock';
+          resolve(mockResults);
         }
       } catch (error) {
         console.error('Google Search API error:', error);
-        reject(error);
+        
+        // Fall back to mock results on any error
+        console.log('Falling back to mock results due to error');
+        const mockResults = generateMockResults(query, searchParams.maxResults || 30);
+        mockResults._source = 'mock';
+        resolve(mockResults);
       }
     });
     
@@ -110,7 +99,12 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     return request;
   } catch (error) {
     console.error('Google Search API error:', error);
-    throw error;
+    
+    // Fall back to mock results on any error
+    console.log('Falling back to mock results due to error');
+    const mockResults = generateMockResults(query, searchParams.maxResults || 30);
+    mockResults._source = 'mock';
+    return mockResults;
   }
 };
 
