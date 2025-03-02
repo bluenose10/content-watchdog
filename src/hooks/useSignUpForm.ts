@@ -73,11 +73,22 @@ export const useSignUpForm = ({ onSignUpSuccess }: UseSignUpFormProps) => {
       
       if (error) {
         console.error("Supabase signup error:", error);
-        toast({
-          title: "Sign up failed",
-          description: error.message || "There was an error creating your account",
-          variant: "destructive",
-        });
+        
+        // Special handling for email rate limit errors
+        if (error.message?.includes("rate limit exceeded") || error.code === "over_email_send_rate_limit") {
+          toast({
+            title: "Email rate limit exceeded",
+            description: "Too many verification emails have been sent to this address. Please try again in a few minutes or use a different email.",
+            variant: "destructive",
+            duration: 8000,
+          });
+        } else {
+          toast({
+            title: "Sign up failed",
+            description: error.message || "There was an error creating your account",
+            variant: "destructive",
+          });
+        }
       } else {
         console.log("Sign up successful, redirecting user to success page");
         toast({
