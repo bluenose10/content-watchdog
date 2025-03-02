@@ -2,7 +2,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0;
+  padding: 2rem;
   text-align: center;
 }
 
@@ -53,35 +53,4 @@ a[role="button"],
 /* Target Link components wrapped in Button */
 a {
   cursor: pointer !important;
-}
-
-/* Consistent section padding */
-section {
-  padding: 2rem 0;
-}
-
-@media (min-width: 768px) {
-  section {
-    padding: 4rem 0;
-  }
-}
-
-/* Consistent container */
-.container {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-@media (min-width: 768px) {
-  .container {
-    padding: 0 2rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container {
-    padding: 0 3rem;
-  }
 }

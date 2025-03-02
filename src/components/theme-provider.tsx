@@ -35,8 +35,6 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
-    // Add 'dark' or 'light' class to the html element for Tailwind
     root.classList.remove("light", "dark");
 
     if (theme === "system") {
@@ -51,14 +49,6 @@ export function ThemeProvider({
 
     root.classList.add(theme);
   }, [theme]);
-
-  // Ensure the theme is applied immediately on initial render
-  useEffect(() => {
-    // Force a repaint to fix potential white screen issue
-    document.body.style.display = 'none';
-    document.body.offsetHeight; // Trigger a reflow
-    document.body.style.display = '';
-  }, []);
 
   const value = {
     theme,

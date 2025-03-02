@@ -1,6 +1,7 @@
-import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/cache/index';
+
+import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/search-cache';
 import { getRecentSearches } from '@/lib/db-service';
-import { searchApiManager, optimizedSearch } from '@/lib/google-api-manager';
+import { googleApiManager } from '@/lib/google-api-manager';
 
 // Popular search types and terms that we want to pre-fetch
 interface PreFetchQuery {
@@ -40,22 +41,10 @@ const isLowSystemLoad = (): boolean => {
 };
 
 /**
- * Check API quota availability before pre-fetching
- * We check both Google and Bing search availability
+ * Check Google API quota availability before pre-fetching
  */
 const hasAvailableQuota = (): boolean => {
-  // Use searchApiManager's canMakeRequest method
-  return searchApiManager.canMakeRequest('google') || searchApiManager.canMakeRequest('bing');
-};
-
-/**
- * Get the list of engines to use for pre-fetching
- * This allows us to pre-fetch using available engines
- */
-const getPreFetchEngines = (): string[] => {
-  return searchApiManager.getAvailableSearchEngines().filter(engine => 
-    engine === 'google' || engine === 'bing'
-  );
+  return googleApiManager.canMakeRequest('search');
 };
 
 /**
@@ -84,11 +73,11 @@ export const preFetchQuery = async (
     
     console.log(`[Pre-fetch] Fetching: ${queryType} - ${query}`);
     
-    // Use optimizedSearch which will automatically use available engines
-    const results = await optimizedSearch(queryType, query, params);
+    // Use Google API Manager for optimized, throttled access
+    const results = await googleApiManager.optimizedSearch(queryType, query, params);
     
     // Cache the results
-    cacheResults(cacheKey, results, 'multi-engine', 0.01); // Tracking cost per request
+    cacheResults(cacheKey, results, 'google', 0.01); // Tracking cost per request
     
     console.log(`[Pre-fetch] Successfully cached: ${queryType} - ${query}`);
     return true;
@@ -137,7 +126,7 @@ export const batchPreFetch = async (queries: PreFetchQuery[]): Promise<number> =
       
       if (result) {
         const cacheKey = getCacheKey(query.queryType, query.query, query.params);
-        cacheResults(cacheKey, result, 'multi-engine', 0.01);
+        cacheResults(cacheKey, result, 'google', 0.01);
         cachedCount++;
       }
     });
@@ -160,14 +149,7 @@ export const startPreFetching = async (customQueries?: PreFetchQuery[]): Promise
     return;
   }
   
-  // Check if any search engines are available
-  const availableEngines = getPreFetchEngines();
-  if (availableEngines.length === 0) {
-    console.log('[Pre-fetch] No search engines available for pre-fetching');
-    return;
-  }
-  
-  console.log(`[Pre-fetch] Starting pre-fetch process using engines: ${availableEngines.join(', ')}`);
+  console.log('[Pre-fetch] Starting pre-fetch process');
   
   // Combine default and custom queries
   const queriesToFetch = [...DEFAULT_PREFETCH_QUERIES, ...(customQueries || [])];

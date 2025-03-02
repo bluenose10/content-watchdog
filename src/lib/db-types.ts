@@ -3,7 +3,7 @@ export type SearchQuery = {
   id?: string;
   user_id: string;
   query_text?: string;
-  query_type: 'name' | 'hashtag' | 'image' | 'plagiarism';
+  query_type: 'name' | 'hashtag' | 'image';
   image_url?: string;
   created_at?: string;
   search_params_json?: string | null; // Stores advanced search parameters
@@ -60,7 +60,6 @@ export type TextSearchParams = {
   fileType?: string; // Specific file types to search for
   rights?: 'cc_publicdomain' | 'cc_attribute' | 'cc_sharealike' | 'cc_noncommercial' | 'cc_nonderived' | string; // Creative Commons licenses
   sortBy?: 'relevance' | 'date' | string; // How to sort results
-  maxResults?: number; // Maximum number of results to return
 }
 
 export type ImageSearchParams = {

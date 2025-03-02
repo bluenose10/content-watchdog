@@ -1,88 +1,134 @@
 
-import { useEffect, useState } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PRICING_PLANS } from "@/lib/constants";
-import { CheckCircle } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { Check, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from "@/lib/supabase";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-  const planId = searchParams.get("plan_id");
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const location = useLocation();
   const navigate = useNavigate();
-  const [plan, setPlan] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Get session_id from URL or state
+  const sessionId = searchParams.get("session_id") || 
+                   (location.state as { sessionId?: string })?.sessionId;
 
-  // Find the plan details based on the plan ID
   useEffect(() => {
-    if (planId) {
-      const selectedPlan = PRICING_PLANS.find(p => p.id === planId);
-      if (selectedPlan) {
-        setPlan(selectedPlan);
+    // Verify the checkout session
+    const verifySession = async () => {
+      try {
+        if (!sessionId) {
+          throw new Error("No session ID found in URL or state");
+        }
+        
+        console.log("Verifying session ID:", sessionId);
+        
+        // For mock checkout sessions (starts with mock_sess_)
+        if (sessionId.startsWith('mock_sess_')) {
+          console.log("Mock session detected, simulating successful verification");
+          // Simulate successful verification for mock/demo purposes
+          setIsSuccess(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        // For test mode Stripe sessions
+        if (sessionId.startsWith('cs_test_')) {
+          // Simulate successful verification for test mode
+          console.log("Test mode session detected, simulating successful verification");
+          setIsSuccess(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Call Supabase Edge Function to verify production sessions
+        const { data, error } = await supabase.functions.invoke('verify-checkout', {
+          body: { sessionId }
+        });
+        
+        if (error) {
+          throw new Error(`Failed to verify session: ${error.message}`);
+        }
+        
+        if (!data || !data.success) {
+          throw new Error(data?.message || "Session verification failed");
+        }
+        
+        setIsSuccess(true);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error verifying payment session:", error);
+        setErrorMessage(error instanceof Error ? error.message : "Failed to verify payment");
+        setIsSuccess(false);
+        setIsLoading(false);
       }
-    }
-  }, [planId]);
+    };
 
-  // Check if user is logged in
-  useEffect(() => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to access subscription details",
-        variant: "destructive"
-      });
-      navigate("/login");
-    }
-  }, [user, toast, navigate]);
+    verifySession();
+  }, [sessionId]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="bg-green-50 p-8 flex flex-col items-center">
-          <div className="rounded-full bg-green-100 p-3">
-            <CheckCircle className="h-12 w-12 text-green-500" />
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full p-8 space-y-6 bg-card rounded-lg shadow-lg">
+        {isLoading ? (
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+            <h1 className="text-2xl font-bold">Verifying payment...</h1>
+            <p className="text-muted-foreground">Please wait while we confirm your payment.</p>
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-green-900">Payment Successful!</h1>
-          <p className="mt-2 text-center text-green-700">
-            Thank you for your subscription. Your account has been upgraded.
-          </p>
-        </div>
-        
-        <div className="p-8">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Subscription Details</h2>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-500">Plan</span>
-                <span className="font-medium">{plan?.name || "Premium Plan"}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-500">Amount</span>
-                <span className="font-medium">${plan?.price || "49"}/month</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Status</span>
-                <span className="text-green-500 font-medium">Active</span>
-              </div>
+        ) : isSuccess ? (
+          <div className="text-center space-y-4">
+            <div className="bg-green-100 p-3 rounded-full inline-flex">
+              <Check className="h-10 w-10 text-green-600" />
+            </div>
+            <h1 className="text-2xl font-bold">Payment Successful</h1>
+            <p className="text-muted-foreground">
+              Thank you for your purchase. Your subscription has been activated.
+            </p>
+            
+            <div className="pt-4">
+              <Button onClick={() => navigate("/dashboard")} className="w-full">
+                Go to Dashboard
+              </Button>
             </div>
           </div>
-          
-          <div className="space-y-4">
-            <Button asChild className="w-full">
-              <Link to="/dashboard">Go to Dashboard</Link>
-            </Button>
-            <div className="text-center text-sm text-gray-500">
-              If you have any questions, please{" "}
-              <Link to="/support" className="text-primary hover:underline">
-                contact support
-              </Link>
-              .
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="bg-red-100 p-3 rounded-full inline-flex">
+              <AlertTriangle className="h-10 w-10 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold">Payment Verification Failed</h1>
+            <p className="text-muted-foreground">
+              {errorMessage || "We couldn't verify your payment. Please contact support."}
+            </p>
+            
+            <Alert className="my-4 bg-amber-50 border-amber-200">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-700">Important</AlertTitle>
+              <AlertDescription className="text-amber-600 text-sm">
+                If you believe this is an error and your card was charged, please contact our support team.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="pt-4 space-y-2">
+              <Button onClick={() => navigate("/dashboard")} className="w-full">
+                Return to Dashboard
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = "mailto:support@example.com"} 
+                className="w-full"
+              >
+                Contact Support
+              </Button>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

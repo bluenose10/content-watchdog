@@ -15,7 +15,7 @@ interface PaginatedResultsProps {
 export function PaginatedResults({
   results,
   accessLevel,
-  itemsPerPage = 10,
+  itemsPerPage = 10, // Changed from 6 to 10 to accommodate more list items
   onUpgrade,
 }: PaginatedResultsProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,23 +38,31 @@ export function PaginatedResults({
   const getResultLimit = () => {
     switch (accessLevel) {
       case AccessLevel.PREMIUM:
-        return results.length; // Premium users can see all results
+        return 20; // Pro users can see all 20 results unblurred
       case AccessLevel.BASIC:
-        return 3; // Free users can only see 3 results
+        return 5; // Registered users can see 5 unblurred results
       case AccessLevel.ANONYMOUS:
       default:
-        return 1; // Anonymous users see only 1 result
+        return 0; // Anonymous users see 0 unlocked results (all blurred)
     }
   };
 
-  const resultLimit = getResultLimit();
-  const displayedResults = currentResults.slice(0, resultLimit);
-  const hasHiddenResults = currentResults.length > resultLimit;
+  // Check if a result should be premium (unblurred)
+  const isPremium = (index: number) => {
+    const actualIndex = startIndex + index;
+    return actualIndex < getResultLimit();
+  };
+
+  // Check if a result is a free preview for anonymous users
+  const isFreePreview = (index: number) => {
+    const actualIndex = startIndex + index;
+    return accessLevel === AccessLevel.ANONYMOUS && actualIndex < 2;
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3">
-        {displayedResults.map((result, index) => (
+        {currentResults.map((result, index) => (
           <SearchResultCard
             key={result.id || `result-${startIndex + index}`}
             result={{
@@ -65,24 +73,13 @@ export function PaginatedResults({
               source: result.source,
               matchLevel: result.match_level,
               date: result.found_at,
-              type: result.type,
-              snippet: result.snippet,
             }}
+            isPremium={isPremium(index)}
+            isFreePreview={isFreePreview(index)}
+            onUpgrade={onUpgrade}
           />
         ))}
       </div>
-      
-      {hasHiddenResults && accessLevel !== AccessLevel.PREMIUM && (
-        <div className="mt-4 p-4 bg-muted/30 rounded-lg border text-center">
-          <h4 className="font-medium mb-2">Additional Results Available</h4>
-          <p className="text-sm text-muted-foreground mb-3">
-            Upgrade to view all {results.length} results from your search.
-          </p>
-          <Button onClick={onUpgrade} variant="default" size="sm">
-            Upgrade Now
-          </Button>
-        </div>
-      )}
 
       {/* Pagination controls */}
       {totalPages > 1 && (

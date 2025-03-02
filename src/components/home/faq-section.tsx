@@ -4,13 +4,13 @@ import { HelpCircle } from "lucide-react"
 
 export function FAQSection() {
   return (
-    <div className="py-6 md:py-4 bg-gray-50/50 dark:bg-gray-900/50 rounded-3xl">
+    <div className="py-16 bg-gray-50/50 dark:bg-gray-900/50 rounded-3xl">
       <div className="container px-4 md:px-6">
-        <div className="text-center mb-8">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg mb-4">
             <HelpCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2 text-gradient">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-2">Frequently Asked Questions</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Get answers to the most common questions about our content protection platform
           </p>
@@ -22,7 +22,7 @@ export function FAQSection() {
               before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
-              <AccordionTrigger className="text-base md:text-lg font-medium py-5 hover:no-underline">
+              <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 How does the content monitoring system work?
               </AccordionTrigger>
               <AccordionContent className="pb-6 text-muted-foreground">
@@ -34,7 +34,7 @@ export function FAQSection() {
               before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
-              <AccordionTrigger className="text-base md:text-lg font-medium py-5 hover:no-underline">
+              <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 What types of content can I protect using your service?
               </AccordionTrigger>
               <AccordionContent className="pb-6 text-muted-foreground">
@@ -46,7 +46,7 @@ export function FAQSection() {
               before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
-              <AccordionTrigger className="text-base md:text-lg font-medium py-5 hover:no-underline">
+              <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 How do I initiate a takedown request for unauthorized content?
               </AccordionTrigger>
               <AccordionContent className="pb-6 text-muted-foreground">
@@ -58,7 +58,7 @@ export function FAQSection() {
               before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
-              <AccordionTrigger className="text-base md:text-lg font-medium py-5 hover:no-underline">
+              <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 What's the difference between the free and premium plans?
               </AccordionTrigger>
               <AccordionContent className="pb-6 text-muted-foreground">
@@ -70,7 +70,7 @@ export function FAQSection() {
               before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
-              <AccordionTrigger className="text-base md:text-lg font-medium py-5 hover:no-underline">
+              <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 How accurate is your content matching technology?
               </AccordionTrigger>
               <AccordionContent className="pb-6 text-muted-foreground">
@@ -82,7 +82,7 @@ export function FAQSection() {
               before:absolute before:inset-0 before:rounded-xl before:p-[3px] before:bg-gradient-to-r before:from-purple-500 before:via-purple-400 before:to-purple-600 dark:before:from-purple-700 dark:before:via-purple-500 dark:before:to-purple-800 before:-z-10
               after:absolute after:inset-[3px] after:rounded-[calc(0.75rem-3px)] after:bg-white dark:after:bg-gray-800 after:-z-10
               hover:shadow-lg transition-all duration-300">
-              <AccordionTrigger className="text-base md:text-lg font-medium py-5 hover:no-underline">
+              <AccordionTrigger className="text-lg font-medium py-5 hover:no-underline">
                 Can I use this service internationally?
               </AccordionTrigger>
               <AccordionContent className="pb-6 text-muted-foreground">
