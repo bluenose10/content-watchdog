@@ -2,6 +2,7 @@
 import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/search-cache';
 import { getRecentSearches } from '@/lib/db-service';
 import { googleApiManager } from '@/lib/google-api-manager';
+import { supabase } from '@/lib/supabase';
 
 // Popular search types and terms that we want to pre-fetch
 interface PreFetchQuery {
@@ -48,6 +49,54 @@ const hasAvailableQuota = (): boolean => {
 };
 
 /**
+ * Load Google API credentials from Supabase and store them in session storage
+ */
+export const loadGoogleApiCredentials = async (): Promise<boolean> => {
+  try {
+    // Skip if already loaded in session storage
+    if (sessionStorage.getItem('GOOGLE_API_KEY') && sessionStorage.getItem('GOOGLE_CSE_ID')) {
+      console.log("Google API credentials already loaded in session storage");
+      return true;
+    }
+
+    // Check for credentials in process.env first (already loaded from environment)
+    if (process.env.GOOGLE_API_KEY && process.env.GOOGLE_CSE_ID) {
+      sessionStorage.setItem('GOOGLE_API_KEY', process.env.GOOGLE_API_KEY);
+      sessionStorage.setItem('GOOGLE_CSE_ID', process.env.GOOGLE_CSE_ID);
+      console.log("Google API credentials loaded from environment");
+      return true;
+    }
+
+    // Try to load from Supabase Edge Function that exposes secrets
+    try {
+      const { data, error } = await supabase.functions.invoke('get-search-credentials', {
+        method: 'GET',
+      });
+
+      if (error) {
+        console.error("Error fetching Google API credentials from Supabase:", error);
+        return false;
+      }
+
+      if (data && data.apiKey && data.cseId) {
+        sessionStorage.setItem('GOOGLE_API_KEY', data.apiKey);
+        sessionStorage.setItem('GOOGLE_CSE_ID', data.cseId);
+        console.log("Google API credentials loaded from Supabase");
+        return true;
+      }
+    } catch (e) {
+      console.error("Failed to load Google API credentials from Edge Function:", e);
+    }
+
+    console.warn("Could not load Google API credentials");
+    return false;
+  } catch (error) {
+    console.error("Error in loadGoogleApiCredentials:", error);
+    return false;
+  }
+};
+
+/**
  * Pre-fetch a specific search query and cache the results
  */
 export const preFetchQuery = async (
@@ -56,6 +105,9 @@ export const preFetchQuery = async (
   params: any = {}
 ): Promise<boolean> => {
   try {
+    // Make sure credentials are loaded
+    await loadGoogleApiCredentials();
+    
     // Generate cache key for this query
     const cacheKey = getCacheKey(queryType, query, params);
     

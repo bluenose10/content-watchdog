@@ -1,4 +1,3 @@
-
 import { getCacheKey, getCachedResults, cacheResults } from "./search-cache";
 
 // Quota management for Google APIs
@@ -193,17 +192,17 @@ class GoogleApiManager {
     apiKey?: string,
     cseId?: string
   ): Promise<any> {
-    if (!apiKey || !cseId) {
-      apiKey = process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
-      cseId = process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
-      
-      if (!apiKey || !cseId) {
-        throw new Error("Missing Google API credentials");
-      }
+    // Get API credentials from environment variables or session storage
+    const googleApiKey = apiKey || process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
+    const googleCseId = cseId || process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
+    
+    if (!googleApiKey || !googleCseId) {
+      console.error("Missing Google API credentials");
+      throw new Error("Missing Google API credentials. Please set GOOGLE_API_KEY and GOOGLE_CSE_ID in your environment or session storage.");
     }
     
     console.log("Attempting direct Google API call for query:", query);
-    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=${encodeURIComponent(query)}`;
+    const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCseId}&q=${encodeURIComponent(query)}`;
     
     try {
       const response = await fetch(url);
@@ -238,11 +237,17 @@ class GoogleApiManager {
       console.log(`Executing optimized Google API search: ${type} - ${query}`);
       
       try {
-        // First try direct API call
-        const apiKey = process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
-        const cseId = process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
+        // First try direct API call with credentials from different sources
+        const apiKey = process.env.GOOGLE_API_KEY || 
+                      sessionStorage.getItem('GOOGLE_API_KEY') || 
+                      localStorage.getItem('GOOGLE_API_KEY');
+                      
+        const cseId = process.env.GOOGLE_CSE_ID || 
+                     sessionStorage.getItem('GOOGLE_CSE_ID') || 
+                     localStorage.getItem('GOOGLE_CSE_ID');
         
         if (apiKey && cseId) {
+          console.log("Found Google API credentials, attempting direct search");
           const directResult = await this.directGoogleSearch(query, apiKey, cseId);
           
           if (directResult && directResult.items && directResult.items.length > 0) {
@@ -264,7 +269,11 @@ class GoogleApiManager {
             }));
             
             return { results, searchInformation: directResult.searchInformation };
+          } else {
+            console.warn("Google API call succeeded but returned no items");
           }
+        } else {
+          console.error("No Google API credentials found. Please set GOOGLE_API_KEY and GOOGLE_CSE_ID");
         }
         
         // If direct API call failed, fall back to simulated results
@@ -307,6 +316,39 @@ class GoogleApiManager {
     
     return 'website';
   }
+  
+  // Method to check if Google API credentials are configured
+  public checkApiCredentials(): { configured: boolean, message: string } {
+    const apiKey = process.env.GOOGLE_API_KEY || 
+                  sessionStorage.getItem('GOOGLE_API_KEY') || 
+                  localStorage.getItem('GOOGLE_API_KEY');
+                  
+    const cseId = process.env.GOOGLE_CSE_ID || 
+                 sessionStorage.getItem('GOOGLE_CSE_ID') || 
+                 localStorage.getItem('GOOGLE_CSE_ID');
+    
+    if (!apiKey && !cseId) {
+      return { 
+        configured: false, 
+        message: "Both Google API Key and CSE ID are missing. Please configure them in Supabase secrets." 
+      };
+    } else if (!apiKey) {
+      return { 
+        configured: false, 
+        message: "Google API Key is missing. Please configure it in Supabase secrets." 
+      };
+    } else if (!cseId) {
+      return { 
+        configured: false, 
+        message: "Google CSE ID is missing. Please configure it in Supabase secrets." 
+      };
+    }
+    
+    return { 
+      configured: true, 
+      message: "Google API credentials are configured correctly." 
+    };
+  }
 }
 
 // Export singleton instance
@@ -325,3 +367,6 @@ export const directGoogleSearch = (
   apiKey?: string,
   cseId?: string
 ) => googleApiManager.directGoogleSearch(query, apiKey, cseId);
+
+// Export method to check API credentials
+export const checkGoogleApiCredentials = () => googleApiManager.checkApiCredentials();

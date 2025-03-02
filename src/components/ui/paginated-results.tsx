@@ -36,9 +36,8 @@ export function PaginatedResults({
         setIsFallbackData(true);
         console.log("Warning: Using fallback/sample search results");
         
-        // Notify user once with toast
+        // Notify user once with toast - Fix type error by using proper toast params
         toast({
-          title: "Using sample results",
           description: "We're showing sample data because the Google API connection failed. Check the console for details.",
           duration: 5000,
         });
@@ -46,9 +45,8 @@ export function PaginatedResults({
         setIsFallbackData(false);
         console.log("Using real API search results");
         
-        // Notify success once
+        // Notify success once - Fix type error by using proper toast params
         toast({
-          title: "Search complete",
           description: "Showing real search results from Google.",
           duration: 3000,
         });
