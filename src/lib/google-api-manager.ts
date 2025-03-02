@@ -1,3 +1,4 @@
+
 import { google } from 'googleapis';
 
 // Define a type for the search result item
@@ -461,4 +462,105 @@ class GoogleApiManager {
   private readonly maxPagemapEventRatingItemsPerTypePerRatingWorst: number = 5;
   private readonly maxPagemapPlaceRatingItemsPerTypePerRatingWorst: number = 5;
   private readonly maxPagemapPersonRatingItemsPerTypePerRatingWorst: number = 5;
-  private readonly maxPagemapBreadcrumbRatingItemsPerType
+  private readonly maxPagemapBreadcrumbRatingItemsPerTypePerRatingWorst: number = 5;
+
+  constructor(options?: CustomSearchEngineOptions) {
+    if (options) {
+      this.apiKey = options.apiKey;
+      this.cseId = options.cseId;
+      this.initializeSearchClient();
+    } else {
+      this.loadCredentialsFromStorage();
+    }
+  }
+
+  // Initialize the search client with current credentials
+  private initializeSearchClient(): void {
+    if (this.apiKey && this.cseId) {
+      this.searchClient = google.customsearch('v1');
+      console.log("Google Custom Search client initialized");
+    } else {
+      console.warn("Cannot initialize search client: Missing API key or CSE ID");
+    }
+  }
+
+  // Load credentials from session/local storage
+  private loadCredentialsFromStorage(): void {
+    let apiKey = '';
+    let cseId = '';
+
+    // Try to get from session storage first
+    if (typeof window !== 'undefined') {
+      apiKey = sessionStorage.getItem('GOOGLE_API_KEY') || '';
+      cseId = sessionStorage.getItem('GOOGLE_CSE_ID') || '';
+      
+      // If not in session storage, try local storage
+      if (!apiKey || !cseId) {
+        apiKey = localStorage.getItem('GOOGLE_API_KEY') || '';
+        cseId = localStorage.getItem('GOOGLE_CSE_ID') || '';
+      }
+      
+      // If still not found, try environment variables
+      if (!apiKey || !cseId) {
+        apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
+        cseId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
+      }
+      
+      if (apiKey && cseId) {
+        this.apiKey = apiKey;
+        this.cseId = cseId;
+        this.initializeSearchClient();
+      } else {
+        console.warn("Failed to load Google API credentials from storage or environment variables");
+      }
+    }
+  }
+
+  // Check if API credentials are properly configured
+  public checkApiCredentials(): { configured: boolean; source?: string } {
+    if (this.apiKey && this.cseId) {
+      let source = 'unknown';
+      
+      if (sessionStorage.getItem('GOOGLE_API_KEY')) {
+        source = 'session storage';
+      } else if (localStorage.getItem('GOOGLE_API_KEY')) {
+        source = 'local storage';
+      } else if (import.meta.env.VITE_GOOGLE_API_KEY) {
+        source = 'environment variables';
+      }
+      
+      return { configured: true, source };
+    }
+    
+    return { configured: false };
+  }
+
+  // Set API credentials
+  public setCredentials(apiKey: string, cseId: string): void {
+    this.apiKey = apiKey;
+    this.cseId = cseId;
+    
+    // Save to session storage for current session
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('GOOGLE_API_KEY', apiKey);
+      sessionStorage.setItem('GOOGLE_CSE_ID', cseId);
+    }
+    
+    this.initializeSearchClient();
+  }
+
+  // Check if we can make a request based on quota and rate limits
+  public canMakeRequest(requestType: 'search' | 'image' = 'search'): boolean {
+    // Add implementation here
+    return true; // Placeholder for now
+  }
+
+  // Optimized search with rate limiting and automatic retries
+  public async optimizedSearch(queryType: 'name' | 'hashtag' | 'image', query: string, params: any = {}): Promise<any> {
+    // Add implementation here
+    return { items: [] }; // Placeholder for now
+  }
+}
+
+// Create a singleton instance
+export const googleApiManager = new GoogleApiManager();
