@@ -202,7 +202,23 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      direct_insert_search_query: {
+        Args: {
+          p_user_id: string
+          p_query_type: string
+          p_query_text: string
+          p_search_params_json: string
+        }
+        Returns: Json
+      }
+      insert_plagiarism_query: {
+        Args: {
+          p_user_id: string
+          p_query_text: string
+          p_search_params: Json
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
