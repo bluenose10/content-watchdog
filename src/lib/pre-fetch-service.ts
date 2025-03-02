@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { googleApiManager } from '@/lib/google-api-manager';
 
 // Timeout for Supabase function calls (in milliseconds)
-const FUNCTION_TIMEOUT = 8000;
+const FUNCTION_TIMEOUT = 10000; // Increased timeout
 
 /**
  * Load Google API credentials from Supabase Edge Function
@@ -14,6 +14,16 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
   console.log("Attempting to load Google API credentials from Supabase");
   
   try {
+    // Check if we already have valid credentials in sessionStorage
+    const sessionApiKey = sessionStorage.getItem("GOOGLE_API_KEY");
+    const sessionCseId = sessionStorage.getItem("GOOGLE_CSE_ID");
+    
+    if (sessionApiKey && sessionCseId) {
+      console.log("Using Google API credentials from session storage");
+      googleApiManager.setCredentials(sessionApiKey, sessionCseId);
+      return true;
+    }
+    
     // Function to implement timeout for the Supabase function call
     const timeoutPromise = new Promise<{data: null, error: Error}>((_, reject) => {
       setTimeout(() => {
@@ -22,6 +32,7 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
     });
     
     // Attempt to get credentials from the Supabase edge function
+    console.log("Calling Supabase function to get credentials");
     const functionPromise = supabase.functions.invoke('get-search-credentials', {
       method: 'GET'
     });
@@ -33,7 +44,7 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
     ]);
     
     if (error) {
-      console.error("Error fetching Google API credentials:", error);
+      console.error("Error fetching Google API credentials from Supabase:", error);
       
       // Try to fall back to environment variables
       const envApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -144,6 +155,9 @@ async function performPreFetch(): Promise<void> {
       console.warn("Failed to load Google API credentials during pre-fetch, skipping operations");
       return;
     }
+    
+    // Force the GoogleApiManager to refresh its credentials
+    googleApiManager.refreshCredentials();
     
     // Test a sample search to ensure everything is working
     const testQuery = "test query";
