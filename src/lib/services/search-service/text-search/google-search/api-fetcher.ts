@@ -28,17 +28,23 @@ export async function fetchMultiplePages(
   
   // Log configuration details to help with debugging
   console.log('Using Google API key pattern:', apiKey ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : 'None');
-  console.log('Using Google Search Engine ID pattern:', engineId ? engineId.split(':')[0] + ':...' : 'None');
+  console.log('Using Google Search Engine ID pattern:', engineId ? (engineId.includes(':') ? engineId.split(':')[0] + ':...' : engineId.substring(0, 4) + '...') : 'None');
   
-  // Strict validation for API key and Search Engine ID formats (don't assume dev environment)
+  // Less strict validation in production environments
   if (!apiKey || apiKey.length < 10) {
-    console.error('Google API key appears to be invalid or too short');
-    throw new Error('Google API key appears to be invalid. Please check your API key configuration.');
+    if (import.meta.env.DEV) {
+      console.error('Google API key appears to be invalid or too short');
+      throw new Error('Google API key appears to be invalid. Please check your API key configuration.');
+    } else {
+      console.warn('Google API key appears short but continuing in production environment');
+    }
   }
   
-  if (!engineId || !engineId.includes(':')) {
-    console.error('Google Search Engine ID appears to be invalid (missing colon format)');
-    throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
+  if (!engineId || (!engineId.includes(':') && import.meta.env.DEV)) {
+    console.warn('Google Search Engine ID has unusual format (missing colon)');
+    if (import.meta.env.DEV) {
+      throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
+    }
   }
   
   for (let page = 0; page < numPages; page++) {
@@ -50,7 +56,7 @@ export async function fetchMultiplePages(
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
       const requestUrl = `https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`;
-      console.log(`Request URL pattern: ${requestUrl.replace(apiKey, '***API_KEY***').replace(engineId, '***CSE_ID***')}`);
+      console.log(`Request URL pattern: ${requestUrl.replace(apiKey || '', '***API_KEY***').replace(engineId || '', '***CSE_ID***')}`);
       
       const response = await fetch(requestUrl);
       

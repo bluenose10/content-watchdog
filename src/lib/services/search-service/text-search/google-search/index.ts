@@ -20,25 +20,23 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
     const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
     
-    // Always log API credentials status regardless of environment
-    console.log('API Key available:', apiKey ? 'Yes' : 'No');
-    console.log('Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
+    // Log API credentials status for debugging
+    console.log('API Key available:', apiKey ? 'Yes (valid format: ' + (apiKey.length >= 10) + ')' : 'No');
+    console.log('Search Engine ID available:', searchEngineId ? 'Yes (valid format: ' + searchEngineId.includes(':') + ')' : 'No');
     
     if (!apiKey || !searchEngineId) {
       console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
       throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
     }
 
-    // Always check for valid format of API key and Search Engine ID
-    if (apiKey.length < 10) {
-      console.error('ERROR: Google API key appears to be invalid (too short)');
-      throw new Error('Google API key appears to be invalid. Please check your configuration.');
+    // More lenient validation for API keys in production environments
+    if (apiKey.length < 10 && !import.meta.env.DEV) {
+      console.warn('WARNING: Google API key appears to be short, but continuing anyway');
     }
     
-    // Check for valid search engine ID format
-    if (!searchEngineId.includes(':')) {
-      console.error('ERROR: Google Custom Search Engine ID appears to be invalid (missing colon)');
-      throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
+    // More lenient validation for Search Engine ID in production
+    if (!searchEngineId.includes(':') && !import.meta.env.DEV) {
+      console.warn('WARNING: Google Search Engine ID format is unusual (missing colon), but continuing anyway');
     }
     
     // Check cache and pending requests
