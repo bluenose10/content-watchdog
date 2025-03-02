@@ -1,76 +1,58 @@
 
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { corsHeaders } from '../_shared/cors.ts'
 
-// CORS headers for browser access
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-}
+console.log('get-search-credentials function initialization')
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders,
-    })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Get Google API credentials from environment variables
+    console.log('Fetching Google API credentials from Supabase secrets')
+    
+    // Get secrets from environment
     const apiKey = Deno.env.get('GOOGLE_API_KEY')
     const cseId = Deno.env.get('GOOGLE_CSE_ID')
-
-    console.log('Edge function: Retrieving Google API credentials')
-    console.log(`API Key present: ${apiKey ? 'Yes (starts with ' + apiKey.substring(0, 4) + '...)' : 'No'}`)
-    console.log(`CSE ID present: ${cseId ? 'Yes (starts with ' + cseId.substring(0, 4) + '...)' : 'No'}`)
-
+    
+    // Log status (without revealing the full key for security)
+    console.log(`API Key status: ${apiKey ? 'Found (starts with ' + apiKey.substring(0, 4) + '...)' : 'Not found'}`)
+    console.log(`CSE ID status: ${cseId ? 'Found (starts with ' + cseId.substring(0, 4) + '...)' : 'Not found'}`)
+    
     if (!apiKey || !cseId) {
-      console.error('Edge function: Missing Google API credentials')
+      console.error('Missing required Google API credentials in Supabase secrets')
       return new Response(
         JSON.stringify({
-          error: 'Missing Google API credentials',
-          apiKeyPresent: !!apiKey,
-          cseIdPresent: !!cseId
+          error: 'Missing required Google API credentials in Supabase secrets'
         }),
         {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
         }
       )
     }
-
-    // Return credentials
+    
+    // Return the credentials
+    console.log('Successfully retrieved Google API credentials')
     return new Response(
       JSON.stringify({
         apiKey,
-        cseId,
-        message: 'Google API credentials retrieved successfully'
+        cseId
       }),
       {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
       }
     )
   } catch (error) {
-    console.error('Edge function error:', error.message)
-    
+    console.error(`Error in get-search-credentials function: ${error.message}`)
     return new Response(
-      JSON.stringify({
-        error: 'Failed to retrieve Google API credentials',
-        details: error.message
-      }),
+      JSON.stringify({ error: error.message }),
       {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
       }
     )
   }

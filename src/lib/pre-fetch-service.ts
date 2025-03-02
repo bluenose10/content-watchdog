@@ -1,3 +1,4 @@
+
 import { googleApiManager } from './google-api-manager';
 import { supabase } from './supabase';
 
@@ -40,6 +41,9 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
       // If we got this far, we couldn't get credentials
       return false;
     }
+    
+    // Additional logging to understand what's in the response
+    console.log("Edge Function response received:", data);
     
     if (data && data.apiKey && data.cseId) {
       // Store the credentials in memory and session storage
