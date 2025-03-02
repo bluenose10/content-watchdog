@@ -44,6 +44,8 @@ class GoogleApiManager {
   private apiKey: string = '';
   private cseId: string = '';
   private searchClient: any;
+  private retryCount: number = 3;
+  private retryDelay: number = 1000;
   
   constructor() {
     // Try to load credentials when the class is instantiated
@@ -147,10 +149,38 @@ class GoogleApiManager {
     console.log(`GoogleApiManager: Performing optimized ${queryType} search for: "${query}"`);
     
     try {
-      const searchResults = await this.search(query);
+      // Before searching, ensure we have the latest credentials
+      this.loadCredentialsFromStorage();
+      
+      if (!this.apiKey || !this.cseId) {
+        throw new Error("Missing Google API credentials. Please set them in Supabase secrets or manually.");
+      }
+      
+      // Try to perform the search with retries
+      let searchResults = null;
+      let lastError = null;
+      
+      for (let attempt = 0; attempt < this.retryCount; attempt++) {
+        try {
+          console.log(`Search attempt ${attempt + 1} for "${query}"`);
+          searchResults = await this.search(query);
+          
+          if (searchResults && searchResults.items && searchResults.items.length > 0) {
+            break; // Successful search, exit retry loop
+          }
+        } catch (error) {
+          console.error(`Attempt ${attempt + 1} failed:`, error);
+          lastError = error;
+          
+          if (attempt < this.retryCount - 1) {
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+          }
+        }
+      }
       
       if (!searchResults || !searchResults.items || searchResults.items.length === 0) {
-        throw new Error("No search results found");
+        throw lastError || new Error("No search results found after retries");
       }
       
       const formattedResults = searchResults.items.map((item: any, index: number) => {
@@ -161,7 +191,7 @@ class GoogleApiManager {
           `https://picsum.photos/200/300?random=${index+1}`;
         
         const source = item.displayLink || "unknown";
-        let type = 'website';
+        let type: 'website' | 'image' | 'social' = 'website';
         
         // Determine content type based on source and metadata
         if (item.pagemap?.videoobject || 
@@ -213,7 +243,7 @@ class GoogleApiManager {
         
         matchScore = Math.min(1, matchScore);
         
-        let matchLevel = 'Medium';
+        let matchLevel: 'High' | 'Medium' | 'Low' = 'Medium';
         if (matchScore > 0.65) matchLevel = 'High';
         else if (matchScore < 0.3) matchLevel = 'Low';
         
@@ -242,7 +272,7 @@ class GoogleApiManager {
     }
   }
 
-  // Optimized search with automatic retries
+  // Perform search with automatic retries
   public async search(query: string): Promise<any> {
     // Make sure credentials are loaded
     this.loadCredentialsFromStorage();

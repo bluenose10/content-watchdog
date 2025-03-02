@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { loadGoogleApiCredentials, schedulePreFetching } from '@/lib/pre-fetch-service';
+import { loadGoogleApiCredentials, schedulePreFetching, startPreFetching } from '@/lib/pre-fetch-service';
 import { useToast } from '@/hooks/use-toast';
 import { googleApiManager } from '@/lib/google-api-manager';
 
@@ -31,6 +31,10 @@ export function PreFetchInitializer() {
               duration: 6000,
             });
           }
+        } else {
+          // If credentials loaded successfully, try to start pre-fetching
+          await startPreFetching();
+          console.log("Initial pre-fetch completed");
         }
         
         // Schedule pre-fetching regardless of API status

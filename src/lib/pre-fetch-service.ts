@@ -1,6 +1,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { googleApiManager } from '@/lib/google-api-manager';
 
 // Timeout for Supabase function calls (in milliseconds)
 const FUNCTION_TIMEOUT = 8000;
@@ -42,6 +43,7 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
         console.log("Using environment variables for Google API credentials");
         sessionStorage.setItem("GOOGLE_API_KEY", envApiKey);
         sessionStorage.setItem("GOOGLE_CSE_ID", envCseId);
+        googleApiManager.setCredentials(envApiKey, envCseId);
         return true;
       }
       
@@ -53,6 +55,7 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
         console.log("Using locally stored Google API credentials");
         sessionStorage.setItem("GOOGLE_API_KEY", localApiKey);
         sessionStorage.setItem("GOOGLE_CSE_ID", localCseId);
+        googleApiManager.setCredentials(localApiKey, localCseId);
         return true;
       }
       
@@ -81,6 +84,9 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
     // Also store in localStorage for persistence
     localStorage.setItem("GOOGLE_API_KEY", apiKey);
     localStorage.setItem("GOOGLE_CSE_ID", cseId);
+    
+    // Update the GoogleApiManager with the new credentials
+    googleApiManager.setCredentials(apiKey, cseId);
     
     return true;
   } catch (error) {
@@ -139,7 +145,15 @@ async function performPreFetch(): Promise<void> {
       return;
     }
     
-    // Add your pre-fetch operations here
+    // Test a sample search to ensure everything is working
+    const testQuery = "test query";
+    try {
+      const testSearch = await googleApiManager.optimizedSearch("text", testQuery);
+      console.log(`Pre-fetch test search completed with ${testSearch.results.length} results`);
+    } catch (error) {
+      console.error("Error during pre-fetch test search:", error);
+    }
+    
     console.log("Pre-fetch operations completed successfully");
   } catch (error) {
     console.error("Error during pre-fetch operations:", error);
