@@ -141,7 +141,7 @@ export function PaginatedResults({
       {showApiSetup ? (
         <GoogleApiSetup onComplete={handleRefreshAfterCredentials} />
       ) : isLoadingCredentials ? (
-        <Alert variant="default" className="mb-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+        <Alert className="mb-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
           <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-spin mr-2" />
           <AlertTitle>Checking for Google API credentials</AlertTitle>
           <AlertDescription>
@@ -179,7 +179,7 @@ export function PaginatedResults({
           </AlertDescription>
         </Alert>
       ) : isFallbackData && credentialsLoaded ? (
-        <Alert variant="default" className="mb-4 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
+        <Alert className="mb-4 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
           <AlertCircle className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
           <AlertTitle>API credentials loaded successfully</AlertTitle>
           <AlertDescription className="space-y-3">
