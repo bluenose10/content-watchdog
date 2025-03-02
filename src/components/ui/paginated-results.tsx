@@ -28,15 +28,30 @@ export function PaginatedResults({
       const hasFallbackIds = results.some(result => 
         result.id?.toString().includes('fallback') || 
         result.id?.toString().includes('Sample') ||
-        result.title?.includes('Sample')
+        result.title?.includes('Sample') ||
+        (result.id?.toString().startsWith('result-') && !result.id?.toString().includes('google'))
       );
       
       if (hasFallbackIds) {
         setIsFallbackData(true);
         console.log("Warning: Using fallback/sample search results");
+        
+        // Notify user once with toast
+        toast({
+          title: "Using sample results",
+          description: "We're showing sample data because the Google API connection failed. Check the console for details.",
+          duration: 5000,
+        });
       } else {
         setIsFallbackData(false);
         console.log("Using real API search results");
+        
+        // Notify success once
+        toast({
+          title: "Search complete",
+          description: "Showing real search results from Google.",
+          duration: 3000,
+        });
       }
     }
   }, [results]);
@@ -86,7 +101,8 @@ export function PaginatedResults({
         <div className="p-3 mb-4 border rounded-md bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900 flex items-center gap-2">
           <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
           <span className="text-sm text-yellow-800 dark:text-yellow-300">
-            Using sample results. There was an issue connecting to the search service.
+            Using sample results. There was an issue connecting to the Google search service. 
+            To fix this, make sure your Google API key and CSE ID are correctly set.
           </span>
         </div>
       )}

@@ -176,7 +176,51 @@ class GoogleApiManager {
     quota.minuteUsage++;
     
     // Execute the request
-    return executeFunc();
+    try {
+      const result = await executeFunc();
+      return result;
+    } catch (error) {
+      console.error(`Google API request failed (${apiType}):`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Execute a Google API search with direct call to Google API
+   */
+  public async directGoogleSearch(
+    query: string,
+    apiKey?: string,
+    cseId?: string
+  ): Promise<any> {
+    if (!apiKey || !cseId) {
+      apiKey = process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
+      cseId = process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
+      
+      if (!apiKey || !cseId) {
+        throw new Error("Missing Google API credentials");
+      }
+    }
+    
+    console.log("Attempting direct Google API call for query:", query);
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=${encodeURIComponent(query)}`;
+    
+    try {
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Google API error response:", errorText);
+        throw new Error(`Google API responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Successfully received Google API response with items:", data.items?.length || 0);
+      return data;
+    } catch (error) {
+      console.error("Error making direct Google API call:", error);
+      throw error;
+    }
   }
   
   /**
@@ -191,26 +235,77 @@ class GoogleApiManager {
     
     // Helper function to execute the actual API call
     const executeSearch = async () => {
-      // In a real implementation, this would call the Google API with the query
-      // For this mock, we'll use our existing getSearchResults function
-      
       console.log(`Executing optimized Google API search: ${type} - ${query}`);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // For demonstration - in a real app, this would be the actual Google API call
-      const searchId = `${type}_${query.replace(/\W+/g, '_')}`;
-      
-      // Get results with only the fields we need
-      const result = await import('./search-cache').then(module => 
-        module.getSearchResults(searchId)
-      );
-      
-      return result;
+      try {
+        // First try direct API call
+        const apiKey = process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
+        const cseId = process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
+        
+        if (apiKey && cseId) {
+          const directResult = await this.directGoogleSearch(query, apiKey, cseId);
+          
+          if (directResult && directResult.items && directResult.items.length > 0) {
+            console.log("Successfully retrieved direct Google search results");
+            
+            // Format results
+            const results = directResult.items.map((item: any, index: number) => ({
+              id: `google-${index}-${Date.now()}`,
+              title: item.title || "Untitled",
+              url: item.link || "#",
+              thumbnail: item.pagemap?.cse_image?.[0]?.src || 
+                          item.pagemap?.cse_thumbnail?.[0]?.src ||
+                          `https://picsum.photos/200/300?random=${index+1}`,
+              source: item.displayLink || "unknown",
+              match_level: index < 3 ? 'High' : index < 7 ? 'Medium' : 'Low',
+              found_at: new Date().toISOString(),
+              type: this.determineResultType(item, type),
+              snippet: item.snippet || null
+            }));
+            
+            return { results, searchInformation: directResult.searchInformation };
+          }
+        }
+        
+        // If direct API call failed, fall back to simulated results
+        console.warn("Direct API call failed or returned no results, using fallback");
+        throw new Error("Direct Google API call failed");
+      } catch (error) {
+        console.error("All Google API methods failed:", error);
+        throw error;
+      }
     };
     
     return this.executeWithThrottling('search', executeSearch, cacheKey);
+  }
+  
+  private determineResultType(item: any, queryType: string): 'website' | 'social' | 'image' {
+    const source = item.displayLink || "";
+    
+    if (queryType === 'image' || 
+        item.pagemap?.imageobject || 
+        item.pagemap?.cse_image ||
+        source.includes('instagram') || 
+        source.includes('flickr') || 
+        source.includes('pinterest') ||
+        item.title?.toLowerCase().includes('image') ||
+        item.title?.toLowerCase().includes('photo')) {
+      return 'image';
+    } else if (
+        item.pagemap?.videoobject || 
+        source.includes('youtube') || 
+        source.includes('vimeo') || 
+        source.includes('tiktok') ||
+        source.includes('twitter') || 
+        source.includes('facebook') || 
+        source.includes('linkedin') || 
+        source.includes('reddit') ||
+        item.title?.toLowerCase().includes('profile') ||
+        item.title?.toLowerCase().includes('video')) {
+      return 'social';
+    }
+    
+    return 'website';
   }
 }
 
@@ -223,3 +318,10 @@ export const optimizedGoogleSearch = (
   query: string,
   params: any = {}
 ) => googleApiManager.optimizedSearch(type, query, params);
+
+// Add direct Google search method
+export const directGoogleSearch = (
+  query: string,
+  apiKey?: string,
+  cseId?: string
+) => googleApiManager.directGoogleSearch(query, apiKey, cseId);

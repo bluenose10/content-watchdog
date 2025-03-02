@@ -1,4 +1,3 @@
-
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
@@ -51,6 +50,7 @@ const userSearchCounts: Record<string, {
 function cacheSearchParams(searchId: string, params: any): void {
   try {
     sessionStorage.setItem(`search_params_${searchId}`, JSON.stringify(params));
+    console.log(`Cached search parameters for ID: ${searchId}`);
   } catch (error) {
     console.error("Error caching search parameters:", error);
   }
@@ -58,10 +58,6 @@ function cacheSearchParams(searchId: string, params: any): void {
 
 /**
  * Check if user has exceeded their search limits based on subscription tier
- * @param userId User ID
- * @param isPro Whether the user has a Pro subscription
- * @param userEmail User's email address to check admin status
- * @returns Object with isAllowed and message
  */
 async function checkSearchLimits(userId: string, isPro: boolean, userEmail?: string): Promise<{ isAllowed: boolean, message: string }> {
   // Admin users have unlimited searches
@@ -198,7 +194,7 @@ export async function handleTextSearch(
     throw new Error(limitCheck.message);
   }
 
-  // Check cache first for this query
+  // Format query based on type
   const formattedQuery = queryType === 'hashtag' && !sanitizedQuery.startsWith('#') 
     ? `#${sanitizedQuery}` 
     : sanitizedQuery;
@@ -249,7 +245,26 @@ export async function handleTextSearch(
     // by generating a mock search ID for the client
     console.error("Search query processing error:", error);
     
-    // Create a fallback search ID
+    if (error instanceof Error && error.message.includes("materialized view")) {
+      console.log("Continuing search despite materialized view error");
+      // Generate a unique ID but mark it as a real search, not fallback
+      const searchId = `real_search_${crypto.randomUUID()}`;
+      
+      // Cache search parameters
+      cacheSearchParams(searchId, {
+        user_id: user.id,
+        query_type: queryType,
+        query_text: formattedQuery,
+        search_params_json: JSON.stringify(mergedParams),
+        use_real_google_api: true // Flag to ensure we try real Google API first
+      });
+      
+      cacheResults(cacheKey, { id: searchId });
+      
+      return searchId;
+    }
+    
+    // For other errors, use fallback
     const fallbackId = `fallback_${crypto.randomUUID()}`;
     
     // Cache search parameters for fallback ID
@@ -324,7 +339,8 @@ export async function handleImageSearch(
         user_id: user.id,
         query_type: "image",
         image_url: imageUrl,
-        search_params_json: JSON.stringify(mergedParams)
+        search_params_json: JSON.stringify(mergedParams),
+        use_real_google_api: true // Flag to ensure we try real Google API first
       });
       
       // Cache the results
@@ -332,20 +348,41 @@ export async function handleImageSearch(
       
       return searchId;
     } catch (dbError) {
-      // If there's an error with the database operation, use a fallback ID
       console.error("Image search database error:", dbError);
-      const fallbackId = `fallback_${crypto.randomUUID()}`;
       
-      // Cache search parameters for fallback ID
-      cacheSearchParams(fallbackId, {
+      if (dbError instanceof Error && dbError.message.includes("materialized view")) {
+        console.log("Continuing image search despite materialized view error");
+        // Generate a unique ID but mark it as a real search, not fallback
+        const searchId = `real_search_${crypto.randomUUID()}`;
+        
+        // Cache search parameters
+        cacheSearchParams(searchId, {
+          user_id: user.id,
+          query_type: "image",
+          image_url: imageUrl,
+          search_params_json: JSON.stringify(mergedParams),
+          use_real_google_api: true 
+        });
+        
+        cacheResults(cacheKey, { id: searchId });
+        
+        return searchId;
+      }
+      
+      // For database errors, use a special ID format that will still try to use real API
+      const specialId = `api_fallback_${crypto.randomUUID()}`;
+      
+      // Cache search parameters for this special ID
+      cacheSearchParams(specialId, {
         user_id: user.id,
         query_type: "image",
         image_url: imageUrl,
-        search_params_json: JSON.stringify(mergedParams)
+        search_params_json: JSON.stringify(mergedParams),
+        use_real_google_api: true
       });
       
-      cacheResults(cacheKey, { id: fallbackId });
-      return fallbackId;
+      cacheResults(cacheKey, { id: specialId });
+      return specialId;
     }
   } catch (error) {
     console.error("Error during image search:", error);
@@ -402,13 +439,6 @@ async function processSearch(
     );
     
     if (error) {
-      // Check if it's the materialized view error
-      if (error.message && error.message.includes('materialized view')) {
-        console.error("Materialized view error, but continuing with search:", error);
-        // Generate a random ID to allow the search to continue
-        return `generated_${crypto.randomUUID()}`;
-      }
-      
       console.error("Error creating search query:", error);
       throw error;
     }
@@ -420,11 +450,9 @@ async function processSearch(
     return data;
   } catch (error) {
     console.error("Error in processSearch:", error);
-    // If any unexpected error happens, throw a more user-friendly message
-    // but still allow processing to continue with a generated ID
-    if (error instanceof Error && error.message.includes('materialized view')) {
-      return `recovery_${crypto.randomUUID()}`;
-    }
-    throw new Error(`Failed to create search: ${error instanceof Error ? error.message : "Unknown error"}`);
+    
+    // If any unexpected error happens, throw it so our above handlers can create
+    // the appropriate type of search ID
+    throw error;
   }
 }
