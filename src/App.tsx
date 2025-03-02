@@ -7,38 +7,17 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Suspense, lazy, useEffect, useState } from "react";
 import { LoadingState } from "@/components/dashboard/LoadingState";
 
-// Lazy load pages to improve initial load performance
-const Index = lazy(() => import("@/pages/Index"));
-const Dashboard = lazy(() => 
-  import("@/pages/Dashboard")
-    .catch(err => {
-      console.error("Error loading Dashboard:", err);
+// Function to handle lazy loading with error handling
+const lazyLoadWithErrorBoundary = (importFunc, name) => {
+  return lazy(() => 
+    importFunc().catch(err => {
+      console.error(`Error loading ${name}:`, err);
       return { default: ErrorFallback };
     })
-);
-const Analytics = lazy(() => import("@/pages/Analytics"));
-const Search = lazy(() => import("@/pages/Search"));
-const Results = lazy(() => import("@/pages/Results"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
-const Login = lazy(() => import("@/pages/Login"));
-const SignUp = lazy(() => import("@/pages/SignUp"));
-const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
-const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("@/pages/TermsOfService"));
-const CookiePolicy = lazy(() => import("@/pages/CookiePolicy"));
-const AccountSettings = lazy(() => import("@/pages/AccountSettings"));
-const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
-const PaymentCanceled = lazy(() => import("@/pages/PaymentCanceled"));
-const MockCheckout = lazy(() => import("@/pages/MockCheckout"));
-const Monitoring = lazy(() => import("@/pages/Monitoring"));
-const Protection = lazy(() => import("@/pages/Protection"));
-const SearchHistory = lazy(() => import("@/pages/SearchHistory"));
-const Contact = lazy(() => import("@/pages/Contact"));
-const Piracy = lazy(() => import("@/pages/Piracy"));
-const PlagiarismChecker = lazy(() => import("@/pages/PlagiarismChecker"));
+  );
+};
 
-import "./App.css";
-
+// ErrorFallback component for when a module fails to load
 function ErrorFallback() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
@@ -53,6 +32,32 @@ function ErrorFallback() {
     </div>
   );
 }
+
+// Lazy load pages with error handling
+const Index = lazyLoadWithErrorBoundary(() => import("@/pages/Index"), "Index");
+const Dashboard = lazyLoadWithErrorBoundary(() => import("@/pages/Dashboard"), "Dashboard");
+const Analytics = lazyLoadWithErrorBoundary(() => import("@/pages/Analytics"), "Analytics");
+const Search = lazyLoadWithErrorBoundary(() => import("@/pages/Search"), "Search");
+const Results = lazyLoadWithErrorBoundary(() => import("@/pages/Results"), "Results");
+const NotFound = lazyLoadWithErrorBoundary(() => import("@/pages/NotFound"), "NotFound");
+const Login = lazyLoadWithErrorBoundary(() => import("@/pages/Login"), "Login");
+const SignUp = lazyLoadWithErrorBoundary(() => import("@/pages/SignUp"), "SignUp");
+const ResetPassword = lazyLoadWithErrorBoundary(() => import("@/pages/ResetPassword"), "ResetPassword");
+const PrivacyPolicy = lazyLoadWithErrorBoundary(() => import("@/pages/PrivacyPolicy"), "PrivacyPolicy");
+const TermsOfService = lazyLoadWithErrorBoundary(() => import("@/pages/TermsOfService"), "TermsOfService");
+const CookiePolicy = lazyLoadWithErrorBoundary(() => import("@/pages/CookiePolicy"), "CookiePolicy");
+const AccountSettings = lazyLoadWithErrorBoundary(() => import("@/pages/AccountSettings"), "AccountSettings");
+const PaymentSuccess = lazyLoadWithErrorBoundary(() => import("@/pages/PaymentSuccess"), "PaymentSuccess");
+const PaymentCanceled = lazyLoadWithErrorBoundary(() => import("@/pages/PaymentCanceled"), "PaymentCanceled");
+const MockCheckout = lazyLoadWithErrorBoundary(() => import("@/pages/MockCheckout"), "MockCheckout");
+const Monitoring = lazyLoadWithErrorBoundary(() => import("@/pages/Monitoring"), "Monitoring");
+const Protection = lazyLoadWithErrorBoundary(() => import("@/pages/Protection"), "Protection");
+const SearchHistory = lazyLoadWithErrorBoundary(() => import("@/pages/SearchHistory"), "SearchHistory");
+const Contact = lazyLoadWithErrorBoundary(() => import("@/pages/Contact"), "Contact");
+const Piracy = lazyLoadWithErrorBoundary(() => import("@/pages/Piracy"), "Piracy");
+const PlagiarismChecker = lazyLoadWithErrorBoundary(() => import("@/pages/PlagiarismChecker"), "PlagiarismChecker");
+
+import "./App.css";
 
 function AppRoutes() {
   const [isAppReady, setIsAppReady] = useState(false);
