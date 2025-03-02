@@ -79,6 +79,8 @@ const SignUp = () => {
         toast({
           title: "Success",
           description: "Your account has been created. Please check your email for verification.",
+          // Change from "success" to "default" as that's an allowed variant
+          variant: "default", 
         });
       }
     } catch (error: any) {
