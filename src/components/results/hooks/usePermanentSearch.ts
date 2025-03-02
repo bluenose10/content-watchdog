@@ -59,25 +59,57 @@ export function usePermanentSearch({
       const searchParams = searchQuery.search_params_json ? 
                           JSON.parse(searchQuery.search_params_json) : {};
       
-      // Perform Google search
       try {
         let searchResponse;
-        if (queryType === 'image') {
-          console.log("Performing image search");
-          searchResponse = await performImageSearch(searchQuery.image_url, searchQuery.user_id, searchParams);
+        
+        // Check if we're in demo mode (using mock results)
+        const useDemo = !import.meta.env.VITE_GOOGLE_API_KEY || 
+                        import.meta.env.VITE_GOOGLE_API_KEY.length < 10 ||
+                        !import.meta.env.VITE_GOOGLE_CSE_ID;
+        
+        if (useDemo) {
+          console.log("Using demo mode with mock results due to missing API configuration");
+          // Import mock generator dynamically
+          const { generateMockResults } = await import('@/lib/services/search-service/text-search/mock-generator');
+          searchResponse = generateMockResults(queryText, searchParams.maxResults || 20);
+          searchResponse._source = 'mock';
         } else {
-          console.log("Performing Google search");
-          searchResponse = await performGoogleSearch(queryText, searchQuery.user_id, searchParams);
+          // Perform actual API search based on query type
+          if (queryType === 'image') {
+            console.log("Performing image search");
+            searchResponse = await performImageSearch(searchQuery.image_url, searchQuery.user_id, searchParams);
+          } else {
+            console.log("Performing Google search");
+            searchResponse = await performGoogleSearch(queryText, searchQuery.user_id, searchParams);
+          }
         }
         
-        console.log("Google API response:", searchResponse);
+        console.log("Search API response:", searchResponse);
+        
+        // Check if we got mock results as a fallback
+        if (searchResponse?._source?.includes('mock')) {
+          console.log("Received mock results instead of real search data");
+          toast({
+            title: "Using Demo Results",
+            description: "The search API is not configured correctly. Showing sample results instead of real search data.",
+            variant: "default",
+          });
+        }
         
         if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
           processSearchResponse(searchResponse, queryText, queryType);
         } else if (searchResponse && searchResponse.error) {
           // Handle API-reported errors
           console.error("API error:", searchResponse.error);
-          throw new Error(searchResponse.error.message || "API error");
+          // Fall back to sample results
+          setResults(FALLBACK_RESULTS);
+          setTotalResults(FALLBACK_RESULTS.length);
+          
+          toast({
+            title: "Search API Error",
+            description: "Using sample results due to an API error. Please try again later.",
+            variant: "default",
+          });
         } else {
           // Handle empty results
           setResults([]);
@@ -90,11 +122,30 @@ export function usePermanentSearch({
         }
       } catch (error) {
         console.error("Error performing search:", error);
-        throw error; // Let the parent handle this error
+        
+        // Fall back to sample results on error
+        setResults(FALLBACK_RESULTS);
+        setTotalResults(FALLBACK_RESULTS.length);
+        
+        toast({
+          title: "Search Error",
+          description: "Using sample results due to a search error. Please try again later.",
+          variant: "default",
+        });
       }
     } catch (error) {
       console.error("Error fetching search or results:", error);
-      throw error; // Let the parent handle this error
+      
+      // Fall back to sample results on error
+      setResults(FALLBACK_RESULTS);
+      setTotalResults(FALLBACK_RESULTS.length);
+      setQuery("Sample Results");
+      
+      toast({
+        title: "Error Loading Results",
+        description: "Using sample results due to an error. Please try again later.",
+        variant: "default",
+      });
     }
   };
 
