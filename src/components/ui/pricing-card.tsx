@@ -1,9 +1,8 @@
 
 import { Button } from "@/components/ui/button";
-import { CheckoutButton } from "@/components/stripe/CheckoutButton";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -35,21 +34,32 @@ export function PricingCard({
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Log component mounting for debugging
+    console.log("PricingCard mounted for plan:", name, planId);
+  }, [name, planId]);
+
   // Ensure price is properly formatted
   const formattedPrice = price === 0 ? "Free" : `$${price.toFixed(2)}`;
 
   const handlePlanClick = () => {
-    if (!user && planId !== "basic") {
-      // Redirect to signup for non-basic plans if not logged in
-      navigate("/signup");
-      return;
-    }
-    
-    if (onClick) {
-      onClick();
-    } else if (planId && price > 0) {
-      // For paid plans, navigate to checkout page with plan ID
-      navigate(`/checkout?plan_id=${planId}`);
+    try {
+      console.log("PricingCard click handler - plan:", planId, "user:", !!user);
+      
+      if (!user && planId !== "basic") {
+        // Redirect to signup for non-basic plans if not logged in
+        navigate("/signup");
+        return;
+      }
+      
+      if (onClick) {
+        onClick();
+      } else if (planId && price > 0) {
+        // For paid plans, navigate to checkout page with plan ID
+        navigate(`/checkout?plan_id=${planId}`);
+      }
+    } catch (error) {
+      console.error("Error in pricing card click handler:", error);
     }
   };
 
@@ -92,7 +102,6 @@ export function PricingCard({
         ))}
       </div>
       
-      {/* Pricing card button - updated for proper checkout flow */}
       <Button
         className={cn(
           "mt-6 w-full button-animation",

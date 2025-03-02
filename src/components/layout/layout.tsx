@@ -2,7 +2,7 @@
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { PreFetchInitializer } from "@/components/PreFetchInitializer";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "react-router-dom";
 import { PROTECTED_ROUTES } from "@/lib/constants";
@@ -30,7 +30,11 @@ export function Layout({ children }: LayoutProps) {
     <div className="flex min-h-screen flex-col">
       <PreFetchInitializer />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+          {children}
+        </Suspense>
+      </main>
       <Footer />
     </div>
   );
