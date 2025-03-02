@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -33,10 +33,16 @@ export function PricingCard({
 }: PricingCardProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Log component mounting for debugging
-    console.log("PricingCard mounted for plan:", name, planId);
+    try {
+      // Log component mounting for debugging
+      console.log("PricingCard mounted for plan:", name, planId);
+    } catch (error) {
+      console.error("Error in PricingCard mount:", error);
+      setRenderError("Failed to initialize pricing card");
+    }
   }, [name, planId]);
 
   // Ensure price is properly formatted
@@ -62,6 +68,14 @@ export function PricingCard({
       console.error("Error in pricing card click handler:", error);
     }
   };
+
+  if (renderError) {
+    return (
+      <div className="relative glass-card overflow-hidden rounded-xl p-6">
+        <p className="text-destructive">Error: {renderError}</p>
+      </div>
+    );
+  }
 
   return (
     <div
