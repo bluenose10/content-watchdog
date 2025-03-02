@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/header";
@@ -184,7 +185,7 @@ export default function Results() {
         // Check if Google API credentials are loaded
         const credentialsLoaded = await googleApiManager.checkApiCredentials();
         if (!credentialsLoaded.configured) {
-          console.error("Google API credentials not configured:", credentialsLoaded.message);
+          console.error("Google API credentials not configured:", credentialsLoaded.source || "Unknown reason");
           setApiConnectionFailed(true);
         }
         
