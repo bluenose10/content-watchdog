@@ -1,4 +1,3 @@
-
 import { googleApiManager } from './google-api-manager';
 import { supabase } from './supabase';
 import { toast } from 'sonner';
@@ -21,20 +20,23 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
     // Otherwise, fetch from Supabase Edge Function with better error handling
     console.log("Fetching credentials from Supabase Edge Function...");
     
-    // Make the request to the edge function with timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    // Set up timeout for the request
+    const timeoutPromise = new Promise<{data: null, error: Error}>((_, reject) => {
+      setTimeout(() => reject(new Error("Timeout fetching Google API credentials")), 10000);
+    });
     
     try {
-      const { data, error } = await supabase.functions.invoke('get-search-credentials', {
-        method: 'GET',
-        signal: controller.signal
-      });
+      // Use Promise.race to implement timeout without AbortController
+      const result = await Promise.race([
+        supabase.functions.invoke('get-search-credentials', {
+          method: 'GET'
+        }),
+        timeoutPromise
+      ]);
       
-      clearTimeout(timeoutId);
-      
-      if (error) {
-        console.error("Error fetching Google API credentials from Edge Function:", error);
+      // Check for errors from the Edge Function
+      if (result.error) {
+        console.error("Error fetching Google API credentials from Edge Function:", result.error);
         toast.error("Failed to fetch Google API credentials from Supabase");
         
         // Try to get credentials directly from environment variables as fallback
@@ -54,22 +56,22 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
       }
       
       // Additional detailed logging to understand what we're getting from the edge function
-      console.log("Edge Function response received:", JSON.stringify(data, null, 2));
+      console.log("Edge Function response received:", JSON.stringify(result.data, null, 2));
       
-      if (data && typeof data.apiKey === 'string' && typeof data.cseId === 'string') {
+      if (result.data && typeof result.data.apiKey === 'string' && typeof result.data.cseId === 'string') {
         // Store the credentials in memory and session storage
         console.log("Successfully received valid Google API credentials from Supabase");
-        googleApiManager.setCredentials(data.apiKey, data.cseId);
-        sessionStorage.setItem("GOOGLE_API_KEY", data.apiKey);
-        sessionStorage.setItem("GOOGLE_CSE_ID", data.cseId);
+        googleApiManager.setCredentials(result.data.apiKey, result.data.cseId);
+        sessionStorage.setItem("GOOGLE_API_KEY", result.data.apiKey);
+        sessionStorage.setItem("GOOGLE_CSE_ID", result.data.cseId);
         return true;
       } else {
-        console.warn("Invalid Google API credentials returned from Supabase:", data);
+        console.warn("Invalid Google API credentials returned from Supabase:", result.data);
         
         // Check if there's a message in the response that might explain the issue
-        if (data && data.message) {
-          console.error("Edge Function error message:", data.message);
-          toast.error(`Supabase Edge Function error: ${data.message}`);
+        if (result.data && result.data.message) {
+          console.error("Edge Function error message:", result.data.message);
+          toast.error(`Supabase Edge Function error: ${result.data.message}`);
         }
         
         // Try to use local storage or environment variables as a fallback
@@ -87,7 +89,6 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
         return false;
       }
     } catch (fetchError) {
-      clearTimeout(timeoutId);
       console.error("Fetch error getting Google API credentials:", fetchError);
       toast.error("Network error fetching Google API credentials");
       
