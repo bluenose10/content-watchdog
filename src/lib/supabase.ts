@@ -25,16 +25,45 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Add a function to test the connection
 export async function testSupabaseConnection(): Promise<boolean> {
   try {
-    const { error } = await supabase.from('dummy_check').select('count').limit(1);
+    // Try calling the function directly to check if it's accessible
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/get-search-credentials`;
+    console.log(`Testing connection to Supabase edge function at: ${edgeFunctionUrl}`);
     
-    // If there's a permission error, that's actually good - it means the connection worked
-    // but we just don't have access to that table
-    if (error && error.code !== 'PGRST116') {
-      console.error("Supabase connection test failed:", error);
-      return false;
+    // First try to get the token
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    
+    if (!token) {
+      console.warn("No auth token available for Supabase function call");
+      // Try an anonymous request to see if the endpoint is reachable
+      const response = await fetch(edgeFunctionUrl, {
+        method: 'OPTIONS',
+        headers: {
+          'apikey': supabaseAnonKey
+        }
+      });
+      
+      // Even a CORS preflight response means the endpoint is reachable
+      return response.status !== 404;
     }
     
-    return true;
+    // Full test with authorization
+    const response = await fetch(edgeFunctionUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': supabaseAnonKey,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      console.log("Supabase edge function connection test successful");
+      return true;
+    } else {
+      console.error("Supabase edge function test failed:", await response.text());
+      return false;
+    }
   } catch (error) {
     console.error("Failed to connect to Supabase:", error);
     return false;

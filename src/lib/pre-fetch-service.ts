@@ -173,8 +173,31 @@ async function performPreFetch(): Promise<void> {
     // Test a sample search to ensure everything is working
     const testQuery = "test query";
     try {
+      // Try direct call to google-search edge function first
+      console.log("Testing direct call to google-search edge function");
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://phkdkwusblkngypuwgao.supabase.co';
+      const resp = await fetch(`${supabaseUrl}/functions/v1/google-search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+        body: JSON.stringify({ 
+          query: testQuery,
+          searchType: "text"
+        })
+      });
+      
+      if (!resp.ok) {
+        throw new Error(`Direct google-search function call failed: ${resp.status} ${resp.statusText}`);
+      }
+      
+      const directResult = await resp.json();
+      console.log("Google search edge function response:", directResult);
+      
+      // Also test through googleApiManager for comparison
       const testSearch = await googleApiManager.optimizedSearch("text", testQuery);
-      console.log(`Pre-fetch test search completed with ${testSearch.results.length} results`);
+      console.log(`Pre-fetch test search completed with ${testSearch.results.length} results via GoogleApiManager`);
     } catch (error) {
       console.error("Error during pre-fetch test search:", error);
     }
