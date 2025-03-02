@@ -1,4 +1,3 @@
-<lov-code>
 import { google } from 'googleapis';
 
 // Define a type for the search result item
@@ -77,8 +76,8 @@ interface CustomSearchEngineOptions {
 
 // Class to manage Google API interactions, including rate limiting and error handling
 class GoogleApiManager {
-  private apiKey: string;
-  private cseId: string;
+  private apiKey: string = '';
+  private cseId: string = '';
   private searchClient: any;
   private requestQueue: (() => Promise<any>)[] = [];
   private isProcessing: boolean = false;
@@ -462,4 +461,4 @@ class GoogleApiManager {
   private readonly maxPagemapEventRatingItemsPerTypePerRatingWorst: number = 5;
   private readonly maxPagemapPlaceRatingItemsPerTypePerRatingWorst: number = 5;
   private readonly maxPagemapPersonRatingItemsPerTypePerRatingWorst: number = 5;
-  private readonly maxPagemapBreadcrumbRatingItemsPer
+  private readonly maxPagemapBreadcrumbRatingItemsPerType
