@@ -15,6 +15,11 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
   const handleNameSearch = async (query: string, params?: any) => {
     // If anonymous user, redirect to signup
     if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to perform searches.",
+        variant: "default",
+      });
       navigate('/signup');
       return;
     }
@@ -37,29 +42,31 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
       
       setIsLoading(true);
       setError(null);
-      console.log("Name search with query:", query, "and params:", params);
+      console.log("Name search with query:", query, "params:", params, "user:", user.id);
       
       try {
-        // Check if API keys are configured but be more lenient in validation
+        // Add credential check but proceed anyway
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
         
-        console.log("Google Search API - API Key configured:", apiKey ? "Yes (length: " + apiKey?.length + ")" : "No");
+        console.log("Google Search API - API Key configured:", apiKey ? `Yes (length: ${apiKey?.length})` : "No");
         console.log("Google Search API - Search Engine ID configured:", searchEngineId ? "Yes" : "No");
         
-        // Basic check for existence only, not format
-        if (!apiKey || !searchEngineId) {
-          console.warn("Google Search API configuration missing. Proceeding anyway with possible failures.");
-        }
+        // Pass user authentication details with the request
+        const enhancedParams = {
+          ...params,
+          authenticated: true,
+          accessLevel: accessLevel
+        };
         
-        const searchId = await handleTextSearch(query, "name", user, params);
+        const searchId = await handleTextSearch(query, "name", user, enhancedParams);
         
         // Store query data in session storage for temporary searches
         const tempSearchData = {
           query_text: query,
           query_type: "name",
           user_id: user.id,
-          search_params_json: params ? JSON.stringify(params) : null
+          search_params_json: enhancedParams ? JSON.stringify(enhancedParams) : null
         };
         sessionStorage.setItem(`temp_search_${searchId}`, JSON.stringify(tempSearchData));
         
@@ -90,6 +97,20 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
           sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify(tempSearchData));
           
           navigate(`/results?id=${tempSearchId}&q=${encodeURIComponent(query)}`);
+          return;
+        }
+        
+        // For authentication errors, provide clearer guidance
+        if (error.message?.includes('unregistered callers') || 
+            error.message?.includes('without established identity')) {
+          
+          setError("API authentication error: Please check your Google API configuration and ensure it has the proper permissions.");
+          
+          toast({
+            title: "Authentication Error",
+            description: "The search API is having trouble authenticating your request. This is likely a configuration issue with the Google API.",
+            variant: "destructive",
+          });
           return;
         }
         

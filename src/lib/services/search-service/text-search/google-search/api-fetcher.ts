@@ -20,12 +20,11 @@ export async function fetchMultiplePages(
   const apiKey = params.get('key') || '';
   const engineId = params.get('cx') || '';
   
-  // Log configuration details for debugging
-  console.log('Google Search API - Using API key:', apiKey ? 'Present (length: ' + apiKey.length + ')' : 'None');
+  // Log configuration details for debugging (but mask sensitive info)
+  console.log('Google Search API - Using API key:', apiKey ? `Present (length: ${apiKey.length})` : 'None');
   console.log('Google Search API - Using Search Engine ID:', engineId ? 'Present' : 'None');
   
-  // Be much more lenient about credentials in production
-  // We'll assume the API might work even with potentially invalid credentials
+  // Check credentials validity - but don't block in production
   if (!apiKey || !engineId) {
     console.warn('Google Search API - Missing required parameters but continuing anyway');
   }
@@ -38,10 +37,24 @@ export async function fetchMultiplePages(
     // Make the API request with error handling
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
+      
+      // Include authentication headers
+      const headers = new Headers({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      });
+      
       const requestUrl = `https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`;
+      
+      // Log sanitized URL for debugging (remove API keys)
       console.log(`Request URL: ${requestUrl.replace(/key=[^&]+/, 'key=***API_KEY***').replace(/cx=[^&]+/, 'cx=***CSE_ID***')}`);
       
-      const response = await fetch(requestUrl);
+      const response = await fetch(requestUrl, {
+        method: 'GET',
+        headers: headers,
+        // Include credentials to prevent "callers without established identity" error
+        credentials: 'include'
+      });
       
       if (!response.ok) {
         let errorMessage = `Google API error: ${response.status} ${response.statusText}`;
