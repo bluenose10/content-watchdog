@@ -3,3 +3,8 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[build.environment]
+  # Set these environment variables in the Netlify UI
+  # VITE_GOOGLE_API_KEY = "your_google_api_key"
+  # VITE_GOOGLE_CSE_ID = "your_google_cse_id"
