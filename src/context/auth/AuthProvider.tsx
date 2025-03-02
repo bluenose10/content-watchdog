@@ -14,20 +14,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin, setIsAdmin
   } = useAuthState();
 
+  // Debug auth state
+  React.useEffect(() => {
+    console.log("Auth state changed:", { 
+      user: user ? `${user.email} (${user.id})` : 'null', 
+      loading, 
+      isAdmin,
+      sessionActive: !!session
+    });
+  }, [user, session, loading, isAdmin]);
+
   // Wrap auth methods with state setters
   const handleSignIn = (email: string, password: string) => {
+    console.log("SignIn attempt for:", email);
     return signIn(email, password, setIsAdmin);
   };
 
   const handleSignUp = (email: string, password: string, options?: { data: any }) => {
+    console.log("SignUp attempt for:", email, "with options:", options);
     return signUp(email, password, setIsAdmin, options);
   };
 
   const handleSignOut = () => {
+    console.log("SignOut requested");
     return signOut(setUser, setSession, setIsAdmin);
   };
 
   const handleResetPassword = (email: string) => {
+    console.log("Reset password requested for:", email);
     return resetPassword(email);
   };
 
