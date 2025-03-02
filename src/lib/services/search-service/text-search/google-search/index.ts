@@ -15,7 +15,6 @@ import { fetchMultiplePages } from './api-fetcher';
  */
 export const performGoogleSearch = async (query: string, userId: string, searchParams: TextSearchParams = {}) => {
   try {
-    // First, validate API configuration before proceeding
     // Access API keys from import.meta.env
     const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
     const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
@@ -24,23 +23,9 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     console.log('Google Search API - API Key available:', apiKey ? `Yes (length: ${apiKey.length})` : 'No');
     console.log('Google Search API - Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
     
-    // In production or when userId is available, proceed even with potentially missing credentials
-    // This allows the API to attempt the request with whatever credentials are available
-    const hasUser = userId && userId !== 'anonymous';
-    
+    // Validate API configuration
     if (!apiKey || !searchEngineId) {
-      const errorMessage = 'WARNING: Google Search API configuration missing.';
-      console.error(errorMessage);
-      
-      // Only throw in explicit development mode with strict validation
-      const isDev = import.meta.env.DEV === true;
-      const strictMode = import.meta.env.VITE_STRICT_API_VALIDATION === 'true';
-      
-      if (isDev && strictMode && !hasUser) {
-        throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
-      } else {
-        console.warn('Continuing with search despite missing API configuration. This may cause errors.');
-      }
+      throw new Error('Google Search API configuration missing. Please configure API keys in your environment variables.');
     }
     
     // Check cache and pending requests
@@ -62,8 +47,8 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         const params = buildSearchParams(query, searchParams, apiKey, searchEngineId);
         
         // Add user identification if available (for authentication tracking)
-        if (hasUser) {
-          params.append('userIp', '0.0.0.0'); // Placeholder IP to identify request as authenticated
+        if (userId && userId !== 'anonymous') {
+          params.append('userIdentity', userId); // Add user identity to help prevent "callers without established identity" errors
         }
         
         // Make multiple API requests if we need more than max results per page
@@ -81,6 +66,12 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         resolve(allResults);
       } catch (error) {
         console.error('Google Search API error:', error);
+        
+        // Handle network connectivity issues
+        if (error instanceof TypeError && error.message === 'Failed to fetch') {
+          reject(new Error('Network connection error. Please check your internet connection and try again.'));
+          return;
+        }
         
         // If error is about caller identity, provide more helpful error
         const errorMsg = error instanceof Error ? error.message : String(error);
