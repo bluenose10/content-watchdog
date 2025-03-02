@@ -31,7 +31,7 @@ function App() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <ThemeProvider defaultTheme="light" storageKey="content-defense-theme">
+        <ThemeProvider defaultTheme="dark" storageKey="influence-guard-theme">
           <Router>
             <Routes>
               <Route path="/" element={<Index />} />
