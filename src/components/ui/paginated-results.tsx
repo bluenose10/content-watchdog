@@ -97,6 +97,11 @@ export function PaginatedResults({
     toast.info("Retrying to fetch credentials from Supabase...");
   };
 
+  const handleManualSearch = () => {
+    // Redirect back to the search page
+    window.location.href = '/search';
+  };
+
   if (!results || results.length === 0) {
     return (
       <div className="text-center py-12">
@@ -115,7 +120,7 @@ export function PaginatedResults({
   const getResultLimit = () => {
     switch (accessLevel) {
       case AccessLevel.PREMIUM:
-        return 20; // Pro users can see all 20 results unblurred
+        return results.length; // Pro users can see all results unblurred
       case AccessLevel.BASIC:
         return 5; // Registered users can see 5 unblurred results
       case AccessLevel.ANONYMOUS:
@@ -175,6 +180,14 @@ export function PaginatedResults({
               >
                 Manual API Setup
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800 dark:hover:bg-yellow-900/50"
+                onClick={handleManualSearch}
+              >
+                Try Another Search
+              </Button>
             </div>
           </AlertDescription>
         </Alert>
@@ -191,11 +204,19 @@ export function PaginatedResults({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-green-100 text-green-800 border-green-300 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/50 mt-2"
+                className="bg-green-100 text-green-800 border-green-300 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/50 mt-2 mr-2"
                 onClick={() => window.location.reload()}
               >
                 <RefreshCw className="h-3 w-3 mr-1" />
                 Refresh Page
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-green-100 text-green-800 border-green-300 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/50 mt-2"
+                onClick={handleManualSearch}
+              >
+                Try Another Search
               </Button>
             </div>
           </AlertDescription>

@@ -1,79 +1,61 @@
 
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-
+// CORS headers for browser compatibility
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
 }
 
-console.log("Edge Function: get-search-credentials started")
+// Function to generate a response with CORS headers
+function corsResponse(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'application/json'
+    }
+  })
+}
 
 serve(async (req) => {
+  console.log('Edge Function: get-search-credentials called')
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request')
     return new Response(null, { headers: corsHeaders })
   }
-
+  
   try {
-    console.log("Edge Function: Retrieving Google API credentials")
-    
-    // Get the API keys from environment variables
+    // Get Google API Key and CSE ID from Supabase secrets
     const apiKey = Deno.env.get('GOOGLE_API_KEY')
     const cseId = Deno.env.get('GOOGLE_CSE_ID')
     
-    // Debug logging (this will show up in Supabase Function logs)
-    console.log(`Edge Function: API Key exists: ${Boolean(apiKey)}`)
-    console.log(`Edge Function: CSE ID exists: ${Boolean(cseId)}`)
-    
-    // Validate the credentials
+    // Validate that both values exist
     if (!apiKey || !cseId) {
-      console.error("Edge Function: Missing Google API credentials")
-      return new Response(
-        JSON.stringify({
-          error: 'Missing Google API credentials',
-          message: 'Both GOOGLE_API_KEY and GOOGLE_CSE_ID must be set in the Supabase Function Secrets.',
-          apiKeyExists: Boolean(apiKey),
-          cseIdExists: Boolean(cseId)
-        }), 
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
-      )
+      console.error('Missing Google API credentials in environment variables')
+      
+      if (!apiKey) console.error('GOOGLE_API_KEY is missing')
+      if (!cseId) console.error('GOOGLE_CSE_ID is missing')
+      
+      return corsResponse({
+        error: 'Google API credentials not configured in Supabase secrets'
+      }, 500)
     }
     
-    // Return the API keys
-    console.log("Edge Function: Successfully retrieved credentials")
-    return new Response(
-      JSON.stringify({ 
-        apiKey, 
-        cseId,
-        message: 'Credentials retrieved successfully' 
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
-  } catch (error) {
-    console.error("Edge Function: Error retrieving credentials:", error)
+    console.log('Successfully retrieved Google API credentials')
     
-    return new Response(
-      JSON.stringify({ 
-        error: 'Server error', 
-        message: error.message || 'Unknown error occurred',
-        stack: Deno.env.get('ENVIRONMENT') === 'development' ? error.stack : undefined
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
-      }
-    )
+    // Return the credentials
+    return corsResponse({
+      apiKey,
+      cseId
+    })
+  } catch (error) {
+    console.error(`Error retrieving Google API credentials: ${error.message}`)
+    return corsResponse({
+      error: `Failed to retrieve Google API credentials: ${error.message}`
+    }, 500)
   }
 })
-
-// To invoke:
-// curl -i --location --request GET 'https://phkdkwusblkngypuwgao.functions.supabase.co/get-search-credentials'
