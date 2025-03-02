@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { googleApiManager } from '@/lib/google-api-manager';
 
 // Timeout for Supabase function calls (in milliseconds)
-const FUNCTION_TIMEOUT = 10000; // Increased timeout
+const FUNCTION_TIMEOUT = 15000; // Increased timeout for more reliability
 
 /**
  * Load Google API credentials from Supabase Edge Function
@@ -31,10 +31,14 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
       }, FUNCTION_TIMEOUT);
     });
     
-    // Attempt to get credentials from the Supabase edge function
+    // Attempt to get credentials from the Supabase edge function with explicit headers
     console.log("Calling Supabase function to get credentials");
     const functionPromise = supabase.functions.invoke('get-search-credentials', {
-      method: 'GET'
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabase.auth.getSession().then(res => res.data.session?.access_token)}`
+      }
     });
     
     // Race the function call against the timeout

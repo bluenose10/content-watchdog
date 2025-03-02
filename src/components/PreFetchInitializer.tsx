@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { loadGoogleApiCredentials, schedulePreFetching, startPreFetching } from '@/lib/pre-fetch-service';
 import { useToast } from '@/hooks/use-toast';
 import { googleApiManager } from '@/lib/google-api-manager';
+import { testSupabaseConnection } from '@/lib/supabase';
 
 export function PreFetchInitializer() {
   const { toast } = useToast();
@@ -16,6 +17,17 @@ export function PreFetchInitializer() {
       console.log("Initializing pre-fetch and API services...");
       
       try {
+        // Test Supabase connection first
+        const supabaseConnected = await testSupabaseConnection();
+        if (!supabaseConnected) {
+          console.error("Unable to connect to Supabase, retrying API initialization");
+          
+          if (retryCount < 3) {
+            setTimeout(() => setRetryCount(prev => prev + 1), 3000);
+            return;
+          }
+        }
+        
         // Force clear any potentially corrupt credentials (only on retry)
         if (retryCount > 0) {
           console.log("Retry attempt, clearing previous credentials");
