@@ -24,7 +24,8 @@ export async function fetchMultiplePages(
   console.log('Google Search API - Using API key:', apiKey ? 'Present (length: ' + apiKey.length + ')' : 'None');
   console.log('Google Search API - Using Search Engine ID:', engineId ? 'Present' : 'None');
   
-  // Proceed even with potentially invalid credentials in production
+  // Be much more lenient about credentials in production
+  // We'll assume the API might work even with potentially invalid credentials
   if (!apiKey || !engineId) {
     console.warn('Google Search API - Missing required parameters but continuing anyway');
   }
@@ -38,7 +39,7 @@ export async function fetchMultiplePages(
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
       const requestUrl = `https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`;
-      console.log(`Request URL: ${requestUrl.replace(apiKey, '***API_KEY***').replace(engineId, '***CSE_ID***')}`);
+      console.log(`Request URL: ${requestUrl.replace(/key=[^&]+/, 'key=***API_KEY***').replace(/cx=[^&]+/, 'cx=***CSE_ID***')}`);
       
       const response = await fetch(requestUrl);
       

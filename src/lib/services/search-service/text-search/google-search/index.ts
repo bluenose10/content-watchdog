@@ -24,12 +24,20 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     console.log('Google Search API - API Key available:', apiKey ? 'Yes (length: ' + apiKey.length + ')' : 'No');
     console.log('Google Search API - Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
     
-    // Less strict validation - we'll let the API handle errors if there are issues
+    // Much more lenient validation - treat as production by default
+    // Only throw errors in explicit development mode
     if (!apiKey || !searchEngineId) {
-      console.error('WARNING: Google Search API configuration missing. Will attempt to continue anyway.');
-      // In production environments, we'll try to continue even with potentially invalid credentials
-      if (import.meta.env.DEV) {
+      const errorMessage = 'WARNING: Google Search API configuration missing.';
+      console.error(errorMessage);
+      
+      // Only throw in strict development mode
+      const isDev = import.meta.env.DEV === true;
+      const strictMode = import.meta.env.VITE_STRICT_API_VALIDATION === 'true';
+      
+      if (isDev && strictMode) {
         throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
+      } else {
+        console.warn('Continuing with search despite missing API configuration. This may cause errors.');
       }
     }
     

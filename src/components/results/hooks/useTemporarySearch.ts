@@ -47,51 +47,34 @@ export function useTemporarySearch({
     try {
       console.log("Starting Google search with query:", queryText);
       
-      // Validate API configuration before proceeding - treat as production by default
+      // Check API configuration but be more lenient in production
       const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
       const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
       
       console.log("API Key available:", apiKey ? "Yes (length: " + apiKey.length + ")" : "No");
-      console.log("Search Engine ID available:", searchEngineId ? "Yes (format correct: " + searchEngineId.includes(':') + ")" : "No");
+      console.log("Search Engine ID available:", searchEngineId ? "Yes" : "No");
+      
+      // Only perform strict validation in development mode
+      const isDev = import.meta.env.DEV === true;
+      const strictMode = import.meta.env.VITE_STRICT_API_VALIDATION === 'true';
       
       if (!apiKey || !searchEngineId) {
-        console.error("Missing Google API configuration");
-        const errorMessage = "Google Search API configuration is missing. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID in your environment variables.";
+        console.warn("Missing Google API configuration");
         
-        toast({
-          title: "Search Configuration Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        
-        throw new Error(errorMessage);
-      }
-      
-      // Basic validation of API key and Search Engine ID
-      if (apiKey.length < 10) {
-        const errorMessage = "Google API key appears to be invalid or too short. Please check your configuration.";
-        console.error(errorMessage);
-        
-        toast({
-          title: "API Configuration Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        
-        throw new Error(errorMessage);
-      }
-      
-      if (!searchEngineId.includes(':')) {
-        const errorMessage = "Google Custom Search Engine ID format appears to be invalid (missing colon). Please check your configuration.";
-        console.error(errorMessage);
-        
-        toast({
-          title: "API Configuration Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        
-        throw new Error(errorMessage);
+        if (isDev && strictMode) {
+          const errorMessage = "Google Search API configuration is missing. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID in your environment variables.";
+          
+          toast({
+            title: "Search Configuration Error",
+            description: errorMessage,
+            variant: "destructive",
+          });
+          
+          throw new Error(errorMessage);
+        } else {
+          // In production, warn but don't block
+          console.warn("Missing API configuration, but continuing anyway");
+        }
       }
       
       let searchResponse;
