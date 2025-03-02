@@ -32,17 +32,22 @@ export function PaginatedResults({
     const attemptCredentialLoad = async () => {
       setIsLoadingCredentials(true);
       try {
+        console.log("PaginatedResults: Attempting to load Google API credentials");
         const success = await loadGoogleApiCredentials();
         setCredentialsLoaded(success);
+        
         if (success) {
+          console.log("PaginatedResults: Successfully loaded Google API credentials");
           // If we were successfully able to get credentials, we should
           // tell the user to refresh the page to use them
           if (isFallbackData) {
             toast.success("API credentials loaded successfully. Try searching again for real results.");
           }
+        } else {
+          console.warn("PaginatedResults: Failed to load Google API credentials");
         }
       } catch (error) {
-        console.error("Failed to load credentials:", error);
+        console.error("PaginatedResults: Failed to load credentials:", error);
       } finally {
         setIsLoadingCredentials(false);
       }

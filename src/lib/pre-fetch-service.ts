@@ -1,4 +1,3 @@
-
 import { googleApiManager } from './google-api-manager';
 import { supabase } from './supabase';
 
@@ -17,25 +16,40 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
       return true;
     }
     
-    // Otherwise, fetch from Supabase Edge Function
+    // Otherwise, fetch from Supabase Edge Function with better error handling
+    console.log("Fetching credentials from Supabase Edge Function...");
     const { data, error } = await supabase.functions.invoke('get-search-credentials', {
       method: 'GET',
     });
     
     if (error) {
-      console.error("Error fetching Google API credentials:", error);
+      console.error("Error fetching Google API credentials from Edge Function:", error);
+      
+      // Try to get credentials directly from environment variables as fallback
+      const envApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+      const envCseId = import.meta.env.VITE_GOOGLE_CSE_ID;
+      
+      if (envApiKey && envCseId) {
+        console.log("Using Google API credentials from environment variables");
+        googleApiManager.setCredentials(envApiKey, envCseId);
+        sessionStorage.setItem("GOOGLE_API_KEY", envApiKey);
+        sessionStorage.setItem("GOOGLE_CSE_ID", envCseId);
+        return true;
+      }
+      
+      // If we got this far, we couldn't get credentials
       return false;
     }
     
     if (data && data.apiKey && data.cseId) {
       // Store the credentials in memory and session storage
+      console.log("Successfully received Google API credentials from Supabase");
       googleApiManager.setCredentials(data.apiKey, data.cseId);
       sessionStorage.setItem("GOOGLE_API_KEY", data.apiKey);
       sessionStorage.setItem("GOOGLE_CSE_ID", data.cseId);
-      console.log("Successfully loaded Google API credentials from Supabase");
       return true;
     } else {
-      console.warn("No valid Google API credentials returned from Supabase");
+      console.warn("No valid Google API credentials returned from Supabase:", data);
       return false;
     }
   } catch (error) {
