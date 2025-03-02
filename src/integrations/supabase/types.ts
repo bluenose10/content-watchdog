@@ -219,16 +219,6 @@ export type Database = {
         }
         Returns: Json
       }
-      insert_search_query: {
-        Args: {
-          p_user_id: string
-          p_query_type: string
-          p_query_text: string
-          p_search_params_json?: string
-          p_image_url?: string
-        }
-        Returns: string
-      }
     }
     Enums: {
       [_ in never]: never

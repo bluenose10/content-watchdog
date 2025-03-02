@@ -65,6 +65,8 @@ export const PRICING_PLANS = [
       "4 searches per month",
       "Basic content alerts",
       "Email support",
+      "Monthly report",
+      "Basic analytics"
     ],
     stripePriceId: "", // Free plan doesn't need a Stripe Price ID
     popular: false,
@@ -79,10 +81,10 @@ export const PRICING_PLANS = [
     features: [
       "40 searches per month",
       "Real-time monitoring",
-      "Automated takedown notices",
+      "Automated takedowns",
       "Priority support",
       "Monthly reports",
-      "5 scheduled automated searches",
+      "5 scheduled searches",
     ],
     stripePriceId: "price_1O2uq8Dt5zFTAXjQ3rkszxTy", // Replace with your real test mode Stripe Price ID
     popular: true,
@@ -97,11 +99,11 @@ export const PRICING_PLANS = [
     features: [
       "All Pro features",
       "Custom API access",
-      "Dedicated account manager",
+      "Account manager",
       "Legal assistance",
       "Custom integrations",
       "Advanced analytics",
-      "20 scheduled automated searches",
+      "20 scheduled searches",
     ],
     stripePriceId: "price_1O2urADt5zFTAXjQSKD8S5n4", // Replace with your real test mode Stripe Price ID
     popular: false,
@@ -118,6 +120,8 @@ export const PROTECTED_ROUTES = [
   "/dashboard",
   "/search",
   "/alerts",
+  "/monitoring",
+  "/protection",
   "/settings",
   "/results"
 ];

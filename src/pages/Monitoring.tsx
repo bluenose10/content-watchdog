@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Layout } from '@/components/layout/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RateLimitMonitor } from '@/components/monitoring/RateLimitMonitor';
@@ -7,15 +6,69 @@ import { SearchAnalytics } from '@/components/monitoring/SearchAnalytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCacheStats } from '@/lib/search-cache';
 import { PreFetchManager } from '@/components/monitoring/PreFetchManager';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { AccessLevel, useProtectedRoute } from '@/hooks/useProtectedRoute';
 
 export default function Monitoring() {
   // Get cache statistics
   const cacheStats = getCacheStats();
+  const { user, isAdmin: authIsAdmin } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Use the protected route hook with admin requirement
+  const { isReady, accessLevel, isAdmin } = useProtectedRoute(true, false, undefined, true);
+  
+  // Debug admin status
+  console.log("Monitoring page - Admin status:", { authIsAdmin, isAdmin, accessLevel });
+  
+  // Check if access should be allowed - require admin or premium accounts only
+  useEffect(() => {
+    if (isReady && !user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access System Monitoring",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    
+    if (isReady && user && accessLevel !== AccessLevel.ADMIN) {
+      toast({
+        title: "Admin access required",
+        description: "You don't have permission to access this page",
+        variant: "destructive",
+      });
+      navigate('/dashboard');
+    }
+  }, [isReady, user, accessLevel, navigate, toast]);
+  
+  // Show loading state while checking auth
+  if (!isReady) {
+    return (
+      <Layout>
+        <div className="container py-8 max-w-7xl">
+          <h1 className="text-2xl font-bold mb-8 text-gradient">System Monitoring</h1>
+          <div className="flex justify-center py-12">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
+  // Don't render anything if user is not authenticated or not admin
+  if (!user || accessLevel !== AccessLevel.ADMIN) {
+    return null;
+  }
   
   return (
     <Layout>
-      <div className="container py-8 max-w-7xl">
-        <h1 className="text-3xl font-bold mb-6">System Monitoring</h1>
+      <div className="container pt-24 pb-12 px-4 sm:px-6 max-w-7xl">
+        <h1 className="text-2xl font-bold mb-8 text-gradient">System Monitoring</h1>
         
         <Tabs defaultValue="rate-limits">
           <TabsList className="mb-4">
@@ -33,7 +86,7 @@ export default function Monitoring() {
           <TabsContent value="cache">
             <Card>
               <CardHeader>
-                <CardTitle>Cache Statistics</CardTitle>
+                <CardTitle className="text-gradient">Cache Statistics</CardTitle>
                 <CardDescription>Performance metrics for the search cache</CardDescription>
               </CardHeader>
               <CardContent>
@@ -78,7 +131,7 @@ export default function Monitoring() {
           <TabsContent value="api">
             <Card>
               <CardHeader>
-                <CardTitle>API Usage Statistics</CardTitle>
+                <CardTitle className="text-gradient">API Usage Statistics</CardTitle>
                 <CardDescription>Track external API consumption</CardDescription>
               </CardHeader>
               <CardContent>
@@ -95,7 +148,7 @@ export default function Monitoring() {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>How Pre-Fetching Works</CardTitle>
+                  <CardTitle className="text-gradient">How Pre-Fetching Works</CardTitle>
                   <CardDescription>Understanding the pre-caching system</CardDescription>
                 </CardHeader>
                 <CardContent>

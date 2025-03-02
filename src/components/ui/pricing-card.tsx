@@ -1,10 +1,10 @@
 
 import { Button } from "@/components/ui/button";
-import { CheckoutButton } from "@/components/stripe/CheckoutButton";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
@@ -32,9 +32,50 @@ export function PricingCard({
   ...props
 }: PricingCardProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [renderError, setRenderError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      // Log component mounting for debugging
+      console.log("PricingCard mounted for plan:", name, planId);
+    } catch (error) {
+      console.error("Error in PricingCard mount:", error);
+      setRenderError("Failed to initialize pricing card");
+    }
+  }, [name, planId]);
 
   // Ensure price is properly formatted
   const formattedPrice = price === 0 ? "Free" : `$${price.toFixed(2)}`;
+
+  const handlePlanClick = () => {
+    try {
+      console.log("PricingCard click handler - plan:", planId, "user:", !!user);
+      
+      if (!user && planId !== "basic") {
+        // Redirect to signup for non-basic plans if not logged in
+        navigate("/signup");
+        return;
+      }
+      
+      if (onClick) {
+        onClick();
+      } else if (planId && price > 0) {
+        // For paid plans, navigate to checkout page with plan ID
+        navigate(`/checkout?plan_id=${planId}`);
+      }
+    } catch (error) {
+      console.error("Error in pricing card click handler:", error);
+    }
+  };
+
+  if (renderError) {
+    return (
+      <div className="relative glass-card overflow-hidden rounded-xl p-6">
+        <p className="text-destructive">Error: {renderError}</p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -75,26 +116,15 @@ export function PricingCard({
         ))}
       </div>
       
-      {/* Conditionally render either the CheckoutButton or regular Button */}
-      {user && planId && price > 0 ? (
-        <CheckoutButton
-          planId={planId}
-          variant={popular ? "blue" : "default"}
-          className="mt-6 w-full button-animation"
-        >
-          {cta}
-        </CheckoutButton>
-      ) : (
-        <Button
-          className={cn(
-            "mt-6 w-full button-animation",
-            popular ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
-          )}
-          onClick={onClick}
-        >
-          {cta}
-        </Button>
-      )}
+      <Button
+        className={cn(
+          "mt-6 w-full button-animation",
+          popular ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+        )}
+        onClick={handlePlanClick}
+      >
+        {cta}
+      </Button>
     </div>
   );
 }

@@ -1,306 +1,249 @@
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
-import { googleApiManager } from '@/lib/google-api-manager';
+import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } from '@/lib/cache/index';
+import { getRecentSearches } from '@/lib/db-service';
+import { searchApiManager, optimizedSearch } from '@/lib/google-api-manager';
 
-// Timeout for Supabase function calls (in milliseconds)
-const FUNCTION_TIMEOUT = 15000; // Increased timeout for more reliability
+// Popular search types and terms that we want to pre-fetch
+interface PreFetchQuery {
+  queryType: 'name' | 'hashtag' | 'image';
+  query: string;
+  params?: any;
+}
+
+// Default list of queries to pre-fetch (can be expanded based on analytics)
+const DEFAULT_PREFETCH_QUERIES: PreFetchQuery[] = [
+  { queryType: 'name', query: 'digital art' },
+  { queryType: 'name', query: 'photography' },
+  { queryType: 'hashtag', query: '#naturebeauty' },
+  { queryType: 'hashtag', query: '#digitalart' },
+  // Add more common searches based on analytics
+];
 
 /**
- * Load Google API credentials from Supabase Edge Function
- * @returns Promise<boolean> - True if credentials were successfully loaded
+ * Check if we're in an "off-peak" period where pre-fetching won't impact performance
  */
-export async function loadGoogleApiCredentials(): Promise<boolean> {
-  console.log("Attempting to load Google API credentials from Supabase");
+const isOffPeakHours = (): boolean => {
+  const now = new Date();
+  const hour = now.getHours();
+  
+  // Consider early morning and late night as off-peak hours
+  // This can be tuned based on your actual traffic patterns
+  return (hour >= 0 && hour < 7) || (hour >= 22);
+};
+
+/**
+ * Determines if the system is under low load and suitable for pre-fetching
+ */
+const isLowSystemLoad = (): boolean => {
+  // In a real implementation, this would check system metrics
+  // For demo purposes, we'll assume it's always OK to prefetch during off-peak hours
+  return true;
+};
+
+/**
+ * Check API quota availability before pre-fetching
+ * We check both Google and Bing search availability
+ */
+const hasAvailableQuota = (): boolean => {
+  // Use searchApiManager's canMakeRequest method
+  return searchApiManager.canMakeRequest('google') || searchApiManager.canMakeRequest('bing');
+};
+
+/**
+ * Get the list of engines to use for pre-fetching
+ * This allows us to pre-fetch using available engines
+ */
+const getPreFetchEngines = (): string[] => {
+  return searchApiManager.getAvailableSearchEngines().filter(engine => 
+    engine === 'google' || engine === 'bing'
+  );
+};
+
+/**
+ * Pre-fetch a specific search query and cache the results
+ */
+export const preFetchQuery = async (
+  queryType: 'name' | 'hashtag' | 'image',
+  query: string, 
+  params: any = {}
+): Promise<boolean> => {
+  try {
+    // Generate cache key for this query
+    const cacheKey = getCacheKey(queryType, query, params);
+    
+    // Check if already cached
+    if (getCachedResults(cacheKey)) {
+      console.log(`[Pre-fetch] Query already cached: ${queryType} - ${query}`);
+      return false;
+    }
+    
+    // Skip if we don't have quota available
+    if (!hasAvailableQuota()) {
+      console.log(`[Pre-fetch] Skipping due to quota limits: ${queryType} - ${query}`);
+      return false;
+    }
+    
+    console.log(`[Pre-fetch] Fetching: ${queryType} - ${query}`);
+    
+    // Use optimizedSearch which will automatically use available engines
+    const results = await optimizedSearch(queryType, query, params);
+    
+    // Cache the results
+    cacheResults(cacheKey, results, 'multi-engine', 0.01); // Tracking cost per request
+    
+    console.log(`[Pre-fetch] Successfully cached: ${queryType} - ${query}`);
+    return true;
+  } catch (error) {
+    console.error(`[Pre-fetch] Error pre-fetching ${queryType} - ${query}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Batch pre-fetch multiple queries at once for efficiency
+ */
+export const batchPreFetch = async (queries: PreFetchQuery[]): Promise<number> => {
+  // Skip if we don't have sufficient quota
+  if (!hasAvailableQuota()) {
+    console.log(`[Pre-fetch] Skipping batch pre-fetch due to quota limits`);
+    return 0;
+  }
+  
+  // Filter out queries that are already cached
+  const queriesToFetch = queries.filter(q => {
+    const cacheKey = getCacheKey(q.queryType, q.query, q.params);
+    return !getCachedResults(cacheKey);
+  });
+  
+  if (queriesToFetch.length === 0) {
+    console.log(`[Pre-fetch] All queries already cached`);
+    return 0;
+  }
   
   try {
-    // Check if we already have valid credentials in sessionStorage
-    const sessionApiKey = sessionStorage.getItem("GOOGLE_API_KEY");
-    const sessionCseId = sessionStorage.getItem("GOOGLE_CSE_ID");
+    // Create search IDs for each query
+    const searchIds = queriesToFetch.map(q => 
+      `${q.queryType}_${q.query.replace(/\W+/g, '_')}`
+    );
     
-    if (sessionApiKey && sessionCseId) {
-      console.log("Using Google API credentials from session storage");
-      googleApiManager.setCredentials(sessionApiKey, sessionCseId);
-      return true;
-    }
+    // Batch fetch the results
+    const batchResults = await batchGetSearchResults(searchIds);
     
-    // Get the access token first
-    const { data: sessionData } = await supabase.auth.getSession();
-    const accessToken = sessionData.session?.access_token;
+    // Cache each result
+    let cachedCount = 0;
     
-    if (!accessToken) {
-      console.warn("No auth token available for Supabase function call");
-      // Fall back to using anon key only
-    }
-    
-    // Function to implement timeout for the fetch call
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Function call timed out after ' + FUNCTION_TIMEOUT + 'ms'));
-      }, FUNCTION_TIMEOUT);
+    queriesToFetch.forEach((query, index) => {
+      const searchId = searchIds[index];
+      const result = batchResults[searchId];
+      
+      if (result) {
+        const cacheKey = getCacheKey(query.queryType, query.query, query.params);
+        cacheResults(cacheKey, result, 'multi-engine', 0.01);
+        cachedCount++;
+      }
     });
     
-    // Attempt direct API call to edge function instead of using the SDK
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://phkdkwusblkngypuwgao.supabase.co';
-    console.log(`Calling Supabase edge function directly at: ${supabaseUrl}/functions/v1/get-search-credentials`);
-    
-    // Prepare headers with proper auth
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-    
-    // Add the anon key for anonymous access
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoa2Rrd3VzYmxrbmd5cHV3Z2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTk2NTMsImV4cCI6MjA1NjIzNTY1M30.3EqEUglSG8hAqwkKMul68LOzvnhQ6Z7M-LEXslPdVTY';
-    headers['apikey'] = anonKey;
-    
-    // Race the direct fetch against timeout
-    let response;
-    try {
-      const fetchPromise = fetch(`${supabaseUrl}/functions/v1/get-search-credentials`, {
-        method: 'GET',
-        headers: headers
-      });
-      
-      // Fixed type error: Using Promise.race with proper typing
-      response = await Promise.race([fetchPromise, timeoutPromise]);
-      
-      console.log("Direct edge function response status:", response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Edge function returned error: ${response.status} - ${errorText}`);
-      }
-      
-      const data = await response.json();
-      
-      // Make sure data is valid
-      if (!data || typeof data !== 'object') {
-        console.error("Invalid response from get-search-credentials:", data);
-        return false;
-      }
-      
-      const { apiKey, cseId } = data as { apiKey?: string, cseId?: string };
-      
-      if (!apiKey || !cseId) {
-        console.error("Missing apiKey or cseId in response:", data);
-        return false;
-      }
-      
-      console.log("Successfully retrieved Google API credentials from Supabase");
-      
-      // Store the credentials in session storage for immediate use
-      sessionStorage.setItem("GOOGLE_API_KEY", apiKey);
-      sessionStorage.setItem("GOOGLE_CSE_ID", cseId);
-      
-      // Also store in localStorage for persistence
-      localStorage.setItem("GOOGLE_API_KEY", apiKey);
-      localStorage.setItem("GOOGLE_CSE_ID", cseId);
-      
-      // Update the GoogleApiManager with the new credentials
-      googleApiManager.setCredentials(apiKey, cseId);
-      
-      return true;
-    } catch (error) {
-      console.error("Direct edge function call failed:", error);
-      
-      // Fall back to SDK method as a secondary attempt
-      console.log("Falling back to Supabase SDK for function invocation");
-      try {
-        const { data, error: sdkError } = await supabase.functions.invoke('get-search-credentials', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (sdkError || !data) {
-          console.error("SDK function call failed:", sdkError);
-          throw sdkError || new Error("No data returned from function call");
-        }
-        
-        const { apiKey, cseId } = data as { apiKey?: string, cseId?: string };
-        
-        if (!apiKey || !cseId) {
-          console.error("Missing apiKey or cseId in SDK response:", data);
-          return false;
-        }
-        
-        console.log("Successfully retrieved Google API credentials via SDK");
-        
-        // Store the credentials
-        sessionStorage.setItem("GOOGLE_API_KEY", apiKey);
-        sessionStorage.setItem("GOOGLE_CSE_ID", cseId);
-        localStorage.setItem("GOOGLE_API_KEY", apiKey);
-        localStorage.setItem("GOOGLE_CSE_ID", cseId);
-        googleApiManager.setCredentials(apiKey, cseId);
-        
-        return true;
-      } catch (sdkError) {
-        console.error("Both direct and SDK function calls failed:", sdkError);
-      }
-    }
-      
-    // Try to fall back to environment variables
-    const envApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-    const envCseId = import.meta.env.VITE_GOOGLE_CSE_ID;
-    
-    if (envApiKey && envCseId) {
-      console.log("Using environment variables for Google API credentials");
-      sessionStorage.setItem("GOOGLE_API_KEY", envApiKey);
-      sessionStorage.setItem("GOOGLE_CSE_ID", envCseId);
-      googleApiManager.setCredentials(envApiKey, envCseId);
-      return true;
-    }
-    
-    // Try to fall back to localStorage as last resort
-    const localApiKey = localStorage.getItem("GOOGLE_API_KEY");
-    const localCseId = localStorage.getItem("GOOGLE_CSE_ID");
-    
-    if (localApiKey && localCseId) {
-      console.log("Using locally stored Google API credentials");
-      sessionStorage.setItem("GOOGLE_API_KEY", localApiKey);
-      sessionStorage.setItem("GOOGLE_CSE_ID", localCseId);
-      googleApiManager.setCredentials(localApiKey, localCseId);
-      return true;
-    }
-    
-    return false;
+    console.log(`[Pre-fetch] Batch cached ${cachedCount} of ${queriesToFetch.length} queries`);
+    return cachedCount;
   } catch (error) {
-    console.error("Failed to load Google API credentials:", error);
-    return false;
+    console.error(`[Pre-fetch] Error batch pre-fetching:`, error);
+    return 0;
   }
-}
+};
 
 /**
- * Schedule pre-fetching of data at regular intervals
- * @param intervalMinutes Interval in minutes to perform the pre-fetch
- * @returns Cleanup function to cancel the interval
+ * Start pre-fetching process for common queries
  */
-export function schedulePreFetching(intervalMinutes: number = 30): () => void {
-  console.log(`Scheduling pre-fetching every ${intervalMinutes} minutes`);
+export const startPreFetching = async (customQueries?: PreFetchQuery[]): Promise<void> => {
+  // Only run during off-peak hours
+  if (!isOffPeakHours() || !isLowSystemLoad()) {
+    console.log('[Pre-fetch] Not pre-fetching: Peak hours or high system load');
+    return;
+  }
   
-  // Initial pre-fetch
-  setTimeout(() => {
-    performPreFetch();
-  }, 5000); // Short delay for initial pre-fetch
+  // Check if any search engines are available
+  const availableEngines = getPreFetchEngines();
+  if (availableEngines.length === 0) {
+    console.log('[Pre-fetch] No search engines available for pre-fetching');
+    return;
+  }
   
-  // Schedule recurring pre-fetch
+  console.log(`[Pre-fetch] Starting pre-fetch process using engines: ${availableEngines.join(', ')}`);
+  
+  // Combine default and custom queries
+  const queriesToFetch = [...DEFAULT_PREFETCH_QUERIES, ...(customQueries || [])];
+  
+  // Try to get popular searches from recent user activity
+  try {
+    const recentSearches = await getRecentSearches(10);
+    
+    if (recentSearches && recentSearches.length > 0) {
+      // Transform recent searches into pre-fetch queries
+      const recentQueries = recentSearches.map(search => ({
+        queryType: search.query_type as 'name' | 'hashtag' | 'image',
+        query: search.query_text || '',
+        params: search.search_params_json ? JSON.parse(search.search_params_json) : {}
+      }));
+      
+      // Add unique recent searches to our pre-fetch list
+      recentQueries.forEach(query => {
+        if (!queriesToFetch.some(q => 
+          q.queryType === query.queryType && 
+          q.query.toLowerCase() === query.query.toLowerCase()
+        )) {
+          queriesToFetch.push(query);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('[Pre-fetch] Error fetching recent searches:', error);
+    // Continue with default queries if we can't get recent searches
+  }
+  
+  // Use batch pre-fetching for efficiency
+  const batchSize = 5;
+  let totalFetched = 0;
+  
+  for (let i = 0; i < queriesToFetch.length; i += batchSize) {
+    const batch = queriesToFetch.slice(i, i + batchSize);
+    
+    // Process in batches for better performance
+    const fetched = await batchPreFetch(batch);
+    totalFetched += fetched;
+    
+    // If we've hit quota limits, stop
+    if (!hasAvailableQuota()) {
+      console.log(`[Pre-fetch] Stopping due to quota limits after ${totalFetched} fetches`);
+      break;
+    }
+    
+    // Small delay between batches
+    if (i + batchSize < queriesToFetch.length) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+  
+  console.log(`[Pre-fetch] Completed pre-fetching. Cached ${totalFetched} queries.`);
+};
+
+/**
+ * Schedule regular pre-fetching to run at specified intervals
+ */
+export const schedulePreFetching = (intervalMinutes = 60): (() => void) => {
+  console.log(`[Pre-fetch] Scheduled pre-fetching every ${intervalMinutes} minutes`);
+  
+  // Initial pre-fetch after a short delay
+  const initialTimeout = setTimeout(() => {
+    startPreFetching();
+  }, 30000); // 30 seconds after app starts
+  
+  // Regular interval pre-fetching
   const intervalId = setInterval(() => {
-    performPreFetch();
+    startPreFetching();
   }, intervalMinutes * 60 * 1000);
   
-  // Return cleanup function
+  // Return a cleanup function
   return () => {
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
+    clearTimeout(initialTimeout);
+    clearInterval(intervalId);
   };
-}
-
-/**
- * Manually start the pre-fetch process
- * @returns Promise that resolves when pre-fetch is complete
- */
-export async function startPreFetching(): Promise<void> {
-  console.log("Manually starting pre-fetch operations");
-  return performPreFetch();
-}
-
-/**
- * Perform pre-fetch operations
- */
-async function performPreFetch(): Promise<void> {
-  console.log("Performing pre-fetch operations");
-  
-  try {
-    // First, ensure API credentials are loaded
-    const credentialsLoaded = await loadGoogleApiCredentials();
-    
-    if (!credentialsLoaded) {
-      console.warn("Failed to load Google API credentials during pre-fetch, skipping operations");
-      return;
-    }
-    
-    // Re-load the credentials from storage to ensure we have the latest
-    const sessionApiKey = sessionStorage.getItem("GOOGLE_API_KEY");
-    const sessionCseId = sessionStorage.getItem("GOOGLE_CSE_ID");
-    
-    if (sessionApiKey && sessionCseId) {
-      googleApiManager.setCredentials(sessionApiKey, sessionCseId);
-      console.log("Refreshed Google API credentials from session storage");
-    }
-    
-    // Test a sample search to ensure everything is working
-    const testQuery = "test query";
-    try {
-      // Get the access token for authentication
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
-      
-      // Prepare direct call to edge function with proper headers
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://phkdkwusblkngypuwgao.supabase.co';
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
-      }
-      
-      // Add the anon key for anonymous access
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoa2Rrd3VzYmxrbmd5cHV3Z2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTk2NTMsImV4cCI6MjA1NjIzNTY1M30.3EqEUglSG8hAqwkKMul68LOzvnhQ6Z7M-LEXslPdVTY';
-      headers['apikey'] = anonKey;
-      
-      console.log("Testing direct call to google-search edge function with headers:", JSON.stringify(headers));
-      
-      // Try direct call to google-search edge function first using fetch
-      const resp = await fetch(`${supabaseUrl}/functions/v1/google-search`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ 
-          query: testQuery,
-          searchType: "text"
-        })
-      });
-      
-      if (!resp.ok) {
-        const errorText = await resp.text();
-        throw new Error(`Direct google-search function call failed: ${resp.status} ${resp.statusText} - ${errorText}`);
-      }
-      
-      const directResult = await resp.json();
-      console.log("Google search edge function response:", directResult);
-      
-      // Also test through googleApiManager for comparison
-      const testSearch = await googleApiManager.optimizedSearch("text", testQuery);
-      console.log(`Pre-fetch test search completed with ${testSearch.results.length} results via GoogleApiManager`);
-    } catch (error) {
-      console.error("Error during pre-fetch test search:", error);
-      
-      // Try as a fallback to use the SDK method
-      try {
-        console.log("Attempting to use SDK for google-search function");
-        const { data, error: sdkError } = await supabase.functions.invoke('google-search', {
-          method: 'POST',
-          body: { 
-            query: testQuery,
-            searchType: "text"
-          }
-        });
-        
-        if (sdkError) {
-          throw sdkError;
-        }
-        
-        console.log("Google search via SDK response:", data);
-      } catch (sdkError) {
-        console.error("Both direct and SDK function calls failed:", sdkError);
-      }
-    }
-    
-    console.log("Pre-fetch operations completed successfully");
-  } catch (error) {
-    console.error("Error during pre-fetch operations:", error);
-  }
-}
+};

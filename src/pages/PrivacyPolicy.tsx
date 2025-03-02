@@ -1,5 +1,3 @@
-
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Check, FileText, Shield } from "lucide-react";

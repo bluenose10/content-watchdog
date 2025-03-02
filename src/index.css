@@ -120,7 +120,7 @@
   }
   
   .section-padding {
-    @apply py-16 md:py-24;
+    @apply py-8 md:py-20 lg:py-24;
   }
   
   .smooth-transition {

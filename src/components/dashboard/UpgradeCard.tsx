@@ -16,37 +16,37 @@ export function UpgradeCard() {
           <CardTitle className="text-2xl font-bold text-gradient">Upgrade to Pro</CardTitle>
         </div>
         <CardDescription className="text-base">
-          Get unlimited searches and advanced features
+          Get premium features and enhanced protection
         </CardDescription>
       </CardHeader>
       <CardContent className="py-6 relative z-10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-3">
-            <p className="text-gradient font-semibold text-lg mb-3">Protect Your Content From Unauthorized Use</p>
+            <p className="text-gradient font-semibold text-lg mb-3">Unlock Advanced Features</p>
             <ul className="space-y-2.5">
               <li className="flex items-center text-sm group">
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">
                   <Shield className="h-3 w-3 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
                 </div>
-                <span className="group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">40 searches per month</span>
+                <span className="group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">10 scheduled monitoring sessions</span>
               </li>
               <li className="flex items-center text-sm group">
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">
                   <Shield className="h-3 w-3 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
                 </div>
-                <span className="group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">Advanced content monitoring</span>
+                <span className="group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">20 content monitoring URLs</span>
               </li>
               <li className="flex items-center text-sm group">
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">
                   <Shield className="h-3 w-3 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
                 </div>
-                <span className="group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">5 automated monitoring sessions</span>
+                <span className="group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">90-day search history retention</span>
               </li>
               <li className="flex items-center text-sm group">
                 <div className="flex-shrink-0 h-5 w-5 mr-2 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 flex items-center justify-center">
                   <Shield className="h-3 w-3 text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform" />
                 </div>
-                <span className="group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">Export results in multiple formats</span>
+                <span className="group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">Legal resources and DMCA templates</span>
               </li>
             </ul>
           </div>
