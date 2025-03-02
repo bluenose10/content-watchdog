@@ -11,21 +11,32 @@ import { Loader2, AlertTriangle } from "lucide-react";
 
 interface GoogleApiSetupProps {
   onComplete?: () => void;
+  skipSupabaseCheck?: boolean;
 }
 
-export function GoogleApiSetup({ onComplete }: GoogleApiSetupProps) {
+export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: GoogleApiSetupProps) {
   const [apiKey, setApiKey] = useState("");
   const [cseId, setCseId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [checkingSupabase, setCheckingSupabase] = useState(true);
+  const [checkingSupabase, setCheckingSupabase] = useState(!skipSupabaseCheck);
   const [supbaseCheckFailed, setSupabaseCheckFailed] = useState(false);
 
   // Try to load credentials from Supabase on mount
   useEffect(() => {
     const loadCredentials = async () => {
+      if (skipSupabaseCheck) {
+        setCheckingSupabase(false);
+        return;
+      }
+      
       setCheckingSupabase(true);
       try {
         console.log("GoogleApiSetup: Attempting to load credentials from Supabase");
+        
+        // Clear any possible cached credentials to ensure fresh retrieval
+        sessionStorage.removeItem("GOOGLE_API_KEY");
+        sessionStorage.removeItem("GOOGLE_CSE_ID");
+        
         const success = await loadGoogleApiCredentials();
         if (success) {
           console.log("GoogleApiSetup: Successfully loaded credentials from Supabase");
@@ -36,6 +47,13 @@ export function GoogleApiSetup({ onComplete }: GoogleApiSetupProps) {
         } else {
           console.warn("GoogleApiSetup: Failed to load credentials from Supabase");
           setSupabaseCheckFailed(true);
+          
+          // Attempt to pre-fill form with any values we might have found
+          const cachedApiKey = localStorage.getItem("GOOGLE_API_KEY") || import.meta.env.VITE_GOOGLE_API_KEY;
+          const cachedCseId = localStorage.getItem("GOOGLE_CSE_ID") || import.meta.env.VITE_GOOGLE_CSE_ID;
+          
+          if (cachedApiKey) setApiKey(cachedApiKey);
+          if (cachedCseId) setCseId(cachedCseId);
         }
       } catch (error) {
         console.error("GoogleApiSetup: Error loading credentials from Supabase:", error);
@@ -46,7 +64,7 @@ export function GoogleApiSetup({ onComplete }: GoogleApiSetupProps) {
     };
 
     loadCredentials();
-  }, [onComplete]);
+  }, [onComplete, skipSupabaseCheck]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,9 +80,11 @@ export function GoogleApiSetup({ onComplete }: GoogleApiSetupProps) {
       // Save credentials
       googleApiManager.setCredentials(apiKey, cseId);
       
-      // Store in session storage for persistence
+      // Store in both session and local storage for better persistence
       sessionStorage.setItem("GOOGLE_API_KEY", apiKey);
       sessionStorage.setItem("GOOGLE_CSE_ID", cseId);
+      localStorage.setItem("GOOGLE_API_KEY", apiKey);
+      localStorage.setItem("GOOGLE_CSE_ID", cseId);
       
       toast.success("Google API credentials saved successfully");
       

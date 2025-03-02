@@ -19,6 +19,8 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
     
     // Otherwise, fetch from Supabase Edge Function with better error handling
     console.log("Fetching credentials from Supabase Edge Function...");
+    
+    // Make the request to the edge function
     const { data, error } = await supabase.functions.invoke('get-search-credentials', {
       method: 'GET',
     });
@@ -54,10 +56,42 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
       return true;
     } else {
       console.warn("No valid Google API credentials returned from Supabase:", data);
+      
+      // Try to use local storage or environment variables as a fallback
+      const localApiKey = localStorage.getItem("GOOGLE_API_KEY") || import.meta.env.VITE_GOOGLE_API_KEY;
+      const localCseId = localStorage.getItem("GOOGLE_CSE_ID") || import.meta.env.VITE_GOOGLE_CSE_ID;
+      
+      if (localApiKey && localCseId) {
+        console.log("Using Google API credentials from local fallback");
+        googleApiManager.setCredentials(localApiKey, localCseId);
+        sessionStorage.setItem("GOOGLE_API_KEY", localApiKey);
+        sessionStorage.setItem("GOOGLE_CSE_ID", localCseId);
+        return true;
+      }
+      
       return false;
     }
   } catch (error) {
     console.error("Failed to load Google API credentials:", error);
+    
+    // Attempt one last fallback to any available source
+    try {
+      const lastResortApiKey = localStorage.getItem("GOOGLE_API_KEY") || 
+                              sessionStorage.getItem("GOOGLE_API_KEY") || 
+                              import.meta.env.VITE_GOOGLE_API_KEY;
+      const lastResortCseId = localStorage.getItem("GOOGLE_CSE_ID") || 
+                             sessionStorage.getItem("GOOGLE_CSE_ID") || 
+                             import.meta.env.VITE_GOOGLE_CSE_ID;
+      
+      if (lastResortApiKey && lastResortCseId) {
+        console.log("Using last resort Google API credentials");
+        googleApiManager.setCredentials(lastResortApiKey, lastResortCseId);
+        return true;
+      }
+    } catch (e) {
+      console.error("Final fallback attempt also failed:", e);
+    }
+    
     return false;
   }
 }
