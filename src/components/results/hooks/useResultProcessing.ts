@@ -11,14 +11,30 @@ export function useResultProcessing({ setResults, setTotalResults }: ResultProce
   const processSearchResponse = (searchResponse: any, queryText: string, queryType: string) => {
     setTotalResults(searchResponse.searchInformation?.totalResults || searchResponse.items.length);
     
-    // Transform Google API response to our format
-    const formattedResults = searchResponse.items.map((item: any, index: number) => {
-      // Extract thumbnail with fallbacks
+    // Filter out results with very low relevance or missing key data
+    const filteredItems = searchResponse.items.filter((item: any) => {
+      // Skip results without title, snippets, or with very short content
+      if (!item.title || item.title.length < 3) return false;
+      if (!item.snippet || item.snippet.length < 10) return false;
+      
+      // If URL is malformed or missing, filter out
+      try {
+        new URL(item.link);
+      } catch (e) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    // Transform Google API response to our format with enhanced validation
+    const formattedResults = filteredItems.map((item: any, index: number) => {
+      // Extract thumbnail with improved fallbacks
       const thumbnailUrl = 
         item.pagemap?.cse_thumbnail?.[0]?.src || 
         item.pagemap?.cse_image?.[0]?.src || 
         item.image?.thumbnailLink ||
-        `https://picsum.photos/200/300?random=${index+1}`;
+        `https://picsum.photos/seed/${item.link.replace(/[^a-zA-Z0-9]/g, '')}/200/300`;
       
       // Determine result type based on URL, pagemap, or other factors
       const source = item.displayLink || "unknown";
@@ -51,12 +67,22 @@ export function useResultProcessing({ setResults, setTotalResults }: ResultProce
         type = 'social';
       }
       
-      // Determine match level based on ranking factors
-      const matchScore = calculateMatchScore(item, index, queryText, searchResponse.items.length);
+      // Determine match level with more sophisticated algorithm
+      const matchScore = calculateMatchScore(item, index, queryText, filteredItems.length);
       
       let matchLevel = 'Medium';
       if (matchScore > 0.65) matchLevel = 'High';
       else if (matchScore < 0.3) matchLevel = 'Low';
+      
+      // Improve snippet display
+      let enhancedSnippet = item.snippet;
+      if (item.pagemap?.metatags?.[0]?.['og:description']) {
+        // If the meta description is significantly longer, prefer it
+        const metaDesc = item.pagemap.metatags[0]['og:description'];
+        if (metaDesc && metaDesc.length > item.snippet?.length * 1.2) {
+          enhancedSnippet = metaDesc;
+        }
+      }
       
       return {
         id: `result-${index}`,
@@ -67,12 +93,18 @@ export function useResultProcessing({ setResults, setTotalResults }: ResultProce
         match_level: matchLevel,
         found_at: new Date().toISOString(),
         type: type,
-        snippet: item.snippet || null
+        snippet: enhancedSnippet || item.snippet || null
       };
     });
     
-    setResults(formattedResults);
-    console.log("Formatted results:", formattedResults);
+    // Add additional sort by match_level
+    const sortedResults = formattedResults.sort((a: any, b: any) => {
+      const matchOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
+      return matchOrder[a.match_level] - matchOrder[b.match_level];
+    });
+    
+    setResults(sortedResults);
+    console.log("Processed results:", sortedResults);
   };
 
   const calculateMatchScore = (item: any, index: number, queryText: string, totalItems: number) => {
@@ -99,6 +131,22 @@ export function useResultProcessing({ setResults, setTotalResults }: ResultProce
     // URL match
     if (item.link?.toLowerCase().includes(queryText.toLowerCase().replace(/\s+/g, ''))) {
       matchScore += 0.2;
+    }
+    
+    // Content length bonuses - longer content is usually better
+    if (item.snippet) {
+      // Longer snippets get a small boost
+      matchScore += Math.min(0.1, item.snippet.length / 1000);
+    }
+    
+    // Domain authority (approximated based on known domains)
+    const authorityDomains = [
+      'wikipedia.org', 'github.com', 'linkedin.com', 'medium.com', 
+      'nytimes.com', 'cnn.com', 'bbc.com', 'reddit.com'
+    ];
+    
+    if (item.link && authorityDomains.some(domain => item.link.includes(domain))) {
+      matchScore += 0.15;
     }
 
     // Final normalization of score to 0-1 range
