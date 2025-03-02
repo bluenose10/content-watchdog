@@ -1,3 +1,4 @@
+
 import { QueuedRequest, SearchEngineConfig } from './search-types';
 import { quotaManager } from './quota-manager';
 import { requestQueue } from './request-queue';
@@ -8,6 +9,8 @@ import { getCacheKey, getCachedResults, cacheResults } from '../search-cache';
 export class SearchApiManager {
   private static instance: SearchApiManager;
   private searchEngines: Record<string, SearchEngineConfig> = {};
+  private maxResultsPerEngine = 20;
+  private combinedResultsLimit = 50;
   
   private constructor() {
     // Initialize search engines with priority (higher = tried first)
@@ -46,6 +49,18 @@ export class SearchApiManager {
     return Object.keys(this.searchEngines)
       .filter(key => this.searchEngines[key].enabled && quotaManager.canMakeRequest(key))
       .sort((a, b) => this.searchEngines[b].priority - this.searchEngines[a].priority);
+  }
+  
+  // Configure max results per engine
+  public setMaxResultsPerEngine(count: number): void {
+    this.maxResultsPerEngine = count;
+    console.log(`Max results per engine set to ${count}`);
+  }
+  
+  // Configure combined results limit
+  public setCombinedResultsLimit(count: number): void {
+    this.combinedResultsLimit = count;
+    console.log(`Combined results limit set to ${count}`);
   }
   
   public toggleSearchEngine(name: string, enabled: boolean): void {
@@ -138,6 +153,10 @@ export class SearchApiManager {
       return cachedResults;
     }
     
+    // Set results count in params if not already set
+    params.maxResults = params.maxResults || this.combinedResultsLimit;
+    params.resultsPerEngine = params.resultsPerEngine || this.maxResultsPerEngine;
+    
     // Get available search engines sorted by priority
     const availableEngines = this.getAvailableSearchEngines();
     
@@ -149,38 +168,48 @@ export class SearchApiManager {
     let lastError = null;
     let combinedResults = { items: [] };
     
-    for (const engine of availableEngines) {
+    // Run parallel searches on multiple engines for faster response
+    const searchPromises = availableEngines.map(async (engine) => {
+      // Skip YouTube engine for non-video searches
+      if (engine === 'youtube' && type !== 'video') return null;
+      
       try {
-        // Skip YouTube engine for non-video searches
-        if (engine === 'youtube' && type !== 'video') continue;
-        
         console.log(`Trying ${engine} search for query: ${query}`);
-        
         // Execute the search with the current engine
-        const results = await this.executeSearchWithEngine(engine, type, query, params);
-        
-        // If this is the first successful result, use it as base
-        if (combinedResults.items.length === 0) {
-          combinedResults = results;
-        } else {
-          // Merge results, avoiding duplicates
-          resultMerger.mergeSearchResults(combinedResults, results);
-        }
-        
-        // If we have enough results already, stop trying more engines
-        if (combinedResults.items.length >= (params.maxResults || 20)) {
-          break;
-        }
+        return await this.executeSearchWithEngine(engine, type, query, {
+          ...params,
+          maxResults: params.resultsPerEngine
+        });
       } catch (error) {
         console.error(`Error with ${engine} search:`, error);
         lastError = error;
-        // Continue to next engine if one fails
+        return null;
+      }
+    });
+    
+    // Wait for all engines to respond
+    const engineResults = await Promise.all(searchPromises);
+    
+    // Merge all results
+    for (const result of engineResults) {
+      if (result && result.items && result.items.length > 0) {
+        if (combinedResults.items.length === 0) {
+          combinedResults = result;
+        } else {
+          // Merge results, avoiding duplicates
+          resultMerger.mergeSearchResults(combinedResults, result);
+        }
       }
     }
     
     // If we got no results from any engine, throw the last error
     if (combinedResults.items.length === 0 && lastError) {
       throw lastError;
+    }
+    
+    // Apply final limit to combined results
+    if (combinedResults.items.length > params.maxResults) {
+      combinedResults.items = combinedResults.items.slice(0, params.maxResults);
     }
     
     // Cache combined results
