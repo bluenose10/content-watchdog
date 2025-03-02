@@ -25,6 +25,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Add a function to test the connection
 export async function testSupabaseConnection(): Promise<boolean> {
   try {
+    // Test basic Supabase connection first
+    console.log("Testing basic Supabase connection...");
+    try {
+      const { data, error } = await supabase.from('dummy_check').select('count').limit(1);
+      
+      // If there's a permission error, that's actually good - it means the connection worked
+      // but we just don't have access to that table
+      if (error && error.code !== 'PGRST116') {
+        console.log("Supabase basic connection check response:", error);
+      } else {
+        console.log("Supabase basic connection successful");
+      }
+    } catch (basicError) {
+      console.warn("Basic Supabase connection check failed, continuing with edge function test:", basicError);
+    }
+    
     // Try calling the function directly to check if it's accessible
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/get-search-credentials`;
     console.log(`Testing connection to Supabase edge function at: ${edgeFunctionUrl}`);
@@ -43,8 +59,14 @@ export async function testSupabaseConnection(): Promise<boolean> {
         }
       });
       
+      if (response.status === 404) {
+        console.error("Supabase edge function not found (404)");
+        return false;
+      }
+      
       // Even a CORS preflight response means the endpoint is reachable
-      return response.status !== 404;
+      console.log("Supabase edge function reachable via OPTIONS preflight");
+      return true;
     }
     
     // Full test with authorization
@@ -57,11 +79,15 @@ export async function testSupabaseConnection(): Promise<boolean> {
       }
     });
     
+    console.log("Edge function response status:", response.status);
+    
     if (response.ok) {
-      console.log("Supabase edge function connection test successful");
+      const responseData = await response.json();
+      console.log("Supabase edge function connection test successful with data:", responseData);
       return true;
     } else {
-      console.error("Supabase edge function test failed:", await response.text());
+      const errorText = await response.text();
+      console.error("Supabase edge function test failed:", response.status, errorText);
       return false;
     }
   } catch (error) {
