@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SearchResultCard } from "@/components/ui/search-result-card";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { AccessLevel } from "@/hooks/useProtectedRoute";
+import { toast } from "sonner";
 
 interface PaginatedResultsProps {
   results: any[];
@@ -19,6 +20,26 @@ export function PaginatedResults({
   onUpgrade,
 }: PaginatedResultsProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFallbackData, setIsFallbackData] = useState(false);
+
+  useEffect(() => {
+    // Check if we're using fallback data by looking for the fallback pattern in IDs
+    if (results && results.length > 0) {
+      const hasFallbackIds = results.some(result => 
+        result.id?.toString().includes('fallback') || 
+        result.id?.toString().includes('Sample') ||
+        result.title?.includes('Sample')
+      );
+      
+      if (hasFallbackIds) {
+        setIsFallbackData(true);
+        console.log("Warning: Using fallback/sample search results");
+      } else {
+        setIsFallbackData(false);
+        console.log("Using real API search results");
+      }
+    }
+  }, [results]);
 
   if (!results || results.length === 0) {
     return (
@@ -61,6 +82,15 @@ export function PaginatedResults({
 
   return (
     <div className="space-y-6">
+      {isFallbackData && (
+        <div className="p-3 mb-4 border rounded-md bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900 flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          <span className="text-sm text-yellow-800 dark:text-yellow-300">
+            Using sample results. There was an issue connecting to the search service.
+          </span>
+        </div>
+      )}
+      
       <div className="flex flex-col gap-3">
         {currentResults.map((result, index) => (
           <SearchResultCard
