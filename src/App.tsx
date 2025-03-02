@@ -9,7 +9,13 @@ import { LoadingState } from "@/components/dashboard/LoadingState";
 
 // Lazy load pages to improve initial load performance
 const Index = lazy(() => import("@/pages/Index"));
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Dashboard = lazy(() => 
+  import("@/pages/Dashboard")
+    .catch(err => {
+      console.error("Error loading Dashboard:", err);
+      return { default: ErrorFallback };
+    })
+);
 const Analytics = lazy(() => import("@/pages/Analytics"));
 const Search = lazy(() => import("@/pages/Search"));
 const Results = lazy(() => import("@/pages/Results"));

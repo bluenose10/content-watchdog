@@ -1,12 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { Layout } from "@/components/layout/layout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentSearches } from "@/components/dashboard/RecentSearches";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { UpgradeCard } from "@/components/dashboard/UpgradeCard";
-import { LoadingState } from "@/components/dashboard/LoadingState";
 import { useAuth } from "@/context/AuthContext";
 import { PremiumFeature, useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { ScheduledSearches } from "@/components/dashboard/ScheduledSearches";
@@ -29,11 +27,15 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
+    console.log("Dashboard component mounted, user:", !!user);
+    
     // Fetch user data and recent searches
     const fetchDashboardData = async () => {
       if (!user) return;
       
       try {
+        console.log("Fetching dashboard data for user:", user.id);
+        
         // Fetch recent searches
         const searches = await getUserSearchQueries(user.id);
         setRecentSearches(searches);
@@ -53,13 +55,13 @@ export default function Dashboard() {
     
     if (user && isReady) {
       fetchDashboardData();
+    } else {
+      // If no user or not ready, still set loading to false after a delay
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
     }
   }, [user, isReady]);
-
-  // Show loading state while auth is being checked
-  if (!isReady || isLoading) {
-    return <LoadingState />;
-  }
 
   // Get user information
   const fullName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
@@ -72,9 +74,8 @@ export default function Dashboard() {
   const showUpgradeCard = !hasPremiumFeature(PremiumFeature.UNLIMITED_RESULTS);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-grow container px-4 py-16">
+    <Layout>
+      <div className="container px-4 py-16">
         <div className="flex items-center gap-4 mb-8 pt-12">
           <Avatar className="h-16 w-16 border-2 border-primary/10">
             <AvatarImage src={avatarUrl} alt={fullName} />
@@ -125,8 +126,7 @@ export default function Dashboard() {
         <div className="mt-8">
           <ScheduledSearches />
         </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </Layout>
   );
 }
