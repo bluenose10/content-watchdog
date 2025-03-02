@@ -33,7 +33,9 @@ export default function Contact() {
         <TeamMemberCard />
         
         {/* Education background */}
-        <EducationCard />
+        <div className="mt-12">
+          <EducationCard />
+        </div>
       </div>
     </Layout>
   );

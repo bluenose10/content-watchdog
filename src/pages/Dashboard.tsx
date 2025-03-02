@@ -13,12 +13,14 @@ import { getUserSearchQueries } from "@/lib/db-service";
 import { getUserDashboardStats } from "@/lib/services/dashboard-stats-service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { accessLevel, isReady, hasPremiumFeature } = useProtectedRoute(true);
   const [isLoading, setIsLoading] = useState(true);
   const [recentSearches, setRecentSearches] = useState([]);
+  const { toast } = useToast();
   const [stats, setStats] = useState({
     searchCount: 0,
     contentMatchCount: 0,
@@ -45,6 +47,11 @@ export default function Dashboard() {
         setStats(userStats);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+        toast({
+          title: "Failed to load dashboard data",
+          description: "Please try refreshing the page",
+          variant: "destructive",
+        });
       } finally {
         // Finish loading after a short delay
         setTimeout(() => {
@@ -61,7 +68,7 @@ export default function Dashboard() {
         setIsLoading(false);
       }, 500);
     }
-  }, [user, isReady]);
+  }, [user, isReady, toast]);
 
   // Get user information
   const fullName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
