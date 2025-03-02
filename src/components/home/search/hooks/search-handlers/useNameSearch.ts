@@ -45,18 +45,28 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
       console.log("Name search with query:", query, "params:", params, "user:", user.id);
       
       try {
-        // Add credential check but proceed anyway
+        // Enhanced credential validation
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
         
         console.log("Google Search API - API Key configured:", apiKey ? `Yes (length: ${apiKey?.length})` : "No");
         console.log("Google Search API - Search Engine ID configured:", searchEngineId ? "Yes" : "No");
         
+        // Validate API credentials before proceeding
+        if (!apiKey || apiKey.length < 10) {
+          throw new Error("Invalid Google API Key: The API key is missing or appears to be invalid. Please check your environment configuration.");
+        }
+        
+        if (!searchEngineId) {
+          throw new Error("Missing Search Engine ID: The Google Custom Search Engine ID is required. Please configure VITE_GOOGLE_CSE_ID in your environment variables.");
+        }
+        
         // Pass user authentication details with the request
         const enhancedParams = {
           ...params,
           authenticated: true,
-          accessLevel: accessLevel
+          accessLevel: accessLevel,
+          userId: user.id // Explicitly include user ID to help with authentication
         };
         
         const searchId = await handleTextSearch(query, "name", user, enhancedParams);
@@ -100,24 +110,41 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
           return;
         }
         
+        // Enhanced error handling for API key issues
+        const errorMsg = error.message || "";
+        
         // For authentication errors, provide clearer guidance
-        if (error.message?.includes('unregistered callers') || 
-            error.message?.includes('without established identity')) {
+        if (errorMsg.includes('unregistered callers') || 
+            errorMsg.includes('without established identity')) {
           
           setError("API authentication error: Please check your Google API configuration and ensure it has the proper permissions.");
           
           toast({
             title: "Authentication Error",
-            description: "The search API is having trouble authenticating your request. This is likely a configuration issue with the Google API.",
+            description: "The search API is having trouble authenticating your request. Please ensure your Google API key has the proper permissions for Custom Search API.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // For invalid API key errors
+        if (errorMsg.includes('API key not valid') || 
+            errorMsg.includes('invalid key')) {
+          
+          setError("Invalid API Key: The Google API key appears to be invalid. Please check your configuration.");
+          
+          toast({
+            title: "API Key Error",
+            description: "The Google API key you are using appears to be invalid. Please verify the key in your environment configuration.",
             variant: "destructive",
           });
           return;
         }
         
         // For API configuration errors, be more informative
-        if (error.message?.includes('API key') || 
-            error.message?.includes('configuration') || 
-            error.message?.includes('Search Engine ID')) {
+        if (errorMsg.includes('API key') || 
+            errorMsg.includes('configuration') || 
+            errorMsg.includes('Search Engine ID')) {
           
           setError("Search API configuration issue. Please check your environment variables and try again.");
           

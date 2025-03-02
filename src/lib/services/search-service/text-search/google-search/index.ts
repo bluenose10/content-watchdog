@@ -23,9 +23,17 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     console.log('Google Search API - API Key available:', apiKey ? `Yes (length: ${apiKey.length})` : 'No');
     console.log('Google Search API - Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
     
-    // Validate API configuration
-    if (!apiKey || !searchEngineId) {
-      throw new Error('Google Search API configuration missing. Please configure API keys in your environment variables.');
+    // Enhanced API key validation
+    if (!apiKey) {
+      throw new Error('Google Search API key is missing. Please configure VITE_GOOGLE_API_KEY in your environment variables.');
+    }
+    
+    if (!searchEngineId) {
+      throw new Error('Google Custom Search Engine ID is missing. Please configure VITE_GOOGLE_CSE_ID in your environment variables.');
+    }
+    
+    if (apiKey.length < 10) {
+      throw new Error('Google API key appears to be invalid (too short). Please check your VITE_GOOGLE_API_KEY value.');
     }
     
     // Check cache and pending requests
@@ -80,6 +88,14 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
             'API authentication error: The Google API requires valid credentials. ' +
             'Please ensure your API key and Search Engine ID are correctly configured ' +
             'and have proper permissions for Custom Search API.'
+          );
+          reject(enhancedError);
+        } else if (errorMsg.includes('API key not valid') || errorMsg.includes('invalid key')) {
+          // Add specific error for invalid API key
+          const enhancedError = new Error(
+            'Invalid API key: The Google API key you provided is not valid. ' +
+            'Please check that you have entered the correct key and that it has ' +
+            'the Custom Search API enabled in the Google Cloud Console.'
           );
           reject(enhancedError);
         } else {

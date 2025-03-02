@@ -24,10 +24,15 @@ export async function fetchMultiplePages(
   console.log('Google Search API - Using API key:', apiKey ? `Present (length: ${apiKey.length})` : 'None');
   console.log('Google Search API - Using Search Engine ID:', engineId ? 'Present' : 'None');
   
-  // Check for missing API credentials
-  if (!apiKey || !engineId) {
-    console.warn('Google Search API - Missing required API credentials');
-    throw new Error('Search API configuration missing. Please check your Google API key and Custom Search Engine ID.');
+  // Enhanced validation for API credentials
+  if (!apiKey || apiKey.length < 10) {
+    console.warn('Google Search API - Invalid or missing API key');
+    throw new Error('Invalid Google API key. Please check your API key configuration.');
+  }
+  
+  if (!engineId) {
+    console.warn('Google Search API - Missing Search Engine ID');
+    throw new Error('Search Engine ID is missing. Please configure your Google Custom Search Engine ID.');
   }
   
   for (let page = 0; page < numPages; page++) {
@@ -39,7 +44,7 @@ export async function fetchMultiplePages(
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
       
-      // Include authentication headers
+      // Include proper headers for Google API
       const headers = new Headers({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -52,14 +57,14 @@ export async function fetchMultiplePages(
       
       // Use AbortController to set a timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout for slower connections
       
       try {
         const response = await fetch(requestUrl, {
           method: 'GET',
           headers: headers,
           signal: controller.signal,
-          mode: 'cors' // Explicitly set CORS mode
+          // Don't include mode: 'cors' as it's the default and might cause issues
         });
         
         // Clear the timeout
@@ -71,9 +76,18 @@ export async function fetchMultiplePages(
             const errorData = await response.json();
             console.error('Google API error response:', errorData);
             
-            // Extract meaningful error message
+            // Enhanced error message extraction
             if (errorData?.error?.message) {
               errorMessage = errorData.error.message;
+              
+              // Add more helpful context for specific errors
+              if (errorMessage.includes('API key not valid')) {
+                errorMessage = 'The provided Google API key is not valid. Please check your key and ensure it has access to the Custom Search API.';
+              } else if (errorMessage.includes('API key expired')) {
+                errorMessage = 'Your Google API key has expired. Please renew or replace it.';
+              } else if (errorMessage.includes('limit')) {
+                errorMessage = 'Google API quota exceeded. Please try again later or increase your quota.';
+              }
             } else if (errorData?.error?.errors?.length > 0) {
               errorMessage = errorData.error.errors[0].message;
             }
@@ -111,30 +125,43 @@ export async function fetchMultiplePages(
       } catch (error) {
         // Clear the timeout if there was an error
         clearTimeout(timeoutId);
-        throw error; // Re-throw to be caught by outer try-catch
+        
+        // Enhanced error handling
+        if (error.name === 'AbortError') {
+          console.error(`Google Search API request timeout on page ${page}`);
+          if (page === 0) {
+            throw new Error('Search request timed out. The Google API did not respond in time. Please try again later.');
+          } 
+          break;
+        }
+        
+        // Handle network errors more gracefully
+        if (error instanceof TypeError && error.message === 'Failed to fetch') {
+          console.error('Network error when contacting Google API:', error);
+          if (page === 0) {
+            throw new Error('Network connection error when contacting the Google API. Please check your internet connection and try again.');
+          }
+          break;
+        }
+        
+        // Log and rethrow
+        console.error(`Google Search API request error on page ${page}:`, error);
+        
+        // Add helpful context for common errors
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('API key') && page === 0) {
+          throw new Error('Google API key error: ' + errorMessage + '. Please verify your API key configuration in the environment variables.');
+        }
+        
+        // If this is the first page, throw the error, otherwise continue with what we have
+        if (page === 0) throw error;
+        break;
       }
     } catch (error) {
-      // Handle AbortController timeout
-      if (error.name === 'AbortError') {
-        console.error(`Google Search API request timeout on page ${page}`);
-        if (page === 0) {
-          throw new Error('Search request timed out. Please try again later.');
-        } 
-        break;
-      }
-      
-      // Handle network errors more gracefully
-      if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        console.error('Network error when contacting Google API:', error);
-        if (page === 0) {
-          throw new Error('Network error when contacting the search API. Please check your internet connection and try again.');
-        }
-        break;
-      }
-      
       console.error(`Google Search API request error on page ${page}:`, error);
+      
       // If this is the first page, throw the error, otherwise continue with what we have
-      if (page === 0) throw error;
+      if (page === 0) throw error; 
       break;
     }
   }
