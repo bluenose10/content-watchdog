@@ -116,6 +116,15 @@ export function schedulePreFetching(intervalMinutes: number = 30): () => void {
 }
 
 /**
+ * Manually start the pre-fetch process
+ * @returns Promise that resolves when pre-fetch is complete
+ */
+export async function startPreFetching(): Promise<void> {
+  console.log("Manually starting pre-fetch operations");
+  return performPreFetch();
+}
+
+/**
  * Perform pre-fetch operations
  */
 async function performPreFetch(): Promise<void> {

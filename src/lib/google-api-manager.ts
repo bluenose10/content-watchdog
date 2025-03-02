@@ -23,6 +23,22 @@ export interface SearchResults {
   };
 }
 
+// Define the optimized search results format
+export interface OptimizedSearchResults {
+  results: Array<{
+    id: string;
+    title: string;
+    url: string;
+    thumbnail: string;
+    source: string;
+    match_level: 'High' | 'Medium' | 'Low';
+    found_at: string;
+    type: 'website' | 'image' | 'social';
+    snippet?: string;
+  }>;
+  totalResults: number;
+}
+
 // Class to manage Google API interactions, including rate limiting and error handling
 class GoogleApiManager {
   private apiKey: string = '';
@@ -120,6 +136,110 @@ class GoogleApiManager {
     }
     
     this.initializeSearchClient();
+  }
+
+  // Optimized search with automatic retries and result formatting
+  public async optimizedSearch(
+    queryType: string,
+    query: string,
+    searchParams: any = {}
+  ): Promise<OptimizedSearchResults> {
+    console.log(`GoogleApiManager: Performing optimized ${queryType} search for: "${query}"`);
+    
+    try {
+      const searchResults = await this.search(query);
+      
+      if (!searchResults || !searchResults.items || searchResults.items.length === 0) {
+        throw new Error("No search results found");
+      }
+      
+      const formattedResults = searchResults.items.map((item: any, index: number) => {
+        const thumbnailUrl = 
+          item.pagemap?.cse_thumbnail?.[0]?.src || 
+          item.pagemap?.cse_image?.[0]?.src || 
+          item.image?.thumbnailLink ||
+          `https://picsum.photos/200/300?random=${index+1}`;
+        
+        const source = item.displayLink || "unknown";
+        let type = 'website';
+        
+        // Determine content type based on source and metadata
+        if (item.pagemap?.videoobject || 
+            source.includes('youtube') || 
+            source.includes('vimeo') || 
+            source.includes('tiktok') ||
+            item.title?.toLowerCase().includes('video')) {
+          type = 'social';
+        } else if (
+            item.pagemap?.imageobject || 
+            item.pagemap?.cse_image ||
+            source.includes('instagram') || 
+            source.includes('flickr') || 
+            source.includes('pinterest') ||
+            item.title?.toLowerCase().includes('image') ||
+            item.title?.toLowerCase().includes('photo') ||
+            queryType === 'image'
+        ) {
+          type = 'image';
+        } else if (
+            source.includes('twitter') || 
+            source.includes('facebook') || 
+            source.includes('linkedin') || 
+            source.includes('reddit') ||
+            item.title?.toLowerCase().includes('profile')
+        ) {
+          type = 'social';
+        }
+        
+        // Calculate match score
+        let matchScore = 0;
+        matchScore += Math.max(0, 1 - (index / searchResults.items.length));
+        
+        if (item.title && item.title.toLowerCase().includes(query.toLowerCase())) {
+          matchScore += 0.4;
+        }
+        
+        if (item.snippet && item.snippet.toLowerCase().includes(query.toLowerCase())) {
+          matchScore += 0.2;
+        }
+        
+        if (item.pagemap?.metatags?.[0]?.['og:title']?.toLowerCase().includes(query.toLowerCase())) {
+          matchScore += 0.2;
+        }
+        
+        if (item.link?.toLowerCase().includes(query.toLowerCase().replace(/\s+/g, ''))) {
+          matchScore += 0.2;
+        }
+        
+        matchScore = Math.min(1, matchScore);
+        
+        let matchLevel = 'Medium';
+        if (matchScore > 0.65) matchLevel = 'High';
+        else if (matchScore < 0.3) matchLevel = 'Low';
+        
+        return {
+          id: `result-${index}`,
+          title: item.title || "Untitled",
+          url: item.link || "#",
+          thumbnail: thumbnailUrl,
+          source: source,
+          match_level: matchLevel,
+          found_at: new Date().toISOString(),
+          type: type,
+          snippet: item.snippet || null
+        };
+      });
+      
+      console.log("Optimized search completed:", formattedResults.length, "results");
+      
+      return {
+        results: formattedResults,
+        totalResults: parseInt(searchResults.searchInformation?.totalResults) || formattedResults.length
+      };
+    } catch (error) {
+      console.error("Optimized search failed:", error);
+      throw error;
+    }
   }
 
   // Optimized search with automatic retries
