@@ -24,19 +24,7 @@ export function useTemporarySearch({
     
     if (!tempSearchData) {
       console.error("No temporary search data found");
-      
-      // Instead of throwing an error, use fallback results for a better user experience
-      setQuery("Sample Search");
-      setResults(FALLBACK_RESULTS);
-      setTotalResults(FALLBACK_RESULTS.length);
-      
-      toast({
-        title: "Demo Results",
-        description: "Showing sample search results due to missing search data.",
-        variant: "default",
-      });
-      
-      return;
+      throw new Error("No search data found. Please try a new search.");
     }
     
     const searchData = JSON.parse(tempSearchData);
@@ -52,6 +40,7 @@ export function useTemporarySearch({
     
     // Perform Google search directly for temporary searches
     try {
+      console.log("Starting Google search with query:", queryText);
       let searchResponse;
       if (queryType === 'image') {
         console.log("Performing image search");

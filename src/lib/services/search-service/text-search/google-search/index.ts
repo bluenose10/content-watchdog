@@ -30,8 +30,12 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     
     const request = new Promise(async (resolve, reject) => {
       try {
+        // Access API keys from import.meta.env
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
+        
+        console.log('API Key available:', apiKey ? 'Yes' : 'No');
+        console.log('Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
         
         if (!apiKey || !searchEngineId) {
           console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
@@ -47,6 +51,10 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         const allResults = await fetchMultiplePages(params, numPages, maxResultsPerPage);
         
         console.log('Google API response completed with', allResults.items?.length || 0, 'total results');
+        
+        if (!allResults.items || allResults.items.length === 0) {
+          console.warn('No search results returned from Google API');
+        }
         
         cacheResults(cacheKey, allResults);
         resolve(allResults);

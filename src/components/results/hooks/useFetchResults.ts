@@ -65,16 +65,21 @@ export function useFetchResults({ id, isReady, stateActions }: FetchResultsProps
       } catch (error) {
         console.error("Search API error:", error);
         
-        // For API errors, provide a more helpful message without automatically using fallback results
+        // For API errors, provide a more helpful message
         let errorMessage = "An error occurred while fetching your results.";
         
         if (error instanceof Error) {
+          console.log("Error message:", error.message);
+          
           if (error.message.includes("API key") || error.message.includes("configuration missing")) {
-            errorMessage = "Search API configuration error. Please contact support.";
+            errorMessage = "Search API configuration error. The API keys are configured but may not be valid. Please check your Google API key and Custom Search Engine ID.";
           } else if (error.message.includes("quota") || error.message.includes("rate limit")) {
             errorMessage = "Search API quota exceeded. Please try again later.";
           } else if (error.message.includes("No search") || error.message.includes("not found")) {
             errorMessage = "Your search could not be found. Please try a new search.";
+          } else {
+            // Include actual error for better debugging
+            errorMessage = `Search error: ${error.message}`;
           }
         }
         

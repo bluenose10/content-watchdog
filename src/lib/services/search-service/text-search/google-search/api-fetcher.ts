@@ -24,14 +24,25 @@ export async function fetchMultiplePages(
     // Make the API request with error handling
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
+      console.log(`Request URL: https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`);
+      
       const response = await fetch(`https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Google API error:', errorData);
+        
+        // Extract meaningful error message
+        let errorMessage = 'Unknown Google API error';
+        if (errorData?.error?.message) {
+          errorMessage = errorData.error.message;
+        } else if (errorData?.error?.errors?.length > 0) {
+          errorMessage = errorData.error.errors[0].message;
+        }
+        
         // If this is not the first page, we don't throw the error but continue with what we have
         if (page === 0) {
-          throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorData?.error?.message || 'Unknown error'}`);
+          throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorMessage}`);
         } else {
           break;
         }
