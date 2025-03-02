@@ -1,3 +1,4 @@
+
 import { getCacheKey, getCachedResults, cacheResults } from "./search-cache";
 
 // Quota management for Google APIs
@@ -202,6 +203,9 @@ class GoogleApiManager {
     }
     
     console.log("Attempting direct Google API call for query:", query);
+    console.log("Using API Key starting with:", googleApiKey.substring(0, 4) + '...');
+    console.log("Using CSE ID starting with:", googleCseId.substring(0, 4) + '...');
+    
     const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCseId}&q=${encodeURIComponent(query)}`;
     
     try {
@@ -210,7 +214,7 @@ class GoogleApiManager {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Google API error response:", errorText);
-        throw new Error(`Google API responded with status: ${response.status}`);
+        throw new Error(`Google API responded with status: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
@@ -248,6 +252,9 @@ class GoogleApiManager {
         
         if (apiKey && cseId) {
           console.log("Found Google API credentials, attempting direct search");
+          console.log("API Key starts with:", apiKey.substring(0, 4) + '...');
+          console.log("CSE ID starts with:", cseId.substring(0, 4) + '...');
+          
           const directResult = await this.directGoogleSearch(query, apiKey, cseId);
           
           if (directResult && directResult.items && directResult.items.length > 0) {
@@ -273,7 +280,13 @@ class GoogleApiManager {
             console.warn("Google API call succeeded but returned no items");
           }
         } else {
-          console.error("No Google API credentials found. Please set GOOGLE_API_KEY and GOOGLE_CSE_ID");
+          console.error("No Google API credentials found. Checking each source:");
+          console.log("process.env.GOOGLE_API_KEY:", process.env.GOOGLE_API_KEY ? "Present" : "Missing");
+          console.log("sessionStorage.GOOGLE_API_KEY:", sessionStorage.getItem('GOOGLE_API_KEY') ? "Present" : "Missing");
+          console.log("localStorage.GOOGLE_API_KEY:", localStorage.getItem('GOOGLE_API_KEY') ? "Present" : "Missing");
+          console.log("process.env.GOOGLE_CSE_ID:", process.env.GOOGLE_CSE_ID ? "Present" : "Missing");
+          console.log("sessionStorage.GOOGLE_CSE_ID:", sessionStorage.getItem('GOOGLE_CSE_ID') ? "Present" : "Missing");
+          console.log("localStorage.GOOGLE_CSE_ID:", localStorage.getItem('GOOGLE_CSE_ID') ? "Present" : "Missing");
         }
         
         // If direct API call failed, fall back to simulated results

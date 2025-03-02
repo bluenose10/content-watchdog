@@ -56,6 +56,8 @@ export const loadGoogleApiCredentials = async (): Promise<boolean> => {
     // Skip if already loaded in session storage
     if (sessionStorage.getItem('GOOGLE_API_KEY') && sessionStorage.getItem('GOOGLE_CSE_ID')) {
       console.log("Google API credentials already loaded in session storage");
+      console.log("API Key starts with:", sessionStorage.getItem('GOOGLE_API_KEY')?.substring(0, 4) + '...');
+      console.log("CSE ID starts with:", sessionStorage.getItem('GOOGLE_CSE_ID')?.substring(0, 4) + '...');
       return true;
     }
 
@@ -64,11 +66,14 @@ export const loadGoogleApiCredentials = async (): Promise<boolean> => {
       sessionStorage.setItem('GOOGLE_API_KEY', process.env.GOOGLE_API_KEY);
       sessionStorage.setItem('GOOGLE_CSE_ID', process.env.GOOGLE_CSE_ID);
       console.log("Google API credentials loaded from environment");
+      console.log("API Key starts with:", process.env.GOOGLE_API_KEY.substring(0, 4) + '...');
+      console.log("CSE ID starts with:", process.env.GOOGLE_CSE_ID.substring(0, 4) + '...');
       return true;
     }
 
     // Try to load from Supabase Edge Function that exposes secrets
     try {
+      console.log("Attempting to load Google API credentials from Supabase Edge Function...");
       const { data, error } = await supabase.functions.invoke('get-search-credentials', {
         method: 'GET',
       });
@@ -81,14 +86,18 @@ export const loadGoogleApiCredentials = async (): Promise<boolean> => {
       if (data && data.apiKey && data.cseId) {
         sessionStorage.setItem('GOOGLE_API_KEY', data.apiKey);
         sessionStorage.setItem('GOOGLE_CSE_ID', data.cseId);
-        console.log("Google API credentials loaded from Supabase");
+        console.log("Google API credentials successfully loaded from Supabase");
+        console.log("API Key starts with:", data.apiKey.substring(0, 4) + '...');
+        console.log("CSE ID starts with:", data.cseId.substring(0, 4) + '...');
         return true;
+      } else {
+        console.error("Edge function returned but missing credentials:", data);
       }
     } catch (e) {
       console.error("Failed to load Google API credentials from Edge Function:", e);
     }
 
-    console.warn("Could not load Google API credentials");
+    console.warn("Could not load Google API credentials from any source");
     return false;
   } catch (error) {
     console.error("Error in loadGoogleApiCredentials:", error);
