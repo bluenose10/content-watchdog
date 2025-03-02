@@ -1,11 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { googleApiManager } from "@/lib/google-api-manager";
+import { loadGoogleApiCredentials } from "@/lib/pre-fetch-service";
+import { Loader2 } from "lucide-react";
 
 interface GoogleApiSetupProps {
   onComplete?: () => void;
@@ -15,6 +17,29 @@ export function GoogleApiSetup({ onComplete }: GoogleApiSetupProps) {
   const [apiKey, setApiKey] = useState("");
   const [cseId, setCseId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [checkingSupabase, setCheckingSupabase] = useState(true);
+
+  // Try to load credentials from Supabase on mount
+  useEffect(() => {
+    const loadCredentials = async () => {
+      setCheckingSupabase(true);
+      try {
+        const success = await loadGoogleApiCredentials();
+        if (success) {
+          toast.success("Google API credentials loaded from Supabase");
+          if (onComplete) {
+            onComplete();
+          }
+        }
+      } catch (error) {
+        console.error("Error loading credentials from Supabase:", error);
+      } finally {
+        setCheckingSupabase(false);
+      }
+    };
+
+    loadCredentials();
+  }, [onComplete]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +72,17 @@ export function GoogleApiSetup({ onComplete }: GoogleApiSetupProps) {
       setIsLoading(false);
     }
   };
+
+  if (checkingSupabase) {
+    return (
+      <Card className="w-full max-w-xl mx-auto">
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+          <p className="text-center">Checking for API credentials from Supabase...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-xl mx-auto">
