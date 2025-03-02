@@ -1,4 +1,3 @@
-
 import { 
   BingWebResult, 
   BingImageResult, 
@@ -120,16 +119,11 @@ export class BingSearchProcessor {
       console.log(`Executing Bing ${type} search for: ${query}`);
       
       // Get the Bing API key from environment
-      const apiKey = process.env.BING_API_KEY || '';
+      const apiKey = import.meta.env.VITE_BING_API_KEY || '';
       
       if (!apiKey) {
-        console.warn('BING_API_KEY not configured, using mock data for Bing search');
-        // Return mock data if no API key
-        return {
-          items: [],
-          engine: 'bing',
-          query: query
-        };
+        console.error('ERROR: VITE_BING_API_KEY not configured, Bing search cannot proceed');
+        throw new Error('Bing API key not configured. Please set VITE_BING_API_KEY');
       }
       
       // Determine the appropriate Bing API endpoint based on search type
@@ -178,6 +172,8 @@ export class BingSearchProcessor {
         url.searchParams.append('imageType', this.mapImageTypeForBing(params.imageType));
       }
       
+      console.log(`Making Bing API request to ${endpoint}`);
+      
       // Execute the API request
       const response = await fetch(url.toString(), requestOptions);
       
@@ -187,6 +183,7 @@ export class BingSearchProcessor {
       }
       
       const bingResults = await response.json();
+      console.log(`Received Bing results with ${bingResults.value?.length || 0} items`);
       
       // Process and normalize the results based on search type
       let items: any[] = [];

@@ -30,29 +30,25 @@ export const performImageSearch = async (
     
     console.log('Performing enhanced image search with URL:', imageUrl, 'with params:', searchParams);
     
-    const request = new Promise<ImageSearchResponse>(async (resolve) => {
+    const request = new Promise<ImageSearchResponse>(async (resolve, reject) => {
       try {
         // Check if we have actual Google API credentials first
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
         
-        if (apiKey && searchEngineId) {
-          // Use Google Image Search API if credentials are available
-          const googleResults = await handleGoogleImageSearch(imageUrl, searchParams, apiKey, searchEngineId);
-          cacheResults(cacheKey, googleResults);
-          resolve(googleResults);
-        } else {
-          // Fall back to mock data if no API credentials
-          const mockResults = generateMockImageResults(searchParams);
-          cacheResults(cacheKey, mockResults);
-          resolve(mockResults);
+        if (!apiKey || !searchEngineId) {
+          console.error('ERROR: No API keys found for image search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
+          reject(new Error('Google API configuration missing. Please configure API keys.'));
+          return;
         }
+        
+        // Use Google Image Search API
+        const googleResults = await handleGoogleImageSearch(imageUrl, searchParams, apiKey, searchEngineId);
+        cacheResults(cacheKey, googleResults);
+        resolve(googleResults);
       } catch (error) {
         console.error('Image Search API error:', error);
-        
-        const fallbackResults = generateFallbackResults();
-        cacheResults(cacheKey, fallbackResults);
-        resolve(fallbackResults);
+        reject(error);
       } finally {
         setTimeout(() => {
           delete pendingRequests[cacheKey];
@@ -65,6 +61,6 @@ export const performImageSearch = async (
     return request;
   } catch (error) {
     console.error('Image Search API error:', error);
-    return generateFallbackResults();
+    throw error;
   }
 };

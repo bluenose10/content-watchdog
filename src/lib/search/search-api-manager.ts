@@ -1,4 +1,3 @@
-
 import { QueuedRequest, SearchEngineConfig } from './search-types';
 import { quotaManager } from './quota-manager';
 import { requestQueue } from './request-queue';
@@ -51,13 +50,11 @@ export class SearchApiManager {
       .sort((a, b) => this.searchEngines[b].priority - this.searchEngines[a].priority);
   }
   
-  // Configure max results per engine
   public setMaxResultsPerEngine(count: number): void {
     this.maxResultsPerEngine = count;
     console.log(`Max results per engine set to ${count}`);
   }
   
-  // Configure combined results limit
   public setCombinedResultsLimit(count: number): void {
     this.combinedResultsLimit = count;
     console.log(`Combined results limit set to ${count}`);
@@ -164,9 +161,11 @@ export class SearchApiManager {
       throw new Error('No search engines available. Try again later.');
     }
     
-    // Try each search engine in priority order
-    let lastError = null;
+    // Run parallel searches on multiple engines for faster response
     let combinedResults = { items: [] };
+    let lastError = null;
+    
+    console.log(`Starting parallel search on engines: ${availableEngines.join(', ')}`);
     
     // Run parallel searches on multiple engines for faster response
     const searchPromises = availableEngines.map(async (engine) => {
@@ -203,14 +202,20 @@ export class SearchApiManager {
     }
     
     // If we got no results from any engine, throw the last error
-    if (combinedResults.items.length === 0 && lastError) {
-      throw lastError;
+    if (combinedResults.items.length === 0) {
+      if (lastError) {
+        throw lastError;
+      } else {
+        throw new Error('No search results found from any available search engines');
+      }
     }
     
     // Apply final limit to combined results
     if (combinedResults.items.length > params.maxResults) {
       combinedResults.items = combinedResults.items.slice(0, params.maxResults);
     }
+    
+    console.log(`Combined search completed with ${combinedResults.items.length} results`);
     
     // Cache combined results
     cacheResults(cacheKey, combinedResults, 'multi-engine', 0.02);
@@ -232,30 +237,12 @@ export class SearchApiManager {
         return bingSearchProcessor.executeBingSearch(type, query, params);
       }
       
-      // For other engines or mock implementation
+      // For other engines - assume Google search as default
       // Simulate API call delay for mock implementation
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // For demonstration - in a real app, call the appropriate API
-      const searchId = `${engine}_${type}_${query.replace(/\W+/g, '_')}`;
-      
-      // Get results with only the fields we need
-      const result = await import('../search-cache').then(module => 
-        module.getSearchResults(searchId)
-      );
-      
-      // Tag results with their source
-      if (result && result.results) {
-        result.results.forEach((item: any) => {
-          item.source_engine = engine;
-        });
-      }
-      
-      return { 
-        items: result.results || [],
-        engine: engine,
-        query: query
-      };
+      // For production - call the appropriate search API
+      throw new Error(`Search engine ${engine} not implemented - use another engine`);
     };
     
     return this.executeWithThrottling(engine, executeSearch);

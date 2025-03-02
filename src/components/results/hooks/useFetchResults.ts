@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useResultProcessing } from "./useResultProcessing";
 import { useTemporarySearch } from "./useTemporarySearch";
 import { usePermanentSearch } from "./usePermanentSearch";
-import { FALLBACK_RESULTS } from "./useFallbackResults";
 import { SearchStateActions } from "./useSearchState";
 
 interface FetchResultsProps {
@@ -64,16 +63,31 @@ export function useFetchResults({ id, isReady, stateActions }: FetchResultsProps
       setSearchDate(now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
     } catch (error) {
       console.error("Error in fetchResults:", error);
-      // Even if everything fails, show something to the user
-      setResults(FALLBACK_RESULTS);
-      setTotalResults(FALLBACK_RESULTS.length);
-      setQuery("Your search");
+      
+      let errorMessage = "An unexpected error occurred while fetching your results.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("API key") || error.message.includes("configuration missing")) {
+          errorMessage = "API keys not configured. Please set up your search API keys to get real results.";
+        } else if (error.message.includes("quota") || error.message.includes("rate limit")) {
+          errorMessage = "Search API quota exceeded. Please try again later.";
+        }
+      }
+      
+      setResults([]);
+      setTotalResults(0);
+      setQuery("Search error");
       
       toast({
-        title: "Warning",
-        description: "We encountered an issue loading your full results, showing sample matches instead.",
-        variant: "default",
+        title: "Search Error",
+        description: errorMessage,
+        variant: "destructive",
       });
+      
+      // Navigate back to search page after 2 seconds
+      setTimeout(() => {
+        navigate("/search");
+      }, 2000);
     } finally {
       // Reduced loading time
       setTimeout(() => {

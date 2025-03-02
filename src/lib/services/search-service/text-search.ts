@@ -1,4 +1,3 @@
-
 import { supabase } from '../../supabase';
 import { TextSearchParams } from '../../db-types';
 import { getCacheKey, getCachedResults, cacheResults } from '../../search-cache';
@@ -23,16 +22,14 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     
     console.log('Performing Google search for query:', query, 'by user:', userId, 'with params:', searchParams);
     
-    const request = new Promise(async (resolve) => {
+    const request = new Promise(async (resolve, reject) => {
       try {
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
         
         if (!apiKey || !searchEngineId) {
-          console.log('No API keys found, falling back to mock data');
-          const mockResults = generateEnhancedMockSearchResults(query, searchParams);
-          cacheResults(cacheKey, mockResults);
-          resolve(mockResults);
+          console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
+          reject(new Error('Google API configuration missing. Please configure API keys.'));
           return;
         }
         
@@ -109,6 +106,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
           
           // Make the API request with error handling
           try {
+            console.log(`Making Google API request for page ${page+1}/${numPages}`);
             const response = await fetch(`https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`);
             
             if (!response.ok) {
@@ -123,6 +121,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
             }
             
             const data = await response.json();
+            console.log(`Received page ${page+1} results: ${data.items?.length || 0} items`);
             
             // Set search information from first page
             if (page === 0) {
@@ -173,16 +172,13 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
           });
         }
         
-        console.log('Google API response:', allResults.items?.length || 0, 'results');
+        console.log('Google API response completed with', allResults.items?.length || 0, 'total results');
         
         cacheResults(cacheKey, allResults);
         resolve(allResults);
       } catch (error) {
         console.error('Google Search API error:', error);
-        
-        const mockResults = generateEnhancedMockSearchResults(query, searchParams);
-        cacheResults(cacheKey, mockResults);
-        resolve(mockResults);
+        reject(error);
       } finally {
         setTimeout(() => {
           delete pendingRequests[cacheKey];
@@ -195,13 +191,13 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     return request;
   } catch (error) {
     console.error('Google Search API error:', error);
-    
-    return generateEnhancedMockSearchResults(query, searchParams);
+    throw error;
   }
 };
 
+// Only used as fallback for testing when API is completely unavailable
 function generateEnhancedMockSearchResults(query: string, searchParams: TextSearchParams = {}) {
-  console.log('Generating enhanced mock search results for:', query, 'with params:', searchParams);
+  console.warn('FALLBACK: Using mock data for search - this should only happen during development');
   
   const exactMatch = searchParams?.exactMatch;
   const dateRestrict = searchParams?.dateRestrict;
