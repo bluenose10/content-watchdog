@@ -29,6 +29,7 @@ export function RecentSearches({
 
   useEffect(() => {
     if (propSearchQueries) {
+      console.log('Using provided search queries:', propSearchQueries.length);
       setSearchQueries(propSearchQueries);
       return;
     }
@@ -39,6 +40,13 @@ export function RecentSearches({
       try {
         setLoading(true);
         const queries = await getUserSearchQueries(user.id);
+        console.log('Fetched search queries:', queries.length);
+        
+        if (queries.length > 0) {
+          console.log('Most recent search date:', queries[0]?.created_at);
+          console.log('Oldest search date in list:', queries[queries.length - 1]?.created_at);
+        }
+        
         setSearchQueries(queries.slice(0, limit));
       } catch (error) {
         console.error("Error fetching search queries:", error);
@@ -117,7 +125,9 @@ export function RecentSearches({
                       ? 'Image Search' 
                       : search.query_type === 'hashtag'
                         ? `Hashtag: #${search.query_text}`
-                        : `Username: @${search.query_text}`}
+                        : search.query_type === 'plagiarism'
+                          ? `${search.query_text}`
+                          : `Username: @${search.query_text}`}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {search.created_at ? formatDate(search.created_at) : 'Recent'}

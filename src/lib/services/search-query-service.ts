@@ -17,6 +17,7 @@ export const createSearchQuery = async (searchQuery: SearchQuery) => {
 };
 
 export const getUserSearchQueries = async (userId: string) => {
+  // Removed any time-based filtering to ensure all searches are returned
   const { data, error } = await supabase
     .from('search_queries')
     .select('*')
@@ -24,6 +25,7 @@ export const getUserSearchQueries = async (userId: string) => {
     .order('created_at', { ascending: false });
   
   if (error) throw error;
+  console.log('Retrieved search queries:', data?.length || 0);
   return data;
 };
 
@@ -100,6 +102,7 @@ export const getRecentSearches = async (limit: number = 10) => {
     }
     
     // Fall back to recent searches if materialized view is not available
+    // Removed any time-based filtering to ensure all searches are returned
     const { data, error } = await supabase
       .from('search_queries')
       .select('id, query_type, query_text, created_at, search_params_json')
