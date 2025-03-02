@@ -1,3 +1,4 @@
+
 import { googleApiManager } from './google-api-manager';
 import { supabase } from './supabase';
 
@@ -68,6 +69,27 @@ export function schedulePreFetching(intervalMinutes: number = 60): () => void {
     clearInterval(intervalId);
     console.log("Pre-fetch scheduler stopped");
   };
+}
+
+// Add the missing startPreFetching function that was imported by PreFetchManager.tsx
+export async function startPreFetching(): Promise<void> {
+  console.log("Manual pre-fetch initiated");
+  
+  // Check API credentials before proceeding
+  if (!googleApiManager.checkApiCredentials().configured) {
+    console.warn("Cannot start pre-fetch: Google API credentials not configured");
+    
+    // Try to load credentials
+    const credentialsLoaded = await loadGoogleApiCredentials();
+    
+    if (!credentialsLoaded) {
+      console.error("Failed to load API credentials, cannot perform pre-fetch");
+      throw new Error("Google API credentials not available");
+    }
+  }
+  
+  // Perform the actual pre-fetch
+  return performPreFetch();
 }
 
 // Perform the actual pre-fetching
