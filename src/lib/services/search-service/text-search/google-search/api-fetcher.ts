@@ -1,4 +1,3 @@
-
 import { GoogleSearchResponse } from '../types';
 import { enhanceResultsWithScores } from './results-enhancer';
 import { generateMockResults } from '../mock-generator';
@@ -27,13 +26,15 @@ export async function fetchMultiplePages(
   
   // Enhanced validation for API credentials
   if (!apiKey || apiKey.length < 10) {
-    console.warn('Google Search API - Invalid or missing API key');
-    throw new Error('Invalid Google API key. Please check your API key configuration.');
+    const errorMsg = 'Google Search API configuration error: Invalid or missing API key. Please configure a valid VITE_GOOGLE_API_KEY in your environment.';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
   
   if (!engineId) {
-    console.warn('Google Search API - Missing Search Engine ID');
-    throw new Error('Search Engine ID is missing. Please configure your Google Custom Search Engine ID.');
+    const errorMsg = 'Google Search API configuration error: Missing Search Engine ID. Please configure a valid VITE_GOOGLE_CSE_ID in your environment.';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
   
   for (let page = 0; page < numPages; page++) {

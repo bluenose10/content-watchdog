@@ -24,25 +24,23 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     console.log('Google Search API - API Key available:', apiKey ? `Yes (length: ${apiKey.length})` : 'No');
     console.log('Google Search API - Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
     
-    // Always try to use real API, only fall back to mock if configuration is missing
-    const useMockData = !apiKey || !searchEngineId || apiKey.length < 20;
-    
-    if (useMockData) {
-      console.error('Critical error: Missing or invalid API credentials. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID.');
-      throw new Error('Google Search API requires valid API credentials. Please configure your API keys.');
-    }
-    
-    // Enhanced API key validation
+    // More explicit API key validation with clearer error messages
     if (!apiKey) {
-      throw new Error('Google Search API key is missing. Please configure VITE_GOOGLE_API_KEY in your environment variables.');
+      const errorMsg = 'Google Search API configuration error: API key is missing. Please configure VITE_GOOGLE_API_KEY in your environment variables.';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
     }
     
     if (!searchEngineId) {
-      throw new Error('Google Custom Search Engine ID is missing. Please configure VITE_GOOGLE_CSE_ID in your environment variables.');
+      const errorMsg = 'Google Search API configuration error: Custom Search Engine ID is missing. Please configure VITE_GOOGLE_CSE_ID in your environment variables.';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
     }
     
     if (apiKey.length < 10) {
-      throw new Error('Google API key appears to be invalid (too short). Please check your VITE_GOOGLE_API_KEY value.');
+      const errorMsg = 'Google Search API configuration error: API key appears to be invalid (too short). Please check your VITE_GOOGLE_API_KEY value.';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
     }
     
     // Check cache and pending requests
@@ -71,31 +69,39 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
         // Make multiple API requests if we need more than max results per page
         const maxResultsPerPage = 10;
         const numPages = Math.min(3, Math.ceil((searchParams.maxResults || 30) / maxResultsPerPage));
-        const allResults = await fetchMultiplePages(params, numPages, maxResultsPerPage);
         
-        console.log('Google API response completed with', allResults.items?.length || 0, 'total results');
-        
-        if (!allResults.items || allResults.items.length === 0) {
-          console.warn('No search results returned from Google API');
-          resolve({ items: [], searchInformation: allResults.searchInformation || null });
-          return;
+        try {
+          const allResults = await fetchMultiplePages(params, numPages, maxResultsPerPage);
+          
+          console.log('Google API response completed with', allResults.items?.length || 0, 'total results');
+          
+          if (!allResults.items || allResults.items.length === 0) {
+            console.warn('No search results returned from Google API');
+            resolve({ items: [], searchInformation: allResults.searchInformation || null });
+            return;
+          }
+          
+          cacheResults(cacheKey, allResults);
+          resolve(allResults);
+        } catch (error) {
+          console.error('Google API request error:', error);
+          
+          // Improved error messages for API configuration issues
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          
+          if (errorMsg.includes('API key') || errorMsg.includes('configuration')) {
+            reject(new Error('Google Search API configuration error: Please configure valid VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID in your environment variables.'));
+          } else if (errorMsg.includes('unregistered callers') || errorMsg.includes('without established identity')) {
+            reject(new Error('Google API authentication error: The Google API requires valid credentials with proper permissions for Custom Search API.'));
+          } else if (errorMsg.includes('API key not valid') || errorMsg.includes('invalid key')) {
+            reject(new Error('Invalid API key: The Google API key you provided is not valid. Please check that you have entered the correct key and that it has the Custom Search API enabled in the Google Cloud Console.'));
+          } else {
+            reject(error);
+          }
         }
-        
-        cacheResults(cacheKey, allResults);
-        resolve(allResults);
       } catch (error) {
         console.error('Google Search API error:', error);
-        
-        // Handle specific errors but don't use mock data - let the error bubble up
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        
-        if (errorMsg.includes('unregistered callers') || errorMsg.includes('without established identity')) {
-          reject(new Error('API authentication error: The Google API requires valid credentials with proper permissions for Custom Search API.'));
-        } else if (errorMsg.includes('API key not valid') || errorMsg.includes('invalid key')) {
-          reject(new Error('Invalid API key: The Google API key you provided is not valid. Please check that you have entered the correct key and that it has the Custom Search API enabled in the Google Cloud Console.'));
-        } else {
-          reject(error);
-        }
+        reject(error);
       }
     });
     
