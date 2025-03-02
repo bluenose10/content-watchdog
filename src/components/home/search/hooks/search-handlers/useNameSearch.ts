@@ -44,8 +44,20 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
         const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
         
+        console.log("API Key configured:", apiKey ? "Yes (length: " + apiKey.length + ")" : "No");
+        console.log("Search Engine ID configured:", searchEngineId ? "Yes (format correct: " + searchEngineId.includes(':') + ")" : "No");
+        
         if (!apiKey || !searchEngineId) {
           throw new Error("Google Search API configuration missing. Please set up your VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID environment variables.");
+        }
+        
+        // Additional validation for API key and Search Engine ID
+        if (apiKey.length < 10) {
+          throw new Error("Google API key appears to be invalid (too short). Please check your configuration.");
+        }
+        
+        if (!searchEngineId.includes(':')) {
+          throw new Error("Google Search Engine ID format appears to be invalid (missing colon). Please check your configuration.");
         }
         
         const searchId = await handleTextSearch(query, "name", user, params);
@@ -69,7 +81,15 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
             error.message?.includes('configuration') || 
             error.message?.includes('Search Engine ID')) {
           
-          const errorMessage = "Search API configuration error. Please ensure your Google API key and Custom Search Engine ID are correctly set up.";
+          let errorMessage = "Search API configuration error. ";
+          
+          if (error.message?.includes('too short')) {
+            errorMessage += "Your Google API key appears to be invalid or too short.";
+          } else if (error.message?.includes('missing colon')) {
+            errorMessage += "Your Google Search Engine ID format is incorrect. It should contain a colon (:).";
+          } else {
+            errorMessage += "Please ensure your Google API key and Custom Search Engine ID are correctly set up.";
+          }
           
           setError(errorMessage);
           

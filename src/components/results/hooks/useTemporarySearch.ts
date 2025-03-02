@@ -51,8 +51,8 @@ export function useTemporarySearch({
       const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
       const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
       
-      console.log("API Key available:", apiKey ? "Yes" : "No");
-      console.log("Search Engine ID available:", searchEngineId ? "Yes" : "No");
+      console.log("API Key available:", apiKey ? "Yes (length: " + apiKey.length + ")" : "No");
+      console.log("Search Engine ID available:", searchEngineId ? "Yes (format correct: " + searchEngineId.includes(':') + ")" : "No");
       
       if (!apiKey || !searchEngineId) {
         console.error("Missing Google API configuration");
@@ -81,8 +81,8 @@ export function useTemporarySearch({
         throw new Error(errorMessage);
       }
       
-      if (!searchEngineId.match(/^\d+:[a-zA-Z0-9]+$/)) {
-        const errorMessage = "Google Custom Search Engine ID format appears to be invalid. Please check your configuration.";
+      if (!searchEngineId.includes(':')) {
+        const errorMessage = "Google Custom Search Engine ID format appears to be invalid (missing colon). Please check your configuration.";
         console.error(errorMessage);
         
         toast({
@@ -96,7 +96,7 @@ export function useTemporarySearch({
       
       let searchResponse;
       if (queryType === 'image') {
-        console.log("Performing image search with URL:", searchData.image_url);
+        console.log("Performing image search with URL:", searchData.image_url ? "Yes (available)" : "No");
         if (!searchData.image_url) {
           throw new Error("No image URL provided for image search");
         }
@@ -106,7 +106,7 @@ export function useTemporarySearch({
         searchResponse = await performGoogleSearch(queryText, 'anonymous', searchParams);
       }
       
-      console.log("Google API response:", searchResponse);
+      console.log("Google API response:", searchResponse ? "Received" : "Empty");
       
       if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
         console.log("Processing search response with items:", searchResponse.items.length);

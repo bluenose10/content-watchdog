@@ -27,6 +27,18 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
       console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
       throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
     }
+
+    // Check for valid format of API key and Search Engine ID
+    if (apiKey.length < 10) {
+      console.error('ERROR: Google API key appears to be invalid (too short)');
+      throw new Error('Google API key appears to be invalid. Please check your configuration.');
+    }
+    
+    // Check for valid search engine ID format
+    if (!searchEngineId.includes(':')) {
+      console.error('ERROR: Google Custom Search Engine ID appears to be invalid (missing colon)');
+      throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
+    }
     
     // Check cache and pending requests
     const { cacheKey, cachedResult, pendingRequest } = checkRequestCache(query, searchParams);
@@ -42,19 +54,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     console.log('Performing Google search for query:', query, 'by user:', userId, 'with params:', searchParams);
     
     const request = new Promise(async (resolve, reject) => {
-      try {
-        // Validate the API key format (basic check)
-        if (apiKey.length < 10) {
-          console.error('ERROR: Google API key appears to be invalid (too short)');
-          throw new Error('Google API key appears to be invalid. Please check your configuration.');
-        }
-        
-        // Validate search engine ID format (basic check)
-        if (!searchEngineId.match(/^\d+:[a-zA-Z0-9]+$/)) {
-          console.error('ERROR: Google Custom Search Engine ID format appears to be invalid');
-          throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
-        }
-        
+      try {        
         // Build the URL parameters with enhanced configuration
         const params = buildSearchParams(query, searchParams, apiKey, searchEngineId);
         

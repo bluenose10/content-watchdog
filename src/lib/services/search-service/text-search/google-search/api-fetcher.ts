@@ -22,17 +22,22 @@ export async function fetchMultiplePages(
     throw new Error('Google Search configuration error: API key or Search Engine ID missing.');
   }
   
-  // Basic validation for API key and Search Engine ID formats
+  // Get API key and Search Engine ID for detailed logging
   const apiKey = params.get('key');
   const engineId = params.get('cx');
   
+  // Log configuration details to help with debugging
+  console.log('Using Google API key pattern:', apiKey ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : 'None');
+  console.log('Using Google Search Engine ID pattern:', engineId ? engineId.split(':')[0] + ':...' : 'None');
+  
+  // Basic validation for API key and Search Engine ID formats
   if (!apiKey || apiKey.length < 10) {
     console.error('Google API key appears to be invalid or too short');
     throw new Error('Google API key appears to be invalid. Please check your API key configuration.');
   }
   
   if (!engineId || !engineId.includes(':')) {
-    console.error('Google Search Engine ID appears to be invalid');
+    console.error('Google Search Engine ID appears to be invalid (missing colon format)');
     throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
   }
   
@@ -45,7 +50,7 @@ export async function fetchMultiplePages(
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
       const requestUrl = `https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`;
-      console.log(`Request URL: ${requestUrl}`);
+      console.log(`Request URL pattern: ${requestUrl.replace(apiKey, '***API_KEY***').replace(engineId, '***CSE_ID***')}`);
       
       const response = await fetch(requestUrl);
       
@@ -68,6 +73,8 @@ export async function fetchMultiplePages(
           errorMessage = 'Daily API quota exceeded. Please try again tomorrow.';
         } else if (errorMessage.includes('accessNotConfigured') || errorMessage.includes('not enabled')) {
           errorMessage = 'Google Custom Search API is not enabled for this project.';
+        } else if (errorMessage.includes('invalid cx')) {
+          errorMessage = 'Invalid Search Engine ID. Please check your configuration.';
         }
         
         // If this is not the first page, we don't throw the error but continue with what we have
