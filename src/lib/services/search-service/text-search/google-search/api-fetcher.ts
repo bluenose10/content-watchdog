@@ -30,7 +30,7 @@ export async function fetchMultiplePages(
   console.log('Using Google API key pattern:', apiKey ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : 'None');
   console.log('Using Google Search Engine ID pattern:', engineId ? engineId.split(':')[0] + ':...' : 'None');
   
-  // Basic validation for API key and Search Engine ID formats
+  // Strict validation for API key and Search Engine ID formats (don't assume dev environment)
   if (!apiKey || apiKey.length < 10) {
     console.error('Google API key appears to be invalid or too short');
     throw new Error('Google API key appears to be invalid. Please check your API key configuration.');

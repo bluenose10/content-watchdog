@@ -20,6 +20,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
     const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
     
+    // Always log API credentials status regardless of environment
     console.log('API Key available:', apiKey ? 'Yes' : 'No');
     console.log('Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
     
@@ -28,7 +29,7 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
       throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
     }
 
-    // Check for valid format of API key and Search Engine ID
+    // Always check for valid format of API key and Search Engine ID
     if (apiKey.length < 10) {
       console.error('ERROR: Google API key appears to be invalid (too short)');
       throw new Error('Google API key appears to be invalid. Please check your configuration.');

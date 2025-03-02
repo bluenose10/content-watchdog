@@ -14,8 +14,8 @@ export function useRateLimit() {
     monthlyRemaining?: number;
     monthlyResetTime?: number;
   } => {
-    // Skip rate limiting for non-production environments but maintain consistent return type
-    if (import.meta.env.DEV && !import.meta.env.VITE_ENABLE_RATE_LIMIT_IN_DEV) {
+    // Only skip rate limiting for explicit DEV environments with flag enabled
+    if (import.meta.env.DEV === true && !import.meta.env.VITE_ENABLE_RATE_LIMIT_IN_DEV) {
       return { 
         allowed: true, 
         remaining: 1000, 

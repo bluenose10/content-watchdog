@@ -47,7 +47,7 @@ export function useTemporarySearch({
     try {
       console.log("Starting Google search with query:", queryText);
       
-      // Validate API configuration before proceeding
+      // Validate API configuration before proceeding - treat as production by default
       const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
       const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
       
