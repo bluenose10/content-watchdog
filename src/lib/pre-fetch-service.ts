@@ -3,6 +3,7 @@ import { getCacheKey, getCachedResults, cacheResults, batchGetSearchResults } fr
 import { getRecentSearches } from '@/lib/db-service';
 import { googleApiManager } from '@/lib/google-api-manager';
 import { supabase } from '@/lib/supabase';
+import { toast } from '@/hooks/use-toast';
 
 // Popular search types and terms that we want to pre-fetch
 interface PreFetchQuery {
@@ -53,6 +54,8 @@ const hasAvailableQuota = (): boolean => {
  */
 export const loadGoogleApiCredentials = async (): Promise<boolean> => {
   try {
+    console.log("Starting to load Google API credentials...");
+    
     // Skip if already loaded in session storage
     if (sessionStorage.getItem('GOOGLE_API_KEY') && sessionStorage.getItem('GOOGLE_CSE_ID')) {
       console.log("Google API credentials already loaded in session storage");
@@ -71,6 +74,16 @@ export const loadGoogleApiCredentials = async (): Promise<boolean> => {
       return true;
     }
 
+    // Try to load from local storage as fallback
+    if (localStorage.getItem('GOOGLE_API_KEY') && localStorage.getItem('GOOGLE_CSE_ID')) {
+      sessionStorage.setItem('GOOGLE_API_KEY', localStorage.getItem('GOOGLE_API_KEY')!);
+      sessionStorage.setItem('GOOGLE_CSE_ID', localStorage.getItem('GOOGLE_CSE_ID')!);
+      console.log("Google API credentials loaded from local storage");
+      console.log("API Key starts with:", localStorage.getItem('GOOGLE_API_KEY')?.substring(0, 4) + '...');
+      console.log("CSE ID starts with:", localStorage.getItem('GOOGLE_CSE_ID')?.substring(0, 4) + '...');
+      return true;
+    }
+
     // Try to load from Supabase Edge Function that exposes secrets
     try {
       console.log("Attempting to load Google API credentials from Supabase Edge Function...");
@@ -84,17 +97,32 @@ export const loadGoogleApiCredentials = async (): Promise<boolean> => {
       }
 
       if (data && data.apiKey && data.cseId) {
+        // Store in both session storage and local storage for resilience
         sessionStorage.setItem('GOOGLE_API_KEY', data.apiKey);
         sessionStorage.setItem('GOOGLE_CSE_ID', data.cseId);
-        console.log("Google API credentials successfully loaded from Supabase");
+        localStorage.setItem('GOOGLE_API_KEY', data.apiKey);
+        localStorage.setItem('GOOGLE_CSE_ID', data.cseId);
+        
+        console.log("Google API credentials successfully loaded from Supabase Edge Function");
         console.log("API Key starts with:", data.apiKey.substring(0, 4) + '...');
         console.log("CSE ID starts with:", data.cseId.substring(0, 4) + '...');
         return true;
       } else {
         console.error("Edge function returned but missing credentials:", data);
+        if (data && data.error) {
+          console.error("Error details:", data.error);
+        }
       }
     } catch (e) {
       console.error("Failed to load Google API credentials from Edge Function:", e);
+      // Display a toast notification about the failure
+      if (typeof window !== 'undefined') {  // Check if we're in browser environment
+        toast({
+          title: "API Configuration Issue",
+          description: "Could not connect to Google Search API. Please check your configuration.",
+          variant: "destructive",
+        });
+      }
     }
 
     console.warn("Could not load Google API credentials from any source");

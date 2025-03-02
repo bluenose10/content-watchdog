@@ -1,49 +1,77 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "../_shared/cors.ts";
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 
-const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
-const GOOGLE_CSE_ID = Deno.env.get("GOOGLE_CSE_ID");
+// CORS headers for browser access
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, {
+      headers: corsHeaders,
+    })
   }
-  
+
   try {
-    if (!GOOGLE_API_KEY || !GOOGLE_CSE_ID) {
-      console.error("Missing Google API credentials in environment");
+    // Get Google API credentials from environment variables
+    const apiKey = Deno.env.get('GOOGLE_API_KEY')
+    const cseId = Deno.env.get('GOOGLE_CSE_ID')
+
+    console.log('Edge function: Retrieving Google API credentials')
+    console.log(`API Key present: ${apiKey ? 'Yes (starts with ' + apiKey.substring(0, 4) + '...)' : 'No'}`)
+    console.log(`CSE ID present: ${cseId ? 'Yes (starts with ' + cseId.substring(0, 4) + '...)' : 'No'}`)
+
+    if (!apiKey || !cseId) {
+      console.error('Edge function: Missing Google API credentials')
       return new Response(
-        JSON.stringify({ 
-          error: "Google API credentials are not configured on the server" 
+        JSON.stringify({
+          error: 'Missing Google API credentials',
+          apiKeyPresent: !!apiKey,
+          cseIdPresent: !!cseId
         }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
         }
-      );
+      )
     }
-    
-    // Return the credentials
+
+    // Return credentials
     return new Response(
-      JSON.stringify({ 
-        apiKey: GOOGLE_API_KEY, 
-        cseId: GOOGLE_CSE_ID 
+      JSON.stringify({
+        apiKey,
+        cseId,
+        message: 'Google API credentials retrieved successfully'
       }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
-    );
+    )
   } catch (error) {
-    console.error("Error in get-search-credentials function:", error);
+    console.error('Edge function error:', error.message)
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      JSON.stringify({
+        error: 'Failed to retrieve Google API credentials',
+        details: error.message
+      }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
-    );
+    )
   }
-});
+})

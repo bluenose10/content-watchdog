@@ -1,31 +1,54 @@
 
 import { useEffect } from 'react';
-import { schedulePreFetching } from '@/lib/pre-fetch-service';
+import { loadGoogleApiCredentials, schedulePreFetching } from '@/lib/pre-fetch-service';
+import { useToast } from '@/hooks/use-toast';
+import { googleApiManager } from '@/lib/google-api-manager';
 
 export function PreFetchInitializer() {
+  const { toast } = useToast();
+
   useEffect(() => {
-    // Check if pre-fetching was previously enabled
-    const isPrefetchEnabled = localStorage.getItem('prefetch_enabled') === 'true';
-    
-    if (isPrefetchEnabled) {
-      console.log('[PreFetchInitializer] Initializing scheduled pre-fetching');
+    const initializeServices = async () => {
+      console.log("Initializing pre-fetch and API services...");
+      
+      // Try to load the API credentials
+      const credentialsLoaded = await loadGoogleApiCredentials();
+      
+      if (!credentialsLoaded) {
+        console.warn("Failed to load Google API credentials during initialization");
+        
+        // Check Google API configuration status
+        const apiStatus = googleApiManager.checkApiCredentials();
+        
+        if (!apiStatus.configured) {
+          toast({
+            title: "API Configuration Issue",
+            description: "Google API credentials are not configured properly. Search results may be limited.",
+            variant: "destructive",
+            duration: 6000,
+          });
+        }
+      }
+      
+      // Schedule pre-fetching regardless of API status
+      // It will skip actual API calls if credentials aren't available
       const cleanup = schedulePreFetching(60); // Every 60 minutes
       
-      // Store cleanup function
-      (window as any).preFetchCleanup = cleanup;
-    } else {
-      console.log('[PreFetchInitializer] Pre-fetching is disabled');
-    }
+      // Return cleanup function
+      return cleanup;
+    };
+    
+    const cleanup = initializeServices();
     
     return () => {
-      // Cleanup when component unmounts
-      if ((window as any).preFetchCleanup) {
-        console.log('[PreFetchInitializer] Cleaning up pre-fetch scheduler');
-        (window as any).preFetchCleanup();
+      if (cleanup && typeof cleanup === 'function') {
+        cleanup();
       }
     };
-  }, []);
-  
+  }, [toast]);
+
   // This component doesn't render anything
   return null;
 }
+
+export default PreFetchInitializer;

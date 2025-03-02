@@ -153,6 +153,9 @@ export default function Results() {
   const [totalResults, setTotalResults] = useState<number>(0);
   const { toast } = useToast();
 
+  // Add a new state for API connection status
+  const [apiConnectionFailed, setApiConnectionFailed] = useState<boolean>(false);
+
   const handleUpgrade = () => {
     toast({
       title: "Premium Feature",
@@ -177,6 +180,13 @@ export default function Results() {
       try {
         setIsLoading(true);
         console.log("Fetching results for search ID:", id);
+        
+        // Check if Google API credentials are loaded
+        const credentialsLoaded = await googleApiManager.checkApiCredentials();
+        if (!credentialsLoaded.configured) {
+          console.error("Google API credentials not configured:", credentialsLoaded.message);
+          setApiConnectionFailed(true);
+        }
         
         const isTemporarySearch = id.startsWith('temp_');
         const isFallbackSearch = id.startsWith('fallback_') || id.startsWith('generated_') || id.startsWith('recovery_');
@@ -609,6 +619,7 @@ export default function Results() {
         setSearchDate(now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
       } catch (error) {
         console.error("Error in fetchResults:", error);
+        setApiConnectionFailed(true);
         toast({
           title: "Search Error",
           description: "Something went wrong with your search. Please try again.",
@@ -664,6 +675,31 @@ export default function Results() {
                 Results for {query ? <span className="font-medium">{query}</span> : <span>Unknown search</span>}
               </p>
             </div>
+
+            {apiConnectionFailed && (
+              <Card className="mb-6 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                <CardContent className="p-4">
+                  <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-amber-800 dark:text-amber-300">API Connection Issue</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Using sample results. There was an issue connecting to the Google search service. 
+                        Please check if the Google API key and CSE ID are correctly set in Supabase secrets.
+                      </p>
+                    </div>
+                    <div>
+                      <Button 
+                        onClick={() => navigate("/search")}
+                        variant="default"
+                        className="bg-amber-600 hover:bg-amber-700 w-full md:w-auto"
+                      >
+                        Try Again
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="mb-8 mt-6">
               <CardContent className="p-6 flex flex-col gap-4 md:flex-row md:gap-8">
