@@ -7,3 +7,4 @@ export * from './storage-service';
 export * from './metrics-service';
 export * from './search-service/text-search';
 export * from './search-service/image-search';
+export * from './dashboard-stats-service';

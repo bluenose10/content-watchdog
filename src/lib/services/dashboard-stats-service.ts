@@ -38,19 +38,30 @@ export const getUserDashboardStats = async (userId: string): Promise<UserStats> 
       ? Math.round(((searchCount - lastMonthCount) / lastMonthCount) * 100) 
       : 0;
     
-    // Get total content matches from search results
-    const { data: searchResults, error: resultsError } = await supabase
-      .from('search_results')
-      .select('search_id')
-      .in('search_id', supabase
-        .from('search_queries')
-        .select('id')
-        .eq('user_id', userId)
-      );
+    // First, get all search query IDs for this user
+    const { data: searchIds, error: idsError } = await supabase
+      .from('search_queries')
+      .select('id')
+      .eq('user_id', userId);
     
-    if (resultsError) throw resultsError;
+    if (idsError) throw idsError;
     
-    const contentMatchCount = searchResults?.length || 0;
+    // Then get content matches count using the array of search IDs
+    let contentMatchCount = 0;
+    
+    if (searchIds && searchIds.length > 0) {
+      // Extract just the ID values into an array
+      const searchIdValues = searchIds.map(row => row.id);
+      
+      const { count, error: resultsError } = await supabase
+        .from('search_results')
+        .select('*', { count: 'exact', head: true })
+        .in('search_id', searchIdValues);
+      
+      if (resultsError) throw resultsError;
+      
+      contentMatchCount = count || 0;
+    }
     
     // For now, we'll return a placeholder for takedowns
     // In a real implementation, this would come from a takedowns table
