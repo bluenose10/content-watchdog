@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { googleApiManager } from '@/lib/google-api-manager';
@@ -33,8 +32,8 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
       // Fall back to using anon key only
     }
     
-    // Function to implement timeout for the Supabase function call
-    const timeoutPromise = new Promise<{data: null, error: Error}>((_, reject) => {
+    // Function to implement timeout for the fetch call
+    const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
         reject(new Error('Function call timed out after ' + FUNCTION_TIMEOUT + 'ms'));
       }, FUNCTION_TIMEOUT);
@@ -65,10 +64,8 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
         headers: headers
       });
       
-      response = await Promise.race([
-        fetchPromise,
-        timeoutPromise as Promise<Response>
-      ]);
+      // Fixed type error: Using Promise.race with proper typing
+      response = await Promise.race([fetchPromise, timeoutPromise]);
       
       console.log("Direct edge function response status:", response.status);
       
