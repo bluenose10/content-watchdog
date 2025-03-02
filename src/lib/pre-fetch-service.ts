@@ -156,8 +156,15 @@ async function performPreFetch(): Promise<void> {
       return;
     }
     
-    // Force the GoogleApiManager to refresh its credentials
-    googleApiManager.refreshCredentials();
+    // Instead of calling refreshCredentials which doesn't exist, 
+    // we'll re-load the credentials from storage to ensure we have the latest
+    const sessionApiKey = sessionStorage.getItem("GOOGLE_API_KEY");
+    const sessionCseId = sessionStorage.getItem("GOOGLE_CSE_ID");
+    
+    if (sessionApiKey && sessionCseId) {
+      googleApiManager.setCredentials(sessionApiKey, sessionCseId);
+      console.log("Refreshed Google API credentials from session storage");
+    }
     
     // Test a sample search to ensure everything is working
     const testQuery = "test query";
