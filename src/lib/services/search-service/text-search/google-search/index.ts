@@ -42,6 +42,18 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
           throw new Error('Google API configuration missing. Please configure API keys.');
         }
         
+        // Validate the API key format (basic check)
+        if (apiKey.length < 10) {
+          console.error('ERROR: Google API key appears to be invalid (too short)');
+          throw new Error('Google API key appears to be invalid. Please check your configuration.');
+        }
+        
+        // Validate search engine ID format (basic check)
+        if (!searchEngineId.match(/^\d+:[a-zA-Z0-9]+$/)) {
+          console.error('ERROR: Google Custom Search Engine ID format appears to be invalid');
+          throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
+        }
+        
         // Build the URL parameters with enhanced configuration
         const params = buildSearchParams(query, searchParams, apiKey, searchEngineId);
         

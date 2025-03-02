@@ -24,6 +24,11 @@ export function useTemporarySearch({
     
     if (!tempSearchData) {
       console.error("No temporary search data found");
+      toast({
+        title: "Search Error",
+        description: "No search data found. Please try a new search.",
+        variant: "destructive",
+      });
       throw new Error("No search data found. Please try a new search.");
     }
     
@@ -41,25 +46,49 @@ export function useTemporarySearch({
     // Perform Google search directly for temporary searches
     try {
       console.log("Starting Google search with query:", queryText);
+      console.log("API Key available:", import.meta.env.VITE_GOOGLE_API_KEY ? "Yes" : "No");
+      console.log("Search Engine ID available:", import.meta.env.VITE_GOOGLE_CSE_ID ? "Yes" : "No");
+      
+      if (!import.meta.env.VITE_GOOGLE_API_KEY || !import.meta.env.VITE_GOOGLE_CSE_ID) {
+        console.error("Missing Google API configuration");
+        toast({
+          title: "Search Configuration Error",
+          description: "Google API configuration is missing. Please check your environment variables.",
+          variant: "destructive",
+        });
+        throw new Error("Google API configuration missing. Please configure API keys.");
+      }
+      
       let searchResponse;
       if (queryType === 'image') {
-        console.log("Performing image search");
+        console.log("Performing image search with URL:", searchData.image_url);
+        if (!searchData.image_url) {
+          throw new Error("No image URL provided for image search");
+        }
         searchResponse = await performImageSearch(searchData.image_url, 'anonymous', searchParams);
       } else {
-        console.log("Performing Google search");
+        console.log("Performing Google search with text:", queryText);
         searchResponse = await performGoogleSearch(queryText, 'anonymous', searchParams);
       }
       
       console.log("Google API response:", searchResponse);
       
       if (searchResponse && searchResponse.items && searchResponse.items.length > 0) {
+        console.log("Processing search response with items:", searchResponse.items.length);
         processSearchResponse(searchResponse, queryText, queryType);
       } else if (searchResponse && searchResponse.error) {
         // Handle API-reported errors
         console.error("API error:", searchResponse.error);
-        throw new Error(searchResponse.error.message || "API error");
+        const errorMessage = searchResponse.error.message || "API error";
+        toast({
+          title: "Search API Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        throw new Error(errorMessage);
       } else {
         // Handle empty results
+        console.warn("No search results returned");
         setResults([]);
         setTotalResults(0);
         toast({
@@ -70,6 +99,11 @@ export function useTemporarySearch({
       }
     } catch (error) {
       console.error("Error performing direct search:", error);
+      // Store search data in session storage for debugging
+      sessionStorage.setItem('last_failed_search', JSON.stringify({
+        search_data: searchData,
+        error: error instanceof Error ? error.message : String(error)
+      }));
       throw error; // Let the parent handle this error
     }
   };

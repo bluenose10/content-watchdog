@@ -24,13 +24,14 @@ export async function fetchMultiplePages(
     // Make the API request with error handling
     try {
       console.log(`Making Google API request for page ${page+1}/${numPages}`);
-      console.log(`Request URL: https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`);
+      const requestUrl = `https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`;
+      console.log(`Request URL: ${requestUrl}`);
       
-      const response = await fetch(`https://www.googleapis.com/customsearch/v1?${pageParams.toString()}`);
+      const response = await fetch(requestUrl);
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Google API error:', errorData);
+        console.error('Google API error response:', errorData);
         
         // Extract meaningful error message
         let errorMessage = 'Unknown Google API error';
@@ -40,10 +41,20 @@ export async function fetchMultiplePages(
           errorMessage = errorData.error.errors[0].message;
         }
         
+        // Check for specific error types
+        if (errorMessage.includes('keyInvalid') || errorMessage.includes('invalid key')) {
+          errorMessage = 'Invalid Google API key. Please check your configuration.';
+        } else if (errorMessage.includes('dailyLimitExceeded') || errorMessage.includes('quota')) {
+          errorMessage = 'Daily API quota exceeded. Please try again tomorrow.';
+        } else if (errorMessage.includes('accessNotConfigured') || errorMessage.includes('not enabled')) {
+          errorMessage = 'Google Custom Search API is not enabled for this project.';
+        }
+        
         // If this is not the first page, we don't throw the error but continue with what we have
         if (page === 0) {
           throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorMessage}`);
         } else {
+          console.warn(`Stopping pagination due to error on page ${page+1}. Using results collected so far.`);
           break;
         }
       }

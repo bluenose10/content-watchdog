@@ -41,6 +41,16 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
       
       try {
         const searchId = await handleTextSearch(query, "name", user, params);
+        
+        // Store query data in session storage for temporary searches
+        const tempSearchData = {
+          query_text: query,
+          query_type: "name",
+          user_id: user.id,
+          search_params_json: params ? JSON.stringify(params) : null
+        };
+        sessionStorage.setItem(`temp_search_${searchId}`, JSON.stringify(tempSearchData));
+        
         // Use the searchId directly in the URL for results
         navigate(`/results?id=${searchId}`);
       } catch (error: any) {
@@ -57,6 +67,16 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
           
           // Generate a temporary search ID for this session
           const tempSearchId = `temp_${Date.now()}`;
+          
+          // Store query data in session storage for temporary searches
+          const tempSearchData = {
+            query_text: query,
+            query_type: "name",
+            user_id: user.id,
+            search_params_json: params ? JSON.stringify(params) : null
+          };
+          sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify(tempSearchData));
+          
           navigate(`/results?id=${tempSearchId}&q=${encodeURIComponent(query)}`);
           return;
         }

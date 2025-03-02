@@ -40,7 +40,27 @@ export function useImageSearch(user: User | null, accessLevel: AccessLevel) {
       console.log("Image search with file:", file.name, "and params:", params);
       
       try {
+        // Convert file to data URL for temporary storage
+        const fileReader = new FileReader();
+        
+        // Wrap FileReader in a promise
+        const fileDataUrl = await new Promise<string>((resolve, reject) => {
+          fileReader.onload = () => resolve(fileReader.result as string);
+          fileReader.onerror = reject;
+          fileReader.readAsDataURL(file);
+        });
+        
         const searchId = await handleImageSearch(file, user, params);
+        
+        // Store query data in session storage for temporary searches
+        const tempSearchData = {
+          query_type: "image",
+          user_id: user.id,
+          image_url: fileDataUrl,
+          search_params_json: params ? JSON.stringify(params) : null
+        };
+        sessionStorage.setItem(`temp_search_${searchId}`, JSON.stringify(tempSearchData));
+        
         // Use the searchId directly in the URL for results
         navigate(`/results?id=${searchId}`);
       } catch (error: any) {
@@ -57,6 +77,26 @@ export function useImageSearch(user: User | null, accessLevel: AccessLevel) {
           
           // Generate a temporary search ID for this session
           const tempSearchId = `temp_${Date.now()}`;
+          
+          // Convert file to data URL for temporary storage
+          const fileReader = new FileReader();
+          
+          // Wrap FileReader in a promise
+          const fileDataUrl = await new Promise<string>((resolve, reject) => {
+            fileReader.onload = () => resolve(fileReader.result as string);
+            fileReader.onerror = reject;
+            fileReader.readAsDataURL(file);
+          });
+          
+          // Store query data in session storage for temporary searches
+          const tempSearchData = {
+            query_type: "image",
+            user_id: user.id,
+            image_url: fileDataUrl,
+            search_params_json: params ? JSON.stringify(params) : null
+          };
+          sessionStorage.setItem(`temp_search_${tempSearchId}`, JSON.stringify(tempSearchData));
+          
           navigate(`/results?id=${tempSearchId}&type=image`);
           return;
         }
