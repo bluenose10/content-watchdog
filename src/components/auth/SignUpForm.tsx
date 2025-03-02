@@ -72,11 +72,23 @@ const SignUpForm = ({ onSignUpSuccess }: SignUpFormProps) => {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Success",
-          description: "Your account has been created. Please check your email for verification.",
-          variant: "default",
-        });
+        // Check if email confirmation is needed
+        if (data?.user && !data.user.email_confirmed_at) {
+          console.log("Email confirmation required, informing user to check their inbox");
+          toast({
+            title: "Check your email",
+            description: "We've sent a confirmation link to your email. Please check your inbox and spam folder.",
+            duration: 6000,
+          });
+        } else {
+          console.log("User created successfully, no email confirmation needed");
+          toast({
+            title: "Success",
+            description: "Your account has been created successfully.",
+            variant: "default",
+          });
+        }
+        
         onSignUpSuccess(formData.email);
       }
     } catch (error: any) {
@@ -181,11 +193,11 @@ const SignUpForm = ({ onSignUpSuccess }: SignUpFormProps) => {
 
         <p className="text-xs text-center mt-8 text-muted-foreground">
           By signing up, you agree to our{" "}
-          <Link to="#" className="underline hover:text-foreground">
+          <Link to="/terms-of-service" className="underline hover:text-foreground">
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link to="#" className="underline hover:text-foreground">
+          <Link to="/privacy-policy" className="underline hover:text-foreground">
             Privacy Policy
           </Link>
           .

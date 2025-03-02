@@ -28,21 +28,26 @@ export const signIn = async (
 export const signUp = async (
   email: string, 
   password: string, 
-  setIsAdmin: (value: boolean) => void,
   options?: { data: any }
 ) => {
   try {
+    console.log("Starting sign up process with options:", options);
+    
     const { data, error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
-        data: options?.data
+        data: options?.data,
+        emailRedirectTo: window.location.origin + '/login'
       }
     });
+    
     console.log("Sign up response:", data?.user?.email, error ? "Error: " + error.message : "Success");
     
-    if (!error && data.user) {
-      setIsAdmin(checkAdminStatus(data.user.email));
+    if (error) {
+      console.error("Supabase signUp error details:", error);
+    } else if (data.session === null) {
+      console.log("Email confirmation required for this user");
     }
     
     return { data, error };
@@ -91,7 +96,9 @@ export const signOut = async (
 // Reset password
 export const resetPassword = async (email: string) => {
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password',
+    });
     return { error };
   } catch (error) {
     console.error("Reset password error:", error);
