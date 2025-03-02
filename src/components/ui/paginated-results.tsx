@@ -37,6 +37,8 @@ export function PaginatedResults({
   // Get result limit based on access level
   const getResultLimit = () => {
     switch (accessLevel) {
+      case AccessLevel.ADMIN:
+        return results.length; // Admin users should see all results
       case AccessLevel.PREMIUM:
         return results.length; // Premium users can see all results
       case AccessLevel.BASIC:
@@ -72,7 +74,7 @@ export function PaginatedResults({
         ))}
       </div>
       
-      {hasHiddenResults && accessLevel !== AccessLevel.PREMIUM && (
+      {hasHiddenResults && accessLevel !== AccessLevel.PREMIUM && accessLevel !== AccessLevel.ADMIN && (
         <div className="mt-4 p-4 bg-muted/30 rounded-lg border text-center">
           <h4 className="font-medium mb-2">Additional Results Available</h4>
           <p className="text-sm text-muted-foreground mb-3">
