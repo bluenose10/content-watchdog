@@ -6,11 +6,12 @@ import { RecentSearches } from "@/components/dashboard/RecentSearches";
 import { LoadingState } from "@/components/dashboard/LoadingState";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { getUserSearchQueries } from "@/lib/db-service";
+import { getUserSearchQueries } from "@/lib/services/search-query-service";
 import { useNavigate } from "react-router-dom";
 import { SearchQuery } from "@/lib/db-types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SearchHistory() {
   const { user } = useAuth();
@@ -19,23 +20,31 @@ export default function SearchHistory() {
   const [searchQueries, setSearchQueries] = useState<SearchQuery[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch user data and search history
-    const fetchSearchHistory = async () => {
-      if (!user) return;
-      
-      try {
-        const searches = await getUserSearchQueries(user.id);
-        setSearchQueries(searches);
-      } catch (error) {
-        console.error("Error fetching search history:", error);
-      } finally {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 300);
-      }
-    };
+  const fetchSearchHistory = async () => {
+    if (!user) return;
     
+    try {
+      setIsLoading(true);
+      console.log("Fetching search history for user:", user.id);
+      const searches = await getUserSearchQueries(user.id);
+      console.log("Total searches fetched:", searches.length);
+      
+      if (searches.length > 0) {
+        console.log("Most recent search date:", searches[0]?.created_at);
+        console.log("Oldest search in history:", searches[searches.length - 1]?.created_at);
+      }
+      
+      setSearchQueries(searches);
+      toast.success(`Loaded ${searches.length} searches`);
+    } catch (error) {
+      console.error("Error fetching search history:", error);
+      toast.error("Failed to load search history");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     if (user && isReady) {
       fetchSearchHistory();
     }
@@ -63,6 +72,14 @@ export default function SearchHistory() {
             <h1 className="text-2xl font-bold text-primary">Search History</h1>
             <p className="text-muted-foreground">View all your previous content searches</p>
           </div>
+          <Button 
+            variant="outline" 
+            onClick={fetchSearchHistory}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
         </div>
 
         <RecentSearches 

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
@@ -7,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { SearchQuery } from "@/lib/db-types";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { getUserSearchQueries } from "@/lib/db-service";
+import { getUserSearchQueries } from "@/lib/services/search-query-service";
 
 interface RecentSearchesProps {
   searchQueries?: SearchQuery[];
@@ -39,6 +38,7 @@ export function RecentSearches({
       
       try {
         setLoading(true);
+        console.log('Fetching search queries for user:', user.id);
         const queries = await getUserSearchQueries(user.id);
         console.log('Fetched search queries:', queries.length);
         
