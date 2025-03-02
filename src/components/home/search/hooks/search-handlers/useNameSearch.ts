@@ -40,6 +40,14 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
       console.log("Name search with query:", query, "and params:", params);
       
       try {
+        // Check if API keys are configured
+        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+        const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
+        
+        if (!apiKey || !searchEngineId) {
+          throw new Error("Google Search API configuration missing. Please set up your VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID environment variables.");
+        }
+        
         const searchId = await handleTextSearch(query, "name", user, params);
         
         // Store query data in session storage for temporary searches
@@ -55,6 +63,23 @@ export function useNameSearch(user: User | null, accessLevel: AccessLevel) {
         navigate(`/results?id=${searchId}`);
       } catch (error: any) {
         console.error("Name search error:", error);
+        
+        // Handle API configuration errors specifically
+        if (error.message?.includes('API key') || 
+            error.message?.includes('configuration') || 
+            error.message?.includes('Search Engine ID')) {
+          
+          const errorMessage = "Search API configuration error. Please ensure your Google API key and Custom Search Engine ID are correctly set up.";
+          
+          setError(errorMessage);
+          
+          toast({
+            title: "Configuration Error",
+            description: errorMessage,
+            variant: "destructive",
+          });
+          return;
+        }
         
         // Handle permission errors more gracefully
         if (error.code === "42501" && error.message?.includes("popular_searches")) {

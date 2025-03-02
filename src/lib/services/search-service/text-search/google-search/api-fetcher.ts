@@ -16,6 +16,26 @@ export async function fetchMultiplePages(
 ): Promise<GoogleSearchResponse> {
   const allResults: GoogleSearchResponse = { items: [], searchInformation: null };
   
+  // Validate required API parameters before making requests
+  if (!params.has('key') || !params.has('cx')) {
+    console.error('Missing required Google API parameters - key or cx missing');
+    throw new Error('Google Search configuration error: API key or Search Engine ID missing.');
+  }
+  
+  // Basic validation for API key and Search Engine ID formats
+  const apiKey = params.get('key');
+  const engineId = params.get('cx');
+  
+  if (!apiKey || apiKey.length < 10) {
+    console.error('Google API key appears to be invalid or too short');
+    throw new Error('Google API key appears to be invalid. Please check your API key configuration.');
+  }
+  
+  if (!engineId || !engineId.includes(':')) {
+    console.error('Google Search Engine ID appears to be invalid');
+    throw new Error('Google Custom Search Engine ID appears to be invalid. Please check your configuration.');
+  }
+  
   for (let page = 0; page < numPages; page++) {
     // Add start parameter for pagination
     const pageParams = new URLSearchParams(params);

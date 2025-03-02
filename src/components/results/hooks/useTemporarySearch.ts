@@ -46,17 +46,52 @@ export function useTemporarySearch({
     // Perform Google search directly for temporary searches
     try {
       console.log("Starting Google search with query:", queryText);
-      console.log("API Key available:", import.meta.env.VITE_GOOGLE_API_KEY ? "Yes" : "No");
-      console.log("Search Engine ID available:", import.meta.env.VITE_GOOGLE_CSE_ID ? "Yes" : "No");
       
-      if (!import.meta.env.VITE_GOOGLE_API_KEY || !import.meta.env.VITE_GOOGLE_CSE_ID) {
+      // Validate API configuration before proceeding
+      const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+      const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID;
+      
+      console.log("API Key available:", apiKey ? "Yes" : "No");
+      console.log("Search Engine ID available:", searchEngineId ? "Yes" : "No");
+      
+      if (!apiKey || !searchEngineId) {
         console.error("Missing Google API configuration");
+        const errorMessage = "Google Search API configuration is missing. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID in your environment variables.";
+        
         toast({
           title: "Search Configuration Error",
-          description: "Google API configuration is missing. Please check your environment variables.",
+          description: errorMessage,
           variant: "destructive",
         });
-        throw new Error("Google API configuration missing. Please configure API keys.");
+        
+        throw new Error(errorMessage);
+      }
+      
+      // Basic validation of API key and Search Engine ID
+      if (apiKey.length < 10) {
+        const errorMessage = "Google API key appears to be invalid or too short. Please check your configuration.";
+        console.error(errorMessage);
+        
+        toast({
+          title: "API Configuration Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        
+        throw new Error(errorMessage);
+      }
+      
+      if (!searchEngineId.match(/^\d+:[a-zA-Z0-9]+$/)) {
+        const errorMessage = "Google Custom Search Engine ID format appears to be invalid. Please check your configuration.";
+        console.error(errorMessage);
+        
+        toast({
+          title: "API Configuration Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        
+        throw new Error(errorMessage);
       }
       
       let searchResponse;
@@ -99,11 +134,23 @@ export function useTemporarySearch({
       }
     } catch (error) {
       console.error("Error performing direct search:", error);
+      
+      // Detect configuration errors and provide helpful messages
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      if (errorMsg.includes('API key') || errorMsg.includes('configuration') || errorMsg.includes('Search Engine ID')) {
+        toast({
+          title: "API Configuration Error",
+          description: "Google Search API is not properly configured. Please check that you have set up valid API keys.",
+          variant: "destructive",
+        });
+      }
+      
       // Store search data in session storage for debugging
       sessionStorage.setItem('last_failed_search', JSON.stringify({
         search_data: searchData,
-        error: error instanceof Error ? error.message : String(error)
+        error: errorMsg
       }));
+      
       throw error; // Let the parent handle this error
     }
   };

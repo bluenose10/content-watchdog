@@ -15,6 +15,19 @@ import { fetchMultiplePages } from './api-fetcher';
  */
 export const performGoogleSearch = async (query: string, userId: string, searchParams: TextSearchParams = {}) => {
   try {
+    // First, validate API configuration before proceeding
+    // Access API keys from import.meta.env
+    const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
+    const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
+    
+    console.log('API Key available:', apiKey ? 'Yes' : 'No');
+    console.log('Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
+    
+    if (!apiKey || !searchEngineId) {
+      console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
+      throw new Error('Google API configuration missing. Please configure API keys in your environment variables.');
+    }
+    
     // Check cache and pending requests
     const { cacheKey, cachedResult, pendingRequest } = checkRequestCache(query, searchParams);
     
@@ -30,18 +43,6 @@ export const performGoogleSearch = async (query: string, userId: string, searchP
     
     const request = new Promise(async (resolve, reject) => {
       try {
-        // Access API keys from import.meta.env
-        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
-        const searchEngineId = import.meta.env.VITE_GOOGLE_CSE_ID || '';
-        
-        console.log('API Key available:', apiKey ? 'Yes' : 'No');
-        console.log('Search Engine ID available:', searchEngineId ? 'Yes' : 'No');
-        
-        if (!apiKey || !searchEngineId) {
-          console.error('ERROR: No API keys found for Google search. Please configure VITE_GOOGLE_API_KEY and VITE_GOOGLE_CSE_ID');
-          throw new Error('Google API configuration missing. Please configure API keys.');
-        }
-        
         // Validate the API key format (basic check)
         if (apiKey.length < 10) {
           console.error('ERROR: Google API key appears to be invalid (too short)');
