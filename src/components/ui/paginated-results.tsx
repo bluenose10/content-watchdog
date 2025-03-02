@@ -5,6 +5,7 @@ import { SearchResultCard } from "@/components/ui/search-result-card";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { AccessLevel } from "@/hooks/useProtectedRoute";
 import { toast } from "sonner";
+import { GoogleApiSetup } from "./google-api-setup";
 
 interface PaginatedResultsProps {
   results: any[];
@@ -21,6 +22,7 @@ export function PaginatedResults({
 }: PaginatedResultsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isFallbackData, setIsFallbackData] = useState(false);
+  const [showApiSetup, setShowApiSetup] = useState(false);
 
   useEffect(() => {
     // Check if we're using fallback data by looking for the fallback pattern in IDs
@@ -36,17 +38,23 @@ export function PaginatedResults({
         setIsFallbackData(true);
         console.log("Warning: Using fallback/sample search results");
         
-        // Fix: Use toast function correctly
         toast("We're showing sample data because the Google API connection failed. Check the console for details.");
       } else {
         setIsFallbackData(false);
         console.log("Using real API search results");
         
-        // Fix: Use toast function correctly
         toast("Showing real search results from Google.");
       }
     }
   }, [results]);
+
+  const handleRefreshAfterCredentials = () => {
+    setShowApiSetup(false);
+    toast("Credentials saved! Please try your search again.");
+    // In a real implementation, you might want to re-trigger the search
+    // or reload the page here
+    window.location.reload();
+  };
 
   if (!results || results.length === 0) {
     return (
@@ -89,13 +97,29 @@ export function PaginatedResults({
 
   return (
     <div className="space-y-6">
-      {isFallbackData && (
-        <div className="p-3 mb-4 border rounded-md bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900 flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-          <span className="text-sm text-yellow-800 dark:text-yellow-300">
-            Using sample results. There was an issue connecting to the Google search service. 
-            To fix this, make sure your Google API key and CSE ID are correctly set.
-          </span>
+      {showApiSetup ? (
+        <GoogleApiSetup onComplete={handleRefreshAfterCredentials} />
+      ) : isFallbackData && (
+        <div className="p-3 mb-4 border rounded-md bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+            <span className="text-sm text-yellow-800 dark:text-yellow-300">
+              Using sample results. There was an issue connecting to the Google search service.
+            </span>
+          </div>
+          <p className="text-sm text-yellow-700 dark:text-yellow-400 ml-6">
+            To fix this, you need to set up your Google API key and CSE ID. 
+          </p>
+          <div className="ml-6">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800 dark:hover:bg-yellow-900/50"
+              onClick={() => setShowApiSetup(true)}
+            >
+              Set Up Google API Credentials
+            </Button>
+          </div>
         </div>
       )}
       
