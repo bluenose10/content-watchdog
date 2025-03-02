@@ -8,6 +8,8 @@ export function PreFetchInitializer() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let cleanupFunction: (() => void) | undefined;
+    
     const initializeServices = async () => {
       console.log("Initializing pre-fetch and API services...");
       
@@ -32,17 +34,16 @@ export function PreFetchInitializer() {
       
       // Schedule pre-fetching regardless of API status
       // It will skip actual API calls if credentials aren't available
-      const cleanup = schedulePreFetching(60); // Every 60 minutes
-      
-      // Return cleanup function
-      return cleanup;
+      cleanupFunction = schedulePreFetching(60); // Every 60 minutes
     };
     
-    const cleanup = initializeServices();
+    // Call the async function
+    initializeServices();
     
+    // Return cleanup function
     return () => {
-      if (cleanup && typeof cleanup === 'function') {
-        cleanup();
+      if (cleanupFunction && typeof cleanupFunction === 'function') {
+        cleanupFunction();
       }
     };
   }, [toast]);
