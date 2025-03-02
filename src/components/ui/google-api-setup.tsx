@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { googleApiManager } from "@/lib/google-api-manager";
 import { loadGoogleApiCredentials } from "@/lib/pre-fetch-service";
-import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { Loader2, AlertTriangle, RefreshCw, CheckCircle } from "lucide-react";
 
 interface GoogleApiSetupProps {
   onComplete?: () => void;
@@ -21,6 +21,8 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
   const [checkingSupabase, setCheckingSupabase] = useState(!skipSupabaseCheck);
   const [supbaseCheckFailed, setSupabaseCheckFailed] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [testSuccess, setTestSuccess] = useState<boolean | null>(null);
+  const [testMessage, setTestMessage] = useState("");
 
   // Try to load credentials from Supabase on mount
   useEffect(() => {
@@ -32,7 +34,7 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
       
       setCheckingSupabase(true);
       try {
-        console.log("GoogleApiSetup: Attempting to load credentials from Supabase");
+        console.log("GoogleApiSetup: Attempting to load credentials from Supabase, attempt #", retryCount + 1);
         
         // Clear any possible cached credentials to ensure fresh retrieval
         sessionStorage.removeItem("GOOGLE_API_KEY");
@@ -42,6 +44,17 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
         if (success) {
           console.log("GoogleApiSetup: Successfully loaded credentials from Supabase");
           toast.success("Google API credentials loaded from Supabase");
+          
+          // Set the state variables for display
+          const cachedApiKey = sessionStorage.getItem("GOOGLE_API_KEY") || "";
+          const cachedCseId = sessionStorage.getItem("GOOGLE_CSE_ID") || "";
+          if (cachedApiKey) setApiKey(cachedApiKey.substring(0, 4) + "..." + cachedApiKey.substring(cachedApiKey.length - 4));
+          if (cachedCseId) setCseId(cachedCseId.substring(0, 4) + "..." + cachedCseId.substring(cachedCseId.length - 4));
+          
+          setTestSuccess(true);
+          setTestMessage("Credentials successfully loaded from Supabase");
+          
+          // If there's a completion callback, run it
           if (onComplete) {
             onComplete();
           }
@@ -55,10 +68,15 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
           
           if (cachedApiKey) setApiKey(cachedApiKey);
           if (cachedCseId) setCseId(cachedCseId);
+          
+          setTestSuccess(false);
+          setTestMessage("Failed to load credentials from Supabase");
         }
       } catch (error) {
         console.error("GoogleApiSetup: Error loading credentials from Supabase:", error);
         setSupabaseCheckFailed(true);
+        setTestSuccess(false);
+        setTestMessage(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
       } finally {
         setCheckingSupabase(false);
       }
@@ -71,7 +89,7 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
     e.preventDefault();
     
     if (!apiKey || !cseId) {
-      toast("Both API Key and CSE ID are required");
+      toast.error("Both API Key and CSE ID are required");
       return;
     }
     
@@ -87,15 +105,27 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
       localStorage.setItem("GOOGLE_API_KEY", apiKey);
       localStorage.setItem("GOOGLE_CSE_ID", cseId);
       
-      toast.success("Google API credentials saved successfully");
-      
-      // Call the onComplete callback if provided
-      if (onComplete) {
-        onComplete();
+      // Test the credentials by checking the API setup status
+      const apiStatus = googleApiManager.checkApiCredentials();
+      if (apiStatus.configured) {
+        setTestSuccess(true);
+        setTestMessage("Credentials validated and saved successfully");
+        toast.success("Google API credentials saved successfully");
+        
+        // Call the onComplete callback if provided
+        if (onComplete) {
+          onComplete();
+        }
+      } else {
+        setTestSuccess(false);
+        setTestMessage("Credentials saved but validation failed");
+        toast.warning("Credentials saved but validation failed");
       }
     } catch (error) {
       console.error("Error saving credentials:", error);
       toast.error("Failed to save credentials");
+      setTestSuccess(false);
+      setTestMessage(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsLoading(false);
     }
@@ -108,8 +138,24 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
     
     // Increment retry count to trigger the useEffect
     setRetryCount(prev => prev + 1);
+    setTestSuccess(null);
+    setTestMessage("");
     
     toast.info("Retrying to fetch credentials from Supabase...");
+  };
+
+  const handleClearAllStoredCredentials = () => {
+    // Clear all stored credentials
+    sessionStorage.removeItem("GOOGLE_API_KEY");
+    sessionStorage.removeItem("GOOGLE_CSE_ID");
+    localStorage.removeItem("GOOGLE_API_KEY");
+    localStorage.removeItem("GOOGLE_CSE_ID");
+    setApiKey("");
+    setCseId("");
+    setTestSuccess(null);
+    setTestMessage("");
+    
+    toast.info("All stored credentials have been cleared");
   };
 
   if (checkingSupabase) {
@@ -141,15 +187,47 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
               <p className="text-xs text-amber-700 mt-1">
                 Make sure your Supabase project has the GOOGLE_API_KEY and GOOGLE_CSE_ID secrets correctly set.
               </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200"
-                onClick={handleRetrySupabaseCheck}
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Retry Supabase Check
-              </Button>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2 bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200"
+                  onClick={handleRetrySupabaseCheck}
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Retry Supabase Check
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2 bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200"
+                  onClick={handleClearAllStoredCredentials}
+                >
+                  Clear All Stored Credentials
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      )}
+      
+      {testSuccess !== null && (
+        <CardContent className="pb-0">
+          <div 
+            className={`${
+              testSuccess 
+                ? "bg-green-50 border-green-200 text-green-800" 
+                : "bg-red-50 border-red-200 text-red-800"
+            } border rounded-md p-3 flex items-start gap-3 mb-4`}
+          >
+            {testSuccess ? (
+              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+            ) : (
+              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+            )}
+            <div className="flex-1">
+              <p className="text-sm font-medium">{testSuccess ? "Success" : "Error"}</p>
+              <p className="text-xs mt-1">{testMessage}</p>
             </div>
           </div>
         </CardContent>
@@ -201,9 +279,22 @@ export function GoogleApiSetup({ onComplete, skipSupabaseCheck = false }: Google
             </p>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-2">
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? "Saving..." : "Save Credentials"}
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : "Save Credentials"}
+          </Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full"
+            onClick={handleClearAllStoredCredentials}
+          >
+            Clear All Stored Credentials
           </Button>
         </CardFooter>
       </form>

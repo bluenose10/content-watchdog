@@ -1,7 +1,9 @@
+
 import { googleApiManager } from './google-api-manager';
 import { supabase } from './supabase';
+import { toast } from 'sonner';
 
-// Load Google API credentials from Supabase Edge Function
+// Load Google API credentials from Supabase Edge Function with enhanced error handling and debugging
 export async function loadGoogleApiCredentials(): Promise<boolean> {
   console.log("Loading Google API credentials from Supabase...");
   
@@ -19,57 +21,87 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
     // Otherwise, fetch from Supabase Edge Function with better error handling
     console.log("Fetching credentials from Supabase Edge Function...");
     
-    // Make the request to the edge function
-    const { data, error } = await supabase.functions.invoke('get-search-credentials', {
-      method: 'GET',
-    });
+    // Make the request to the edge function with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
-    if (error) {
-      console.error("Error fetching Google API credentials from Edge Function:", error);
+    try {
+      const { data, error } = await supabase.functions.invoke('get-search-credentials', {
+        method: 'GET',
+        signal: controller.signal
+      });
       
-      // Try to get credentials directly from environment variables as fallback
-      const envApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-      const envCseId = import.meta.env.VITE_GOOGLE_CSE_ID;
+      clearTimeout(timeoutId);
       
-      if (envApiKey && envCseId) {
-        console.log("Using Google API credentials from environment variables");
-        googleApiManager.setCredentials(envApiKey, envCseId);
-        sessionStorage.setItem("GOOGLE_API_KEY", envApiKey);
-        sessionStorage.setItem("GOOGLE_CSE_ID", envCseId);
+      if (error) {
+        console.error("Error fetching Google API credentials from Edge Function:", error);
+        toast.error("Failed to fetch Google API credentials from Supabase");
+        
+        // Try to get credentials directly from environment variables as fallback
+        const envApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+        const envCseId = import.meta.env.VITE_GOOGLE_CSE_ID;
+        
+        if (envApiKey && envCseId) {
+          console.log("Using Google API credentials from environment variables");
+          googleApiManager.setCredentials(envApiKey, envCseId);
+          sessionStorage.setItem("GOOGLE_API_KEY", envApiKey);
+          sessionStorage.setItem("GOOGLE_CSE_ID", envCseId);
+          return true;
+        }
+        
+        // If we got this far, we couldn't get credentials
+        return false;
+      }
+      
+      // Additional detailed logging to understand what we're getting from the edge function
+      console.log("Edge Function response received:", JSON.stringify(data, null, 2));
+      
+      if (data && typeof data.apiKey === 'string' && typeof data.cseId === 'string') {
+        // Store the credentials in memory and session storage
+        console.log("Successfully received valid Google API credentials from Supabase");
+        googleApiManager.setCredentials(data.apiKey, data.cseId);
+        sessionStorage.setItem("GOOGLE_API_KEY", data.apiKey);
+        sessionStorage.setItem("GOOGLE_CSE_ID", data.cseId);
         return true;
+      } else {
+        console.warn("Invalid Google API credentials returned from Supabase:", data);
+        
+        // Check if there's a message in the response that might explain the issue
+        if (data && data.message) {
+          console.error("Edge Function error message:", data.message);
+          toast.error(`Supabase Edge Function error: ${data.message}`);
+        }
+        
+        // Try to use local storage or environment variables as a fallback
+        const localApiKey = localStorage.getItem("GOOGLE_API_KEY") || import.meta.env.VITE_GOOGLE_API_KEY;
+        const localCseId = localStorage.getItem("GOOGLE_CSE_ID") || import.meta.env.VITE_GOOGLE_CSE_ID;
+        
+        if (localApiKey && localCseId) {
+          console.log("Using Google API credentials from local fallback");
+          googleApiManager.setCredentials(localApiKey, localCseId);
+          sessionStorage.setItem("GOOGLE_API_KEY", localApiKey);
+          sessionStorage.setItem("GOOGLE_CSE_ID", localCseId);
+          return true;
+        }
+        
+        return false;
       }
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      console.error("Fetch error getting Google API credentials:", fetchError);
+      toast.error("Network error fetching Google API credentials");
       
-      // If we got this far, we couldn't get credentials
-      return false;
-    }
-    
-    // Additional detailed logging to understand what we're getting from the edge function
-    console.log("Edge Function response received:", JSON.stringify(data, null, 2));
-    
-    if (data && typeof data.apiKey === 'string' && typeof data.cseId === 'string') {
-      // Store the credentials in memory and session storage
-      console.log("Successfully received valid Google API credentials from Supabase");
-      googleApiManager.setCredentials(data.apiKey, data.cseId);
-      sessionStorage.setItem("GOOGLE_API_KEY", data.apiKey);
-      sessionStorage.setItem("GOOGLE_CSE_ID", data.cseId);
-      return true;
-    } else {
-      console.warn("Invalid Google API credentials returned from Supabase:", data);
+      // Attempt fallback to any available source
+      const fallbackApiKey = localStorage.getItem("GOOGLE_API_KEY") || 
+                           import.meta.env.VITE_GOOGLE_API_KEY;
+      const fallbackCseId = localStorage.getItem("GOOGLE_CSE_ID") || 
+                          import.meta.env.VITE_GOOGLE_CSE_ID;
       
-      // Check if there's a message in the response that might explain the issue
-      if (data && data.message) {
-        console.error("Edge Function error message:", data.message);
-      }
-      
-      // Try to use local storage or environment variables as a fallback
-      const localApiKey = localStorage.getItem("GOOGLE_API_KEY") || import.meta.env.VITE_GOOGLE_API_KEY;
-      const localCseId = localStorage.getItem("GOOGLE_CSE_ID") || import.meta.env.VITE_GOOGLE_CSE_ID;
-      
-      if (localApiKey && localCseId) {
-        console.log("Using Google API credentials from local fallback");
-        googleApiManager.setCredentials(localApiKey, localCseId);
-        sessionStorage.setItem("GOOGLE_API_KEY", localApiKey);
-        sessionStorage.setItem("GOOGLE_CSE_ID", localCseId);
+      if (fallbackApiKey && fallbackCseId) {
+        console.log("Using fallback Google API credentials after network error");
+        googleApiManager.setCredentials(fallbackApiKey, fallbackCseId);
+        sessionStorage.setItem("GOOGLE_API_KEY", fallbackApiKey);
+        sessionStorage.setItem("GOOGLE_CSE_ID", fallbackCseId);
         return true;
       }
       
@@ -77,6 +109,7 @@ export async function loadGoogleApiCredentials(): Promise<boolean> {
     }
   } catch (error) {
     console.error("Failed to load Google API credentials:", error);
+    toast.error("Error loading Google API credentials");
     
     // Attempt one last fallback to any available source
     try {
