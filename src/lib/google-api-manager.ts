@@ -1,3 +1,4 @@
+<lov-code>
 import { google } from 'googleapis';
 
 // Define a type for the search result item
@@ -461,4 +462,4 @@ class GoogleApiManager {
   private readonly maxPagemapEventRatingItemsPerTypePerRatingWorst: number = 5;
   private readonly maxPagemapPlaceRatingItemsPerTypePerRatingWorst: number = 5;
   private readonly maxPagemapPersonRatingItemsPerTypePerRatingWorst: number = 5;
-  private readonly maxPagemapBreadcrumbRatingItemsPerTypePerRating
+  private readonly maxPagemapBreadcrumbRatingItemsPer
