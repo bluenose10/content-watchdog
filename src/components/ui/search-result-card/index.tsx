@@ -6,10 +6,7 @@ import { SearchResultCardProps } from "./types";
 import { Button } from "@/components/ui/button";
 
 export function SearchResultCard({
-  result,
-  isPremium = false,
-  isFreePreview = false,
-  onUpgrade
+  result
 }: SearchResultCardProps) {
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
@@ -22,21 +19,6 @@ export function SearchResultCard({
               alt={result.title}
               className="w-full h-full object-cover"
             />
-          )}
-          
-          {/* If premium content and not a free preview */}
-          {isPremium && !isFreePreview && (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <div className="text-center p-4">
-                <Badge variant="secondary" className="mb-2">Premium</Badge>
-                <p className="text-xs text-white mb-2">Upgrade to view this result</p>
-                {onUpgrade && (
-                  <Button size="sm" onClick={onUpgrade} variant="secondary">
-                    Upgrade
-                  </Button>
-                )}
-              </div>
-            </div>
           )}
         </div>
         

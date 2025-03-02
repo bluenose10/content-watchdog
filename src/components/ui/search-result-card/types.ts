@@ -13,7 +13,4 @@ export interface SearchResult {
 
 export interface SearchResultCardProps {
   result: SearchResult;
-  isPremium?: boolean;
-  isFreePreview?: boolean;
-  onUpgrade?: () => void;
 }
