@@ -79,22 +79,14 @@ export const useSignUpForm = ({ onSignUpSuccess }: UseSignUpFormProps) => {
           variant: "destructive",
         });
       } else {
-        if (data?.user && !data.user.email_confirmed_at) {
-          console.log("Email confirmation required, informing user to check their inbox");
-          toast({
-            title: "Check your email",
-            description: "We've sent a confirmation link to your email. Please check your inbox and spam folder.",
-            duration: 6000,
-          });
-        } else {
-          console.log("User created successfully, no email confirmation needed");
-          toast({
-            title: "Success",
-            description: "Your account has been created successfully.",
-            variant: "default",
-          });
-        }
+        console.log("Sign up successful, redirecting user to success page");
+        toast({
+          title: "Sign up successful",
+          description: "Please check your email for a confirmation link",
+          duration: 6000,
+        });
         
+        // Always call onSignUpSuccess to redirect to the success screen
         onSignUpSuccess(formData.email);
       }
     } catch (error: any) {

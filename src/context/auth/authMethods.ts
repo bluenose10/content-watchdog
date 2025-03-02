@@ -35,6 +35,7 @@ export const signUp = async (
     
     // Get the current origin - works in both development and production
     const origin = window.location.origin;
+    // This time we'll make sure to redirect to the login page specifically
     const redirectUrl = `${origin}/login`;
     
     console.log("Using redirect URL:", redirectUrl);
