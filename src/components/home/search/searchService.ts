@@ -1,10 +1,10 @@
-
 import { createSearchQuery, uploadSearchImage } from "@/lib/db-service";
 import { SearchQuery, TextSearchParams, ImageSearchParams } from "@/lib/db-types";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { SEARCH_LIMITS } from "@/lib/constants";
 import { getCacheKey, getCachedResults, cacheResults } from "@/lib/search-cache";
+import { supabase } from "@/lib/supabase";
 
 // Enhanced search parameters for text-based searches
 const DEFAULT_TEXT_PARAMS: TextSearchParams = {
@@ -210,22 +210,18 @@ export async function handleTextSearch(
 
   console.log(`Performing ${queryType} search with enhanced parameters:`, mergedParams);
   
-  const searchData: SearchQuery = {
+  // Increment the user's search count
+  incrementSearchCount(user.id, user.email);
+
+  // Process the search using our new secure function
+  const searchId = await processSearch({
     user_id: user.id,
     query_type: queryType,
     query_text: formattedQuery,
     search_params_json: JSON.stringify(mergedParams)
-  };
-
-  // Increment the user's search count
-  incrementSearchCount(user.id, user.email);
-
-  // Process the search
-  const searchId = await processSearch(searchData, user);
+  }, user);
   
   // Cache the results
-  // Note: In a real implementation, we would fetch the results and cache them here
-  // For this mock implementation, we're just caching the search ID
   cacheResults(cacheKey, { id: searchId });
   
   return searchId;
@@ -264,8 +260,6 @@ export async function handleImageSearch(
     const imageUrl = await uploadSearchImage(file, user.id);
     
     // Check cache for this image
-    // Note: For image search, we'd ideally use perceptual hashing to check for similar images
-    // For this implementation, we'll use the image URL as cache key
     const cacheKey = getCacheKey("image", imageUrl, mergedParams);
     const cachedResults = getCachedResults(cacheKey);
     
@@ -274,18 +268,16 @@ export async function handleImageSearch(
       return cachedResults.id || `cache_${crypto.randomUUID()}`;
     }
     
-    const searchData: SearchQuery = {
+    // Increment the user's search count
+    incrementSearchCount(user.id, user.email);
+
+    // Process the search using our new secure function
+    const searchId = await processSearch({
       user_id: user.id,
       query_type: "image",
       image_url: imageUrl,
       search_params_json: JSON.stringify(mergedParams)
-    };
-
-    // Increment the user's search count
-    incrementSearchCount(user.id, user.email);
-
-    // Process the search
-    const searchId = await processSearch(searchData, user);
+    }, user);
     
     // Cache the results
     cacheResults(cacheKey, { id: searchId });
@@ -323,7 +315,7 @@ function validateImageFile(file: File): void {
   }
 }
 
-// Common processing for all search types
+// Common processing for all search types - updated to use our new secure database function
 async function processSearch(
   searchData: SearchQuery, 
   user: User | null
@@ -332,11 +324,31 @@ async function processSearch(
     throw new Error("User must be signed in to perform searches");
   }
   
-  // For registered users, create a permanent search query
-  const newSearch = await createSearchQuery(searchData);
-  if (!newSearch || !newSearch.id) {
-    throw new Error("Failed to create search");
+  try {
+    // Use the new secure function instead of direct table insertion
+    const { data, error } = await supabase.rpc(
+      'insert_search_query',
+      {
+        p_user_id: searchData.user_id,
+        p_query_type: searchData.query_type,
+        p_query_text: searchData.query_text || null,
+        p_search_params_json: searchData.search_params_json || null,
+        p_image_url: searchData.image_url || null
+      }
+    );
+    
+    if (error) {
+      console.error("Error creating search query:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error("Failed to create search query");
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in processSearch:", error);
+    throw new Error(`Failed to create search: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
-  
-  return newSearch.id;
 }
