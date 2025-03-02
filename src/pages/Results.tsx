@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/header";
@@ -15,6 +14,7 @@ import { Sidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSearchQueryById, performGoogleSearch, performImageSearch } from "@/lib/db-service";
+import { googleApiManager } from "@/lib/google-api-manager";
 
 // Extended fallback results to guarantee more results are shown
 const FALLBACK_RESULTS = [
@@ -184,6 +184,7 @@ export default function Results() {
         
         // Check if it's a temporary search ID (for anonymous users)
         const isTemporarySearch = id.startsWith('temp_');
+        const isFallbackSearch = id.startsWith('fallback_') || id.startsWith('generated_') || id.startsWith('recovery_');
         
         if (isTemporarySearch) {
           // For temporary searches, try to get stored search data from session storage
@@ -348,11 +349,27 @@ export default function Results() {
               setQuery(cachedData.query);
               setTotalResults(cachedData.results.length);
             } else {
-              // If no cached results, fetch the search query from the database
-              const searchQuery = await getSearchQueryById(id);
+              // If no cached results or it's a fallback search ID, fetch the search query from the database
+              let searchQuery;
+              
+              try {
+                searchQuery = await getSearchQueryById(id);
+                console.log("Found search query:", searchQuery);
+              } catch (error) {
+                console.error("Error fetching search query:", error);
+                
+                if (isFallbackSearch) {
+                  // If it's a fallback ID and we can't get the search query, 
+                  // we need to perform a direct search using any cached parameters
+                  const cachedParams = sessionStorage.getItem(`search_params_${id}`);
+                  if (cachedParams) {
+                    searchQuery = JSON.parse(cachedParams);
+                    console.log("Using cached search parameters:", searchQuery);
+                  }
+                }
+              }
               
               if (searchQuery) {
-                console.log("Found search query:", searchQuery);
                 const queryText = searchQuery.query_text || "Unknown search";
                 const queryType = searchQuery.query_type;
                 setQuery(queryText);
@@ -361,14 +378,22 @@ export default function Results() {
                 const searchParams = searchQuery.search_params_json ? 
                                     JSON.parse(searchQuery.search_params_json) : {};
                 
-                // Perform Google search
+                // Perform Google search - IMPORTANT: Always attempt Google search, never default to fallbacks
                 try {
+                  console.log("Attempting direct Google API search for", queryType, queryText);
                   let searchResponse;
+                  
                   if (queryType === 'image') {
-                    console.log("Performing image search");
+                    console.log("Performing image search with URL:", searchQuery.image_url);
+                    if (!searchQuery.image_url) {
+                      throw new Error("Missing image URL for image search");
+                    }
                     searchResponse = await performImageSearch(searchQuery.image_url, searchQuery.user_id, searchParams);
                   } else {
-                    console.log("Performing Google search");
+                    console.log("Performing Google search with text:", queryText);
+                    if (!queryText || queryText === "Unknown search") {
+                      throw new Error("Missing query text for search");
+                    }
                     searchResponse = await performGoogleSearch(queryText, searchQuery.user_id, searchParams);
                   }
                   
@@ -379,6 +404,7 @@ export default function Results() {
                     
                     // Transform Google API response to our format
                     const formattedResults = searchResponse.items.map((item: any, index: number) => {
+                      
                       // Extract thumbnail with fallbacks
                       const thumbnailUrl = 
                         item.pagemap?.cse_thumbnail?.[0]?.src || 
@@ -482,32 +508,92 @@ export default function Results() {
                   }
                 } catch (error) {
                   console.error("Error performing search:", error);
-                  setResults(FALLBACK_RESULTS);
-                  setTotalResults(FALLBACK_RESULTS.length);
-                  toast({
-                    title: "API Error",
-                    description: "Could not fetch search results from Google API. Showing sample results instead.",
-                    variant: "destructive",
-                  });
+                  
+                  // Attempt using Google API Manager as a fallback
+                  try {
+                    console.log("Attempting fallback using Google API Manager");
+                    const managerResponse = await googleApiManager.optimizedSearch(
+                      queryType, 
+                      queryText, 
+                      searchParams
+                    );
+                    
+                    if (managerResponse && managerResponse.results && managerResponse.results.length > 0) {
+                      setResults(managerResponse.results);
+                      setTotalResults(managerResponse.results.length);
+                      console.log("Using results from Google API Manager:", managerResponse.results);
+                    } else {
+                      throw new Error("No results from API Manager");
+                    }
+                  } catch (managerError) {
+                    console.error("Fallback search also failed:", managerError);
+                    
+                    // Last resort - try direct Google API call without Supabase
+                    try {
+                      const googleApiKey = process.env.GOOGLE_API_KEY || sessionStorage.getItem('GOOGLE_API_KEY');
+                      const googleCseId = process.env.GOOGLE_CSE_ID || sessionStorage.getItem('GOOGLE_CSE_ID');
+                      
+                      if (googleApiKey && googleCseId) {
+                        console.log("Attempting direct Google API call");
+                        const directApiUrl = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCseId}&q=${encodeURIComponent(queryText)}`;
+                        
+                        const directResponse = await fetch(directApiUrl);
+                        const directData = await directResponse.json();
+                        
+                        if (directData.items && directData.items.length > 0) {
+                          const directResults = directData.items.map((item: any, index: number) => ({
+                            id: `direct-${index}`,
+                            title: item.title,
+                            url: item.link,
+                            thumbnail: item.pagemap?.cse_image?.[0]?.src || `https://picsum.photos/200/300?random=${index+1}`,
+                            source: item.displayLink,
+                            match_level: index < 3 ? 'High' : index < 7 ? 'Medium' : 'Low',
+                            found_at: new Date().toISOString(),
+                            type: item.pagemap?.cse_image ? 'image' : 'website',
+                            snippet: item.snippet
+                          }));
+                          
+                          setResults(directResults);
+                          setTotalResults(directResults.length);
+                          console.log("Using results from direct Google API call:", directResults);
+                        } else {
+                          throw new Error("No results from direct API call");
+                        }
+                      } else {
+                        throw new Error("Missing Google API credentials");
+                      }
+                    } catch (directError) {
+                      console.error("All Google API methods failed:", directError);
+                      toast({
+                        title: "Google Search Error",
+                        description: "Unable to fetch results from Google. Please try again later.",
+                        variant: "destructive",
+                      });
+                      
+                      // Only now do we fall back to sample results as a last resort
+                      setResults(FALLBACK_RESULTS);
+                      setTotalResults(FALLBACK_RESULTS.length);
+                    }
+                  }
                 }
               } else {
                 console.error("Search query not found");
-                setResults(FALLBACK_RESULTS);
-                setTotalResults(FALLBACK_RESULTS.length);
-                setQuery("Unknown search");
+                toast({
+                  title: "Search Not Found",
+                  description: "The search you're looking for couldn't be found.",
+                  variant: "destructive",
+                });
+                navigate("/search");
               }
             }
           } catch (error) {
             console.error("Error fetching search or results:", error);
-            setResults(FALLBACK_RESULTS);
-            setTotalResults(FALLBACK_RESULTS.length);
-            setQuery("Unknown search");
-            
             toast({
               title: "Error",
-              description: "Could not fetch search results. Showing sample results instead.",
+              description: "Could not fetch search results. Please try again.",
               variant: "destructive",
             });
+            navigate("/search");
           }
         }
         
@@ -517,15 +603,12 @@ export default function Results() {
       } catch (error) {
         console.error("Error in fetchResults:", error);
         // Even if everything fails, show something to the user
-        setResults(FALLBACK_RESULTS);
-        setTotalResults(FALLBACK_RESULTS.length);
-        setQuery("Your search");
-        
         toast({
-          title: "Warning",
-          description: "We encountered an issue loading your full results, showing sample matches instead.",
-          variant: "default",
+          title: "Search Error",
+          description: "Something went wrong with your search. Please try again.",
+          variant: "destructive",
         });
+        navigate("/search");
       } finally {
         // Reduced loading time
         setTimeout(() => {
