@@ -9,6 +9,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InfoCircle } from "lucide-react";
 
 interface SignUpFormProps {
   onSignUpSuccess: (email: string) => void;
@@ -172,6 +174,16 @@ const SignUpForm = ({ onSignUpSuccess }: SignUpFormProps) => {
                   required
                 />
               </div>
+              
+              <Alert variant="success" className="mt-4">
+                <InfoCircle className="h-4 w-4" />
+                <AlertTitle>Important!</AlertTitle>
+                <AlertDescription>
+                  After signing up, you'll need to confirm your email address. 
+                  Please check your inbox and spam folder for the confirmation link.
+                </AlertDescription>
+              </Alert>
+              
               <Button type="submit" className="w-full button-animation" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Sign Up"}
               </Button>

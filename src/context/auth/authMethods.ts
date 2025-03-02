@@ -33,12 +33,18 @@ export const signUp = async (
   try {
     console.log("Starting sign up process with options:", options);
     
+    // Get the current origin - works in both development and production
+    const origin = window.location.origin;
+    const redirectUrl = `${origin}/login`;
+    
+    console.log("Using redirect URL:", redirectUrl);
+    
     const { data, error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
         data: options?.data,
-        emailRedirectTo: window.location.origin + '/login'
+        emailRedirectTo: redirectUrl
       }
     });
     
