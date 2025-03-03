@@ -5,6 +5,7 @@ import SuccessScreen from "@/components/auth/SuccessScreen";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSearchParams } from "react-router-dom";
 import { AlertTriangle } from "lucide-react";
+import AuthLayout from "@/components/auth/AuthLayout";
 
 const SignUp = () => {
   const [signupSuccessful, setSignupSuccessful] = useState(false);
@@ -22,7 +23,7 @@ const SignUp = () => {
   }
 
   return (
-    <>
+    <AuthLayout>
       {errorParam && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md">
           <Alert variant="destructive">
@@ -36,7 +37,7 @@ const SignUp = () => {
         </div>
       )}
       <SignUpForm onSignUpSuccess={handleSignUpSuccess} />
-    </>
+    </AuthLayout>
   );
 };
 
