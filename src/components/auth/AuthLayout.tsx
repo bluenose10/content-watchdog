@@ -1,6 +1,6 @@
 
 import { APP_NAME } from "@/lib/constants";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface AuthLayoutProps {
@@ -13,7 +13,11 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
       <div className="w-full max-w-md animate-scale-in">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold">
-            <Shield className="h-6 w-6" />
+            <img 
+              src="/lovable-uploads/822ca5bd-71ae-4f2a-b354-b4182a9f42d7.png" 
+              alt="Influence Guard Logo" 
+              className="h-6 w-6" 
+            />
             <span className="text-gradient">{APP_NAME}</span>
           </Link>
         </div>
