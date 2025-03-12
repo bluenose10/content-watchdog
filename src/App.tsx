@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
@@ -56,6 +55,7 @@ const SearchHistory = lazyLoadWithErrorBoundary(() => import("@/pages/SearchHist
 const Contact = lazyLoadWithErrorBoundary(() => import("@/pages/Contact"), "Contact");
 const Piracy = lazyLoadWithErrorBoundary(() => import("@/pages/Piracy"), "Piracy");
 const PlagiarismChecker = lazyLoadWithErrorBoundary(() => import("@/pages/PlagiarismChecker"), "PlagiarismChecker");
+const Redirect = lazyLoadWithErrorBoundary(() => import("@/pages/Redirect"), "Redirect");
 
 import "./App.css";
 
@@ -78,28 +78,32 @@ function AppRoutes() {
   return (
     <Suspense fallback={<LoadingState />}>
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/search/history" element={<SearchHistory />} />
-        <Route path="/results" element={<Results />} />
-        <Route path="/login" element={<Login />} />
+        {/* Main routes now redirect to the new site */}
+        <Route path="/" element={<Redirect />} />
+        <Route path="/redirect" element={<Redirect />} />
+        
+        {/* Keep existing routes but they'll only be accessed if someone has a direct link */}
+        <Route path="/dashboard" element={<Redirect />} />
+        <Route path="/analytics" element={<Redirect />} />
+        <Route path="/search" element={<Redirect />} />
+        <Route path="/search/history" element={<Redirect />} />
+        <Route path="/results" element={<Redirect />} />
+        <Route path="/login" element={<Redirect />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/settings" element={<AccountSettings />} />
+        <Route path="/reset-password" element={<Redirect />} />
+        <Route path="/settings" element={<Redirect />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/cookie-policy" element={<CookiePolicy />} />
-        <Route path="/payment/success" element={<PaymentSuccess />} />
-        <Route path="/payment/canceled" element={<PaymentCanceled />} />
-        <Route path="/checkout" element={<MockCheckout />} />
-        <Route path="/monitoring" element={<Monitoring />} />
-        <Route path="/protection" element={<Protection />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/piracy" element={<Piracy />} />
-        <Route path="/plagiarism-checker" element={<PlagiarismChecker />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="/payment/success" element={<Redirect />} />
+        <Route path="/payment/canceled" element={<Redirect />} />
+        <Route path="/checkout" element={<Redirect />} />
+        <Route path="/monitoring" element={<Redirect />} />
+        <Route path="/protection" element={<Redirect />} />
+        <Route path="/contact" element={<Redirect />} />
+        <Route path="/piracy" element={<Redirect />} />
+        <Route path="/plagiarism-checker" element={<Redirect />} />
+        <Route path="*" element={<Redirect />} />
       </Routes>
     </Suspense>
   );
