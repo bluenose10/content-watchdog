@@ -8,7 +8,7 @@ const Redirect = () => {
       <div className="w-full max-w-md animate-scale-in text-center">
         <div className="mb-8">
           <img 
-            src="/lovable-uploads/822ca5bd-71ae-4f2a-b354-b4182a9f42d7.png" 
+            src="/lovable-uploads/72940714-67ad-4d39-a726-825cccfb266f.png" 
             alt="Influence Guard Logo" 
             className="h-16 w-16 mx-auto mb-4" 
           />
