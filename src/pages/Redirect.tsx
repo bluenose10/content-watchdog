@@ -9,7 +9,7 @@ const Redirect = () => {
         <div className="mb-8">
           <img 
             src="/lovable-uploads/72940714-67ad-4d39-a726-825cccfb266f.png" 
-            alt="Influence Guard Logo" 
+            alt="BlockSyde Logo" 
             className="h-16 w-16 mx-auto mb-4" 
           />
           <h1 className="text-3xl font-bold text-gradient">{APP_NAME} Has Moved</h1>

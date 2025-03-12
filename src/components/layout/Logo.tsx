@@ -10,10 +10,10 @@ export function Logo() {
       >
         <img 
           src="/lovable-uploads/72940714-67ad-4d39-a726-825cccfb266f.png" 
-          alt="Influence Guard Logo" 
+          alt="BlockSyde Logo" 
           className="h-9 w-9" 
         />
-        <span className="text-gradient">Influence Guard</span>
+        <span className="text-gradient">BlockSyde</span>
       </Link>
     </div>
   );
